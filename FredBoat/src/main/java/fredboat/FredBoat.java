@@ -84,7 +84,6 @@ public abstract class FredBoat {
     public static int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
     static EventListenerBoat listenerBot;
     ShardWatchdogListener shardWatchdogListener = null;
-    private static AtomicInteger numShardsReady = new AtomicInteger(0);
 
     //For when we need to join a revived shard with it's old GuildPlayers
     final ArrayList<String> channelsToRejoin = new ArrayList<>();
@@ -285,7 +284,6 @@ public abstract class FredBoat {
                 shards.add(i, new FredBoatBot(i, listener));
             } catch (Exception e) {
                 log.error("Caught an exception while starting shard " + i + "!", e);
-                numShardsReady.getAndIncrement();
             }
             try {
                 Thread.sleep(SHARD_CREATION_SLEEP_INTERVAL);
@@ -300,17 +298,6 @@ public abstract class FredBoat {
 
     public void onInit(ReadyEvent readyEvent) {
         log.info("Received ready event for " + FredBoat.getInstance(readyEvent.getJDA()).getShardInfo().getShardString());
-
-        int ready = numShardsReady.get();
-        if (ready == Config.CONFIG.getNumShards()) {
-            log.info("All " + ready + " shards are ready.");
-
-            if (Config.CONFIG.getNumShards() <= 10) {
-                MusicPersistenceHandler.reloadPlaylists();
-            } else {
-                log.warn("Skipped music persistence loading! We are using more than 10 shards, so probably not a good idea to run that.");
-            }
-        }
 
         //Rejoin old channels if revived
         channelsToRejoin.forEach(vcid -> {
