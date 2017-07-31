@@ -84,6 +84,7 @@ public class BlacklistEntry implements IEntity<Long> {
     public BlacklistEntry() {
     }
 
+    @Override
     public Long getId() {
         return id;
     }

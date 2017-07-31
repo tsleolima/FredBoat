@@ -50,6 +50,7 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.managers.AudioManager;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
 
 public class GuildPlayer extends AbstractPlayer {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(GuildPlayer.class);
+    private static final Logger log = LoggerFactory.getLogger(GuildPlayer.class);
 
     private final FredBoat shard;
     private final long guildId;
@@ -425,7 +426,7 @@ public class GuildPlayer extends AbstractPlayer {
     private boolean isTrackAnnounceEnabled() {
         boolean enabled = false;
         try {
-            GuildConfig config = EntityReader.getEntity(Long.toString(guildId), GuildConfig.class);
+            GuildConfig config = EntityReader.getOrCreateEntity(Long.toString(guildId), GuildConfig.class);
             enabled = config.isTrackAnnounce();
         } catch (DatabaseNotReadyException ignored) {}
 

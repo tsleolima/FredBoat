@@ -55,7 +55,7 @@ public class ConfigCommand extends Command implements IModerationCommand, IComma
     }
 
     private void printConfig(CommandContext context) {
-        GuildConfig gc = EntityReader.getEntity(context.guild.getId(), GuildConfig.class);
+        GuildConfig gc = EntityReader.getOrCreateEntity(context.guild.getId(), GuildConfig.class);
 
         MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder()
                 .append(MessageFormat.format(I18n.get(context, "configNoArgs") + "\n", context.guild.getName()))
@@ -78,7 +78,7 @@ public class ConfigCommand extends Command implements IModerationCommand, IComma
             return;
         }
 
-        GuildConfig gc = EntityReader.getEntity(context.guild.getId(), GuildConfig.class);
+        GuildConfig gc = EntityReader.getOrCreateEntity(context.guild.getId(), GuildConfig.class);
         String key = args[1];
         String val = args[2];
 
