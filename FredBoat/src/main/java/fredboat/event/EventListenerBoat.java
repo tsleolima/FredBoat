@@ -188,6 +188,12 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
         checkForAutoPause(event.getChannelLeft());
+
+        if (event.getMember().getUser().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
+            //save the left voicechannel
+            GuildPlayer player = PlayerRegistry.getExisting(event.getGuild());
+            if (player != null) player.save();
+        }
     }
 
     @Override
@@ -198,17 +204,27 @@ public class EventListenerBoat extends AbstractEventListener {
         //were we moved?
         if (event.getMember().getUser().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
             checkForAutoPause(event.getChannelJoined());
+
+            //save the newly joined voicechannel
+            GuildPlayer player = PlayerRegistry.getExisting(event.getGuild());
+            if (player != null) player.save();
         }
     }
 
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
         checkForAutoResume(event.getChannelJoined(), event.getMember());
+
+        if (event.getMember().getUser().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
+            //save the newly joined voicechannel
+            GuildPlayer player = PlayerRegistry.getExisting(event.getGuild());
+            if (player != null) player.save();
+        }
     }
 
     private void checkForAutoResume(VoiceChannel joinedChannel, Member joined) {
         Guild guild = joinedChannel.getGuild();
-        //ignore bot users taht arent us joining / moving
+        //ignore bot users that arent us joining / moving
         if (joined.getUser().isBot()
                 && guild.getSelfMember().getUser().getIdLong() != joined.getUser().getIdLong()) return;
 

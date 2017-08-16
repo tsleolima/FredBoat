@@ -120,7 +120,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
-        if (player.getRemainingTracks().size() < givenIndex) {
+        if (player.getTrackCount() < givenIndex) {
             context.reply(MessageFormat.format(I18n.get(context, "skipOutOfBounds"), givenIndex, player.getTrackCount()));
             return;
         } else if (givenIndex < 1) {

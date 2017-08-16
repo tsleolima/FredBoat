@@ -87,7 +87,8 @@ public abstract class FredBoat {
     ShardWatchdogListener shardWatchdogListener = null;
 
     //For when we need to join a revived shard with it's old GuildPlayers
-    final ArrayList<String> channelsToRejoin = new ArrayList<>();
+    protected boolean reviving = false;
+    protected final ArrayList<Long> channelsToRejoin = new ArrayList<>();
 
     //unlimited threads = http://i.imgur.com/H3b7H1S.gif
     //use this executor for various small async tasks
@@ -300,22 +301,29 @@ public abstract class FredBoat {
     public void onInit(ReadyEvent readyEvent) {
         log.info("Received ready event for " + FredBoat.getInstance(readyEvent.getJDA()).getShardInfo().getShardString());
 
-        //Rejoin old channels if revived
-        channelsToRejoin.forEach(vcid -> {
-            VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
-            if (channel == null) return;
-            GuildPlayer player = PlayerRegistry.get(channel.getGuild());
-            if (player == null) return;
+        if (!reviving) {
+            //restore GuildPlayers from database for the guilds that readied
+            MusicPersistenceHandler.restoreGuildPlayers(this);
+        } else {
+            //Rejoin old channels if revived
+            for (long voiceChannelId : channelsToRejoin) {
+                VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(voiceChannelId);
+                if (channel == null) return;
+                GuildPlayer player = PlayerRegistry.get(channel.getGuild());
+                if (player == null) return;
 
-            LavalinkManager.ins.openConnection(channel);
+                VoiceChannel currentVoiceState = channel.getGuild().getSelfMember().getVoiceState().getChannel();
+                log.debug("Currently connected to: " + (currentVoiceState == null ? "null" : currentVoiceState.getName()));
 
-            if (!LavalinkManager.ins.isEnabled()) {
-                AudioManager am = channel.getGuild().getAudioManager();
-                am.setSendingHandler(player);
+                LavalinkManager.ins.openConnection(channel);
+
+                if (!LavalinkManager.ins.isEnabled()) {
+                    AudioManager am = channel.getGuild().getAudioManager();
+                    am.setSendingHandler(player);
+                }
             }
-        });
-
-        channelsToRejoin.clear();
+            channelsToRejoin.clear();
+        }
     }
 
     //Shutdown hook
