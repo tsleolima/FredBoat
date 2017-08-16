@@ -87,7 +87,7 @@ public class OAuthManager {
         //NOTE: the returned user might be fake, which means opening a private channel might throw an exception
         User user = DiscordUtil.getUserFromBearer(FredBoat.getFirstJDA(), token.getBearer());
 
-        UConfig uconfig = EntityReader.getUConfig(user.getId());
+        UConfig uconfig = EntityReader.getEntity(user.getId(), UConfig.class);
 
         uconfig = uconfig == null ? new UConfig() : uconfig;
 
@@ -97,7 +97,7 @@ public class OAuthManager {
                 .setUserId(user.getId());
 
         //Save to database
-        EntityWriter.mergeUConfig(uconfig);
+        uconfig = EntityWriter.merge(uconfig);
 
         return uconfig;
     }

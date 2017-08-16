@@ -43,7 +43,7 @@ import java.util.List;
 @Table(name = "guild_permissions")
 @Cacheable
 @Cache(usage= CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region="guild_permissions")
-public class GuildPermissions implements IEntity, Serializable {
+public class GuildPermissions implements IEntity<String>, Serializable {
 
     private static final long serialVersionUID = 72988747242640626L;
 
@@ -60,6 +60,11 @@ public class GuildPermissions implements IEntity, Serializable {
         // Set up default permissions. Note that the @everyone role of a guild is of the same snowflake as the guild
         this.djList = id;
         this.userList = id;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Column(name = "list_admin", nullable = false, columnDefinition = "text")

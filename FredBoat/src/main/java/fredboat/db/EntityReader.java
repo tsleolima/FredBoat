@@ -27,43 +27,34 @@ package fredboat.db;
 
 
 import fredboat.FredBoat;
-import fredboat.db.entity.BlacklistEntry;
-import fredboat.db.entity.GuildConfig;
-import fredboat.db.entity.GuildPermissions;
 import fredboat.db.entity.IEntity;
-import fredboat.db.entity.UConfig;
-import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import java.io.Serializable;
 import java.util.List;
 
 public class EntityReader {
 
     private static final Logger log = LoggerFactory.getLogger(EntityReader.class);
 
-    public static UConfig getUConfig(String id) {
-        return getEntity(id, UConfig.class);
-    }
-
-    public static GuildConfig getGuildConfig(String id) {
-        return getEntity(id, GuildConfig.class);
-    }
-
-    public static GuildPermissions getGuildPermissions(Guild guild) {
-        return getEntity(guild.getId(), GuildPermissions.class);
-    }
-
-    private static <E extends IEntity> E getEntity(String id, Class<E> clazz) throws DatabaseNotReadyException {
+    /**
+     * @param id    id of the entity to get
+     * @param clazz class of the entity to get
+     * @param <E>   class needs to implement IEntity
+     * @return the entity with the requested id of the requested class
+     * @throws DatabaseNotReadyException if the database is not available
+     */
+    public static <E extends IEntity<I>, I extends Serializable> E getEntity(I id, Class<E> clazz) throws DatabaseNotReadyException {
         DatabaseManager dbManager = FredBoat.getDbManager();
         if (!dbManager.isAvailable()) {
             throw new DatabaseNotReadyException();
         }
 
         EntityManager em = dbManager.getEntityManager();
-        E config = null;
+        E config;
         try {
             em.getTransaction().begin();
             config = em.find(clazz, id);
@@ -79,7 +70,7 @@ public class EntityReader {
         return config;
     }
 
-    private static <E extends IEntity> E newInstance(String id, Class<E> clazz) {
+    private static <E extends IEntity<I>, I extends Serializable> E newInstance(I id, Class<E> clazz) {
         try {
             E entity = clazz.newInstance();
             entity.setId(id);
@@ -89,20 +80,24 @@ public class EntityReader {
         }
     }
 
-    public static List<BlacklistEntry> loadBlacklist() {
+    /**
+     * @param clazz class of the entities to get
+     * @param <E>   class needs to implement IEntity
+     * @return a list of all elements of the requested class
+     */
+    public static <E extends IEntity> List<E> loadAll(Class<E> clazz) {
         DatabaseManager dbManager = FredBoat.getDbManager();
         if (!dbManager.isAvailable()) {
             throw new DatabaseNotReadyException("The database is not available currently. Please try again later.");
         }
         EntityManager em = dbManager.getEntityManager();
-        List<BlacklistEntry> result;
         try {
             em.getTransaction().begin();
-            result = em.createQuery("SELECT b FROM BlacklistEntry b", BlacklistEntry.class).getResultList();
+            List<E> result = em.createQuery("SELECT c FROM " + clazz.getSimpleName() + " c", clazz).getResultList();
             em.getTransaction().commit();
+            return result;
         } finally {
             em.close();
         }
-        return result;
     }
 }

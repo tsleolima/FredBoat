@@ -39,7 +39,7 @@ import java.io.Serializable;
 @Table(name = "guild_config")
 @Cacheable
 @Cache(usage= CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region="guild_config")
-public class GuildConfig implements IEntity, Serializable {
+public class GuildConfig implements IEntity<String>, Serializable {
 
     private static final long serialVersionUID = 5055243002380106205L;
 
@@ -67,7 +67,8 @@ public class GuildConfig implements IEntity, Serializable {
     public GuildConfig() {
     }
 
-    public String getGuildId() {
+    @Override
+    public String getId() {
         return guildId;
     }
 
