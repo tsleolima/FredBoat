@@ -28,7 +28,7 @@ package fredboat.feature;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.EntityReader;
 import fredboat.db.EntityWriter;
-import fredboat.db.entity.GuildConfig;
+import fredboat.db.entity.common.GuildConfig;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;

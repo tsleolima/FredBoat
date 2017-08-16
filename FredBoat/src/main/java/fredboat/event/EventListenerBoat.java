@@ -33,7 +33,7 @@ import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.EntityReader;
-import fredboat.db.entity.GuildConfig;
+import fredboat.db.entity.common.GuildConfig;
 import fredboat.feature.I18n;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.messaging.CentralMessaging;
