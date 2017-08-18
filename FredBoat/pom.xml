@@ -75,6 +75,12 @@
             <version>1.2.43</version>
         </dependency>
         <dependency>
+            <!-- native audio system to avoid gc stutter in the audio -->
+            <groupId>com.sedmelluq</groupId>
+            <artifactId>jda-nas</artifactId>
+            <version>1.0.5</version>
+        </dependency>
+        <dependency>
             <!-- cleverbot.io api -->
             <groupId>frederikam</groupId>
             <artifactId>JCA</artifactId>

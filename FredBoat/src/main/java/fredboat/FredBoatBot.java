@@ -25,6 +25,7 @@
 
 package fredboat;
 
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import fredboat.audio.PlayerRegistry;
 import fredboat.event.EventLogger;
 import fredboat.event.ShardWatchdogListener;
@@ -78,13 +79,12 @@ public class FredBoatBot extends FredBoat {
                     log.warn("Starting a shard without an event listener!");
                 }
 
-                // Disabled as NAS has a memory leak
-                /*if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
+                if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
                         && !System.getProperty("os.arch").equalsIgnoreCase("arm-linux")
                         && !System.getProperty("os.arch").equalsIgnoreCase("darwin")
                         && !System.getProperty("os.name").equalsIgnoreCase("Mac OS X")) {
                     builder.setAudioSendFactory(new NativeAudioSendFactory());
-                }*/
+                }
                 if (Config.CONFIG.getNumShards() > 1) {
                     builder.useSharding(shardId, Config.CONFIG.getNumShards());
                 }
