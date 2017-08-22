@@ -49,7 +49,7 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
 
     @Override
     public void onInvoke(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
-        if (LavalinkManager.ins.isLavalinkEnabled()) {
+        if (LavalinkManager.ins.isEnabled()) {
             handleLavalink(guild, channel, invoker, message, args);
         } else {
             handleLavaplayer(guild, channel, invoker, message, args);

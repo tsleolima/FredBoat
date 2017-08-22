@@ -80,7 +80,7 @@ public class FredBoatBot extends FredBoat {
                     log.warn("Starting a shard without an event listener!");
                 }
 
-                if (LavalinkManager.ins.isLavalinkEnabled()) {
+                if (LavalinkManager.ins.isEnabled()) {
                     builder.addEventListener(LavalinkManager.ins.getLavalink());
                 }
 
@@ -161,9 +161,9 @@ public class FredBoatBot extends FredBoat {
                 jda.removeEventListener(shardWatchdogListener);
                 jda.removeEventListener(listener);
 
-                jda.shutdown(false);
+                jda.shutdown();
                 //a blocking build makes sure the revive task runs until the shard is connected, otherwise the shard may
-                // get revived again accidently while still connecting
+                // get revived again accidentally while still connecting
                 jda = buildJDA(true);
 
             } catch (Exception e) {

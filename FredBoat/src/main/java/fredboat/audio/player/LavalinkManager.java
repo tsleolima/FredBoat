@@ -42,29 +42,29 @@ public class LavalinkManager {
     private LavalinkManager() {
     }
 
-    private boolean lavalinkEnabled = false;
     private Lavalink lavalink = null;
 
     public void start(String userId) {
+        if (!isEnabled()) return;
+
         List<Config.LavalinkHost> hosts = Config.CONFIG.getLavalinkHosts();
-
-        if (hosts.isEmpty()) return;
-
-        lavalink = new Lavalink(Config.CONFIG.getNumShards(), shardId -> FredBoat.getInstance(shardId).getJda());
-        lavalinkEnabled = true;
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getUri(),
                 lavalinkHost.getPassword(),
                 userId));
     }
 
+    public boolean isEnabled() {
+        return !Config.CONFIG.getLavalinkHosts().isEmpty();
+    }
+
     IPlayer createPlayer(String guildId) {
-        return lavalinkEnabled
+        return isEnabled()
                 ? lavalink.getPlayer(guildId)
                 : new LavaplayerPlayerWrapper(AbstractPlayer.getPlayerManager().createPlayer());
     }
 
     public void openConnection(VoiceChannel channel) {
-        if (lavalinkEnabled) {
+        if (isEnabled()) {
             lavalink.openVoiceConnection(channel);
         } else {
             channel.getGuild().getAudioManager().openAudioConnection(channel);
@@ -72,7 +72,7 @@ public class LavalinkManager {
     }
 
     public void closeConnection(Guild guild) {
-        if (lavalinkEnabled) {
+        if (isEnabled()) {
             lavalink.closeVoiceConnection(guild);
         } else {
             guild.getAudioManager().closeAudioConnection();
@@ -80,18 +80,20 @@ public class LavalinkManager {
     }
 
     public VoiceChannel getConnectedChannel(Guild guild) {
-        if (lavalinkEnabled) {
+        if (isEnabled()) {
             return lavalink.getConnectedChannel(guild);
         } else {
             return guild.getAudioManager().getConnectedChannel();
         }
     }
 
-    public boolean isLavalinkEnabled() {
-        return lavalinkEnabled;
-    }
-
     public Lavalink getLavalink() {
+        if (lavalink == null)
+            lavalink = new Lavalink(
+                    Config.CONFIG.getNumShards(),
+                    shardId -> FredBoat.getInstance(shardId).getJda()
+            );
+
         return lavalink;
     }
 }

@@ -341,7 +341,7 @@ public abstract class FredBoat {
 
             LavalinkManager.ins.openConnection(channel);
 
-            if (!LavalinkManager.ins.isLavalinkEnabled()) {
+            if (!LavalinkManager.ins.isEnabled()) {
                 AudioManager am = channel.getGuild().getAudioManager();
                 am.setSendingHandler(player);
             }

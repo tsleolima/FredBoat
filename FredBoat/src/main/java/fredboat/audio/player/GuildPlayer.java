@@ -73,7 +73,7 @@ public class GuildPlayer extends AbstractPlayer {
         this.shard = FredBoat.getInstance(guild.getJDA());
         this.guildId = guild.getId();
 
-        if (!LavalinkManager.ins.isLavalinkEnabled()) {
+        if (!LavalinkManager.ins.isEnabled()) {
             AudioManager manager = guild.getAudioManager();
             manager.setSendingHandler(this);
         }
