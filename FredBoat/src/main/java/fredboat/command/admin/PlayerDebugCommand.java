@@ -62,7 +62,7 @@ public class PlayerDebugCommand extends Command implements ICommand, ICommandRes
         }
         
         try {
-            channel.sendMessage(TextUtils.postToHastebin(a.toString(), true)).queue();
+            channel.sendMessage(TextUtils.postToPasteService(a.toString())).queue();
         } catch (UnirestException ex) {
             Logger.getLogger(PlayerDebugCommand.class.getName()).log(Level.SEVERE, null, ex);
         }
