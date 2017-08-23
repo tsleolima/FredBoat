@@ -471,9 +471,8 @@ public abstract class FredBoat {
                     return fb;
                 }
             }
+            throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed, shardId: " + sId);
         }
-
-        throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed");
     }
 
     public static FredBoat getInstance(int id) {

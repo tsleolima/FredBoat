@@ -101,6 +101,8 @@ public class FredBoatBot extends FredBoat {
                     success = true;
                 } catch (RateLimitedException e) {
                     log.error("Got rate limited while building bot JDA instance! Retrying...", e);
+                } catch (Exception e) {
+                    log.error("Generic exception when building a JDA instance! Retrying...", e);
                 }
             }
         } catch (Exception e) {
