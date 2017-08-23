@@ -51,6 +51,8 @@ import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.shared.constant.DistributionEnum;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
@@ -103,7 +105,11 @@ public abstract class AbstractPlayer extends AudioEventAdapter implements AudioS
         //Determine which Source managers are enabled
         //By default, all are enabled except HttpAudioSources
         if (Config.CONFIG.isYouTubeEnabled()) {
-            mng.registerSourceManager(new YoutubeAudioSourceManager());
+            YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
+            youtubeAudioSourceManager.configureRequests(config -> RequestConfig.copy(config)
+                    .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+                    .build());
+            mng.registerSourceManager(youtubeAudioSourceManager);
         }
         if (Config.CONFIG.isSoundCloudEnabled()) {
             mng.registerSourceManager(new SoundCloudAudioSourceManager());
