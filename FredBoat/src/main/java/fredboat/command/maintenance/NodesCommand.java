@@ -74,6 +74,15 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
         for (LavalinkSocket socket : lavalink.getNodes()) {
             RemoteStats stats = socket.getStats();
             str += "Socket #" + i + "\n";
+
+            if (stats == null) {
+                str += "No stats have been received from this node! Is the node down?";
+                str += "\n";
+                str += "\n";
+                i++;
+                continue;
+            }
+
             str += stats.getPlayingPlayers() + " playing players\n";
             str += stats.getLavalinkLoad() * 100f + "% lavalink load\n";
             str += stats.getSystemLoad() * 100f + "% system load\n";
