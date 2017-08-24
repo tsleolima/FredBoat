@@ -33,6 +33,7 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import fredboat.feature.togglz.FeatureFlags;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 
@@ -75,7 +76,6 @@ public class SearchUtil {
         }
     }
 
-
     static class SearchResultHandler implements AudioLoadResultHandler {
 
         Throwable throwable;
@@ -83,6 +83,10 @@ public class SearchUtil {
         final Object toBeNotified = new Object();
 
         AudioPlaylist searchSync(SearchProvider provider, String query, int timeout) {
+            if (FeatureFlags.FORCE_SOUNDCLOUD_SEARCH.isActive()) {
+                provider = SearchProvider.SOUNDCLOUD;
+            }
+
             try {
                 synchronized (toBeNotified) {
                     PLAYER_MANAGER.loadItem(provider.getPrefix() + query, this);
