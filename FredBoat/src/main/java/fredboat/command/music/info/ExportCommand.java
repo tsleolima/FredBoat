@@ -67,7 +67,7 @@ public class ExportCommand extends Command implements IMusicCommand {
         }
         
         try {
-            String url = TextUtils.postToHastebin(out, true) + ".fredboat";
+            String url = TextUtils.postToPasteService(out) + ".fredboat";
             channel.sendMessage(MessageFormat.format(I18n.get(guild).getString("exportPlaylistResulted"), url)).queue();
         } catch (UnirestException ex) {
             throw new MessagingException(I18n.get(guild).getString("exportPlaylistFail"));

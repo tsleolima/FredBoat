@@ -131,6 +131,11 @@ public class PlaylistImportSourceManager implements AudioSourceManager, Playlist
                 pasteId = m.find() ? m.group(1) : null;
                 break;
 
+            case "wastebin":
+                m = PasteServiceConstants.WASTEBIN_PATTERN.matcher(identifier);
+                pasteId = m.find() ? m.group(1) : null;
+                break;
+
             case "pastebin":
                 m = PasteServiceConstants.PASTEBIN_PATTERN.matcher(identifier);
                 pasteId = m.find() ? m.group(1) : null;

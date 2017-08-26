@@ -53,7 +53,7 @@
             <!-- discord api -->
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.2.0_238</version>
+            <version>3.2.0_243</version>
         </dependency>
         <dependency>
             <!-- because JDA's gradle doesn't make a good pom and the scope isn't set correctly -->
@@ -72,7 +72,13 @@
             <!-- audio player for discord -->
             <groupId>com.sedmelluq</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>1.2.39</version>
+            <version>1.2.43</version>
+        </dependency>
+        <dependency>
+            <!-- gradle's pom scope is wrong, depending on it again -->
+            <groupId>com.sedmelluq</groupId>
+            <artifactId>lavaplayer-common</artifactId>
+            <version>1.0.5</version>
         </dependency>
         <!-- This is just here for convenience -->
         <!--
@@ -98,8 +104,15 @@
         </dependency>
         <dependency>
             <!-- native audio system to avoid gc stutter in the audio -->
+            <!-- we replaced the classes temporarily, but need the native parts -->
             <groupId>com.sedmelluq</groupId>
             <artifactId>jda-nas</artifactId>
+            <version>1.0.5</version>
+        </dependency>
+        <dependency>
+            <!-- gradle pls -->
+            <groupId>com.sedmelluq</groupId>
+            <artifactId>udp-queue</artifactId>
             <version>1.0.5</version>
         </dependency>
         <dependency>

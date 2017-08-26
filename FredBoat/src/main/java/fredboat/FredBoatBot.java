@@ -25,7 +25,7 @@
 
 package fredboat;
 
-import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
+import fredboat.audio.NativeAudioSendFactory;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.event.EventLogger;
@@ -106,6 +106,8 @@ public class FredBoatBot extends FredBoat {
                     success = true;
                 } catch (RateLimitedException e) {
                     log.error("Got rate limited while building bot JDA instance! Retrying...", e);
+                } catch (Exception e) {
+                    log.error("Generic exception when building a JDA instance! Retrying...", e);
                 }
             }
         } catch (Exception e) {

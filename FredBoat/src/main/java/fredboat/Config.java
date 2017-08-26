@@ -93,6 +93,16 @@ public class Config {
     private final String sshPrivateKeyFile;
     private final int forwardToPort; //port where the remote database is listening, postgres default: 5432
 
+    //AudioManager Stuff
+    private Boolean youtubeAudio;
+    private Boolean soundcloudAudio;
+    private Boolean bandcampAudio;
+    private Boolean twitchAudio;
+    private Boolean vimeoAudio;
+    private Boolean mixerAudio;
+    private Boolean spotifyAudio;
+    private Boolean httpAudio;
+
     @SuppressWarnings("unchecked")
     public Config(File credentialsFile, File configFile, int scope) {
         try {
@@ -223,6 +233,18 @@ public class Config {
             sshUser = (String) creds.getOrDefault("sshUser", "fredboat");
             sshPrivateKeyFile = (String) creds.getOrDefault("sshPrivateKeyFile", "database.ppk");
             forwardToPort = (int) creds.getOrDefault("forwardToPort", 5432);
+
+            //Modularise audiomanagers; load from "config.yaml"
+
+            youtubeAudio = (Boolean) config.getOrDefault("enableYouTube", true);
+            soundcloudAudio = (Boolean) config.getOrDefault("enableSoundCloud", true);
+            bandcampAudio = (Boolean) config.getOrDefault("enableBandCamp", true);
+            twitchAudio = (Boolean) config.getOrDefault("enableTwitch", true);
+            vimeoAudio = (Boolean) config.getOrDefault("enableVimeo", true);
+            mixerAudio = (Boolean) config.getOrDefault("enableMixer", true);
+            spotifyAudio = (Boolean) config.getOrDefault("enableSpotify", true);
+            httpAudio = (Boolean) config.getOrDefault("enableHttp", false);
+
         } catch (IOException | UnirestException e) {
             throw new RuntimeException(e);
         }
@@ -418,4 +440,35 @@ public class Config {
         }
     }
 
+    public boolean isYouTubeEnabled() {
+        return youtubeAudio;
+    }
+
+    public boolean isSoundCloudEnabled() {
+        return soundcloudAudio;
+    }
+
+    public boolean isBandCampEnabled() {
+        return bandcampAudio;
+    }
+
+    public boolean isTwitchEnabled() {
+        return twitchAudio;
+    }
+
+    public boolean isVimeoEnabled() {
+        return vimeoAudio;
+    }
+
+    public boolean isMixerEnabled() {
+        return mixerAudio;
+    }
+
+    public boolean isSpotifyEnabled() {
+        return spotifyAudio;
+    }
+
+    public boolean isHttpEnabled() {
+        return httpAudio;
+    }
 }

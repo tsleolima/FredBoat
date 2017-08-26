@@ -52,6 +52,9 @@ public enum FeatureFlags implements Feature {
 
     @Label("Patron validation")
     PATRON_VALIDATION,
+
+    @Label("Force soundcloud search instead of youtube")
+    FORCE_SOUNDCLOUD_SEARCH,
     ;
 
     public boolean isActive() {
