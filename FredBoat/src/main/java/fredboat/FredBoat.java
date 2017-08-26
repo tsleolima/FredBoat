@@ -175,6 +175,7 @@ public abstract class FredBoat {
         //Initialise event listeners
         listenerBot = new EventListenerBoat();
         listenerSelf = new EventListenerSelf();
+        LavalinkManager.ins.start();
 
         //Commands
         if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
@@ -315,10 +316,6 @@ public abstract class FredBoat {
     }
 
     public void onInit(ReadyEvent readyEvent) {
-        if (numShardsReady.getAndIncrement() == 0) {
-            LavalinkManager.ins.start(readyEvent.getJDA().getSelfUser().getId());
-        }
-
         log.info("Received ready event for " + FredBoat.getInstance(readyEvent.getJDA()).getShardInfo().getShardString());
 
         int ready = numShardsReady.get();

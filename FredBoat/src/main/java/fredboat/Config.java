@@ -279,7 +279,7 @@ public class Config {
         return distribution;
     }
 
-    String getBotToken() {
+    public String getBotToken() {
         return botToken;
     }
 

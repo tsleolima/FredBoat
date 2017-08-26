@@ -25,8 +25,10 @@
 
 package fredboat.audio.player;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
 import fredboat.Config;
 import fredboat.FredBoat;
+import fredboat.util.DiscordUtil;
 import lavalink.client.io.Lavalink;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
@@ -44,13 +46,25 @@ public class LavalinkManager {
 
     private Lavalink lavalink = null;
 
-    public void start(String userId) {
+    public void start() {
         if (!isEnabled()) return;
+
+        String userId;
+        try {
+            userId = DiscordUtil.getUserId(Config.CONFIG.getBotToken());
+        } catch (UnirestException e) {
+            throw new RuntimeException(e);
+        }
+
+        lavalink = new Lavalink(
+                userId,
+                Config.CONFIG.getNumShards(),
+                shardId -> FredBoat.getInstance(shardId).getJda()
+        );
 
         List<Config.LavalinkHost> hosts = Config.CONFIG.getLavalinkHosts();
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getUri(),
-                lavalinkHost.getPassword(),
-                userId));
+                lavalinkHost.getPassword()));
     }
 
     public boolean isEnabled() {
@@ -88,12 +102,6 @@ public class LavalinkManager {
     }
 
     public Lavalink getLavalink() {
-        if (lavalink == null)
-            lavalink = new Lavalink(
-                    Config.CONFIG.getNumShards(),
-                    shardId -> FredBoat.getInstance(shardId).getJda()
-            );
-
         return lavalink;
     }
 }
