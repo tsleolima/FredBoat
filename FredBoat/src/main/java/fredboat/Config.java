@@ -78,6 +78,7 @@ public class Config {
     private boolean restServerEnabled = true;
     private List<String> adminIds = new ArrayList<>();
     private boolean useAutoBlacklist = false;
+    private String game = "";
 
     //testing related stuff
     private String testBotToken;
@@ -138,6 +139,7 @@ public class Config {
                 adminIds.add(admins + "");
             }
             useAutoBlacklist = (boolean) config.getOrDefault("useAutoBlacklist", useAutoBlacklist);
+            game = (String) config.getOrDefault("game", "");
 
             log.info("Using prefix: " + prefix);
 
@@ -372,6 +374,14 @@ public class Config {
 
     public boolean useAutoBlacklist() {
         return useAutoBlacklist;
+    }
+
+    public String getGame() {
+        if (game == null || game.isEmpty()) {
+            return "Say " + getPrefix() + "help";
+        } else {
+            return game;
+        }
     }
 
     public String getTestBotToken() {

@@ -38,10 +38,7 @@ import fredboat.feature.I18n;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
-import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.ReadyEvent;
-import net.dv8tion.jda.core.events.ReconnectedEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent;
@@ -175,17 +172,6 @@ public class EventListenerBoat extends AbstractEventListener {
 
         event.getChannel().sendMessage(HelpCommand.getHelpDmMsg(null)).queue();
         lastUserToReceiveHelp = event.getAuthor();
-    }
-
-    @Override
-    public void onReady(ReadyEvent event) {
-        super.onReady(event);
-        event.getJDA().getPresence().setGame(Game.of("Say " + Config.CONFIG.getPrefix() + "help"));
-    }
-
-    @Override
-    public void onReconnect(ReconnectedEvent event) {
-        event.getJDA().getPresence().setGame(Game.of("Say " + Config.CONFIG.getPrefix() + "help"));
     }
 
     /* music related */

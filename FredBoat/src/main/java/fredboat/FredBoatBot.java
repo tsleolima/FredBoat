@@ -33,6 +33,7 @@ import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.EventListener;
@@ -70,6 +71,7 @@ public class FredBoatBot extends FredBoat {
                         .addEventListener(new EventLogger("216689009110417408"))
                         .addEventListener(shardWatchdogListener)
                         .setToken(Config.CONFIG.getBotToken())
+                        .setGame(Game.of(Config.CONFIG.getGame()))
                         .setBulkDeleteSplittingEnabled(true)
                         .setEnableShutdownHook(false);
 
