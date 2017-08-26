@@ -84,7 +84,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
 
     @Override
     public String help(Guild guild) {
-        return null;
+        return "{0}{1}\n#Add or remove lavalink nodes.";
     }
 
     @Override
