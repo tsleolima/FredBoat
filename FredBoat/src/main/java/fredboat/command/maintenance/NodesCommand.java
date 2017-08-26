@@ -31,6 +31,7 @@ import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
+import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
 import lavalink.client.io.Lavalink;
@@ -60,12 +61,21 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
     @SuppressWarnings("StringConcatenationInLoop")
     private void handleLavalink(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
         Lavalink lavalink = LavalinkManager.ins.getLavalink();
-        if (args.length >= 2) {
+        if (args.length >= 2 && !args[1].equals("host")) {
             LavalinkSocket socket = lavalink.getNodes().get(Integer.parseInt(args[1]));
 
 
             channel.sendMessage("```json\n" + socket.getStats().getAsJson().toString(4) + "\n```").queue();
             return;
+        }
+
+        boolean showHosts = false;
+        if (args.length >= 2 && args[1].equals("host")) {
+            if (PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, invoker, channel)) {
+                showHosts = true;
+            } else {
+                return;
+            }
         }
 
         String str = "```";
@@ -74,6 +84,10 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
         for (LavalinkSocket socket : lavalink.getNodes()) {
             RemoteStats stats = socket.getStats();
             str += "Socket #" + i + "\n";
+
+            if (showHosts) {
+                str += "Address: " + socket.getRemoteUri() + "\n";
+            }
 
             if (stats == null) {
                 str += "No stats have been received from this node! Is the node down?";
