@@ -29,7 +29,12 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import fredboat.FredBoat;
-import fredboat.audio.queue.*;
+import fredboat.audio.queue.AbstractTrackProvider;
+import fredboat.audio.queue.AudioLoader;
+import fredboat.audio.queue.AudioTrackContext;
+import fredboat.audio.queue.IdentifierContext;
+import fredboat.audio.queue.RepeatMode;
+import fredboat.audio.queue.SimpleTrackProvider;
 import fredboat.commandmeta.MessagingException;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.EntityReader;
@@ -55,7 +60,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class GuildPlayer extends AbstractPlayer {
 
@@ -66,8 +70,9 @@ public class GuildPlayer extends AbstractPlayer {
     public final Map<String, VideoSelection> selections = new HashMap<>();
     private String currentTCId;
     private final AudioLoader audioLoader;
-    private long earliestPotentialDonationNag = System.currentTimeMillis()
-            + TimeUnit.MINUTES.toMillis(60);
+
+    /* This is used for checking if it is time to advertise FredBoat Patron if it is enabled */
+    private final PlaybackTimeMonitor playbackTimeMonitor = new PlaybackTimeMonitor();
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild) {
@@ -78,6 +83,7 @@ public class GuildPlayer extends AbstractPlayer {
         manager.setSendingHandler(this);
         audioTrackProvider = new SimpleTrackProvider();
         audioLoader = new AudioLoader(audioTrackProvider, getPlayerManager(), this);
+        getPlayer().addListener(playbackTimeMonitor);
     }
 
     public void joinChannel(Member usr) throws MessagingException {
@@ -122,14 +128,14 @@ public class GuildPlayer extends AbstractPlayer {
 
                 // Note that we will only nag users if they seem to actually understand and use the bot
                 if (FeatureFlags.ADVERTISE_DONATION_ON_LEAVE.isActive()
-                        && getTotalRemainingMusicTimeSeconds() > 300
-                        && System.currentTimeMillis() > earliestPotentialDonationNag) {
+                        && playbackTimeMonitor.getPlaybackTime().toMinutes() > 1
+                        && isPlaying()) {
                     String translated = "If you find FredBoat useful, please consider donating so that we can keep the lights on.";
                     msg = msg + "\n\n"
                             + translated
                             + "\n<https://fredboat.com/docs/donate>";
 
-                    earliestPotentialDonationNag = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(120);
+                    playbackTimeMonitor.reset();
                 }
 
                 channel.sendMessage(msg).queue();
