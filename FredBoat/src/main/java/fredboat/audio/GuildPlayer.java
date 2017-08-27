@@ -35,6 +35,7 @@ import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.EntityReader;
 import fredboat.db.entity.GuildConfig;
 import fredboat.feature.I18n;
+import fredboat.feature.togglz.FeatureFlags;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class GuildPlayer extends AbstractPlayer {
 
@@ -63,8 +65,9 @@ public class GuildPlayer extends AbstractPlayer {
     private final String guildId;
     public final Map<String, VideoSelection> selections = new HashMap<>();
     private String currentTCId;
-
     private final AudioLoader audioLoader;
+    private long earliestPotentialDonationNag = System.currentTimeMillis()
+            + TimeUnit.MINUTES.toMillis(60);
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild) {
@@ -115,7 +118,21 @@ public class GuildPlayer extends AbstractPlayer {
             if (manager.getConnectedChannel() == null) {
                 channel.sendMessage(I18n.get(getGuild()).getString("playerNotInChannel")).queue();
             } else {
-                channel.sendMessage(MessageFormat.format(I18n.get(getGuild()).getString("playerLeftChannel"), getChannel().getName())).queue();
+                String msg = MessageFormat.format(I18n.get(getGuild()).getString("playerLeftChannel"), getChannel().getName());
+
+                // Note that we will only nag users if they seem to actually understand and use the bot
+                if (FeatureFlags.ADVERTISE_DONATION_ON_LEAVE.isActive()
+                        && getTotalRemainingMusicTimeSeconds() > 300
+                        && System.currentTimeMillis() > earliestPotentialDonationNag) {
+                    String translated = "If you find FredBoat useful, please consider donating so that we can keep the lights on.";
+                    msg = msg + "\n\n"
+                            + translated
+                            + "\n<https://fredboat.com/docs/donate>";
+
+                    earliestPotentialDonationNag = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(120);
+                }
+
+                channel.sendMessage(msg).queue();
             }
         }
         manager.closeAudioConnection();
