@@ -72,7 +72,7 @@ public class GuildPlayer extends AbstractPlayer {
     private final AudioLoader audioLoader;
 
     /* This is used for checking if it is time to advertise FredBoat Patron if it is enabled */
-    private final PlaybackTimeMonitor playbackTimeMonitor = new PlaybackTimeMonitor();
+    private final PlaybackTimeMonitor playbackTimeMonitor = new PlaybackTimeMonitor(this);
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild) {
@@ -83,7 +83,6 @@ public class GuildPlayer extends AbstractPlayer {
         manager.setSendingHandler(this);
         audioTrackProvider = new SimpleTrackProvider();
         audioLoader = new AudioLoader(audioTrackProvider, getPlayerManager(), this);
-        getPlayer().addListener(playbackTimeMonitor);
     }
 
     public void joinChannel(Member usr) throws MessagingException {
@@ -126,9 +125,11 @@ public class GuildPlayer extends AbstractPlayer {
             } else {
                 String msg = MessageFormat.format(I18n.get(getGuild()).getString("playerLeftChannel"), getChannel().getName());
 
+                log.info(isPlaying() + "");
+
                 // Note that we will only nag users if they seem to actually understand and use the bot
                 if (FeatureFlags.ADVERTISE_DONATION_ON_LEAVE.isActive()
-                        && playbackTimeMonitor.getPlaybackTime().toMinutes() > 1
+                        && playbackTimeMonitor.getPlaybackTime().toMinutes() > 120
                         && isPlaying()) {
                     String translated = "If you find FredBoat useful, please consider donating so that we can keep the lights on.";
                     msg = msg + "\n\n"
@@ -375,6 +376,10 @@ public class GuildPlayer extends AbstractPlayer {
         } else {
             audioTrackProvider.remove(atc);
         }
+    }
+
+    public AudioManager getAudioManager() {
+        return getGuild().getAudioManager();
     }
 
     @Override

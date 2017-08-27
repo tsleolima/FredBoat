@@ -25,40 +25,47 @@
 
 package fredboat.audio;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Monitors playback time
  */
-public class PlaybackTimeMonitor extends AudioEventAdapter {
-    
-    private Duration playbackTime = Duration.ZERO;
-    private LocalDateTime timeStarted = LocalDateTime.now();
+public class PlaybackTimeMonitor {
 
-    @Override
-    public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        timeStarted = LocalDateTime.now();
+    private static final Logger log = LoggerFactory.getLogger(PlaybackTimeMonitor.class);
+
+    private volatile Duration playbackTime = Duration.ZERO;
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+    PlaybackTimeMonitor(GuildPlayer guildPlayer) {
+        executorService.scheduleAtFixedRate(() -> {
+                    if (guildPlayer.isPlaying()
+                            && guildPlayer.getGuild().getAudioManager().isConnected()
+                            && !guildPlayer.getGuild().getSelfMember().getVoiceState().isMuted())
+                        playbackTime = playbackTime.plusMinutes(10);
+                }
+                ,
+                0,
+                10,
+                TimeUnit.MINUTES);
     }
 
-    @Override
-    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        playbackTime = playbackTime.plus(Duration.between(timeStarted, LocalDateTime.now()));
-
-
-    }
-
-    public void reset() {
+    void reset() {
         playbackTime = Duration.ZERO;
-        timeStarted = LocalDateTime.now();
     }
 
-    public Duration getPlaybackTime() {
+    Duration getPlaybackTime() {
         return playbackTime;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        executorService.shutdown();
     }
 }
