@@ -23,12 +23,13 @@
  *
  */
 
-package fredboat.audio;
+package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import fredboat.FredBoat;
+import fredboat.audio.VideoSelection;
 import fredboat.audio.queue.*;
 import fredboat.commandmeta.MessagingException;
 import fredboat.db.DatabaseNotReadyException;
@@ -68,11 +69,14 @@ public class GuildPlayer extends AbstractPlayer {
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild) {
+        super(guild.getId());
         this.shard = FredBoat.getInstance(guild.getJDA());
         this.guildId = guild.getId();
 
-        AudioManager manager = guild.getAudioManager();
-        manager.setSendingHandler(this);
+        if (!LavalinkManager.ins.isEnabled()) {
+            AudioManager manager = guild.getAudioManager();
+            manager.setSendingHandler(this);
+        }
         audioTrackProvider = new SimpleTrackProvider();
         audioLoader = new AudioLoader(audioTrackProvider, getPlayerManager(), this);
     }
@@ -100,25 +104,22 @@ public class GuildPlayer extends AbstractPlayer {
             throw new MessagingException(I18n.get(getGuild()).getString("playerJoinSpeakDenied"));
         }
 
+        LavalinkManager.ins.openConnection(targetChannel);
         AudioManager manager = getGuild().getAudioManager();
-
-        manager.openAudioConnection(targetChannel);
-
         manager.setConnectionListener(new DebugConnectionListener(guildId, shard.getShardInfo()));
 
         log.info("Connected to voice channel " + targetChannel);
     }
 
     public void leaveVoiceChannelRequest(TextChannel channel, boolean silent) {
-        AudioManager manager = getGuild().getAudioManager();
         if (!silent) {
-            if (manager.getConnectedChannel() == null) {
+            if (LavalinkManager.ins.getConnectedChannel(channel.getGuild()) == null) {
                 channel.sendMessage(I18n.get(getGuild()).getString("playerNotInChannel")).queue();
             } else {
                 channel.sendMessage(MessageFormat.format(I18n.get(getGuild()).getString("playerLeftChannel"), getChannel().getName())).queue();
             }
         }
-        manager.closeAudioConnection();
+        LavalinkManager.ins.closeConnection(getGuild());
     }
 
     /**
@@ -379,4 +380,6 @@ public class GuildPlayer extends AbstractPlayer {
     public JDA getJda() {
         return shard.getJda();
     }
+
+
 }

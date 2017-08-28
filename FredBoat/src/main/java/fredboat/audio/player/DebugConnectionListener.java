@@ -23,7 +23,7 @@
  *
  */
 
-package fredboat.audio;
+package fredboat.audio.player;
 
 
 import fredboat.FredBoat;
