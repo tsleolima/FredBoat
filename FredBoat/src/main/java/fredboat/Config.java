@@ -32,6 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -114,8 +115,16 @@ public class Config {
             //remove those pesky tab characters so a potential json file is YAML conform
             credsFileStr = credsFileStr.replaceAll("\t", "");
             configFileStr = configFileStr.replaceAll("\t", "");
-            Map<String, Object> creds = (Map<String, Object>) yaml.load(credsFileStr);
-            Map<String, Object> config = (Map<String, Object>) yaml.load(configFileStr);
+            Map<String, Object> creds;
+            Map<String, Object> config;
+            try {
+                creds = (Map<String, Object>) yaml.load(credsFileStr);
+                config = (Map<String, Object>) yaml.load(configFileStr);
+            } catch (YAMLException e) {
+                log.error("Could not parse the credentials and/or config yaml files! There are probably misformatted. " +
+                        "Try using an online yaml format checker.");
+                throw e;
+            }
             //avoid null values, rather change them to empty strings
             creds.keySet().forEach((String key) -> creds.putIfAbsent(key, ""));
             config.keySet().forEach((String key) -> config.putIfAbsent(key, ""));
@@ -156,6 +165,11 @@ public class Config {
             if (token != null) {
                 botToken = token.getOrDefault(distribution.getId(), "");
             } else botToken = "";
+            if (botToken == null || botToken.isEmpty()) {
+                throw new RuntimeException("No discord bot token provided for the started distribution " + distribution
+                        + "\nMake sure to put a " + distribution.getId() + " token in your credentials file.");
+            }
+
             spotifyId = (String) creds.getOrDefault("spotifyId", "");
             spotifySecret = (String) creds.getOrDefault("spotifySecret", "");
 

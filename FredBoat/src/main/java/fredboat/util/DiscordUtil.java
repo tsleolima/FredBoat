@@ -25,6 +25,8 @@
 
 package fredboat.util;
 
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import fredboat.Config;
@@ -150,13 +152,16 @@ public class DiscordUtil {
     }
 
     public static int getRecommendedShardCount(String token) throws UnirestException {
-        return Unirest.get(Requester.DISCORD_API_PREFIX + "gateway/bot")
+        HttpResponse<JsonNode> response = Unirest.get(Requester.DISCORD_API_PREFIX + "gateway/bot")
                 .header("Authorization", "Bot " + token)
                 .header("User-agent", USER_AGENT)
-                .asJson()
-                .getBody()
-                .getObject()
-                .getInt("shards");
+                .asJson();
+        if (response.getStatus() == 401) {
+            throw new IllegalArgumentException("Invalid discord bot token provided!");
+        } else if (response.getStatus() >= 400) {
+            log.error("Unexpected response from discord: {} {}", response.getStatus(), response.getStatusText());
+        }
+        return response.getBody().getObject().getInt("shards");
     }
 
     public static User getUserFromBearer(JDA jda, String token) {
