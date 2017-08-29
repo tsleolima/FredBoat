@@ -28,7 +28,7 @@ package fredboat.db.entity.common;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.audio.AbstractPlayer;
+import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.audio.queue.SplitAudioTrackContext;
 import fredboat.db.entity.IEntity;

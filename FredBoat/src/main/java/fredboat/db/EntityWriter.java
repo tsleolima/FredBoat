@@ -55,7 +55,7 @@ public class EntityWriter {
             em.getTransaction().commit();
             return mergedEntity;
         } catch (PersistenceException e) {
-            log.error("Failed to merge entity {}", entity.getId(), e);
+            log.error("Failed to merge entity {} of class {}", entity.getId(), entity.getClass().getSimpleName(), e);
             throw new DatabaseNotReadyException(e);
         } finally {
             em.close();

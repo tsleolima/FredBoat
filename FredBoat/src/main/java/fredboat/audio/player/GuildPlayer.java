@@ -168,7 +168,7 @@ public class GuildPlayer extends AbstractPlayer {
         if (tc != null) {
             int trackCount = getTrackCount();
             if (trackCount > 0) {
-                tc.sendMessage(MessageFormat.format(I18n.get(getGuild()).getString("reloadSuccess"), trackCount)).queue();
+                CentralMessaging.sendMessage(tc, MessageFormat.format(I18n.get(getGuild()).getString("reloadSuccess"), trackCount));
             }
         }
     }

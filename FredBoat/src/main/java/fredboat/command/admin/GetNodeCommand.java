@@ -38,7 +38,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
     @Override
     public void onInvoke(CommandContext context) {
         LavalinkSocket node = LavalinkManager.ins.getLavalink().getNodeForGuild(context.getGuild());
-        context.channel.sendMessage(String.valueOf(node)).queue();
+        context.reply(String.valueOf(node));
     }
 
     @Override
