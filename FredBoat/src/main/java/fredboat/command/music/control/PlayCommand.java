@@ -31,7 +31,7 @@ import fredboat.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.audio.VideoSelection;
+import fredboat.audio.player.VideoSelection;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;

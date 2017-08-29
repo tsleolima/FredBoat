@@ -29,7 +29,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import fredboat.FredBoat;
-import fredboat.audio.VideoSelection;
 import fredboat.audio.queue.*;
 import fredboat.commandmeta.MessagingException;
 import fredboat.db.DatabaseNotReadyException;

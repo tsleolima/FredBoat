@@ -23,7 +23,7 @@
  *
  */
 
-package fredboat.audio;
+package fredboat.audio.queue;
 
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
@@ -33,9 +33,6 @@ import fredboat.FredBoat;
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.audio.queue.AudioTrackContext;
-import fredboat.audio.queue.RepeatMode;
-import fredboat.audio.queue.SplitAudioTrackContext;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;

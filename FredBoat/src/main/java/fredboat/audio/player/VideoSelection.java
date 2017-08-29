@@ -23,7 +23,7 @@
  *
  */
 
-package fredboat.audio;
+package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.core.entities.Message;

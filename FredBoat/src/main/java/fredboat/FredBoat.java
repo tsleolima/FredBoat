@@ -34,7 +34,7 @@ import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.ShardWatchdogAgent;
 import fredboat.api.API;
 import fredboat.api.OAuthManager;
-import fredboat.audio.MusicPersistenceHandler;
+import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;

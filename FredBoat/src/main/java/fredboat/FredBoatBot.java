@@ -25,7 +25,7 @@
 
 package fredboat;
 
-import fredboat.audio.NativeAudioSendFactory;
+import fredboat.audio.nas.NativeAudioSendFactory;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.event.EventLogger;
