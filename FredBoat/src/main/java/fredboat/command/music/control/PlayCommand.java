@@ -28,10 +28,7 @@ package fredboat.command.music.control;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.Config;
-import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.LavalinkManager;
-import fredboat.audio.player.PlayerRegistry;
-import fredboat.audio.player.VideoSelection;
+import fredboat.audio.player.*;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
@@ -71,6 +68,8 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             channel.sendMessage(I18n.get(guild).getString("playerUserNotInChannel")).queue();
             return;
         }
+
+        if (!PlayerLimitManager.checkLimitResponsive(channel)) return;
 
         if (!message.getAttachments().isEmpty()) {
             GuildPlayer player = PlayerRegistry.get(guild);
