@@ -49,7 +49,7 @@ public class FredBoatBot extends FredBoat {
     private static final Logger log = LoggerFactory.getLogger(FredBoatBot.class);
     private final int shardId;
     private final EventListener listener;
-    private final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
+    private static final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
 
     public FredBoatBot(int shardId) {
         this(shardId, null);
