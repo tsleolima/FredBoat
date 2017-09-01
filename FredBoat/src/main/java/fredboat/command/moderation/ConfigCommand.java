@@ -116,6 +116,6 @@ public class ConfigCommand extends Command implements IModerationCommand, IComma
 
     @Override
     public PermissionLevel getMinimumPerms() {
-        return PermissionLevel.ADMIN;
+        return PermissionLevel.BASE;
     }
 }
