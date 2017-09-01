@@ -357,7 +357,7 @@ public class GuildPlayer extends AbstractPlayer {
         boolean skipCurrentTrack = false;
 
         for (AudioTrackContext atc : list) {
-            if(atc.equals(getPlayingTrack())){
+            if (atc.equals(getPlayingTrack())){
                 //Should be skipped last, in respect to PlayerEventListener
                 skipCurrentTrack = true;
             } else {
