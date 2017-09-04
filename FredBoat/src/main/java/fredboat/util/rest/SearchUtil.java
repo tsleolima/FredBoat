@@ -51,6 +51,8 @@ import java.util.concurrent.TimeUnit;
 
 public class SearchUtil {
 
+
+    public static final int MAX_RESULTS = 5;
     public static final long DEFAULT_CACHE_MAX_AGE = TimeUnit.HOURS.toMillis(24); //24 hours
     public static final String PUNCTUATION_REGEX = "[.,/#!$%^&*;:{}=\\-_`~()\"\']";
 
@@ -133,7 +135,7 @@ public class SearchUtil {
             if (provider == SearchProvider.YOUTUBE &&
                     (Config.CONFIG.isPatronDistribution() || Config.CONFIG.isDevDistribution())) {
                 try {
-                    AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, 5, PLAYER_MANAGER.source(YoutubeAudioSourceManager.class));
+                    AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, PLAYER_MANAGER.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it
