@@ -115,7 +115,9 @@ public class SearchResult implements Serializable {
         SearchResult sr;
         SearchResultId sId = new SearchResultId(provider, searchTerm);
         try {
+            em.getTransaction().begin();
             sr = em.find(SearchResult.class, sId);
+            em.getTransaction().commit();
         } catch (PersistenceException e) {
             log.error("Unexpected error while trying to look up a search result for provider {} and search term {}", provider.name(), searchTerm, e);
             throw new DatabaseNotReadyException(e);

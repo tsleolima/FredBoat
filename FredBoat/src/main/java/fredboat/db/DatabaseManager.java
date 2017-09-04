@@ -106,10 +106,12 @@ public class DatabaseManager {
             //caution: only add new columns, don't remove or alter old ones, otherwise manual db table migration needed
             properties.put("hibernate.hbm2ddl.auto", "update");
 
-            //disable autocommit, it is not recommended for our usecases.
-            //see https://vladmihalcea.com/2017/05/17/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
-            properties.put("hibernate.connection.autocommit", "false");
-            properties.put("hibernate.connection.provider_disables_autocommit", "true");
+            //disable autocommit, it is not recommended for our usecases, and interferes with some of them
+            // see https://vladmihalcea.com/2017/05/17/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
+            // this also means all EntityManager interactions need to be wrapped into em.getTransaction.begin() and
+            // em.getTransaction.commit() to prevent a rollback spam at the database
+            properties.put("hibernate.connection.autocommit", "true");
+            properties.put("hibernate.connection.provider_disables_autocommit", "false");
 
             properties.put("hibernate.hikari.maximumPoolSize", Integer.toString(poolSize));
 
