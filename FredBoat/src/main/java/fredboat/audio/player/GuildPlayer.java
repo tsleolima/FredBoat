@@ -380,5 +380,10 @@ public class GuildPlayer extends AbstractPlayer {
         return shard.getJda();
     }
 
-
+    @Override
+    void destroy() {
+        audioTrackProvider.clear();
+        super.destroy();
+        log.info("Player for " + guildId + " was destroyed.");
+    }
 }
