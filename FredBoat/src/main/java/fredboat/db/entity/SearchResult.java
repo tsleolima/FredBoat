@@ -206,7 +206,7 @@ public class SearchResult implements Serializable {
         @Column(name = "provider", nullable = false)
         private String provider;
 
-        @Column(name = "search_term", nullable = false)
+        @Column(name = "search_term", nullable = false, columnDefinition = "text")
         private String searchTerm;
 
         //for jpa
