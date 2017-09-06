@@ -219,7 +219,7 @@ public class SearchUtil {
                 provider = SearchProvider.SOUNDCLOUD;
             }
 
-            log.debug("Searching {} for {]", provider, query);
+            log.debug("Searching {} for {}", provider, query);
 
             try {
                 synchronized (toBeNotified) {
