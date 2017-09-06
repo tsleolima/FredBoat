@@ -352,8 +352,21 @@ public class GuildPlayer extends AbstractPlayer {
             return new ImmutablePair<>(true, null);
         } else {
             //We are not a mod
-            boolean userOwnsTracks = audioTrackProvider.isUserTrackOwner(member.getUser().getIdLong(), trackIds);
-            if (userOwnsTracks) {
+            long userId = member.getUser().getIdLong();
+
+            //if there is a currently playing track, and the track is requested to be skipped, but not owned by the
+            // requesting user, then currentTrackSkippable should be false
+            boolean currentTrackSkippable = true;
+            AudioTrackContext playingTrack = getPlayingTrack();
+            if (playingTrack != null
+                    && trackIds.contains(getPlayingTrack().getTrackId())
+                    && playingTrack.getUserId() != userId) {
+
+                currentTrackSkippable = false;
+            }
+
+            if (currentTrackSkippable
+                    && audioTrackProvider.isUserTrackOwner(userId, trackIds)) { //check ownership of the queued tracks
                 return new ImmutablePair<>(true, null);
             } else {
                 return new ImmutablePair<>(false, I18n.get(getGuild()).getString("skipDeniedTooManyTracks"));
