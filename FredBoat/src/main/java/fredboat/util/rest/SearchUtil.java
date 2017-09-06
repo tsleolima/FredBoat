@@ -219,6 +219,8 @@ public class SearchUtil {
                 provider = SearchProvider.SOUNDCLOUD;
             }
 
+            log.debug("Searching {} for {]", provider, query);
+
             try {
                 synchronized (toBeNotified) {
                     PLAYER_MANAGER.loadItem(provider.getPrefix() + query, this);
@@ -267,6 +269,7 @@ public class SearchUtil {
 
         @Override
         public void noMatches() {
+            result = new BasicAudioPlaylist("No matches", Collections.emptyList(), null, true);
             synchronized (toBeNotified) {
                 toBeNotified.notify();
             }
