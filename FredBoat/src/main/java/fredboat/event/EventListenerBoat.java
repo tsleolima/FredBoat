@@ -39,6 +39,7 @@ import fredboat.feature.togglz.FeatureFlags;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
@@ -189,7 +190,7 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
         checkForAutoPause(event.getChannelLeft());
-        checkForAutoResume(event.getChannelJoined());
+        checkForAutoResume(event.getChannelJoined(), event.getMember());
 
         //were we moved?
         if (event.getMember().getUser().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
@@ -199,18 +200,22 @@ public class EventListenerBoat extends AbstractEventListener {
 
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-        checkForAutoResume(event.getChannelJoined());
+        checkForAutoResume(event.getChannelJoined(), event.getMember());
     }
 
-    private void checkForAutoResume(VoiceChannel joinedChannel) {
+    private void checkForAutoResume(VoiceChannel joinedChannel, Member joined) {
         Guild guild = joinedChannel.getGuild();
+        //ignore bot users taht arent us joining / moving
+        if (joined.getUser().isBot()
+                && guild.getSelfMember().getUser().getIdLong() != joined.getUser().getIdLong()) return;
+
         GuildPlayer player = PlayerRegistry.getExisting(guild);
 
         if (player != null
                 && player.isPaused()
                 && player.getPlayingTrack() != null
                 && joinedChannel.getMembers().contains(guild.getSelfMember())
-                && player.getHumanUsersInVC().size() > 0
+                && player.getHumanUsersInCurrentVC().size() > 0
                 && EntityReader.getGuildConfig(guild.getId()).isAutoResume()
                 ) {
             player.getActiveTextChannel().sendMessage(I18n.get(guild).getString("eventAutoResumed")).queue();
@@ -240,7 +245,7 @@ public class EventListenerBoat extends AbstractEventListener {
             return;
         }
 
-        if (player.getHumanUsersInVC().isEmpty() && !player.isPaused()) {
+        if (player.getHumanUsersInCurrentVC().isEmpty() && !player.isPaused()) {
             player.pause();
             player.getActiveTextChannel().sendMessage(I18n.get(guild).getString("eventUsersLeftVC")).queue();
         }
