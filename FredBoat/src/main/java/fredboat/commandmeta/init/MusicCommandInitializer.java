@@ -106,6 +106,7 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand("nodes", new NodesCommand());
         CommandRegistry.registerCommand("mshards", new ShardsCommand());
         CommandRegistry.registerCommand("mrevive", new ReviveCommand());
+        CommandRegistry.registerCommand("msentrydsn", new SentryDsnCommand());
         CommandRegistry.registerCommand("adebug", new AudioDebugCommand());
         CommandRegistry.registerCommand("announce", new AnnounceCommand());
         CommandRegistry.registerCommand("mping", new PingCommand());

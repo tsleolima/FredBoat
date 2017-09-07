@@ -29,6 +29,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import fredboat.audio.player.PlayerLimitManager;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.DiscordUtil;
+import io.sentry.Sentry;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class Config {
     private boolean useAutoBlacklist = false;
     private String game = "";
     private List<LavalinkHost> lavalinkHosts = new ArrayList<>();
+    private String sentryDsn;
 
     //testing related stuff
     private String testBotToken;
@@ -210,6 +212,10 @@ public class Config {
                         throw new RuntimeException("Failed parsing URI", e);
                     }
                 });
+            }
+            sentryDsn = (String) creds.getOrDefault("sentryDsn", "");
+            if (!sentryDsn.isEmpty()) {
+                Sentry.init(sentryDsn);
             }
 
             if(getDistribution() == DistributionEnum.DEVELOPMENT) {
