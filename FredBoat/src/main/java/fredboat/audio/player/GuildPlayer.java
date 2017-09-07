@@ -378,7 +378,7 @@ public class GuildPlayer extends AbstractPlayer {
         Pair<Boolean, String> pair = canMemberSkipTracks(member, trackIds);
 
         if (pair.getLeft()) {
-            channel.sendMessageFormat(successMessage).queue();
+            channel.sendMessage(successMessage).queue();
             skipTracks(trackIds);
         } else {
             TextUtils.replyWithName(channel, member, pair.getRight());
