@@ -104,11 +104,11 @@ public class EventListenerBoat extends AbstractEventListener {
             if (matcher.find()) {
                 String cmdName = matcher.group();
 
-                CommandRegistry.CommandEntry entry = CommandRegistry.getCommand(cmdName);
+                CommandRegistry.CommandEntry entry = CommandRegistry.getCommand(cmdName.toLowerCase());
                 if (entry != null) {
                     invoked = entry.command;
                 } else {
-                    log.info("Unknown command:", cmdName);
+                    log.info("Unknown command:\t" + cmdName);
                 }
             }
 
