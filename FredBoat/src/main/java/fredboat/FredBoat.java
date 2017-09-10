@@ -361,7 +361,7 @@ public abstract class FredBoat {
         }
 
         for (FredBoat fb : shards) {
-            fb.getJda().shutdown(false);
+            fb.getJda().shutdown();
         }
 
         try {
