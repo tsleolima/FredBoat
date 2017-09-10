@@ -27,9 +27,9 @@ package fredboat.commandmeta;
 
 
 import fredboat.Config;
+import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.ICommandRestricted;
-import fredboat.commandmeta.abs.IMusicBackupCommand;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.feature.I18n;
 import fredboat.feature.PatronageChecker;
@@ -63,10 +63,10 @@ public class CommandManager {
         String[] args = commandToArguments(message.getRawContent());
         commandsExecuted.getAndIncrement();
 
-        if (invoked instanceof IMusicBackupCommand
-                && guild.getJDA().getSelfUser().getId().equals(BotConstants.MUSIC_BOT_ID)
-                && DiscordUtil.isMainBotPresent(guild)) {
-            log.info("Ignored command because main bot is present and I am the public music FredBoat");
+        if (Config.CONFIG.getDistribution() == DistributionEnum.MAIN
+                && invoked instanceof HelpCommand
+                && DiscordUtil.isMusicBotPresent(guild)) {
+            log.info("Ignored help command because music bot is present and I am the 'main' FredBoat");
             return;
         }
 
