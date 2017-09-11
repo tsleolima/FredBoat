@@ -34,15 +34,15 @@ import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.ShardWatchdogAgent;
 import fredboat.api.API;
 import fredboat.api.OAuthManager;
-import fredboat.audio.GuildPlayer;
-import fredboat.audio.MusicPersistenceHandler;
-import fredboat.audio.PlayerRegistry;
+import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.LavalinkManager;
+import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.init.MainCommandInitializer;
 import fredboat.commandmeta.init.MusicCommandInitializer;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
-import fredboat.event.EventListenerSelf;
 import fredboat.event.ShardWatchdogListener;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
@@ -65,7 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +85,6 @@ public abstract class FredBoat {
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
     public static int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
     static EventListenerBoat listenerBot;
-    static EventListenerSelf listenerSelf;
     ShardWatchdogListener shardWatchdogListener = null;
     private static AtomicInteger numShardsReady = new AtomicInteger(0);
 
@@ -98,13 +96,11 @@ public abstract class FredBoat {
     public final static ExecutorService executor = Executors.newCachedThreadPool();
 
     JDA jda;
-    private static FredBoatClient fbClient;
 
     private static ShardWatchdogAgent shardWatchdogAgent;
     private static DBConnectionWatchdogAgent dbConnectionWatchdogAgent;
 
     private static DatabaseManager dbManager;
-    private boolean hasReadiedOnce = false;
 
     public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException, IOException, UnirestException {
         Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, "FredBoat main shutdownhook"));
@@ -175,14 +171,14 @@ public abstract class FredBoat {
 
         //Initialise event listeners
         listenerBot = new EventListenerBoat();
-        listenerSelf = new EventListenerSelf();
+        LavalinkManager.ins.start();
 
         //Commands
-        if(Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
+        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
                 || Config.CONFIG.getDistribution() == DistributionEnum.MAIN)
             MainCommandInitializer.initCommands();
 
-        if(Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
+        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
                 || Config.CONFIG.getDistribution() == DistributionEnum.MUSIC
                 || Config.CONFIG.getDistribution() == DistributionEnum.PATRON)
             MusicCommandInitializer.initCommands();
@@ -206,7 +202,6 @@ public abstract class FredBoat {
 
         if ((Config.CONFIG.getScope() & 0x001) != 0) {
             log.error("Selfbot support has been removed.");
-            //fbClient = new FredBoatClient();
         }
 
         if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && Config.CONFIG.getCarbonKey() != null) {
@@ -297,7 +292,7 @@ public abstract class FredBoat {
     }
 
     private static void initBotShards(EventListener listener) {
-        for(int i = 0; i < Config.CONFIG.getNumShards(); i++){
+        for (int i = 0; i < Config.CONFIG.getNumShards(); i++) {
             try {
                 shards.add(i, new FredBoatBot(i, listener));
             } catch (Exception e) {
@@ -316,11 +311,6 @@ public abstract class FredBoat {
     }
 
     public void onInit(ReadyEvent readyEvent) {
-        if (!hasReadiedOnce) {
-            numShardsReady.incrementAndGet();
-            hasReadiedOnce = false;
-        }
-
         log.info("Received ready event for " + FredBoat.getInstance(readyEvent.getJDA()).getShardInfo().getShardString());
 
         int ready = numShardsReady.get();
@@ -336,14 +326,17 @@ public abstract class FredBoat {
 
         //Rejoin old channels if revived
         channelsToRejoin.forEach(vcid -> {
-            VoiceChannel channel = jda.getVoiceChannelById(vcid);
-            if(channel == null) return;
+            VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
+            if (channel == null) return;
             GuildPlayer player = PlayerRegistry.get(channel.getGuild());
-            if(player == null) return;
+            if (player == null) return;
 
-            AudioManager am = channel.getGuild().getAudioManager();
-            am.openAudioConnection(channel);
-            am.setSendingHandler(player);
+            LavalinkManager.ins.openConnection(channel);
+
+            if (!LavalinkManager.ins.isEnabled()) {
+                AudioManager am = channel.getGuild().getAudioManager();
+                am.setSendingHandler(player);
+            }
         });
 
         channelsToRejoin.clear();
@@ -362,13 +355,14 @@ public abstract class FredBoat {
             log.error("Critical error while handling music persistence.", e);
         }
 
-        for(FredBoat fb : shards) {
-            fb.getJda().shutdown(false);
+        for (FredBoat fb : shards) {
+            fb.getJda().shutdown();
         }
 
         try {
             Unirest.shutdown();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         executor.shutdown();
         dbManager.shutdown();
@@ -383,10 +377,6 @@ public abstract class FredBoat {
 
     public static EventListenerBoat getListenerBot() {
         return listenerBot;
-    }
-
-    public static EventListenerSelf getListenerSelf() {
-        return listenerSelf;
     }
 
     /* Sharding */
@@ -439,7 +429,7 @@ public abstract class FredBoat {
     public static TextChannel getTextChannelById(String id) {
         for (FredBoat fb : shards) {
             for (TextChannel channel : fb.getJda().getTextChannels()) {
-                if(channel.getId().equals(id)) return channel;
+                if (channel.getId().equals(id)) return channel;
             }
         }
 
@@ -449,45 +439,44 @@ public abstract class FredBoat {
     public static VoiceChannel getVoiceChannelById(String id) {
         for (FredBoat fb : shards) {
             for (VoiceChannel channel : fb.getJda().getVoiceChannels()) {
-                if(channel.getId().equals(id)) return channel;
+                if (channel.getId().equals(id)) return channel;
             }
         }
 
         return null;
     }
 
-    public static FredBoatClient getClient() {
-        return fbClient;
+    public static Guild getGuildById(long id) {
+        for (FredBoat fb : shards) {
+            Guild g = fb.getJda().getGuildById(id);
+            if (g != null) return g;
+        }
+
+        return null;
     }
 
     public static FredBoat getInstance(JDA jda) {
-        if(jda.getAccountType() == AccountType.CLIENT) {
-            return fbClient;
-        } else {
-            int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
-
-            for(FredBoat fb : shards) {
-                if(((FredBoatBot) fb).getShardId() == sId) {
-                    return fb;
-                }
+        int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
+        for (FredBoat fb : shards) {
+            if (((FredBoatBot) fb).getShardId() == sId) {
+                return fb;
             }
         }
-
-        throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed");
+        throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed, shardId: " + sId);
     }
 
     public static FredBoat getInstance(int id) {
         return shards.get(id);
     }
 
-    public static JDA getFirstJDA(){
+    public static JDA getFirstJDA() {
         return shards.get(0).getJda();
     }
 
     public ShardInfo getShardInfo() {
         int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
 
-        if(jda.getAccountType() == AccountType.CLIENT) {
+        if (jda.getAccountType() == AccountType.CLIENT) {
             return new ShardInfo(0, 1);
         } else {
             return new ShardInfo(sId, Config.CONFIG.getNumShards());
@@ -502,14 +491,14 @@ public abstract class FredBoat {
         return JDAUtil.countAllUniqueUsers(Collections.singletonList(this), biggestUserCount);
     }
 
-    public abstract void revive();
+    public abstract String revive(boolean... force);
 
     public ShardWatchdogListener getShardWatchdogListener() {
         return shardWatchdogListener;
     }
 
     @SuppressWarnings("WeakerAccess")
-    public class ShardInfo {
+    public static class ShardInfo {
 
         int shardId;
         int shardTotal;
@@ -539,5 +528,19 @@ public abstract class FredBoat {
 
     public static DatabaseManager getDbManager() {
         return dbManager;
+    }
+
+    private static volatile long lastCoinGivenOut = 0;
+
+    // if you get a coin, you are allowed to build a shard (= perform a login to discord)
+    public static synchronized boolean getShardCoin(int shardId) {
+        long now = System.currentTimeMillis();
+        if (now - lastCoinGivenOut >= SHARD_CREATION_SLEEP_INTERVAL) {
+            lastCoinGivenOut = now;
+            log.info("Coin for shard {}", shardId);
+            return true;
+        }
+        log.info("No coin for shard {}", shardId);
+        return false;
     }
 }

@@ -26,43 +26,40 @@
 package fredboat.command.admin;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import fredboat.audio.GuildPlayer;
-import fredboat.audio.PlayerRegistry;
+import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
-import fredboat.commandmeta.abs.ICommand;
+import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.perms.PermissionLevel;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PlayerDebugCommand extends Command implements ICommand, ICommandRestricted {
+public class PlayerDebugCommand extends Command implements ICommandRestricted {
 
     @Override
-    public void onInvoke(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
+    public void onInvoke(CommandContext context) {
         JSONArray a = new JSONArray();
         
         for(GuildPlayer gp : PlayerRegistry.getRegistry().values()){
             JSONObject data = new JSONObject();
             data.put("name", gp.getGuild().getName());
             data.put("id", gp.getGuild().getId());
-            data.put("users", gp.getChannel().getMembers().toString());
+            data.put("users", gp.getCurrentVoiceChannel().getMembers().toString());
             data.put("isPlaying", gp.isPlaying());
             data.put("isPaused", gp.isPaused());
-            data.put("songCount", gp.getSongCount());
+            data.put("songCount", gp.getTrackCount());
             
             a.put(data);
         }
         
         try {
-            channel.sendMessage(TextUtils.postToHastebin(a.toString(), true)).queue();
+            context.reply(TextUtils.postToPasteService(a.toString()));
         } catch (UnirestException ex) {
             Logger.getLogger(PlayerDebugCommand.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -20,47 +21,27 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.audio;
+package fredboat.messaging;
 
+import net.dv8tion.jda.core.entities.Message;
 
-import fredboat.FredBoat;
-import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
-import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
-import net.dv8tion.jda.core.entities.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-class DebugConnectionListener implements ConnectionListener {
-
-    private static final Logger log = LoggerFactory.getLogger(DebugConnectionListener.class);
-
-    private ConnectionStatus oldStatus = null;
-    private final String guildId;
-    private final FredBoat.ShardInfo shardInfo;
-
-    DebugConnectionListener(String guildId, FredBoat.ShardInfo shardInfo) {
-        this.guildId = guildId;
-        this.shardInfo = shardInfo;
+/**
+ * Created by napster on 10.09.17.
+ */
+public class MessageFuture extends CompletableFuture<Message> {
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        throw new UnsupportedOperationException("Can't cancel a queued Message");
     }
 
-    @Override
-    public void onPing(long l) {
-
-    }
-
-    @Override
-    public void onStatusChange(ConnectionStatus connectionStatus) {
-        log.debug(String.format("Status change for audio connection in guild %s in %s: %s => %s",
-                guildId, shardInfo, oldStatus, connectionStatus));
-
-        oldStatus = connectionStatus;
-    }
-
-    @Override
-    public void onUserSpeaking(User user, boolean b) {
-
+    public Message getWithDefaultTimeout() throws InterruptedException, ExecutionException, TimeoutException {
+        return get(30, TimeUnit.SECONDS);
     }
 }

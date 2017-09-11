@@ -26,11 +26,9 @@
 package fredboat.command.fun;
 
 import fredboat.commandmeta.abs.Command;
+import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 
 public class TextCommand extends Command implements IFunCommand {
 
@@ -41,8 +39,8 @@ public class TextCommand extends Command implements IFunCommand {
     }
     
     @Override
-    public void onInvoke(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
-        channel.sendMessage(msg).queue();
+    public void onInvoke(CommandContext context) {
+        context.reply(msg);
     }
 
     @Override

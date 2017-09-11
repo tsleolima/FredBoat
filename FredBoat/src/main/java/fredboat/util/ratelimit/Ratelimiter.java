@@ -30,11 +30,10 @@ import fredboat.audio.queue.PlaylistInfo;
 import fredboat.command.maintenance.ShardsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.commandmeta.abs.Command;
+import fredboat.messaging.internal.Context;
 import fredboat.util.DiscordUtil;
 import fredboat.util.Tuple2;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 
 import java.util.ArrayList;
@@ -52,17 +51,24 @@ public class Ratelimiter {
 
     private static final int RATE_LIMIT_HITS_BEFORE_BLACKLIST = 10;
 
-
     //one ratelimiter for all running shards
-    private static Ratelimiter ratelimiterSingleton;
+    private static volatile Ratelimiter ratelimiterSingleton;
 
     public static Ratelimiter getRatelimiter() {
-        if (ratelimiterSingleton == null)
-            ratelimiterSingleton = new Ratelimiter();
-
-        return ratelimiterSingleton;
+        Ratelimiter singleton = ratelimiterSingleton;
+        if (singleton == null) {
+            //we can't use the holder class pattern.
+            //we have to use double-checked locking,
+            //since we need to be able to retry the creation.
+            synchronized (Ratelimiter.class) {
+                singleton = ratelimiterSingleton;
+                if (singleton == null) {
+                    ratelimiterSingleton = singleton = new Ratelimiter();
+                }
+            }
+        }
+        return singleton;
     }
-
 
     private final List<Ratelimit> ratelimits;
     private Blacklist autoBlacklist = null;
@@ -95,21 +101,20 @@ public class Ratelimiter {
     }
 
     /**
-     * @param invoker           the user doing the request
+     * @param context           the context of the request
      * @param command           the command or other kind of object to be used
      * @param weight            how heavy the request is, default should be 1
-     * @param blacklistCallback a channel to write potential output from the auto blacklist. usually the channel the request was made in
      * @return a result object containing further information
      */
-    public Tuple2<Boolean, Class> isAllowed(Member invoker, Object command, int weight, TextChannel blacklistCallback) {
+    public Tuple2<Boolean, Class> isAllowed(Context context, Object command, int weight) {
         for (Ratelimit ratelimit : ratelimits) {
             if (ratelimit.getClazz().isInstance(command)) {
                 boolean allowed;
                 //don't blacklist guilds
                 if (ratelimit.scope == Ratelimit.Scope.GUILD) {
-                    allowed = ratelimit.isAllowed(invoker, weight);
+                    allowed = ratelimit.isAllowed(context, weight);
                 } else {
-                    allowed = ratelimit.isAllowed(invoker, weight, autoBlacklist, blacklistCallback);
+                    allowed = ratelimit.isAllowed(context, weight, autoBlacklist);
                 }
                 if (!allowed) return new Tuple2<>(false, ratelimit.getClazz());
             }

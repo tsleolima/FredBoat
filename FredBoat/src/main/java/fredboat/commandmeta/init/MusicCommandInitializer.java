@@ -61,12 +61,13 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand("commands", new CommandsCommand(), "comms", "cmds");
         
         /* Control */
-        CommandRegistry.registerCommand("play", new PlayCommand(SearchUtil.SearchProvider.YOUTUBE), "yt", "youtube");
+        CommandRegistry.registerCommand("play", new PlayCommand(SearchUtil.SearchProvider.YOUTUBE, SearchUtil.SearchProvider.SOUNDCLOUD), "p");
+        CommandRegistry.registerCommand("yt", new PlayCommand(SearchUtil.SearchProvider.YOUTUBE), "youtube");
         CommandRegistry.registerCommand("sc", new PlayCommand(SearchUtil.SearchProvider.SOUNDCLOUD), "soundcloud");
-        CommandRegistry.registerCommand("skip", new SkipCommand(), "sk");
+        CommandRegistry.registerCommand("skip", new SkipCommand(), "sk", "s");
         CommandRegistry.registerCommand("join", new JoinCommand(), "summon", "jn");
         CommandRegistry.registerCommand("leave", new LeaveCommand(), "lv");
-        CommandRegistry.registerCommand("select", new SelectCommand(), "sel");
+        CommandRegistry.registerCommand("select", new SelectCommand(), buildNumericalSelectAllias("sel"));
         CommandRegistry.registerCommand("stop", new StopCommand(), "st");
         CommandRegistry.registerCommand("pause", new PauseCommand(), "pa", "ps");
         CommandRegistry.registerCommand("shuffle", new ShuffleCommand(), "sh");
@@ -79,7 +80,7 @@ public class MusicCommandInitializer {
         
         /* Info */
         CommandRegistry.registerCommand("nowplaying", new NowplayingCommand(), "np");
-        CommandRegistry.registerCommand("list", new ListCommand(), "queue", "q");
+        CommandRegistry.registerCommand("list", new ListCommand(), "queue", "q", "l");
         CommandRegistry.registerCommand("export", new ExportCommand(), "ex");
         CommandRegistry.registerCommand("gr", new GensokyoRadioCommand(), "gensokyo", "gensokyoradio");
         CommandRegistry.registerCommand("muserinfo", new UserInfoCommand());
@@ -105,9 +106,11 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand("nodes", new NodesCommand());
         CommandRegistry.registerCommand("mshards", new ShardsCommand());
         CommandRegistry.registerCommand("mrevive", new ReviveCommand());
+        CommandRegistry.registerCommand("msentrydsn", new SentryDsnCommand());
         CommandRegistry.registerCommand("adebug", new AudioDebugCommand());
         CommandRegistry.registerCommand("announce", new AnnounceCommand());
         CommandRegistry.registerCommand("mping", new PingCommand());
+        CommandRegistry.registerCommand("node", new NodeAdminCommand());
         
         /* Bot configuration */
         CommandRegistry.registerCommand("config", new ConfigCommand(), "cfg");
@@ -126,4 +129,21 @@ public class MusicCommandInitializer {
         }
     }
 
+    /**
+     * Build a string array that consist of the max number of searches.
+     *
+     * @param extraAliases Aliases to be appended to the rest of the ones being built.
+     * @return String array that contains string representation of numbers with addOnAliases.
+     */
+    private static String[] buildNumericalSelectAllias(String... extraAliases) {
+        String[] selectTrackAliases = new String[SearchUtil.MAX_RESULTS + extraAliases.length];
+        int i = 0;
+        for (; i < extraAliases.length; i++) {
+            selectTrackAliases[i] = extraAliases[i];
+        }
+        for (; i < SearchUtil.MAX_RESULTS + extraAliases.length; i++) {
+            selectTrackAliases[i] = String.valueOf(i - extraAliases.length + 1);
+        }
+        return selectTrackAliases;
+    }
 }

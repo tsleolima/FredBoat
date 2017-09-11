@@ -23,8 +23,29 @@
  *
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.audio.player;
 
-public interface IMusicBackupCommand {
-    
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.dv8tion.jda.core.entities.Message;
+
+import java.util.List;
+
+public class VideoSelection {
+
+    private final List<AudioTrack> choices;
+    private final long outMsgId;
+
+    public VideoSelection(List<AudioTrack> choices, Message outMsg) {
+        this.choices = choices;
+        this.outMsgId = outMsg.getIdLong();
+    }
+
+    public List<AudioTrack> getChoices() {
+        return choices;
+    }
+
+    public long getOutMsgId() {
+        return outMsgId;
+    }
+
 }

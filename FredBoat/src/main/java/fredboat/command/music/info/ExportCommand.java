@@ -28,18 +28,16 @@ package fredboat.command.music.info;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.audio.GuildPlayer;
-import fredboat.audio.PlayerRegistry;
+import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.Command;
+import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.feature.I18n;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -47,11 +45,11 @@ import java.util.List;
 public class ExportCommand extends Command implements IMusicCommand {
 
     @Override
-    public void onInvoke(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
-        GuildPlayer player = PlayerRegistry.get(guild);
+    public void onInvoke(CommandContext context) {
+        GuildPlayer player = PlayerRegistry.get(context.guild);
         
-        if(player.getRemainingTracks().isEmpty()){
-            throw new MessagingException(I18n.get(guild).getString("exportEmpty"));
+        if (player.isQueueEmpty()) {
+            throw new MessagingException(I18n.get(context, "exportEmpty"));
         }
         
         List<AudioTrackContext> tracks = player.getRemainingTracks();
@@ -67,10 +65,10 @@ public class ExportCommand extends Command implements IMusicCommand {
         }
         
         try {
-            String url = TextUtils.postToHastebin(out, true) + ".fredboat";
-            channel.sendMessage(MessageFormat.format(I18n.get(guild).getString("exportPlaylistResulted"), url)).queue();
+            String url = TextUtils.postToPasteService(out) + ".fredboat";
+            context.reply(MessageFormat.format(I18n.get(context, "exportPlaylistResulted"), url));
         } catch (UnirestException ex) {
-            throw new MessagingException(I18n.get(guild).getString("exportPlaylistFail"));
+            throw new MessagingException(I18n.get(context, "exportPlaylistFail"));
         }
         
         

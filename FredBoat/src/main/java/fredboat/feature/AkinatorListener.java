@@ -28,15 +28,22 @@ package fredboat.feature;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import fredboat.FredBoat;
-import fredboat.event.AbstractEventListener;
 import fredboat.event.UserListener;
-import net.dv8tion.jda.core.JDA;
+import fredboat.messaging.internal.Context;
+import fredboat.messaging.internal.LeakSafeContext;
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONObject;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public final class AkinatorListener extends UserListener {
+
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
     private final String NEW_SESSION_URL = "http://api-en4.akinator.com/ws/new_session?partner=1";
     private final String ANSWER_URL = "http://api-en4.akinator.com/ws/answer";
@@ -44,24 +51,26 @@ public final class AkinatorListener extends UserListener {
     private final String CHOICE_URL = "http://api-en4.akinator.com/ws/choice";
     private final String EXCLUSION_URL = "http://api-en4.akinator.com/ws/exclusion";
 
-    private final FredBoat shard;
+    private final LeakSafeContext context;
     private final String channelId;
     private final String userId;
     private StepInfo stepInfo;
-    private final AbstractEventListener listener;
 
     private final String signature;
     private final String session;
     private Guess guess;
     private boolean lastQuestionWasGuess = false;
 
-    public AkinatorListener(JDA jda, AbstractEventListener listener, String channelId, String userId) throws UnirestException {
-        this.shard = FredBoat.getInstance(jda);
-        this.listener = listener;
-        this.channelId = channelId;
-        this.userId = userId;
+    private long lastActionReceived = System.currentTimeMillis();
+    private Future timeoutTask;
 
-        jda.getTextChannelById(channelId).sendTyping().queue();
+
+    public AkinatorListener(Context context) throws UnirestException {
+        this.context = new LeakSafeContext(context);
+        this.userId = context.getMember().getUser().getId();
+        this.channelId = context.getTextChannel().getId();
+
+        context.sendTyping();
 
         //Start new session
         JSONObject json = Unirest.get(NEW_SESSION_URL)
@@ -73,20 +82,28 @@ public final class AkinatorListener extends UserListener {
         session = stepInfo.getSession();
 
         sendNextQuestion();
+        timeoutTask = scheduler.scheduleAtFixedRate(this::checkTimeout, 1, 1, TimeUnit.MINUTES);
+    }
+
+    private void checkTimeout() {
+        if (System.currentTimeMillis() - lastActionReceived > TimeUnit.MINUTES.toMillis(5)) {
+            FredBoat.getListenerBot().removeListener(userId);
+            timeoutTask.cancel(false);
+        }
     }
 
     private void sendNextQuestion() {
-        String name = getJda().getTextChannelById(channelId).getGuild().getMemberById(userId).getEffectiveName();
+        String name = context.getMember().getEffectiveName();
         String out = "**" + name + ": Question " + (stepInfo.getStepNum() + 1) + "**\n"
                 + stepInfo.getQuestion() + "\n [yes/no/idk/probably/probably not]";
-        getJda().getTextChannelById(channelId).sendMessage(out).queue();
+        context.reply(out);
         lastQuestionWasGuess = false;
     }
 
     private void sendGuess() throws UnirestException {
         guess = new Guess();
         String out = "Is this your character?\n" + guess.toString() + "\n[yes/no]";
-        getJda().getTextChannelById(channelId).sendMessage(out).queue();
+        context.reply(out);
         lastQuestionWasGuess = true;
     }
 
@@ -99,6 +116,14 @@ public final class AkinatorListener extends UserListener {
                     .queryString("answer", answer)
                     .asJson().getBody().getObject();
             stepInfo = new StepInfo(json);
+
+            if (stepInfo.gameOver) {
+                context.reply("Bravo !\n"
+                        + "You have defeated me !\n"
+                        + "<http://akinator.com>");
+                FredBoat.getListenerBot().removeListener(userId);
+                return;
+            }
 
             if (stepInfo.getProgression() > 90) {
                 sendGuess();
@@ -119,9 +144,9 @@ public final class AkinatorListener extends UserListener {
                         .queryString("step", stepInfo.getStepNum())
                         .queryString("element", guess.getId())
                         .asString();
-                getJda().getTextChannelById(channelId).sendMessage("Great ! Guessed right one more time.\n"
+                context.reply("Great ! Guessed right one more time.\n"
                         + "I love playing with you!\n"
-                        + "<http://akinator.com>").queue();
+                        + "<http://akinator.com>");
                 FredBoat.getListenerBot().removeListener(userId);
             } else if (answer == 1) {
                 Unirest.get(EXCLUSION_URL)
@@ -187,42 +212,47 @@ public final class AkinatorListener extends UserListener {
             return;
         }
 
+        lastActionReceived = System.currentTimeMillis();
+
         if (lastQuestionWasGuess) {
             if (answer != 0 && answer != 1) {
                 return;
             }
 
-            getJda().getTextChannelById(channelId).sendTyping().queue();
+            context.sendTyping();
             answerGuess(answer);
         } else {
-            getJda().getTextChannelById(channelId).sendTyping().queue();
+            context.sendTyping();
             answerQuestion(answer);
         }
     }
 
-    public JDA getJda() {
-        return shard.getJda();
-    }
-
     private class StepInfo {
 
+        private boolean gameOver;
         private String signature = "";
         private String session = "";
-        private final String question;
-        private final int stepNum;
-        private final double progression;
+        private String question;
+        private int stepNum;
+        private double progression;
 
         StepInfo(JSONObject json) {
-            JSONObject params = json.getJSONObject("parameters");
-            JSONObject info = params.has("step_information") ? params.getJSONObject("step_information") : params;
-            question = info.getString("question");
-            stepNum = info.getInt("step");
-            progression = info.getDouble("progression");
+            String completion = json.getString("completion");
+            if ("OK".equalsIgnoreCase(completion)) {
+                JSONObject params = json.getJSONObject("parameters");
+                JSONObject info = params.has("step_information") ? params.getJSONObject("step_information") : params;
+                question = info.getString("question");
+                stepNum = info.getInt("step");
+                progression = info.getDouble("progression");
 
-            JSONObject identification = params.optJSONObject("identification");
-            if (identification != null) {
-                signature = identification.getString("signature");
-                session = identification.getString("session");
+                JSONObject identification = params.optJSONObject("identification");
+                if (identification != null) {
+                    signature = identification.getString("signature");
+                    session = identification.getString("session");
+                }
+                gameOver = false;
+            } else {
+                gameOver = true;
             }
         }
 

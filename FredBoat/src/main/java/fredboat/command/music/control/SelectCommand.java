@@ -26,58 +26,72 @@
 package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.audio.GuildPlayer;
-import fredboat.audio.PlayerRegistry;
-import fredboat.audio.VideoSelection;
+import fredboat.Config;
+import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.player.VideoSelection;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.commandmeta.abs.Command;
+import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.feature.I18n;
+import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.exceptions.PermissionException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.MessageFormat;
 
 public class SelectCommand extends Command implements IMusicCommand, ICommandRestricted {
 
     @Override
-    public void onInvoke(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
-        select(guild, channel, invoker, message, args);
+    public void onInvoke(CommandContext context) {
+        select(context);
     }
 
-    static void select(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
-        GuildPlayer player = PlayerRegistry.get(guild);
-        player.setCurrentTC(channel);
+    static void select(CommandContext context) {
+        String[] args = context.args;
+        Member invoker = context.invoker;
+        GuildPlayer player = PlayerRegistry.get(context.guild);
+        player.setCurrentTC(context.channel);
         if (player.selections.containsKey(invoker.getUser().getId())) {
             VideoSelection selection = player.selections.get(invoker.getUser().getId());
             try {
-                int i = Integer.valueOf(args[1]);
+                int i = 1;
+
+                if (args.length >= 1) {
+                    String contentWithoutPrefix = args[0].substring(Config.CONFIG.getPrefix().length());
+                    if (StringUtils.isNumeric(contentWithoutPrefix)) {
+                        i = Integer.valueOf(contentWithoutPrefix);
+                    } else {
+                        i = Integer.valueOf(args[1]);
+                    }
+                }
+
                 if (selection.getChoices().size() < i || i < 1) {
                     throw new NumberFormatException();
                 } else {
                     AudioTrack selected = selection.getChoices().get(i - 1);
                     player.selections.remove(invoker.getUser().getId());
-                    String msg = MessageFormat.format(I18n.get(guild).getString("selectSuccess"), i, selected.getInfo().title, TextUtils.formatTime(selected.getInfo().length));
-                    channel.editMessageById(selection.getOutMsgId(), msg).queue();
+                    String msg = MessageFormat.format(I18n.get(context, "selectSuccess"), i, selected.getInfo().title, TextUtils.formatTime(selected.getInfo().length));
+                    CentralMessaging.editMessageById(context.channel, selection.getOutMsgId(), CentralMessaging.from(msg));
                     player.queue(new AudioTrackContext(selected, invoker));
                     player.setPause(false);
                     try {
-                        message.delete().queue();
+                        context.deleteMessage();
                     } catch (PermissionException ignored) {
 
                     }
                 }
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                channel.sendMessage(MessageFormat.format(I18n.get(guild).getString("selectInterval"), selection.getChoices().size())).queue();
+                context.reply(MessageFormat.format(I18n.get(context, "selectInterval"), selection.getChoices().size()));
             }
         } else {
-            channel.sendMessage(I18n.get(guild).getString("selectSelectionNotGiven")).queue();
+            context.reply(I18n.get(context, "selectSelectionNotGiven"));
         }
     }
 

@@ -25,17 +25,16 @@
 
 package fredboat.command.music.control;
 
-import fredboat.audio.GuildPlayer;
-import fredboat.audio.PlayerRegistry;
+import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.LavalinkManager;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
+import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.feature.I18n;
 import fredboat.perms.PermissionLevel;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +43,15 @@ public class LeaveCommand extends Command implements IMusicCommand, ICommandRest
     private static final Logger log = LoggerFactory.getLogger(LeaveCommand.class);
 
     @Override
-    public void onInvoke(Guild guild, TextChannel channel, Member invoker, Message message, String[] args) {
+    public void onInvoke(CommandContext context) {
         try {
-            GuildPlayer player = PlayerRegistry.get(guild);
-            player.setCurrentTC(channel);
-            player.leaveVoiceChannelRequest(channel, false);
+            GuildPlayer player = PlayerRegistry.get(context.guild);
+            player.setCurrentTC(context.channel);
+            player.pause();
+            player.leaveVoiceChannelRequest(context, false);
         } catch (Exception e) {
             log.error("Something caused us to not properly leave a voice channel!", e);
-            guild.getAudioManager().closeAudioConnection();
+            LavalinkManager.ins.closeConnection(context.guild);
         }
     }
 
