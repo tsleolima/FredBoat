@@ -63,7 +63,7 @@ public class CommandContext extends Context {
     public String trigger = "";                        // the command trigger, e.g. "play", or "p", or "pLaY", whatever the user typed
     public String[] args = new String[0];              // the arguments including prefix + trigger in args[0]
     public Command command = null;
-    public boolean isNonMusicCommand = false;
+    public boolean isMusicCommand = false;
 
     /**
      * @param event the event to be parsed
@@ -83,7 +83,8 @@ public class CommandContext extends Context {
 
             if (entry == null) {
                 entry = CommandRegistry.NON_MUSIC.getCommand(context.trigger.toLowerCase());
-                if (entry != null) context.isNonMusicCommand = true;
+            } else {
+                context.isMusicCommand = true;
             }
 
             if (entry != null) {
