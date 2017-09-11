@@ -37,10 +37,10 @@ import net.dv8tion.jda.core.requests.Request;
 import net.dv8tion.jda.core.requests.Response;
 import net.dv8tion.jda.core.requests.RestAction;
 import net.dv8tion.jda.core.requests.Route;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -103,7 +103,7 @@ public class CentralMessaging {
      * @param onFail    Optional exception handler
      * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#queue, avoid usage where not absolutely needed.
      */
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull Message message,
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message,
                                             @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         return sendMessage0(
                 channel,
@@ -114,7 +114,7 @@ public class CentralMessaging {
     }
 
     // Message
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull Message message,
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message,
                                             @Nullable Consumer<Message> onSuccess) {
         return sendMessage0(
                 channel,
@@ -125,7 +125,7 @@ public class CentralMessaging {
     }
 
     // Message
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull Message message) {
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message) {
         return sendMessage0(
                 channel,
                 message,
@@ -135,7 +135,7 @@ public class CentralMessaging {
     }
 
     // Embed
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull MessageEmbed embed,
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed,
                                             @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         return sendMessage0(
                 channel,
@@ -146,7 +146,7 @@ public class CentralMessaging {
     }
 
     // Embed
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull MessageEmbed embed,
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed,
                                             @Nullable Consumer<Message> onSuccess) {
         return sendMessage0(
                 channel,
@@ -157,7 +157,7 @@ public class CentralMessaging {
     }
 
     // Embed
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull MessageEmbed embed) {
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed) {
         return sendMessage0(
                 channel,
                 from(embed),
@@ -167,7 +167,7 @@ public class CentralMessaging {
     }
 
     // String
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull String content,
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull String content,
                                             @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         return sendMessage0(
                 channel,
@@ -178,7 +178,7 @@ public class CentralMessaging {
     }
 
     // String
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull String content,
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull String content,
                                             @Nullable Consumer<Message> onSuccess) {
         return sendMessage0(
                 channel,
@@ -189,7 +189,7 @@ public class CentralMessaging {
     }
 
     // String
-    public static MessageFuture sendMessage(@NotNull MessageChannel channel, @NotNull String content) {
+    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull String content) {
         return sendMessage0(
                 channel,
                 from(content),
@@ -232,7 +232,7 @@ public class CentralMessaging {
      * @param onFail    Optional exception handler
      * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#queue, avoid usage where not absolutely needed.
      */
-    public static MessageFuture sendFile(@NotNull MessageChannel channel, @NotNull File file, @Nullable Message message,
+    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
                                          @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         return sendFile0(
                 channel,
@@ -243,7 +243,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture sendFile(@NotNull MessageChannel channel, @NotNull File file, @Nullable Message message,
+    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
                                          @Nullable Consumer<Message> onSuccess) {
         return sendFile0(
                 channel,
@@ -254,7 +254,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture sendFile(@NotNull MessageChannel channel, @NotNull File file, @Nullable Message message) {
+    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message) {
         return sendFile0(
                 channel,
                 file,
@@ -264,7 +264,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture sendFile(@NotNull MessageChannel channel, @NotNull File file,
+    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file,
                                          @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         return sendFile0(
                 channel,
@@ -275,7 +275,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture sendFile(@NotNull MessageChannel channel, @NotNull File file,
+    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file,
                                          @Nullable Consumer<Message> onSuccess) {
         return sendFile0(
                 channel,
@@ -286,7 +286,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture sendFile(@NotNull MessageChannel channel, @NotNull File file) {
+    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file) {
         return sendFile0(
                 channel,
                 file,
@@ -310,7 +310,7 @@ public class CentralMessaging {
      * @param onFail     Optional exception handler
      * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#queue, avoid usage where not absolutely needed.
      */
-    public static MessageFuture editMessage(@NotNull Message oldMessage, @NotNull Message newMessage,
+    public static MessageFuture editMessage(@Nonnull Message oldMessage, @Nonnull Message newMessage,
                                             @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         return editMessage0(
                 oldMessage,
@@ -320,7 +320,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture editMessage(@NotNull Message oldMessage, @NotNull Message newMessage) {
+    public static MessageFuture editMessage(@Nonnull Message oldMessage, @Nonnull Message newMessage) {
         return editMessage0(
                 oldMessage,
                 newMessage,
@@ -329,7 +329,7 @@ public class CentralMessaging {
         );
     }
 
-    public static MessageFuture editMessage(@NotNull Message oldMessage, @NotNull String newContent) {
+    public static MessageFuture editMessage(@Nonnull Message oldMessage, @Nonnull String newContent) {
         return editMessage0(
                 oldMessage,
                 from(newContent),
@@ -380,7 +380,7 @@ public class CentralMessaging {
     // ********************************************************************************
 
     //class internal message sending method
-    private static MessageFuture sendMessage0(@NotNull MessageChannel channel, @NotNull Message message,
+    private static MessageFuture sendMessage0(@Nonnull MessageChannel channel, @Nonnull Message message,
                                               @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         if (channel == null) {
             throw new IllegalArgumentException("Channel is null");
@@ -408,7 +408,7 @@ public class CentralMessaging {
     }
 
     //class internal file sending method
-    private static MessageFuture sendFile0(@NotNull MessageChannel channel, @NotNull File file, @Nullable Message message,
+    private static MessageFuture sendFile0(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
                                            @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         if (channel == null) {
             throw new IllegalArgumentException("Channel is null");
@@ -436,7 +436,7 @@ public class CentralMessaging {
     }
 
     //class internal editing method
-    private static MessageFuture editMessage0(@NotNull Message oldMessage, @NotNull Message newMessage,
+    private static MessageFuture editMessage0(@Nonnull Message oldMessage, @Nonnull Message newMessage,
                                               @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         if (oldMessage == null) {
             throw new IllegalArgumentException("Old message is null");

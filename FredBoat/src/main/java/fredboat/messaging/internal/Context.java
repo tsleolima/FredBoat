@@ -34,9 +34,9 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.function.Consumer;
 
@@ -108,7 +108,7 @@ public abstract class Context {
 
 
     @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyFile(@NotNull File file, @Nullable Message message) {
+    public MessageFuture replyFile(@Nonnull File file, @Nullable Message message) {
         return CentralMessaging.sendFile(getTextChannel(), file, message);
     }
 
@@ -116,7 +116,7 @@ public abstract class Context {
         CentralMessaging.sendTyping(getTextChannel());
     }
 
-    public void replyPrivate(@NotNull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
+    public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         getMember().getUser().openPrivateChannel().queue(
                 privateChannel -> CentralMessaging.sendMessage(privateChannel, message, onSuccess, onFail)
         );
