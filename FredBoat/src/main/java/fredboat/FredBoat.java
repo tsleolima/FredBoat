@@ -174,16 +174,10 @@ public abstract class FredBoat {
         LavalinkManager.ins.start();
 
         //Commands
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
-                || Config.CONFIG.getDistribution() == DistributionEnum.MAIN)
-            MainCommandInitializer.initCommands();
+        MainCommandInitializer.initCommands();
+        MusicCommandInitializer.initCommands();
 
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
-                || Config.CONFIG.getDistribution() == DistributionEnum.MUSIC
-                || Config.CONFIG.getDistribution() == DistributionEnum.PATRON)
-            MusicCommandInitializer.initCommands();
-
-        log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
+        log.info(String.format("Loaded commands, registry sizes are %d and %d", CommandRegistry.MUSIC.getSize(), CommandRegistry.NON_MUSIC.getSize()));
 
         //Check MAL creds
         executor.submit(FredBoat::hasValidMALLogin);

@@ -34,9 +34,13 @@ import java.util.Set;
 
 public class CommandRegistry {
 
-    private static HashMap<String, CommandEntry> registry = new HashMap<>();
+    public static final CommandRegistry MUSIC = new CommandRegistry();
+    public static final CommandRegistry NON_MUSIC = new CommandRegistry();
+    private HashMap<String, CommandEntry> registry = new HashMap<>();
 
-    public static void registerCommand(String name, Command command, String... aliases) {
+    private CommandRegistry() { }
+
+    public void registerCommand(String name, Command command, String... aliases) {
         name = name.toLowerCase();
         CommandEntry entry = new CommandEntry(command, name);
         registry.put(name, entry);
@@ -45,19 +49,19 @@ public class CommandRegistry {
         }
     }
 
-    public static CommandEntry getCommand(String name) {
+    public CommandEntry getCommand(String name) {
         return registry.get(name);
     }
 
-    public static int getSize() {
+    public int getSize() {
         return registry.size();
     }
 
-    public static Set<String> getRegisteredCommandsAndAliases() {
+    public Set<String> getRegisteredCommandsAndAliases() {
         return registry.keySet();
     }
 
-    public static void removeCommand(String name) {
+    public void removeCommand(String name) {
         CommandEntry entry = new CommandEntry(new Command() {
             @Override
             public void onInvoke(CommandContext context) {

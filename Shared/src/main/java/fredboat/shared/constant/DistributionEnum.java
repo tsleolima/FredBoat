@@ -26,6 +26,7 @@
 package fredboat.shared.constant;
 
 public enum DistributionEnum {
+    @Deprecated
     MAIN("production", false),
     MUSIC("music", false),
     DEVELOPMENT("beta", true),

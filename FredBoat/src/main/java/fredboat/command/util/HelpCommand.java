@@ -94,7 +94,7 @@ public class HelpCommand extends Command implements IUtilCommand {
     }
 
     public static void sendFormattedCommandHelp(CommandContext context) {
-        CommandRegistry.CommandEntry commandEntry = CommandRegistry.getCommand(context.trigger);
+        CommandRegistry.CommandEntry commandEntry = CommandRegistry.MUSIC.getCommand(context.trigger);
         if (commandEntry == null) {
             String out = Config.CONFIG.getPrefix() + context.trigger + ": " + I18n.get(context, "helpUnknownCommand");
             out += "\n" + MessageFormat.format(I18n.get(context, "helpCommandsPromotion"),
