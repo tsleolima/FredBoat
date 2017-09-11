@@ -84,7 +84,7 @@ public class CommandContext extends Context {
                 context.args = CommandManager.commandToArguments(context.msg.getRawContent());
                 return context;
             } else {
-                log.info("Unknown command:\t" + context.trigger);
+                log.info("Unknown command:\t{}", context.trigger);
                 return null;
             }
         } else {

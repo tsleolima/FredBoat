@@ -101,7 +101,8 @@ public class CentralMessaging {
      * @param message   Message to be sent
      * @param onSuccess Optional success handler
      * @param onFail    Optional exception handler
-     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#queue, avoid usage where not absolutely needed.
+     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#complete,
+     * avoid usage where not absolutely needed.
      */
     public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message,
                                             @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
@@ -230,7 +231,8 @@ public class CentralMessaging {
      * @param message   Optional message
      * @param onSuccess Optional success handler
      * @param onFail    Optional exception handler
-     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#queue, avoid usage where not absolutely needed.
+     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#complete,
+     * avoid usage where not absolutely needed.
      */
     public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
                                          @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
@@ -308,7 +310,8 @@ public class CentralMessaging {
      * @param newMessage The message to be set
      * @param onSuccess  Optional success handler
      * @param onFail     Optional exception handler
-     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#queue, avoid usage where not absolutely needed.
+     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#complete,
+     * avoid usage where not absolutely needed.
      */
     public static MessageFuture editMessage(@Nonnull Message oldMessage, @Nonnull Message newMessage,
                                             @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
