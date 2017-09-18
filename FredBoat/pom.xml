@@ -53,7 +53,7 @@
             <!-- discord api -->
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.3.0_264</version>
+            <version>3.3.0_272</version>
         </dependency>
         <dependency>
             <!-- because JDA's gradle doesn't make a good pom and the scope isn't set correctly -->
@@ -88,13 +88,11 @@
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>G:/Lavalink/LavalinkClient/target/Lavalink-Client-1.0.jar</systemPath>
-        </dependency>
-        -->
+        </dependency>-->
         <dependency>
-            <!-- Audio player node client -->
             <groupId>com.github.Frederikam</groupId>
             <artifactId>Lavalink</artifactId>
-            <version>fa4f9d83329aeea9fa88fae3153137220f81b2b6</version>
+            <version>4087dd7c85c2544a8bf23b93aef6c47d80dd4da5</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.Frederikam.Lavalink</groupId>
@@ -183,9 +181,10 @@
             <version>8.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>15.0</version>
+            <!-- annotation sugar -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
         </dependency>
 
         <!-- Database stuff -->

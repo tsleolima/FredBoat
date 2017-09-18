@@ -26,66 +26,24 @@
 package fredboat.command.admin;
 
 import fredboat.audio.player.LavalinkManager;
-import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.perms.PermissionLevel;
+import lavalink.client.io.LavalinkSocket;
 import net.dv8tion.jda.core.entities.Guild;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+public class GetNodeCommand extends Command implements ICommandRestricted {
 
-public class NodeAdminCommand extends Command implements ICommandRestricted {
     @Override
     public void onInvoke(CommandContext context) {
-        if (!LavalinkManager.ins.isEnabled()) {
-            context.reply("Lavalink is disabled");
-        }
-        if (context.args.length == 1) {
-            HelpCommand.sendFormattedCommandHelp(context);
-            return;
-        }
-        switch (context.args[1]) {
-            case "del":
-            case "delete":
-            case "remove":
-            case "rem":
-            case "rm":
-                remove(context);
-                break;
-            case "add":
-                add(context);
-                break;
-            case "list":
-            default:
-                HelpCommand.sendFormattedCommandHelp(context);
-                break;
-        }
-    }
-
-    private void remove(CommandContext context) {
-        int key = Integer.valueOf(context.args[2]);
-        LavalinkManager.ins.getLavalink().removeNode(key);
-        context.reply("Removed node #" + key);
-    }
-
-    private void add(CommandContext context) {
-        URI uri;
-        try {
-            uri = new URI(context.args[2]);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
-        String password = context.args[3];
-        LavalinkManager.ins.getLavalink().addNode(uri, password);
-        context.reply("Added node: " + uri.toString());
+        LavalinkSocket node = LavalinkManager.ins.getLavalink().getNodeForGuild(context.getGuild());
+        context.channel.sendMessage(String.valueOf(node)).queue();
     }
 
     @Override
     public String help(Guild guild) {
-        return "{0}{1}\n#Add or remove lavalink nodes.";
+        return "{0}{1}\n#Restarts the bot.";
     }
 
     @Override
