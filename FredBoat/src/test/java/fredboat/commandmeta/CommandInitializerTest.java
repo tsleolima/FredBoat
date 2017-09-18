@@ -2,8 +2,10 @@ package fredboat.commandmeta;
 
 import fredboat.ProvideJDASingleton;
 import fredboat.commandmeta.abs.Command;
-import fredboat.commandmeta.init.MainCommandInitializer;
-import fredboat.commandmeta.init.MusicCommandInitializer;
+import fredboat.commandmeta.init.DefaultCommands;
+import fredboat.commandmeta.init.FunCommands;
+import fredboat.commandmeta.init.ModerationCommands;
+import fredboat.commandmeta.init.UtilCommands;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,8 +29,10 @@ public class CommandInitializerTest extends ProvideJDASingleton {
     public void testHelpStrings() {
 //        Assumptions.assumeFalse(isTravisEnvironment(), () -> "Aborting test: Travis CI detected");
 
-        MainCommandInitializer.initCommands();
-        MusicCommandInitializer.initCommands();
+        DefaultCommands.initCommands();
+        FunCommands.initCommands();
+        ModerationCommands.initCommands();
+        UtilCommands.initCommands();
 
         for (String c : CommandRegistry.getRegisteredCommandsAndAliases()) {
             Command com = CommandRegistry.getCommand(c).command;

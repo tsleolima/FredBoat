@@ -39,8 +39,10 @@ import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.commandmeta.CommandRegistry;
-import fredboat.commandmeta.init.MainCommandInitializer;
-import fredboat.commandmeta.init.MusicCommandInitializer;
+import fredboat.commandmeta.init.DefaultCommands;
+import fredboat.commandmeta.init.FunCommands;
+import fredboat.commandmeta.init.ModerationCommands;
+import fredboat.commandmeta.init.UtilCommands;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.ShardWatchdogListener;
@@ -174,14 +176,10 @@ public abstract class FredBoat {
         LavalinkManager.ins.start();
 
         //Commands
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
-                || Config.CONFIG.getDistribution() == DistributionEnum.MAIN)
-            MainCommandInitializer.initCommands();
-
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
-                || Config.CONFIG.getDistribution() == DistributionEnum.MUSIC
-                || Config.CONFIG.getDistribution() == DistributionEnum.PATRON)
-            MusicCommandInitializer.initCommands();
+        DefaultCommands.initCommands();
+        FunCommands.initCommands();
+        ModerationCommands.initCommands();
+        UtilCommands.initCommands();
 
         log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
 

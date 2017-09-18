@@ -24,56 +24,18 @@
 
 package fredboat.commandmeta.init;
 
-import fredboat.command.admin.*;
 import fredboat.command.fun.*;
-import fredboat.command.maintenance.*;
-import fredboat.command.moderation.ClearCommand;
-import fredboat.command.moderation.HardbanCommand;
-import fredboat.command.moderation.KickCommand;
-import fredboat.command.moderation.SoftbanCommand;
-import fredboat.command.util.*;
+import fredboat.command.util.AvatarCommand;
+import fredboat.command.util.SayCommand;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.util.AsciiArtConstant;
 
-public class MainCommandInitializer {
+public class FunCommands {
 
     public static void initCommands() {
-        CommandRegistry.registerCommand("help", new HelpCommand(), "info");
-        CommandRegistry.registerCommand("commands", new CommandsCommand(), "comms", "cmds");
-        CommandRegistry.registerCommand("invite", new InviteCommand());      
-        
-        /* Bot Maintenance */
-        CommandRegistry.registerCommand("unblacklist", new UnblacklistCommand(), "unlimit");
-        CommandRegistry.registerCommand("version", new VersionCommand());
-        CommandRegistry.registerCommand("uptime", new StatsCommand(), "stats");
-        CommandRegistry.registerCommand("update", new UpdateCommand());
-        CommandRegistry.registerCommand("compile", new CompileCommand());
-        CommandRegistry.registerCommand("mvntest", new MavenTestCommand());
-        CommandRegistry.registerCommand("botrestart", new BotRestartCommand());
-        CommandRegistry.registerCommand("eval", new EvalCommand());
-        CommandRegistry.registerCommand("shards", new ShardsCommand());
-        CommandRegistry.registerCommand("revive", new ReviveCommand());
-        CommandRegistry.registerCommand("sentrydsn", new SentryDsnCommand());
-        CommandRegistry.registerCommand("test", new TestCommand());
-        CommandRegistry.registerCommand("gitinfo", new GitInfoCommand(), "git");
-        CommandRegistry.registerCommand("exit", new ExitCommand());
-        
-        /* Moderation */
-        CommandRegistry.registerCommand("hardban", new HardbanCommand());
-        CommandRegistry.registerCommand("kick", new KickCommand());
-        CommandRegistry.registerCommand("softban", new SoftbanCommand());
-        CommandRegistry.registerCommand("clear", new ClearCommand());
-        
-        /* Util */
-        CommandRegistry.registerCommand("serverinfo", new fredboat.command.util.ServerInfoCommand(), "guildinfo");
-        CommandRegistry.registerCommand("userinfo", new fredboat.command.util.UserInfoCommand(), "memberinfo");
-        CommandRegistry.registerCommand("ping", new PingCommand());
-        CommandRegistry.registerCommand("fuzzy", new FuzzyUserSearchCommand());
         
         /* Fun Commands */
         CommandRegistry.registerCommand("joke", new JokeCommand(), "jk");
-        //TODO LeetCommand is borken. Don't throw unnecessary error reports until it's fixed or removed.
-//        CommandRegistry.registerCommand("leet", new LeetCommand(), "1337", "l33t", "1ee7");
         CommandRegistry.registerCommand("riot", new RiotCommand());
         CommandRegistry.registerCommand("dance", new DanceCommand());
         CommandRegistry.registerCommand("talk", new TalkCommand());
@@ -124,13 +86,6 @@ public class MainCommandInitializer {
         CommandRegistry.registerCommand("eagleoflenny", new TextCommand(AsciiArtConstant.EAGLE_OF_LENNY), "eol", "lennyeagle");
 
         /* Misc - All commands under this line fall in this category */
-        
-        CommandRegistry.registerCommand("mal", new MALCommand());
-        CommandRegistry.registerCommand("brainfuck", new BrainfuckCommand());
-
-        CommandRegistry.registerCommand("github", new TextCommand("https://github.com/Frederikam"));
-        CommandRegistry.registerCommand("repo", new TextCommand("https://github.com/Frederikam/FredBoat"));
-
         CommandRegistry.registerCommand("hug", new HugCommand("https://imgur.com/a/jHJOc"));
         CommandRegistry.registerCommand("pat", new PatCommand("https://imgur.com/a/WiPTl"));
         CommandRegistry.registerCommand("facedesk", new FacedeskCommand("https://imgur.com/a/I5Q4U"));
