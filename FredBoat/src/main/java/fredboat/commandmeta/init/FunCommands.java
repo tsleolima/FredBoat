@@ -27,13 +27,15 @@ package fredboat.commandmeta.init;
 import fredboat.command.fun.*;
 import fredboat.command.util.AvatarCommand;
 import fredboat.command.util.SayCommand;
+import fredboat.commandmeta.CommandGroup;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.util.AsciiArtConstant;
 
 public class FunCommands {
 
     public static void initCommands() {
-        
+        CommandRegistry.setMode(CommandGroup.FUN);
+
         /* Fun Commands */
         CommandRegistry.registerCommand("joke", new JokeCommand(), "jk");
         CommandRegistry.registerCommand("riot", new RiotCommand());

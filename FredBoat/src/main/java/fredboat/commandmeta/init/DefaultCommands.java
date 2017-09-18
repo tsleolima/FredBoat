@@ -15,6 +15,7 @@ import fredboat.command.music.seeking.RestartCommand;
 import fredboat.command.music.seeking.RewindCommand;
 import fredboat.command.music.seeking.SeekCommand;
 import fredboat.command.util.*;
+import fredboat.commandmeta.CommandGroup;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.perms.PermissionLevel;
 import fredboat.util.rest.SearchUtil;
@@ -22,6 +23,8 @@ import fredboat.util.rest.SearchUtil;
 public class DefaultCommands {
 
     public static void initCommands() {
+        CommandRegistry.setMode(CommandGroup.DEFAULT);
+
         /* Info commands */
         CommandRegistry.registerCommand("help", new HelpCommand(), "info");
         CommandRegistry.registerCommand("music", new MusicHelpCommand(), "musichelp");

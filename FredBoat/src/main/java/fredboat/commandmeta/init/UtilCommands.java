@@ -30,11 +30,14 @@ import fredboat.command.maintenance.PingCommand;
 import fredboat.command.util.MALCommand;
 import fredboat.command.util.ServerInfoCommand;
 import fredboat.command.util.UserInfoCommand;
+import fredboat.commandmeta.CommandGroup;
 import fredboat.commandmeta.CommandRegistry;
 
 public class UtilCommands {
 
     public static void initCommands() {
+        CommandRegistry.setMode(CommandGroup.UTIL);
+
         /* Util */
         CommandRegistry.registerCommand("serverinfo", new ServerInfoCommand(), "guildinfo");
         CommandRegistry.registerCommand("userinfo", new UserInfoCommand(), "memberinfo");

@@ -28,17 +28,27 @@ package fredboat.commandmeta;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import net.dv8tion.jda.core.entities.Guild;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Set;
 
 public class CommandRegistry {
 
+    private static final Logger log = LoggerFactory.getLogger(CommandRegistry.class);
     private static HashMap<String, CommandEntry> registry = new HashMap<>();
+    private static CommandGroup mode = CommandGroup.DEFAULT;
 
     public static void registerCommand(String name, Command command, String... aliases) {
         name = name.toLowerCase();
+        command.setGroup(mode);
         CommandEntry entry = new CommandEntry(command, name);
+
+        if (registry.containsKey(name)) {
+            log.warn("Replacing command " + name + ":" + mode + " with " + name + ":" + registry.get(name).command.getGroup());
+        }
+
         registry.put(name, entry);
         for (String alias : aliases) {
             registry.put(alias.toLowerCase(), entry);
@@ -57,6 +67,7 @@ public class CommandRegistry {
         return registry.keySet();
     }
 
+    @SuppressWarnings("unused")
     public static void removeCommand(String name) {
         CommandEntry entry = new CommandEntry(new Command() {
             @Override
@@ -71,6 +82,13 @@ public class CommandRegistry {
         }, name);
 
         registry.put(name, entry);
+    }
+
+    /**
+     * @param mode The group to begin setting all commands to
+     */
+    public static void setMode(CommandGroup mode) {
+        CommandRegistry.mode = mode;
     }
 
     public static class CommandEntry {

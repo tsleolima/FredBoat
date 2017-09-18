@@ -25,31 +25,22 @@
 
 package fredboat.commandmeta.abs;
 
-import java.util.ArrayList;
+import fredboat.commandmeta.CommandGroup;
 
 public abstract class Command implements ICommand {
 
-    public static String name = "Undefined";
-    public static ArrayList<String> aliases = new ArrayList<>();
+    private CommandGroup group = null;
 
-    public static CommandInfo getCommandInfo(){
-        return new CommandInfo(name, "Undefined", "Undefined", aliases);
+    public CommandGroup getGroup() {
+        return group;
     }
 
-    public static class CommandInfo {
-
-        public String name;
-        public String desc;
-        public String usage;
-        public ArrayList<String> aliases;
-
-        public CommandInfo(String name, String desc, String usage, ArrayList<String> aliases) {
-            this.name = name;
-            this.desc = desc;
-            this.usage = usage;
-            this.aliases = aliases;
-        }
-
+    /**
+     * Used by the command registry.
+     *
+     * @param group Group this command is associated with
+     */
+    public void setGroup(CommandGroup group) {
+        this.group = group;
     }
-
 }
