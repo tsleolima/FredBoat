@@ -77,7 +77,7 @@ public abstract class FredBoat {
 
     private static final Logger log = LoggerFactory.getLogger(FredBoat.class);
 
-    static final int SHARD_CREATION_SLEEP_INTERVAL = 5100;
+    static final int SHARD_CREATION_SLEEP_INTERVAL = 5500;
 
     private static final ArrayList<FredBoat> shards = new ArrayList<>();
     public static JCA jca;
@@ -540,7 +540,6 @@ public abstract class FredBoat {
             log.info("Coin for shard {}", shardId);
             return true;
         }
-        log.info("No coin for shard {}", shardId);
         return false;
     }
 }
