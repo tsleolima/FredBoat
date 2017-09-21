@@ -68,7 +68,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         if (player.isPlaying()) {
 
             // we are about to send an embed, but can we even do that? //todo move error handling to central messaging
-            if (!context.guild.getSelfMember().hasPermission(context.channel, Permission.MESSAGE_EMBED_LINKS)) {
+            if (!context.hasPermissions(Permission.MESSAGE_EMBED_LINKS)) {
                 throw new MessagingException(i18n.getString("permissionMissingBot") + " "
                         + i18n.getString("permissionEmbedLinks"));
             }

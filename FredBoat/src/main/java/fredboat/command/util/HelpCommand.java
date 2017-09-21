@@ -72,7 +72,7 @@ public class HelpCommand extends Command implements IUtilCommand {
                     String out = I18n.get(context, "helpSent");
                     out += "\n" + MessageFormat.format(I18n.get(context, "helpCommandsPromotion"),
                             "`" + Config.CONFIG.getPrefix() + "commands`");
-                    if (context.guild.getSelfMember().hasPermission(context.channel, Permission.MESSAGE_WRITE)) {
+                    if (context.hasPermissions(Permission.MESSAGE_WRITE)) {
                         context.replyWithName(out);
                     }
                 },

@@ -106,7 +106,7 @@ public class CommandManager {
         }
 
         if (invoked instanceof IMusicCommand
-                && !guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_WRITE)) {
+                && !context.hasPermissions(Permission.MESSAGE_WRITE)) {
             log.debug("Ignored command because it was a music command, and this bot cannot write in that channel");
             return;
         }
