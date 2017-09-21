@@ -78,7 +78,9 @@ public class HelpCommand extends Command implements IUtilCommand {
                 },
                 failure -> {
                     String out = ":exclamation:Couldn't send documentation to your DMs! Check you don't have them disabled!"; //TODO: i18n
-                    context.replyWithName(out);
+                    if (context.hasPermissions(Permission.MESSAGE_WRITE)) {
+                        context.replyWithName(out);
+                    }
                 }
         );
     }

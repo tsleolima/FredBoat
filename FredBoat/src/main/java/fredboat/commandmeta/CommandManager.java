@@ -105,9 +105,9 @@ public class CommandManager {
             return;
         }
 
-        if (invoked instanceof IMusicCommand
-                && !context.hasPermissions(Permission.MESSAGE_WRITE)) {
-            log.debug("Ignored command because it was a music command, and this bot cannot write in that channel");
+        //ignore all commands in channels where we can write, except for the help command
+        if (!context.hasPermissions(Permission.MESSAGE_WRITE) && !(invoked instanceof HelpCommand)) {
+            log.debug("Ignored command because this bot cannot write in that channel");
             return;
         }
 
