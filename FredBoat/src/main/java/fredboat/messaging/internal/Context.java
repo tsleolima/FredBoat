@@ -117,6 +117,14 @@ public abstract class Context {
         CentralMessaging.sendTyping(getTextChannel());
     }
 
+    public void replyPrivate(@Nonnull String message) {
+        replyPrivate(message, null, null);
+    }
+
+    public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess) {
+        replyPrivate(message, onSuccess, null);
+    }
+
     public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         getMember().getUser().openPrivateChannel().queue(
                 privateChannel -> CentralMessaging.sendMessage(privateChannel, message, onSuccess, onFail)

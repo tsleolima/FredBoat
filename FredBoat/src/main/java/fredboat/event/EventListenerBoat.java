@@ -39,6 +39,7 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.util.TextUtils;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
@@ -139,7 +140,11 @@ public class EventListenerBoat extends AbstractEventListener {
                 out += "\n" + MessageFormat.format(I18n.get(context, "ratelimitedSkipCommand"),
                         "`" + Config.CONFIG.getPrefix() + "skip n-m`");
             }
-            context.replyWithMention(out);
+            if (context.hasPermissions(Permission.MESSAGE_WRITE)) {
+                context.replyWithMention(out);
+            } else { //PM the user about being ratelimited, let's see how they like that
+                context.replyPrivate(out, null, null);
+            }
         }
     }
 
