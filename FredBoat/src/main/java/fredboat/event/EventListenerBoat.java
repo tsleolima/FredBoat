@@ -42,6 +42,7 @@ import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
@@ -218,8 +219,11 @@ public class EventListenerBoat extends AbstractEventListener {
                 && player.getHumanUsersInCurrentVC().size() > 0
                 && EntityReader.getGuildConfig(guild.getId()).isAutoResume()
                 ) {
-            CentralMessaging.sendMessage(player.getActiveTextChannel(), I18n.get(guild).getString("eventAutoResumed"));
             player.setPause(false);
+            TextChannel activeTextChannel = player.getActiveTextChannel();
+            if (activeTextChannel != null) {
+                CentralMessaging.sendMessage(activeTextChannel, I18n.get(guild).getString("eventAutoResumed"));
+            }
         }
     }
 
@@ -247,7 +251,10 @@ public class EventListenerBoat extends AbstractEventListener {
 
         if (player.getHumanUsersInCurrentVC().isEmpty() && !player.isPaused()) {
             player.pause();
-            CentralMessaging.sendMessage(player.getActiveTextChannel(), I18n.get(guild).getString("eventUsersLeftVC"));
+            TextChannel activeTextChannel = player.getActiveTextChannel();
+            if (activeTextChannel != null) {
+                CentralMessaging.sendMessage(activeTextChannel, I18n.get(guild).getString("eventUsersLeftVC"));
+            }
         }
     }
 
