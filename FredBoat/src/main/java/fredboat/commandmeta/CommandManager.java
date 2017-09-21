@@ -105,12 +105,6 @@ public class CommandManager {
             return;
         }
 
-        //ignore all commands in channels where we can write, except for the help command
-        if (!context.hasPermissions(Permission.MESSAGE_WRITE) && !(invoked instanceof HelpCommand)) {
-            log.debug("Ignored command because this bot cannot write in that channel");
-            return;
-        }
-
         //Hardcode music commands in FredBoatHangout. Blacklist any channel that isn't #general or #staff, but whitelist Frederikam
         if ((invoked instanceof IMusicCommand || invoked instanceof AkinatorCommand) // the hate is real
                 && guild.getId().equals(BotConstants.FREDBOAT_HANGOUT_ID)

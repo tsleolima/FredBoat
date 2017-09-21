@@ -108,6 +108,12 @@ public class EventListenerBoat extends AbstractEventListener {
                 return;
             }
 
+            //ignore all commands in channels where we can't write, except for the help command
+            if (!context.hasPermissions(Permission.MESSAGE_WRITE) && !(context.command instanceof HelpCommand)) {
+                log.debug("Ignored command because this bot cannot write in that channel");
+                return;
+            }
+
             limitOrExecuteCommand(context);
         } else if (event.getMessage().getMentionedUsers().contains(event.getJDA().getSelfUser())) {
             log.info(event.getGuild().getName() + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
@@ -140,11 +146,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 out += "\n" + MessageFormat.format(I18n.get(context, "ratelimitedSkipCommand"),
                         "`" + Config.CONFIG.getPrefix() + "skip n-m`");
             }
-            if (context.hasPermissions(Permission.MESSAGE_WRITE)) {
-                context.replyWithMention(out);
-            } else { //PM the user about being ratelimited, let's see how they like that
-                context.replyPrivate(out, null, null);
-            }
+            context.replyWithMention(out);
         }
     }
 
