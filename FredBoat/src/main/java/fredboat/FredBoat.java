@@ -200,10 +200,6 @@ public abstract class FredBoat {
             initBotShards(listenerBot);
         }
 
-        if ((Config.CONFIG.getScope() & 0x001) != 0) {
-            log.error("Selfbot support has been removed.");
-        }
-
         if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && Config.CONFIG.getCarbonKey() != null) {
             CarbonitexAgent carbonitexAgent = new CarbonitexAgent(Config.CONFIG.getCarbonKey());
             carbonitexAgent.setDaemon(true);
