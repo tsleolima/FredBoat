@@ -274,7 +274,7 @@ public class GuildPlayer extends AbstractPlayer {
         if (currentTc != null) {
             return currentTc;
         } else {
-            log.warn("No currentTC in " + getGuild() + "! Returning public channel...");
+            log.warn("No currentTC in " + getGuild() + "! Returning default channel...");
             return getGuild().getDefaultChannel();
         }
 

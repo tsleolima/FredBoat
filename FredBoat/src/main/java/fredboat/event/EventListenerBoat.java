@@ -49,6 +49,7 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent;
+import net.dv8tion.jda.core.events.http.HttpRequestEvent;
 import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -263,4 +264,11 @@ public class EventListenerBoat extends AbstractEventListener {
         PlayerRegistry.destroyPlayer(event.getGuild());
     }
 
+    @Override
+    public void onHttpRequest(HttpRequestEvent event) {
+        if (event.getResponse().code >= 300) {
+            log.warn("Unsuccessful JDA HTTP Request:\n{}\nResponse:{}\n",
+                    event.getRequestRaw(), event.getResponseRaw());
+        }
+    }
 }
