@@ -29,6 +29,7 @@ import fredboat.feature.I18n;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -460,8 +461,12 @@ public class CentralMessaging {
             channel.sendMessage(message).queue(successWrapper, failureWrapper);
         } catch (InsufficientPermissionException e) {
             failureWrapper.accept(e);
-            //do not call CentralMessaging#handleInsufficientPermissionsException() from here as that will result in a loop
-            log.warn("Could not send message to channel {} due to missing permission {}", channel.getIdLong(), e.getPermission().getName(), e);
+            if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
+                handleInsufficientPermissionsException(channel, e);
+            } else {
+                //do not call CentralMessaging#handleInsufficientPermissionsException() from here as that will result in a loop
+                log.warn("Could not send message to channel {} due to missing permission {}", channel.getIdLong(), e.getPermission().getName(), e);
+            }
         }
         return result;
     }
@@ -539,7 +544,8 @@ public class CentralMessaging {
         } else {
             i18n = I18n.DEFAULT.getProps();
         }
-        sendMessage(channel, i18n.getString("permissionMissingBot") + " " + e.getPermission().getName());
+        //only ever try sending a simple string from here so we don't end up handling a loop of insufficient permissions
+        sendMessage(channel, i18n.getString("permissionMissingBot") + " **" + e.getPermission().getName() + "**");
     }
 
 }
