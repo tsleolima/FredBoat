@@ -113,6 +113,20 @@ public abstract class Context {
         return CentralMessaging.sendFile(getTextChannel(), file, message);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
+    public MessageFuture replyImage(@Nonnull String url, @Nullable String message) {
+        return CentralMessaging.sendMessage(getTextChannel(),
+                CentralMessaging.getClearThreadLocalMessageBuilder()
+                        .setEmbed(embedImage(url))
+                        .append(message != null ? message : "")
+                        .build());
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public MessageFuture replyImage(@Nonnull String url) {
+        return replyImage(url, null);
+    }
+
     public void sendTyping() {
         CentralMessaging.sendTyping(getTextChannel());
     }
@@ -126,5 +140,11 @@ public abstract class Context {
     //checks whether we have the provided permissions for the channel of this context
     public boolean hasPermissions(Permission... permissions) {
         return getGuild().getSelfMember().hasPermission(getTextChannel(), permissions);
+    }
+
+    private static MessageEmbed embedImage(String url) {
+        return CentralMessaging.getClearThreadLocalEmbedBuilder()
+                .setImage(url)
+                .build();
     }
 }

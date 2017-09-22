@@ -40,6 +40,7 @@ import net.dv8tion.jda.core.requests.Request;
 import net.dv8tion.jda.core.requests.Response;
 import net.dv8tion.jda.core.requests.RestAction;
 import net.dv8tion.jda.core.requests.Route;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -89,6 +91,7 @@ public class CentralMessaging {
                 .setImage(null);
     }
 
+    //May not be an empty string, as MessageBuilder#build() will throw an exception
     public static Message from(String string) {
         return getClearThreadLocalMessageBuilder().append(string).build();
     }
@@ -496,10 +499,15 @@ public class CentralMessaging {
         };
 
         try {
-            channel.sendFile(file, message).queue(successWrapper, failureWrapper);
+            // ATTENTION: Do not use JDA's MessageChannel#sendFile(File file, Message message)
+            // as it will skip permission checks, since TextChannel does not override that method
+            // this is scheduled to be fixed through JDA's message-rw branch
+            channel.sendFile(FileUtils.readFileToByteArray(file), file.getName(), message).queue(successWrapper, failureWrapper);
         } catch (InsufficientPermissionException e) {
             failureWrapper.accept(e);
             handleInsufficientPermissionsException(channel, e);
+        } catch (IOException e) {
+            log.error("Could not send file {}, it appears to be borked", file.getAbsolutePath(), e);
         }
         return result;
     }
