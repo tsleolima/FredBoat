@@ -47,7 +47,6 @@ import fredboat.event.ShardWatchdogListener;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.JDAUtil;
-import fredboat.util.log.SimpleLogToSLF4JAdapter;
 import frederikam.jca.JCA;
 import frederikam.jca.JCABuilder;
 import net.dv8tion.jda.core.AccountType;
@@ -59,7 +58,6 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
 import net.dv8tion.jda.core.managers.AudioManager;
-import net.dv8tion.jda.core.utils.SimpleLog;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,12 +112,6 @@ public abstract class FredBoat {
                 " |_|  |_|  \\___|\\__,_|____/ \\___/ \\__,_|\\__|\n\n");
 
         I18n.start();
-
-        //Attach log adapter
-        SimpleLog.addListener(new SimpleLogToSLF4JAdapter());
-
-        //Make JDA not print to console, we have Logback for that
-        SimpleLog.LEVEL = SimpleLog.Level.OFF;
 
         int scope;
         try {

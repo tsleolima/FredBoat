@@ -115,7 +115,7 @@
     </logger>
 
     <!-- Gives us a nice JDA log with only JDA output -->
-    <logger name="net.dv8tion.jda.core.JDA" level="DEBUG" additivity="true">
+    <logger name="net.dv8tion" level="DEBUG" additivity="true">
         <appender-ref ref="JDA"/>
     </logger>
 
