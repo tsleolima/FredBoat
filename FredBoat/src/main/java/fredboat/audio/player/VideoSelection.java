@@ -64,7 +64,7 @@ public class VideoSelection {
     // ********************************************************************************
 
     //the key looks like this: guildId:userId
-    public static Cache<String, VideoSelection> SELECTIONS = CacheBuilder.newBuilder()
+    public static final Cache<String, VideoSelection> SELECTIONS = CacheBuilder.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES)
             .build();
 

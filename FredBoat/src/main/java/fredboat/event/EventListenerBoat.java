@@ -24,6 +24,8 @@
  */
 package fredboat.event;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import fredboat.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
@@ -57,8 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class EventListenerBoat extends AbstractEventListener {
 
@@ -66,8 +67,10 @@ public class EventListenerBoat extends AbstractEventListener {
 
     //first string is the users message ID, second string the id of fredboat's message that should be deleted if the
     // user's message is deleted
-    //todo this is, while not a super crazy one, but still a source of memory leaks. find a better way
-    public static Map<Long, Long> messagesToDeleteIfIdDeleted = new HashMap<>();
+    public static final Cache<Long, Long> messagesToDeleteIfIdDeleted = CacheBuilder.newBuilder()
+            .expireAfterWrite(6, TimeUnit.HOURS)
+            .build();
+
     private User lastUserToReceiveHelp;
 
     public EventListenerBoat() {
@@ -154,9 +157,10 @@ public class EventListenerBoat extends AbstractEventListener {
 
     @Override
     public void onMessageDelete(MessageDeleteEvent event) {
-        if (messagesToDeleteIfIdDeleted.containsKey(event.getMessageIdLong())) {
-            long msgId = messagesToDeleteIfIdDeleted.remove(event.getMessageIdLong());
-            CentralMessaging.deleteMessageById(event.getChannel(), msgId);
+        Long toDelete = messagesToDeleteIfIdDeleted.getIfPresent(event.getMessageIdLong());
+        if (toDelete != null) {
+            messagesToDeleteIfIdDeleted.invalidate(toDelete);
+            CentralMessaging.deleteMessageById(event.getChannel(), toDelete);
         }
     }
 
