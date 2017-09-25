@@ -35,6 +35,7 @@ import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.feature.I18n;
 import fredboat.perms.PermissionLevel;
+import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
@@ -78,8 +79,7 @@ public class HelpCommand extends Command implements IUtilCommand {
                 },
                 failure -> {
                     if (context.hasPermissions(Permission.MESSAGE_WRITE)) {
-                        String out = ":exclamation:Couldn't send documentation to your DMs! Check you don't have them disabled!"; //TODO: i18n
-                        context.replyWithName(out);
+                        context.replyWithName(Emojis.EXCLAMATION + I18n.get(context, "helpDmFailed"));
                     }
                 }
         );

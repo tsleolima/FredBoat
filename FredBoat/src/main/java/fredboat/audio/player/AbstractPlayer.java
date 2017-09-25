@@ -49,6 +49,7 @@ import fredboat.audio.queue.TrackEndMarkerHandler;
 import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
+import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
@@ -376,7 +377,11 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     public void seekTo(long position) {
-        player.seekTo(position);
+        if (context.getTrack().isSeekable()) {
+            player.seekTo(position);
+        } else {
+            throw new MessagingException(I18n.get(context, "seekDeniedLiveTrack"));
+        }
     }
 
     public IPlayer getPlayer() {

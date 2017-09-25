@@ -88,7 +88,8 @@ public class UserInfoCommand extends Command implements IUtilCommand {
                 .addField(i18n.getString("userinfoKnownServer"), knownServers.toString(), true) //Known Server
                 .addField(i18n.getString("userinfoJoinDate"), target.getJoinDate().format(dtf), true)
                 .addField(i18n.getString("userinfoCreationTime"), target.getUser().getCreationTime().format(dtf), true)
-                .addField("Blacklisted", "" + Ratelimiter.getRatelimiter().isBlacklisted(context.invoker.getUser().getIdLong()), true) //TODO i18n
+                .addField(i18n.getString("userinfoBlacklisted"),
+                        Boolean.toString(Ratelimiter.getRatelimiter().isBlacklisted(context.invoker.getUser().getIdLong())), true)
                 .build()
         );
     }
