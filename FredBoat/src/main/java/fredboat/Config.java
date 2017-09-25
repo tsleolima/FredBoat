@@ -132,6 +132,13 @@ public class Config {
             creds.keySet().forEach((String key) -> creds.putIfAbsent(key, ""));
             config.keySet().forEach((String key) -> config.putIfAbsent(key, ""));
 
+            //create the sentry appender as early as possible
+            sentryDsn = (String) creds.getOrDefault("sentryDsn", "");
+            if (!sentryDsn.isEmpty()) {
+                SentryDsnCommand.turnOn(sentryDsn);
+            } else {
+                SentryDsnCommand.turnOff();
+            }
 
             // Determine distribution
             if ((boolean) config.getOrDefault("patron", false)) {
@@ -212,12 +219,6 @@ public class Config {
                         throw new RuntimeException("Failed parsing URI", e);
                     }
                 });
-            }
-            sentryDsn = (String) creds.getOrDefault("sentryDsn", "");
-            if (!sentryDsn.isEmpty()) {
-                SentryDsnCommand.turnOn(sentryDsn);
-            } else {
-                SentryDsnCommand.turnOff();
             }
 
             if(getDistribution() == DistributionEnum.DEVELOPMENT) {
