@@ -352,12 +352,9 @@ public class GuildPlayer extends AbstractPlayer {
     /**
      * @return currently used TextChannel or null if there is none
      */
+    @Nullable
     private TextChannel getCurrentTC() {
-        try {
-            return shard.getJda().getTextChannelById(currentTCId);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        return shard.getJda().getTextChannelById(currentTCId);
     }
 
     //Success, fail message
