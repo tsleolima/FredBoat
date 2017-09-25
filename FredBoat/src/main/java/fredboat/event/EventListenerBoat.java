@@ -207,7 +207,7 @@ public class EventListenerBoat extends AbstractEventListener {
 
     private void checkForAutoResume(VoiceChannel joinedChannel, Member joined) {
         Guild guild = joinedChannel.getGuild();
-        //ignore bot users taht arent us joining / moving
+        //ignore bot users that arent us joining / moving
         if (joined.getUser().isBot()
                 && guild.getSelfMember().getUser().getIdLong() != joined.getUser().getIdLong()) return;
 
@@ -245,12 +245,12 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //are we in the channel that someone left from?
-        if (guild.getSelfMember().getVoiceState().inVoiceChannel() &&
-                guild.getSelfMember().getVoiceState().getChannel().getIdLong() != channelLeft.getIdLong()) {
+        VoiceChannel currentVc = player.getCurrentVoiceChannel();
+        if (currentVc != null && currentVc.getIdLong() != channelLeft.getIdLong()) {
             return;
         }
 
-        if (player.getHumanUsersInCurrentVC().isEmpty() && !player.isPaused()) {
+        if (player.getHumanUsersInVC(currentVc).isEmpty() && !player.isPaused()) {
             player.pause();
             TextChannel activeTextChannel = player.getActiveTextChannel();
             if (activeTextChannel != null) {

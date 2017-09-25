@@ -95,11 +95,11 @@ public class LavalinkManager {
     }
 
     public VoiceChannel getConnectedChannel(@Nonnull Guild guild) {
-        if (isEnabled()) {
-            return lavalink.getConnectedChannel(guild);
-        } else {
-            return guild.getAudioManager().getConnectedChannel();
-        }
+        //NOTE: never use the local audio manager, since the audio connection may be remote
+        // there is also no reason to look the channel up remotely from lavalink, if we have access to a real guild
+        // object here, since we can use the voice state of ourselves (and lavalink 1.x is buggy in keeping up with the
+        // current voice channel if the bot is moved around in the client)
+        return guild.getSelfMember().getVoiceState().getChannel();
     }
 
     public Lavalink getLavalink() {
