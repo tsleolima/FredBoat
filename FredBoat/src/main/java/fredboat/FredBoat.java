@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -414,6 +415,7 @@ public abstract class FredBoat {
         return JDAUtil.countAllUniqueUsers(shards, biggestUserCount);
     }
 
+    @Nullable
     public static TextChannel getTextChannelById(String id) {
         for (FredBoat fb : shards) {
             for (TextChannel channel : fb.getJda().getTextChannels()) {
@@ -424,6 +426,7 @@ public abstract class FredBoat {
         return null;
     }
 
+    @Nullable
     public static VoiceChannel getVoiceChannelById(String id) {
         for (FredBoat fb : shards) {
             for (VoiceChannel channel : fb.getJda().getVoiceChannels()) {
@@ -434,6 +437,7 @@ public abstract class FredBoat {
         return null;
     }
 
+    @Nullable
     public static Guild getGuildById(long id) {
         for (FredBoat fb : shards) {
             Guild g = fb.getJda().getGuildById(id);

@@ -167,9 +167,9 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 //Get at most 5 tracks
                 List<AudioTrack> selectable = list.getTracks().subList(0, Math.min(SearchUtil.MAX_RESULTS, list.getTracks().size()));
 
-                VideoSelection oldSelection = player.selections.get(context.invoker.getUser().getId());
+                VideoSelection oldSelection = VideoSelection.remove(context.invoker);
                 if(oldSelection != null) {
-                    CentralMessaging.deleteMessageById(context.channel, oldSelection.getOutMsgId());
+                    oldSelection.deleteMessage();
                 }
 
                 MessageBuilder builder = CentralMessaging.getClearThreadLocalMessageBuilder();
@@ -190,7 +190,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
                 CentralMessaging.editMessage(outMsg, builder.build());
                 player.setCurrentTC(context.channel);
-                player.selections.put(context.invoker.getUser().getId(), new VideoSelection(selectable, outMsg));
+                VideoSelection.put(context.invoker, new VideoSelection(selectable, outMsg));
             }
         });
     }

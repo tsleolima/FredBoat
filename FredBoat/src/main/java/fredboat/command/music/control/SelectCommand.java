@@ -27,6 +27,7 @@ package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.Config;
+import fredboat.FredBoat;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.player.VideoSelection;
@@ -41,6 +42,7 @@ import fredboat.perms.PermissionLevel;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.TextChannel;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.MessageFormat;
@@ -57,8 +59,8 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
         Member invoker = context.invoker;
         GuildPlayer player = PlayerRegistry.get(context.guild);
         player.setCurrentTC(context.channel);
-        if (player.selections.containsKey(invoker.getUser().getId())) {
-            VideoSelection selection = player.selections.get(invoker.getUser().getId());
+        VideoSelection selection = VideoSelection.get(invoker);
+        if (selection != null) {
             try {
                 int i = 1;
 
@@ -71,19 +73,22 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                     }
                 }
 
-                if (selection.getChoices().size() < i || i < 1) {
+                if (selection.choices.size() < i || i < 1) {
                     throw new NumberFormatException();
                 } else {
-                    AudioTrack selected = selection.getChoices().get(i - 1);
-                    player.selections.remove(invoker.getUser().getId());
-                    String msg = MessageFormat.format(I18n.get(context, "selectSuccess"), i, selected.getInfo().title, TextUtils.formatTime(selected.getInfo().length));
-                    CentralMessaging.editMessage(context.channel, selection.getOutMsgId(), CentralMessaging.from(msg));
+                    AudioTrack selected = selection.choices.get(i - 1);
+                    VideoSelection.remove(invoker);
+                    TextChannel tc = FredBoat.getTextChannelById(Long.toString(selection.channelId));
+                    if (tc != null) {
+                        String msg = MessageFormat.format(I18n.get(context, "selectSuccess"), i, selected.getInfo().title, TextUtils.formatTime(selected.getInfo().length));
+                        CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(msg));
+                    }
                     player.queue(new AudioTrackContext(selected, invoker));
                     player.setPause(false);
                     context.deleteMessage();
                 }
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                context.reply(MessageFormat.format(I18n.get(context, "selectInterval"), selection.getChoices().size()));
+                context.reply(MessageFormat.format(I18n.get(context, "selectInterval"), selection.choices.size()));
             }
         } else {
             context.reply(I18n.get(context, "selectSelectionNotGiven"));
