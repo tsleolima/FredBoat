@@ -70,14 +70,14 @@
         </dependency>
         <dependency>
             <!-- audio player for discord -->
-            <groupId>com.sedmelluq</groupId>
-            <artifactId>lavaplayer</artifactId>
-            <version>1.2.43</version>
+            <groupId>com.fredboat.fork</groupId>
+            <artifactId>com.sedmelluq.lavaplayer</artifactId>
+            <version>1.2.43.3</version>
         </dependency>
         <dependency>
             <!-- gradle's pom scope is wrong, depending on it again -->
-            <groupId>com.sedmelluq</groupId>
-            <artifactId>lavaplayer-common</artifactId>
+            <groupId>com.fredboat.fork</groupId>
+            <artifactId>com.sedmelluq.lavaplayer-common</artifactId>
             <version>1.0.5</version>
         </dependency>
         <!-- This is just here for convenience -->
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.github.Frederikam</groupId>
             <artifactId>Lavalink</artifactId>
-            <version>eeeffaadadc6744f04abea579d20db5cab756ba8</version>
+            <version>bd16e971e72a367884ad1c8bc43ddbc026ad432a</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.Frederikam.Lavalink</groupId>
@@ -103,15 +103,15 @@
         <dependency>
             <!-- native audio system to avoid gc stutter in the audio -->
             <!-- we replaced the classes temporarily, but need the native parts -->
-            <groupId>com.sedmelluq</groupId>
-            <artifactId>jda-nas</artifactId>
-            <version>1.0.5</version>
+            <groupId>com.fredboat.fork</groupId>
+            <artifactId>com.sedmelluq.jda-nas</artifactId>
+            <version>1.0.5.1</version>
         </dependency>
         <dependency>
             <!-- gradle pls -->
-            <groupId>com.sedmelluq</groupId>
-            <artifactId>udp-queue</artifactId>
-            <version>1.0.5</version>
+            <groupId>com.fredboat.fork</groupId>
+            <artifactId>com.sedmelluq.udp-queue</artifactId>
+            <version>1.0.6.1</version>
         </dependency>
         <dependency>
             <!-- cleverbot.io api -->
