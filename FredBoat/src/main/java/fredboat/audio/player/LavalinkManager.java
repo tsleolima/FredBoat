@@ -74,13 +74,13 @@ public class LavalinkManager {
 
     IPlayer createPlayer(String guildId) {
         return isEnabled()
-                ? lavalink.getPlayer(guildId)
+                ? lavalink.getLink(guildId).getPlayer()
                 : new LavaplayerPlayerWrapper(AbstractPlayer.getPlayerManager().createPlayer());
     }
 
     public void openConnection(VoiceChannel channel) {
         if (isEnabled()) {
-            lavalink.openVoiceConnection(channel);
+            lavalink.getLink(channel.getGuild()).connect(channel);
         } else {
             channel.getGuild().getAudioManager().openAudioConnection(channel);
         }
@@ -88,7 +88,7 @@ public class LavalinkManager {
 
     public void closeConnection(Guild guild) {
         if (isEnabled()) {
-            lavalink.closeVoiceConnection(guild);
+            lavalink.getLink(guild).disconnect();
         } else {
             guild.getAudioManager().closeAudioConnection();
         }
