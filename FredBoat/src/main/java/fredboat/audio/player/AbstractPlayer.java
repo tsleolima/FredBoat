@@ -315,8 +315,8 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     void destroy() {
         log.debug("destroy()");
-
         stop();
+        player.removeListener(this);
     }
 
     @Override
