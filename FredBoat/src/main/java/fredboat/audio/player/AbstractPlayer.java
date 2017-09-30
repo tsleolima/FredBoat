@@ -52,6 +52,7 @@ import fredboat.commandmeta.MessagingException;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import lavalink.client.player.IPlayer;
+import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
 import lavalink.client.player.event.AudioEventAdapterWrapped;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
@@ -317,6 +318,9 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
         log.debug("destroy()");
         stop();
         player.removeListener(this);
+        if (player instanceof LavalinkPlayer) {
+            ((LavalinkPlayer) player).getLink().destroy();
+        }
     }
 
     @Override
