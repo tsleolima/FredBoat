@@ -20,7 +20,7 @@ Also feel free to work on your own ideas. Especially commands, we can't have too
 
 ## Writing a Command
 
-The easiest way to write a new command for FredBoat from scratch is having a look at how similar commands are written.
+The easiest way to write a new command for FredBoat from scratch is by having a look at how similar commands are written.
 A few core concepts are used by almost every command:
 
 ### Extending
@@ -33,9 +33,9 @@ FredBoat runs its own, simplified permission system that takes care of properly 
 Each command is provided a `CommandContext` during execution. This context provides access to the invoker, guild, textchannel, message, parsed arguments etc. Further more it provides convenience methods to reply to users.
 
 ### Help
-Each command is required to provide a proper help string explaining all possible usages and arguments. If you're command gets too complex for that, adding an additional page to the official documentation (example: [Permissions commands](https://fredboat.com/docs/permissions) may be discussed.
+Each command is required to provide a proper help string explaining all possible usages and arguments. If your command gets too complex for that, adding an additional page to the official documentation (example: [Permissions commands](https://fredboat.com/docs/permissions) may be discussed.
 
-Commands intended for public use (read: non-admin, non-maintenance commands) are required to be translated.
+Commands intended for public use (read: non-admin, non-maintenance commands) are required to support translation.
 
 ### Translations
 See [Translations](https://github.com/Frederikam/FredBoat/blob/master/CONTRIBUTING.md#translations) for more details on our flow of adding new strings to translation files.
