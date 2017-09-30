@@ -63,21 +63,16 @@ public class Config {
 
     private final DistributionEnum distribution;
     private final String botToken;
-    private String oauthSecret;
     private final String jdbcUrl;
     private final int hikariPoolSize;
     private int numShards;
-    private String mashapeKey;
     private String malUser;
     private String malPassword;
     private String imgurClientId;
-    private int scope;
     private List<String> googleKeys = new ArrayList<>();
     private final String[] lavaplayerNodes;
     private final boolean lavaplayerNodesEnabled;
     private String carbonKey;
-    private String cbUser;
-    private String cbKey;
     private String spotifyId;
     private String spotifySecret;
     private String prefix = DEFAULT_PREFIX;
@@ -110,9 +105,8 @@ public class Config {
     private Boolean httpAudio;
 
     @SuppressWarnings("unchecked")
-    public Config(File credentialsFile, File configFile, int scope) {
+    public Config(File credentialsFile, File configFile) {
         try {
-            this.scope = scope;
             Yaml yaml = new Yaml();
             String credsFileStr = FileUtils.readFileToString(credentialsFile, "UTF-8");
             String configFileStr = FileUtils.readFileToString(configFile, "UTF-8");
@@ -147,7 +141,7 @@ public class Config {
             } else if ((boolean) config.getOrDefault("development", false)) {//Determine distribution
                 distribution = DistributionEnum.DEVELOPMENT;
             } else {
-                distribution = DiscordUtil.isMainBot(this) ? DistributionEnum.MAIN : DistributionEnum.MUSIC;
+                distribution = DistributionEnum.MUSIC;
             }
 
             log.info("Determined distribution: " + distribution);
@@ -166,12 +160,9 @@ public class Config {
 
             log.info("Using prefix: " + prefix);
 
-            mashapeKey = (String) creds.getOrDefault("mashapeKey", "");
             malUser = (String) creds.getOrDefault("malUser", "");
             malPassword = (String) creds.getOrDefault("malPassword", "");
             carbonKey = (String) creds.getOrDefault("carbonKey", "");
-            cbUser = (String) creds.getOrDefault("cbUser", "");
-            cbKey = (String) creds.getOrDefault("cbKey", "");
             Map<String, String> token = (Map) creds.get("token");
             if (token != null) {
                 botToken = token.getOrDefault(distribution.getId(), "");
@@ -184,10 +175,6 @@ public class Config {
             spotifyId = (String) creds.getOrDefault("spotifyId", "");
             spotifySecret = (String) creds.getOrDefault("spotifySecret", "");
 
-            if (creds.containsKey("oauthSecret")) {
-                Map<String, Object> oas = (Map) creds.get("oauthSecret");
-                oauthSecret = (String) oas.getOrDefault(distribution.getId(), "");
-            }
             jdbcUrl = (String) creds.getOrDefault("jdbcUrl", "");
 
             Object gkeys = creds.get("googleServerKeys");
@@ -279,11 +266,10 @@ public class Config {
         }
     }
 
-    static void loadDefaultConfig(int scope) throws IOException {
+    static void loadDefaultConfig() throws IOException {
         Config.CONFIG = new Config(
                 loadConfigFile("credentials"),
-                loadConfigFile("config"),
-                scope
+                loadConfigFile("config")
         );
     }
 
@@ -352,10 +338,6 @@ public class Config {
         return botToken;
     }
 
-    String getOauthSecret() {
-        return oauthSecret;
-    }
-
     public String getJdbcUrl() {
         return jdbcUrl;
     }
@@ -368,10 +350,6 @@ public class Config {
         return numShards;
     }
 
-    public String getMashapeKey() {
-        return mashapeKey;
-    }
-
     public String getMalUser() {
         return malUser;
     }
@@ -382,10 +360,6 @@ public class Config {
 
     public String getImgurClientId() {
         return imgurClientId;
-    }
-
-    public int getScope() {
-        return scope;
     }
 
     public List<String> getGoogleKeys() {
@@ -402,14 +376,6 @@ public class Config {
 
     public String getCarbonKey() {
         return carbonKey;
-    }
-
-    public String getCbUser() {
-        return cbUser;
-    }
-
-    public String getCbKey() {
-        return cbKey;
     }
 
     public String getSpotifyId() {
