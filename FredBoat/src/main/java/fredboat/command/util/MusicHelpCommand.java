@@ -40,7 +40,9 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.feature.I18n;
+import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 
 import java.util.*;
@@ -107,8 +109,9 @@ public class MusicHelpCommand extends Command implements IUtilCommand {
         context.replyPrivate(TextUtils.asMarkdown(dmMsg),
                 success -> context.replyWithName(I18n.get(context, "helpSent")),
                 failure -> {
-                    String out = ":exclamation:I couldn't send commands help to your DMs! Do you have them turned off?"; // TODO: I18n
-                    context.replyWithName(out);
+                    if (context.hasPermissions(Permission.MESSAGE_WRITE)) {
+                        context.replyWithName(Emojis.EXCLAMATION + I18n.get(context, "helpDmFailed"));
+                    }
                 }
         );
     }

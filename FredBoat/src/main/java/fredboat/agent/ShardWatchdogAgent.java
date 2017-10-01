@@ -28,13 +28,12 @@ package fredboat.agent;
 import fredboat.Config;
 import fredboat.FredBoat;
 import fredboat.event.ShardWatchdogListener;
+import fredboat.feature.togglz.FeatureFlags;
 import fredboat.shared.constant.DistributionEnum;
 import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
 import java.util.List;
 
 public class ShardWatchdogAgent extends Thread {
@@ -53,7 +52,6 @@ public class ShardWatchdogAgent extends Thread {
     public void run() {
         log.info("Started shard watchdog");
 
-        //noinspection InfiniteLoopStatement
         while (!shutdown) {
             try {
                 inspect();
@@ -70,6 +68,10 @@ public class ShardWatchdogAgent extends Thread {
     }
 
     private void inspect() throws InterruptedException {
+        if (!FeatureFlags.SHARD_WATCHDOG.isActive()) {
+            return;
+        }
+
         List<FredBoat> shards = FredBoat.getShards();
 
         for (FredBoat shard : shards) {
@@ -114,18 +116,5 @@ public class ShardWatchdogAgent extends Thread {
         }
 
         return Config.CONFIG.getNumShards() != 1 ? 30 * 1000 : 600 * 1000; //30 seconds or 10 minutes depending on shard count
-    }
-
-    private static String getShardThreadDump(int shardId) {
-        ThreadInfo[] threadInfos = ManagementFactory.getThreadMXBean()
-                .dumpAllThreads(true,
-                        true);
-        StringBuilder dump = new StringBuilder();
-        dump.append(String.format("%n"));
-        for (ThreadInfo threadInfo : threadInfos) {
-            if (threadInfo.getThreadName().contains("[" + shardId + " / "))
-                dump.append(threadInfo);
-        }
-        return dump.toString();
     }
 }

@@ -28,6 +28,8 @@ package fredboat.audio.player;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,10 +43,12 @@ public class PlayerRegistry {
         REGISTRY.put(k, v);
     }
 
-    public static GuildPlayer get(Guild guild) {
+    @Nonnull
+    public static GuildPlayer get(@Nonnull Guild guild) {
         return get(guild.getJDA(), guild.getId());
     }
 
+    @Nonnull
     public static GuildPlayer get(JDA jda, String k) {
         GuildPlayer player = REGISTRY.get(k);
         if (player == null) {
@@ -61,10 +65,12 @@ public class PlayerRegistry {
         return player;
     }
 
+    @Nullable
     public static GuildPlayer getExisting(Guild guild) {
         return getExisting(guild.getJDA(), guild.getId());
     }
 
+    @Nullable
     public static GuildPlayer getExisting(JDA jda, String k) {
         if (REGISTRY.containsKey(k)) {
             return get(jda, k);

@@ -29,6 +29,7 @@ import fredboat.Config;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.EntityReader;
 import fredboat.db.entity.GuildPermissions;
+import fredboat.feature.I18n;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.Permission;
@@ -77,9 +78,8 @@ public class PermsUtil {
         if (actual.getLevel() >= minLevel.getLevel()) {
             return true;
         } else {
-            context.replyWithName(MessageFormat.format(
-                    "You don''t have permission to run this command! This command requires `{0}` but you only have `{1}`",
-                    minLevel, actual)); //TODO i18n
+            context.replyWithName(MessageFormat.format(I18n.get(context, "cmdPermsTooLow"),
+                    minLevel, actual));
             return false;
         }
     }

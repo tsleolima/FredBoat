@@ -65,12 +65,13 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand("yt", new PlayCommand(SearchUtil.SearchProvider.YOUTUBE), "youtube");
         CommandRegistry.registerCommand("sc", new PlayCommand(SearchUtil.SearchProvider.SOUNDCLOUD), "soundcloud");
         CommandRegistry.registerCommand("skip", new SkipCommand(), "sk", "s");
-        CommandRegistry.registerCommand("join", new JoinCommand(), "summon", "jn");
+        CommandRegistry.registerCommand("voteSkip", new VoteSkipCommand(), "vsk", "v");
+        CommandRegistry.registerCommand("join", new JoinCommand(), "summon", "jn", "j");
         CommandRegistry.registerCommand("leave", new LeaveCommand(), "lv");
         CommandRegistry.registerCommand("select", new SelectCommand(), buildNumericalSelectAllias("sel"));
         CommandRegistry.registerCommand("stop", new StopCommand(), "st");
         CommandRegistry.registerCommand("pause", new PauseCommand(), "pa", "ps");
-        CommandRegistry.registerCommand("shuffle", new ShuffleCommand(), "sh");
+        CommandRegistry.registerCommand("shuffle", new ShuffleCommand(), "sh","random");
         CommandRegistry.registerCommand("reshuffle", new ReshuffleCommand(), "resh");
         CommandRegistry.registerCommand("repeat", new RepeatCommand(), "rep");
         CommandRegistry.registerCommand("volume", new VolumeCommand(), "vol");
@@ -111,6 +112,8 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand("announce", new AnnounceCommand());
         CommandRegistry.registerCommand("mping", new PingCommand());
         CommandRegistry.registerCommand("node", new NodeAdminCommand());
+
+        CommandRegistry.registerCommand("getnode", new GetNodeCommand());
         
         /* Bot configuration */
         CommandRegistry.registerCommand("config", new ConfigCommand(), "cfg");

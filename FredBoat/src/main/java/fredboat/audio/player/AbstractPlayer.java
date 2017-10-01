@@ -48,9 +48,12 @@ import fredboat.audio.queue.SplitAudioTrackContext;
 import fredboat.audio.queue.TrackEndMarkerHandler;
 import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
+import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.commandmeta.MessagingException;
+import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import lavalink.client.player.IPlayer;
+import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
 import lavalink.client.player.event.AudioEventAdapterWrapped;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
@@ -95,7 +98,9 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
                 quality = AudioConfiguration.ResamplingQuality.MEDIUM;
 
             playerManager.getConfiguration().setResamplingQuality(quality);
-            playerManager.enableGcMonitoring();
+            if (!LavalinkManager.ins.isEnabled()) {
+                playerManager.enableGcMonitoring(); //we are playing tracks locally
+            }
             playerManager.setFrameBufferDuration(1000);
 
             if (Config.CONFIG.getDistribution() != DistributionEnum.DEVELOPMENT && Config.CONFIG.isLavaplayerNodesEnabled()) {
@@ -312,8 +317,11 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     void destroy() {
         log.debug("destroy()");
-
         stop();
+        player.removeListener(this);
+        if (player instanceof LavalinkPlayer) {
+            ((LavalinkPlayer) player).getLink().destroy();
+        }
     }
 
     @Override
@@ -374,7 +382,11 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     public void seekTo(long position) {
-        player.seekTo(position);
+        if (context.getTrack().isSeekable()) {
+            player.seekTo(position);
+        } else {
+            throw new MessagingException(I18n.get(context, "seekDeniedLiveTrack"));
+        }
     }
 
     public IPlayer getPlayer() {

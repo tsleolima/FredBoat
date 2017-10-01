@@ -25,13 +25,20 @@
 
 package fredboat.command.admin;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.filter.ThresholdFilter;
 import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.perms.PermissionLevel;
+import fredboat.util.GitRepoState;
 import io.sentry.Sentry;
+import io.sentry.logback.SentryAppender;
 import net.dv8tion.jda.core.entities.Guild;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by napster on 07.09.17.
@@ -39,6 +46,10 @@ import net.dv8tion.jda.core.entities.Guild;
  * Override the DSN for sentry. Pass stop or clear to turn it off.
  */
 public class SentryDsnCommand extends Command implements ICommandRestricted {
+
+    private static final Logger log = LoggerFactory.getLogger(SentryDsnCommand.class);
+    private static final String SENTRY_APPENDER_NAME = "SENTRY";
+
     @Override
     public void onInvoke(CommandContext context) {
         if (context.args.length < 2) {
@@ -48,12 +59,45 @@ public class SentryDsnCommand extends Command implements ICommandRestricted {
         String dsn = context.args[1];
 
         if (dsn.equals("stop") || dsn.equals("clear")) {
-            Sentry.close();
+            turnOff();
             context.replyWithName("Sentry service has been stopped");
         } else {
-            Sentry.init(dsn);
+            turnOn(dsn);
             context.replyWithName("New Sentry DSN has been set!");
         }
+    }
+
+    public static void turnOn(String dsn) {
+        log.info("Turning on sentry");
+        Sentry.init(dsn).setRelease(GitRepoState.getGitRepositoryState().commitId);
+        getSentryLogbackAppender().start();
+    }
+
+    public static void turnOff() {
+        log.info("Turning off sentry");
+        Sentry.close();
+        getSentryLogbackAppender().stop();
+    }
+
+    //programmatically creates a sentry appender
+    private static synchronized SentryAppender getSentryLogbackAppender() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.Logger root = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+
+        SentryAppender sentryAppender = (SentryAppender) root.getAppender(SENTRY_APPENDER_NAME);
+        if (sentryAppender == null) {
+            sentryAppender = new SentryAppender();
+            sentryAppender.setName(SENTRY_APPENDER_NAME);
+
+            ThresholdFilter warningsOrAboveFilter = new ThresholdFilter();
+            warningsOrAboveFilter.setLevel(Level.WARN.levelStr);
+            warningsOrAboveFilter.start();
+            sentryAppender.addFilter(warningsOrAboveFilter);
+
+            sentryAppender.setContext(loggerContext);
+            root.addAppender(sentryAppender);
+        }
+        return sentryAppender;
     }
 
     @Override

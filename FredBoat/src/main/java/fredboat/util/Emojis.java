@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -20,49 +21,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.util.log;
-
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.utils.SimpleLog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package fredboat.util;
 
 /**
- * @author sedmelluq
+ * Created by napster on 25.09.17.
  */
-public class SimpleLogToSLF4JAdapter implements SimpleLog.LogListener {
-  private static final Logger log = LoggerFactory.getLogger(JDA.class);
+public class Emojis {
 
-  @Override
-  public void onLog(SimpleLog simpleLog, SimpleLog.Level logLevel, Object message) {
-    switch (logLevel) {
-      case TRACE:
-        if (log.isTraceEnabled()) {
-          log.trace(message.toString());
-        }
-        break;
-      case DEBUG:
-        if (log.isDebugEnabled()) {
-          log.debug(message.toString());
-        }
-        break;
-      case INFO:
-        log.info(message.toString());
-        break;
-      case WARNING:
-        log.warn(message.toString());
-        break;
-      case FATAL:
-        log.error(message.toString());
-        break;
-    }
-  }
-
-  @Override
-  public void onError(SimpleLog simpleLog, Throwable err) {
-    log.error("An exception occurred", err);
-  }
+    public static final String EXCLAMATION = "❗";
 }

@@ -28,7 +28,6 @@ package fredboat.commandmeta;
 
 import fredboat.Config;
 import fredboat.command.fun.AkinatorCommand;
-import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -68,13 +67,6 @@ public class CommandManager {
 
         commandsExecuted.getAndIncrement();
 
-        if (Config.CONFIG.getDistribution() == DistributionEnum.MAIN
-                && invoked instanceof HelpCommand
-                && DiscordUtil.isMusicBotPresent(guild)) {
-            log.info("Ignored help command because music bot is present and I am the 'main' FredBoat");
-            return;
-        }
-
         if (guild.getJDA().getSelfUser().getId().equals(BotConstants.PATRON_BOT_ID)
                 && Config.CONFIG.getDistribution() == DistributionEnum.PATRON
                 && guild.getId().equals(BotConstants.FREDBOAT_HANGOUT_ID)) {
@@ -102,12 +94,6 @@ public class CommandManager {
                 && Config.CONFIG.getPrefix().equals(Config.DEFAULT_PREFIX)
                 && !guild.getId().equals(BotConstants.FREDBOAT_HANGOUT_ID)) {
             log.info("Ignored command because patron bot is able to use that channel");
-            return;
-        }
-
-        if (invoked instanceof IMusicCommand
-                && !guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_WRITE)) {
-            log.debug("Ignored command because it was a music command, and this bot cannot write in that channel");
             return;
         }
 

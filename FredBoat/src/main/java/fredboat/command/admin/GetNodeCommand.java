@@ -23,45 +23,31 @@
  *
  */
 
-package fredboat.command.fun;
+package fredboat.command.admin;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.audio.player.LavalinkManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
-import fredboat.commandmeta.abs.IFunCommand;
-import fredboat.feature.togglz.FeatureFlags;
+import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.perms.PermissionLevel;
+import lavalink.client.io.LavalinkSocket;
 import net.dv8tion.jda.core.entities.Guild;
-import org.apache.commons.lang3.StringEscapeUtils;
 
-import javax.annotation.CheckReturnValue;
-
-//TODO fix JCA and reintroduce this command
-public class TalkCommand extends Command implements IFunCommand {
+public class GetNodeCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(CommandContext context) {
-        String question = context.msg.getRawContent().substring(Config.CONFIG.getPrefix().length() + 5);
-
-        String response = talk(question);
-        if (response != null && !response.isEmpty()) {
-            context.replyWithName(response);
-        }
-    }
-
-    @CheckReturnValue
-    public static String talk(String question) {
-        //Cleverbot integration
-        if (FeatureFlags.CHATBOT.isActive()) {
-            String response = FredBoat.jca.getResponse(question);
-            return StringEscapeUtils.unescapeHtml4(response);
-        } else {
-            return "";
-        }
+        LavalinkSocket node = LavalinkManager.ins.getLavalink().getLink(context.getGuild()).getCurrentSocket();
+        context.channel.sendMessage(String.valueOf(node)).queue();
     }
 
     @Override
     public String help(Guild guild) {
-        return "{0}{1} <text> OR @{2} <text>\n#Talk to the Cleverbot AI.";
+        return "{0}{1}\n#Restarts the bot.";
+    }
+
+    @Override
+    public PermissionLevel getMinimumPerms() {
+        return PermissionLevel.BOT_ADMIN;
     }
 }
