@@ -46,6 +46,7 @@ import fredboat.event.ShardWatchdogListener;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.AppInfo;
+import fredboat.util.GitRepoState;
 import fredboat.util.JDAUtil;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -107,16 +108,28 @@ public abstract class FredBoat {
                 " | |__ _ __ ___  __| | |_) | ___   __ _| |_ \n" +
                 " |  __| '__/ _ \\/ _` |  _ < / _ \\ / _` | __|\n" +
                 " | |  | | |  __/ (_| | |_) | (_) | (_| | |_ \n" +
-                " |_|  |_|  \\___|\\__,_|____/ \\___/ \\__,_|\\__|\n\n");
-        log.info("App Info:"
-                + "\n\tGroup:    " + AppInfo.getAppInfo().GROUP_ID
-                + "\n\tArtifact: " + AppInfo.getAppInfo().ARTIFACT_ID
-                + "\n\tVersion:  " + AppInfo.getAppInfo().VERSION
-                + "\n\tBuild:    " + AppInfo.getAppInfo().BUILD_NUMBER);
+                " |_|  |_|  \\___|\\__,_|____/ \\___/ \\__,_|\\__|\n\n"
+
+                + "\n\tVersion:       " + AppInfo.getAppInfo().VERSION
+                + "\n\tBuild:         " + AppInfo.getAppInfo().BUILD_NUMBER
+                + "\n\tCommit:        " + GitRepoState.getGitRepositoryState().commitIdAbbrev + " (" + GitRepoState.getGitRepositoryState().branch +  ")"
+                + "\n\tCommit time:   " + GitRepoState.getGitRepositoryState().commitTime
+                + "\n\tJVM:           " + System.getProperty("java.version")
+                + "\n\tJDA:           " + JDAInfo.VERSION
+                + "\n");
+
+        String javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
+
+        if (!javaVersionMinor.equals("8")) {
+            log.warn("\n\t\t __      ___   ___ _  _ ___ _  _  ___ \n" +
+                    "\t\t \\ \\    / /_\\ | _ \\ \\| |_ _| \\| |/ __|\n" +
+                    "\t\t  \\ \\/\\/ / _ \\|   / .` || || .` | (_ |\n" +
+                    "\t\t   \\_/\\_/_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\n" +
+                    "\t\t                                      ");
+            log.warn("FredBoat only supports Java 8. You are running Java " + javaVersionMinor);
+        }
 
         I18n.start();
-
-        log.info("JDA version:\t" + JDAInfo.VERSION);
 
         Config.loadDefaultConfig();
 
