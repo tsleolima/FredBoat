@@ -269,9 +269,21 @@
                 </dependency>
             </dependencies>
         </profile>
+        <profile>
+            <!-- sets a default value for the build number if it is missing in the environment (when building in a
+            development environment for example) -->
+            <id>buildnumber</id>
+            <activation>
+                <property>
+                    <name>!env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <env.BUILD_NUMBER>DEV</env.BUILD_NUMBER>
+            </properties>
+        </profile>
     </profiles>
 
-    <!-- -P dev,!default -->
     <build>
         <resources>
             <resource>
