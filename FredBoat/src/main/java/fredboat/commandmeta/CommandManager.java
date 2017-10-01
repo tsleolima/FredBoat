@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,6 +60,7 @@ public class CommandManager {
     private static final Logger log = LoggerFactory.getLogger(CommandManager.class);
 
     public static final AtomicInteger commandsExecuted = new AtomicInteger(0);
+    public static final Set<Command> disabledCommands = new HashSet<>(0);
 
     public static void prefixCalled(CommandContext context) {
         Guild guild = context.guild;
@@ -110,6 +113,11 @@ public class CommandManager {
                         msg -> msg.delete().queueAfter(5, TimeUnit.SECONDS));
                 return;
             }
+        }
+
+        if (disabledCommands.contains(invoked)) {
+            context.replyWithName("Sorry the `"+ context.cmdName +"` command is currently disabled. Please try again later");
+            return;
         }
 
         if (invoked instanceof ICommandRestricted) {
