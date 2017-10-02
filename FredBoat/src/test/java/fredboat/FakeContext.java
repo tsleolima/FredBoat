@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -20,38 +21,49 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.command.fun;
+package fredboat;
 
-import fredboat.commandmeta.abs.CommandContext;
-import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.messaging.internal.Context;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 
-import javax.annotation.Nonnull;
+/**
+ * Created by napster on 02.10.17.
+ */
+public class FakeContext extends Context {
 
-public class RollCommand extends RandomImageCommand implements IFunCommand {
+    private final TextChannel channel;
+    private final Member member;
+    private final Guild guild;
 
-    public RollCommand(String[] urls) {
-        super(urls);
-    }
-
-    public RollCommand(String imgurAlbumUrl) {
-        super(imgurAlbumUrl);
+    public FakeContext(TextChannel channel, Member member, Guild guild) {
+        this.channel = channel;
+        this.member = member;
+        this.guild = guild;
     }
 
     @Override
-    public void onInvoke(@Nonnull CommandContext context) {
-        String rollMessage = "_"
-                + context.i18nFormat("rollSuccess", context.invoker.getAsMention())
-                + "_";
-        context.replyImage(super.getRandomImageUrl(), rollMessage);
+    public TextChannel getTextChannel() {
+        return channel;
     }
 
-    @Nonnull
     @Override
-    public String help(@Nonnull Context context) {
-        return "{0}{1}\n#Roll around.";
+    public Guild getGuild() {
+        return guild;
     }
+
+    @Override
+    public Member getMember() {
+        return member;
+    }
+
+    @Override
+    public User getUser() {
+        return getMember().getUser();
+    }
+    
 }
