@@ -115,14 +115,10 @@ public class Config {
             configFileStr = cleanTabs(configFileStr, "config.yaml");
             Map<String, Object> creds;
             Map<String, Object> config;
-            try {
-                creds = (Map<String, Object>) yaml.load(credsFileStr);
-                config = (Map<String, Object>) yaml.load(configFileStr);
-            } catch (YAMLException e) {
-                log.error("Could not parse the credentials and/or config yaml files! There are probably misformatted. " +
-                        "Try using an online yaml format checker.");
-                throw e;
-            }
+
+            creds = (Map<String, Object>) yaml.load(credsFileStr);
+            config = (Map<String, Object>) yaml.load(configFileStr);
+
             //avoid null values, rather change them to empty strings
             creds.keySet().forEach((String key) -> creds.putIfAbsent(key, ""));
             config.keySet().forEach((String key) -> config.putIfAbsent(key, ""));
@@ -263,6 +259,10 @@ public class Config {
 
         } catch (IOException | UnirestException e) {
             throw new RuntimeException(e);
+        } catch (YAMLException | ClassCastException e) {
+            log.error("Could not parse the credentials and/or config yaml files! They are probably misformatted. " +
+                    "Try using an online yaml validator.");
+            throw e;
         }
     }
 
