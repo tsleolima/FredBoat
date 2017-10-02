@@ -58,8 +58,7 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
             full = true;
         }
 
-        //make a copy to avoid concurrent modification errors
-        List<FredBoat> shards = new ArrayList<>(FredBoat.getShards());
+        List<FredBoat> shards = FredBoat.getShards();
         int borkenShards = 0;
         int healthyGuilds = 0;
         int healthyUsers = 0;
