@@ -8,6 +8,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.messaging.CentralMessaging;
+import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.shared.constant.BotConstants;
@@ -19,6 +20,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class DebugCommand extends Command implements ICommandRestricted {
@@ -145,8 +147,9 @@ public class DebugCommand extends Command implements ICommandRestricted {
         return str + "```\n";
     }
 
+    @Nonnull
     @Override
-    public String help(Guild guild) {
+    public String help(@Nonnull Context context) {
         return "{0}{1] <guildId>\n#Display debug information for the selected guild";
     }
 
