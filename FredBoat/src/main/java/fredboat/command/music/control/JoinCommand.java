@@ -64,6 +64,7 @@ public class JoinCommand extends Command implements IMusicCommand, ICommandRestr
         return "{0}{1}\n#" + context.i18n("helpJoinCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;

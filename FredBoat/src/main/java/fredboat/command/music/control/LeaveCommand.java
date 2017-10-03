@@ -62,6 +62,7 @@ public class LeaveCommand extends Command implements IMusicCommand, ICommandRest
         return "{0}{1}\n#" + context.i18n("helpLeaveCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

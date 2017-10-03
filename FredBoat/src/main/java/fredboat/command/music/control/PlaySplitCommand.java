@@ -69,6 +69,7 @@ public class PlaySplitCommand extends Command implements IMusicCommand, ICommand
         return "{0}{1} <url>\n#" + context.i18n("helpPlaySplitCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;

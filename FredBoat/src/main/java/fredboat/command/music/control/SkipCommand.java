@@ -240,6 +240,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
         return usage + context.i18n("helpSkipCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;

@@ -94,6 +94,7 @@ public class RepeatCommand extends Command implements IMusicCommand, ICommandRes
         return usage + context.i18n("helpRepeatCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

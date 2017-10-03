@@ -56,6 +56,7 @@ public class ShuffleCommand extends Command implements IMusicCommand, ICommandRe
         return "{0}{1}\n#" + context.i18n("helpShuffleCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

@@ -71,6 +71,7 @@ public class VolumeCommand extends Command implements IMusicCommand, ICommandRes
         return "{0}{1} <0-150>\n#" + context.i18n("helpVolumeCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

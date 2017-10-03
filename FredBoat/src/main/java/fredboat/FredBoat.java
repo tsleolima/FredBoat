@@ -280,7 +280,6 @@ public abstract class FredBoat {
             VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
             if (channel == null) return;
             GuildPlayer player = PlayerRegistry.get(channel.getGuild());
-            if (player == null) return;
 
             LavalinkManager.ins.openConnection(channel);
 

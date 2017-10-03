@@ -66,6 +66,7 @@ public class StopCommand extends Command implements IMusicCommand, ICommandRestr
         return "{0}{1}\n#" + context.i18n("helpStopCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

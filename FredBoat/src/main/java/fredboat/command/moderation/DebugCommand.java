@@ -165,6 +165,7 @@ public class DebugCommand extends Command implements ICommandRestricted {
         return "{0}{1] <guildId>\n#Display debug information for the selected guild";
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

@@ -101,6 +101,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
         return "{0}{1} n OR {0}{2} n\n#" + context.i18n("helpSelectCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;

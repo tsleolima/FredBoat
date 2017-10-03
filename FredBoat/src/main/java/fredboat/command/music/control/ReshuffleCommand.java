@@ -59,6 +59,7 @@ public class ReshuffleCommand extends Command implements IMusicCommand, ICommand
         return "{0}{1}\n#" + context.i18n("helpReshuffleCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;

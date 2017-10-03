@@ -202,6 +202,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
         return usage + context.i18n("helpPlayCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;
