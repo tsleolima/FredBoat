@@ -42,7 +42,7 @@ public class RepeatCommand extends Command implements IMusicCommand, ICommandRes
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
 
         if (context.args.length < 2) {
             HelpCommand.sendFormattedCommandHelp(context);

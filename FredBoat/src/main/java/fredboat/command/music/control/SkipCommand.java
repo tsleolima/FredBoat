@@ -62,7 +62,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         player.setCurrentTC(context.channel);
 
         if (player.isQueueEmpty()) {
@@ -223,7 +223,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
     }
 
     private void skipNext(CommandContext context) {
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         AudioTrackContext atc = player.getPlayingTrack();
         if (atc == null) {
             context.reply(context.i18n("skipTrackNotFound"));

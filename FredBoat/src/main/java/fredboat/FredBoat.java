@@ -279,7 +279,7 @@ public abstract class FredBoat {
         channelsToRejoin.forEach(vcid -> {
             VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
             if (channel == null) return;
-            GuildPlayer player = PlayerRegistry.get(channel.getGuild());
+            GuildPlayer player = PlayerRegistry.getOrCreate(channel.getGuild());
 
             LavalinkManager.ins.openConnection(channel);
 

@@ -35,7 +35,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         player.setCurrentTC(context.channel);
 
         // No point to allow voteskip if you are not in the vc at all
@@ -113,7 +113,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
     }
 
     private float getSkipPercentage(Guild guild) {
-        GuildPlayer player = PlayerRegistry.get(guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(guild);
         List<Member> vcMembers = player.getHumanUsersInCurrentVC();
         int votes = 0;
 

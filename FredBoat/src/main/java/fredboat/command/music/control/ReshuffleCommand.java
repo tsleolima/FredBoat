@@ -44,7 +44,7 @@ public class ReshuffleCommand extends Command implements IMusicCommand, ICommand
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         if (!player.isShuffle()) {
             context.replyWithName(context.i18n("reshufflePlayerNotShuffling"));
             return;

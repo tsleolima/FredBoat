@@ -56,7 +56,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
     static void select(CommandContext context) {
         String[] args = context.args;
         Member invoker = context.invoker;
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         player.setCurrentTC(context.channel);
         VideoSelection selection = VideoSelection.get(invoker);
         if (selection != null) {

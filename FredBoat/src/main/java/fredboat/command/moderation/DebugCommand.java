@@ -48,7 +48,7 @@ public class DebugCommand extends Command implements ICommandRestricted {
             }
 
             if (guild != null) {
-                GuildPlayer player = PlayerRegistry.get(guild);
+                GuildPlayer player = PlayerRegistry.getOrCreate(guild);
 
                 sendEmbedResponse(context, player);
                 return;
