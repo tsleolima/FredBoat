@@ -96,7 +96,7 @@ public class EvalCommand extends Command implements ICommandRestricted {
 
             } catch (Exception ex) {
                 context.reply("`" + ex.getMessage() + "`");
-                log.error("Error occurred in eval", ex);
+                log.info("Error occurred in eval", ex);
                 return;
             }
 
