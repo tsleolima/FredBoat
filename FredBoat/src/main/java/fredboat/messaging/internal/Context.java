@@ -142,7 +142,8 @@ public abstract class Context {
 
     public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         getMember().getUser().openPrivateChannel().queue(
-                privateChannel -> CentralMessaging.sendMessage(privateChannel, message, onSuccess, onFail)
+                privateChannel -> CentralMessaging.sendMessage(privateChannel, message, onSuccess, onFail),
+                onFail
         );
     }
 

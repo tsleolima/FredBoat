@@ -40,13 +40,21 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         LavalinkSocket node = LavalinkManager.ins.getLavalink().getLink(context.getGuild()).getCurrentSocket();
-        context.channel.sendMessage(String.valueOf(node)).queue();
+
+        String reply = String.format("Guild %s id `%s` lavalink socket: `%s`",
+                context.guild.getName(), context.guild.getIdLong(), String.valueOf(node));
+
+        //sensitive info, send it by DM
+        context.replyPrivate(reply,
+                __ -> context.replyWithName("Sent you a DM with the data"),
+                t -> context.replyWithName("Could not DM you, adjust your privacy settings.")
+        );
     }
 
     @Nonnull
     @Override
     public String help(@Nonnull Context context) {
-        return "{0}{1}\n#Restarts the bot.";
+        return "{0}{1}\n#Show information about the currently assigned lavalink node of this guild.";
     }
 
     @Nonnull
