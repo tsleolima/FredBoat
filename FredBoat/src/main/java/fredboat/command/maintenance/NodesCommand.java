@@ -61,10 +61,12 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
     private void handleLavalink(CommandContext context) {
         Lavalink lavalink = LavalinkManager.ins.getLavalink();
         if (context.args.length >= 2 && !context.args[1].equals("host")) {
-            LavalinkSocket socket = lavalink.getNodes().get(Integer.parseInt(context.args[1]));
-
-            context.reply("```json\n" + socket.getStats().getAsJson().toString(4) + "\n```");
-            return;
+            try {
+                LavalinkSocket socket = lavalink.getNodes().get(Integer.parseInt(context.args[1]));
+                context.reply("```json\n" + socket.getStats().getAsJson().toString(4) + "\n```");
+                return;
+            } catch (NumberFormatException ignored) { //fallthrough
+            }
         }
 
         boolean showHosts = false;
