@@ -505,6 +505,7 @@ public abstract class FredBoat {
         }
     }
 
+    @Nullable
     public static DatabaseManager getDbManager() {
         return dbManager;
     }
