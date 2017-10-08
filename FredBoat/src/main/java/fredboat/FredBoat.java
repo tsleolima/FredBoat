@@ -49,6 +49,8 @@ import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.AppInfo;
 import fredboat.util.GitRepoState;
 import fredboat.util.JDAUtil;
+import fredboat.util.rest.OpenWeatherAPI;
+import fredboat.util.rest.models.weather.RetrievedWeather;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
@@ -151,7 +153,6 @@ public abstract class FredBoat {
             dbManager.startup();
         }
 
-
         //Initialise event listeners
         listenerBot = new EventListenerBoat();
         LavalinkManager.ins.start();
@@ -172,6 +173,9 @@ public abstract class FredBoat {
 
         //Check imgur creds
         executor.submit(FredBoat::hasValidImgurCredentials);
+
+        //Check OpenWeather key
+        executor.submit(FredBoat::hasValidOpenWeatherKey);
 
         /* Init JDA */
         initBotShards(listenerBot);
@@ -216,7 +220,6 @@ public abstract class FredBoat {
                     .asJson();
             int responseStatus = response.getStatus();
 
-
             if (responseStatus == 200) {
                 JSONObject data = response.getBody().getObject().getJSONObject("data");
                 //https://api.imgur.com/#limits
@@ -240,6 +243,30 @@ public abstract class FredBoat {
             log.warn("Imgur login failed, it seems to be down.", e);
         }
         return false;
+    }
+
+    /**
+     * Method to check if there is an error to retrieve open weather data.
+     *
+     * @return True if it can retrieve data, else return false.
+     */
+    private static boolean hasValidOpenWeatherKey() {
+        if ("".equals(Config.CONFIG.getOpenWeatherKey())) {
+            log.warn("Open Weather API credentials not found. Weather related commands will not work properly.");
+            return false;
+        }
+
+        OpenWeatherAPI api = new OpenWeatherAPI();
+        RetrievedWeather weather = api.getCurrentWeatherByCity("san francisco");
+
+        boolean isSuccess = !(weather == null || weather.isError());
+
+        if (isSuccess) {
+            log.info("Open Weather API check successful");
+        } else {
+            log.warn("Open Weather API check failed. It may be down, the provided credentials may be invalid, or temporarily blocked.");
+        }
+        return isSuccess;
     }
 
     private static void initBotShards(EventListener listener) {
