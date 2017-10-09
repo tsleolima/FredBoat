@@ -29,7 +29,6 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import fredboat.Config;
 import fredboat.commandmeta.MessagingException;
-import fredboat.feature.I18n;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -38,7 +37,6 @@ import net.dv8tion.jda.core.entities.Message;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -92,40 +90,28 @@ public class TextUtils {
 
         if (context.getMember() != null) {
             builder.append(context.getMember());
-
-            String filtered = context.i18nFormat("utilErrorOccurred", e.toString());
-
-            for (String str : Config.CONFIG.getGoogleKeys()) {
-                filtered = filtered.replace(str, "GOOGLE_SERVER_KEY");
-            }
-
-            builder.append(filtered);
-        } else {
-            String filtered = MessageFormat.format(I18n.DEFAULT.getProps().getString("utilErrorOccurred"), e.toString());
-
-            for (String str : Config.CONFIG.getGoogleKeys()) {
-                filtered = filtered.replace(str, "GOOGLE_SERVER_KEY");
-            }
-
-            builder.append(filtered);
         }
 
-        //builder.append("```java\n");
+        String filtered = context.i18nFormat("utilErrorOccurred", e.toString());
+        for (String str : Config.CONFIG.getGoogleKeys()) {
+            filtered = filtered.replace(str, "GOOGLE_SERVER_KEY");
+        }
+        builder.append(filtered);
+
         for (StackTraceElement ste : e.getStackTrace()) {
-            builder.append("\t" + ste.toString() + "\n");
+            builder.append("\t").append(ste.toString()).append("\n");
             if ("prefixCalled".equals(ste.getMethodName())) {
                 break;
             }
         }
-        builder.append("\t...```");
-
-        Message out = builder.build();
+        builder.append("\t...```"); //opening ``` is part of the utilErrorOccurred language string
 
         try {
-            context.reply(out);
-        } catch (UnsupportedOperationException tooLongEx) {
+            context.reply(builder.build());
+        } catch (UnsupportedOperationException | IllegalStateException tooLongEx) {
             try {
-                context.reply(context.i18nFormat("errorOccurredTooLong", postToPasteService(out.getRawContent())));
+                context.reply(context.i18nFormat("errorOccurredTooLong",
+                        postToPasteService(builder.getStringBuilder().toString())));
             } catch (UnirestException e1) {
                 context.reply(context.i18n("errorOccurredTooLongAndUnirestException"));
             }

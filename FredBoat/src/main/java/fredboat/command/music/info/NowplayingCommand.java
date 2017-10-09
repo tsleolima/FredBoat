@@ -52,7 +52,6 @@ import org.json.XML;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
-import java.text.MessageFormat;
 
 public class NowplayingCommand extends Command implements IMusicCommand {
 
@@ -127,8 +126,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         return CentralMessaging.getClearThreadLocalEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), null)
-                .setDescription(MessageFormat.format(
-                        atc.i18n("npLoadedSoundcloud"),
+                .setDescription(atc.i18nFormat("npLoadedSoundcloud",
                         TextUtils.formatTime(atc.getEffectivePosition()), TextUtils.formatTime(atc.getEffectiveDuration()))) //TODO: Gather description, thumbnail, etc
                 .setColor(new Color(255, 85, 0));
     }
@@ -145,7 +143,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         return CentralMessaging.getClearThreadLocalEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), null)
-                .setDescription(MessageFormat.format(atc.i18n("npLoadedBandcamp"), desc))
+                .setDescription(atc.i18nFormat("npLoadedBandcamp", desc))
                 .setColor(new Color(99, 154, 169));
     }
 
@@ -221,7 +219,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         return CentralMessaging.getClearThreadLocalEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), at.getIdentifier())
-                .setDescription(MessageFormat.format(atc.i18n("npLoadedFromHTTP"), desc, at.getIdentifier())) //TODO: Probe data
+                .setDescription(atc.i18nFormat("npLoadedFromHTTP", desc, at.getIdentifier())) //TODO: Probe data
                 .setColor(BotConstants.FREDBOAT_COLOR);
     }
 
@@ -237,7 +235,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         return CentralMessaging.getClearThreadLocalEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), null)
-                .setDescription(MessageFormat.format(atc.i18n("npLoadedDefault"), desc, at.getSourceManager().getSourceName()))
+                .setDescription(atc.i18nFormat("npLoadedDefault", desc, at.getSourceManager().getSourceName()))
                 .setColor(BotConstants.FREDBOAT_COLOR);
     }
 
