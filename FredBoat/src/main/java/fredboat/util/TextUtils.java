@@ -51,6 +51,8 @@ public class TextUtils {
     public static final DateTimeFormatter TIME_IN_CENTRAL_EUROPE = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss z")
             .withZone(ZoneId.of("Europe/Copenhagen"));
 
+    public static final char ZERO_WIDTH_CHAR = '\u200b';
+
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TextUtils.class);
 
     private TextUtils() {

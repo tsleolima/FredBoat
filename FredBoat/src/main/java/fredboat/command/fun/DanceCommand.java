@@ -33,6 +33,7 @@ import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.event.EventListenerBoat;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
+import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
 
 import javax.annotation.Nonnull;
@@ -61,7 +62,7 @@ public class DanceCommand extends Command implements IFunCommand {
         Runnable func = new Runnable() {
             @Override
             public void run() {
-                context.reply('\u200b' + "\\o\\", msg -> {
+                context.reply(TextUtils.ZERO_WIDTH_CHAR + "\\o\\", msg -> {
                     try {
                         lock.lock();
                         EventListenerBoat.messagesToDeleteIfIdDeleted.put(context.msg.getIdLong(), msg.getIdLong());
