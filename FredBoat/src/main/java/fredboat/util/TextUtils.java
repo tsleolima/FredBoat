@@ -186,7 +186,7 @@ public class TextUtils {
         return percentageFormat.format((double) tmp / factor);
     }
 
-    public static String formatPercent(float percent) {
+    public static String formatPercent(double percent) {
         return roundToTwo(percent * 100) + "%";
     }
 
@@ -241,8 +241,10 @@ public class TextUtils {
         return millis;
     }
 
-    public static String asMarkdown(String str) {
-        return "```md\n" + str + "```";
+    //optional provide a style, for example diff or md
+    public static String asCodeBlock(String str, String... style) {
+        String sty = style != null && style.length > 0 ? style[0] : "";
+        return "```" + sty + "\n" + str + "\n```";
     }
 
     public static String forceNDigits(int i, int n) {

@@ -32,15 +32,14 @@ import fredboat.audio.player.LavalinkManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
-import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
+import fredboat.util.TextUtils;
 import lavalink.client.io.Lavalink;
 import lavalink.client.io.LavalinkLoadBalancer;
 import lavalink.client.io.LavalinkSocket;
 import lavalink.client.io.RemoteStats;
-import net.dv8tion.jda.core.MessageBuilder;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -63,9 +62,10 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
         if (context.args.length >= 2 && !context.args[1].equals("host")) {
             try {
                 LavalinkSocket socket = lavalink.getNodes().get(Integer.parseInt(context.args[1]));
-                context.reply("```json\n" + socket.getStats().getAsJson().toString(4) + "\n```");
+                context.reply(TextUtils.asCodeBlock(socket.getStats().getAsJson().toString(4), "json"));
                 return;
-            } catch (NumberFormatException ignored) { //fallthrough
+            } catch (NumberFormatException | IndexOutOfBoundsException ignored) { //fallthrough
+                context.replyWithName(String.format("No such node: `%s`, showing all nodes instead.", context.args[1]));
             }
         }
 
@@ -78,15 +78,21 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
             }
         }
 
-        String str = "```";
+        List<LavalinkSocket> nodes = lavalink.getNodes();
+        if (nodes.isEmpty()) {
+            context.replyWithName("There are no remote lavalink nodes registered.");
+            return;
+        }
+
+        String str = "";
 
         int i = 0;
-        for (LavalinkSocket socket : lavalink.getNodes()) {
+        for (LavalinkSocket socket : nodes) {
             RemoteStats stats = socket.getStats();
-            str += "Socket #" + i + "\n";
+            str += "Socket:             #" + i + "\n";
 
             if (showHosts) {
-                str += "Address: " + socket.getRemoteUri() + "\n";
+                str += "Address:                 " + socket.getRemoteUri() + "\n";
             }
 
             if (stats == null) {
@@ -97,29 +103,28 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
                 continue;
             }
 
-            str += stats.getPlayingPlayers() + " playing players\n";
-            str += stats.getLavalinkLoad() * 100f + "% lavalink load\n";
-            str += stats.getSystemLoad() * 100f + "% system load\n";
-            str += stats.getMemUsed() / 1000000 + "MB/" + stats.getMemReservable() / 1000000 + "MB memory\n";
-
-            str += "\n";
-
-            str += stats.getAvgFramesSentPerMinute() + " player average frames sent\n";
-            str += stats.getAvgFramesNulledPerMinute() + " player average frames nulled\n";
-            str += stats.getAvgFramesDeficitPerMinute() + " player average frames deficit\n";
-
-            str += "\n";
-
-            str += LavalinkLoadBalancer.getPenalties(socket).toString();
-
-            str += "\n";
-            str += "\n";
+            str += "Playing players:         " + stats.getPlayingPlayers() + "\n";
+            str += "Lavalink load:           " + TextUtils.formatPercent(stats.getLavalinkLoad()) + "\n";
+            str += "System load:             " + TextUtils.formatPercent(stats.getSystemLoad()) + " \n";
+            str += "Memory:                  " + stats.getMemUsed() / 1000000 + "MB/" + stats.getMemReservable() / 1000000 + "MB\n";
+            str += "---------------\n";
+            str += "Average frames sent:     " + stats.getAvgFramesSentPerMinute() + "\n";
+            str += "Average frames nulled:   " + stats.getAvgFramesNulledPerMinute() + "\n";
+            str += "Average frames deficit:  " + stats.getAvgFramesDeficitPerMinute() + "\n";
+            str += "---------------\n";
+            LavalinkLoadBalancer.Penalties penalties = LavalinkLoadBalancer.getPenalties(socket);
+            str += "Penalties Total:    " + penalties.getTotal() + "\n";
+            str += "Player Penalty:          " + penalties.getPlayerPenalty() + "\n";
+            str += "CPU Penalty:             " + penalties.getCpuPenalty() + "\n";
+            str += "Deficit Frame Penalty:   " + penalties.getDeficitFramePenalty() + "\n";
+            str += "Null Frame Penalty:      " + penalties.getNullFramePenalty() + "\n";
+            str += "Raw: " + penalties.toString() + "\n";
+            str += "---------------\n\n";
 
             i++;
         }
 
-        str += "```";
-        context.reply(str);
+        context.reply(TextUtils.asCodeBlock(str));
     }
 
     private void handleLavaplayer(CommandContext context) {
@@ -134,33 +139,34 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
                 context.replyWithName("You do not have permission to view the hosts!");
             }
         }
+        if (nodes.isEmpty()) {
+            context.replyWithName("There are no remote lavaplayer nodes registered.");
+            return;
+        }
 
-        MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder();
-        mb.append("```\n");
+        StringBuilder sb = new StringBuilder();
         int i = 0;
         for (RemoteNode node : nodes) {
-            mb.append("Node " + i + "\n");
+            sb.append("Node ").append(i).append("\n");
             if (showHost) {
-                mb.append(node.getAddress())
-                        .append("\n");
+                sb.append(node.getAddress()).append("\n");
             }
-            mb.append("Status: ")
+            sb.append("Status: ")
                     .append(node.getConnectionState().toString())
                     .append("\nPlaying: ")
                     .append(node.getLastStatistics() == null ? "UNKNOWN" : node.getLastStatistics().playingTrackCount)
                     .append("\nCPU: ")
-                    .append(node.getLastStatistics() == null ? "UNKNOWN" : node.getLastStatistics().systemCpuUsage * 100 + "%")
+                    .append(node.getLastStatistics() == null ? "UNKNOWN" : TextUtils.formatPercent(node.getLastStatistics().systemCpuUsage))
                     .append("\n");
 
-            mb.append(node.getBalancerPenaltyDetails());
+            sb.append(node.getBalancerPenaltyDetails());
 
-            mb.append("\n\n");
+            sb.append("\n\n");
 
             i++;
         }
 
-        mb.append("```");
-        context.reply(mb.build());
+        context.reply(TextUtils.asCodeBlock(sb.toString()));
     }
 
     @Nonnull
