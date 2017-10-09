@@ -29,6 +29,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.CarbonitexAgent;
 import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.FredBoatAgent;
@@ -101,23 +102,19 @@ public abstract class FredBoat {
     private static DatabaseManager dbManager;
 
     public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException, IOException, UnirestException {
+        //just post the info to the console
+        if (args.length > 0 &&
+                (args[0].equalsIgnoreCase("-v")
+                        || args[0].equalsIgnoreCase("--version")
+                        || args[0].equalsIgnoreCase("-version"))) {
+            System.out.println("Version flag detected. Printing version info, then exiting.");
+            System.out.println(getVersionInfo());
+            System.out.println("Version info printed, exiting.");
+            return;
+        }
+
         Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, "FredBoat main shutdownhook"));
-
-        log.info("\n\n" +
-                "  ______            _ ____              _   \n" +
-                " |  ____|          | |  _ \\            | |  \n" +
-                " | |__ _ __ ___  __| | |_) | ___   __ _| |_ \n" +
-                " |  __| '__/ _ \\/ _` |  _ < / _ \\ / _` | __|\n" +
-                " | |  | | |  __/ (_| | |_) | (_) | (_| | |_ \n" +
-                " |_|  |_|  \\___|\\__,_|____/ \\___/ \\__,_|\\__|\n\n"
-
-                + "\n\tVersion:       " + AppInfo.getAppInfo().VERSION
-                + "\n\tBuild:         " + AppInfo.getAppInfo().BUILD_NUMBER
-                + "\n\tCommit:        " + GitRepoState.getGitRepositoryState().commitIdAbbrev + " (" + GitRepoState.getGitRepositoryState().branch +  ")"
-                + "\n\tCommit time:   " + GitRepoState.getGitRepositoryState().commitTime
-                + "\n\tJVM:           " + System.getProperty("java.version")
-                + "\n\tJDA:           " + JDAInfo.VERSION
-                + "\n");
+        log.info(getVersionInfo());
 
         String javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
 
@@ -521,5 +518,24 @@ public abstract class FredBoat {
             return true;
         }
         return false;
+    }
+
+    private static String getVersionInfo() {
+        return "\n\n" +
+                "  ______            _ ____              _   \n" +
+                " |  ____|          | |  _ \\            | |  \n" +
+                " | |__ _ __ ___  __| | |_) | ___   __ _| |_ \n" +
+                " |  __| '__/ _ \\/ _` |  _ < / _ \\ / _` | __|\n" +
+                " | |  | | |  __/ (_| | |_) | (_) | (_| | |_ \n" +
+                " |_|  |_|  \\___|\\__,_|____/ \\___/ \\__,_|\\__|\n\n"
+
+                + "\n\tVersion:       " + AppInfo.getAppInfo().VERSION
+                + "\n\tBuild:         " + AppInfo.getAppInfo().BUILD_NUMBER
+                + "\n\tCommit:        " + GitRepoState.getGitRepositoryState().commitIdAbbrev + " (" + GitRepoState.getGitRepositoryState().branch + ")"
+                + "\n\tCommit time:   " + GitRepoState.getGitRepositoryState().commitTime
+                + "\n\tJVM:           " + System.getProperty("java.version")
+                + "\n\tJDA:           " + JDAInfo.VERSION
+                + "\n\tLavaplayer     " + PlayerLibrary.VERSION
+                + "\n";
     }
 }

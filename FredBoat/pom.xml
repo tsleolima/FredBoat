@@ -291,6 +291,10 @@
     </profiles>
 
     <build>
+        <finalName>
+            <!-- omit version info from artifact -->
+            FredBoat
+        </finalName>
         <resources>
             <resource>
                 <!-- include all regular resources -->
