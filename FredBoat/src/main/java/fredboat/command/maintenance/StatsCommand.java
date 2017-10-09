@@ -36,6 +36,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
 import fredboat.messaging.internal.Context;
 import fredboat.util.AppInfo;
+import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDAInfo;
 
 import javax.annotation.Nonnull;
@@ -81,8 +82,9 @@ public class StatsCommand extends Command implements IMaintenanceCommand {
 
         str = str + "Last agent run times:\n";
         for (Map.Entry<Class<? extends FredBoatAgent>, Long> entry : FredBoatAgent.getLastRunTimes().entrySet()) {
-            // [classname] [padded to length 32 with spaces] [date]T[time][zone]
-            str += String.format("%1$-32s%2$TFT%2$TT%2$Tz\n", entry.getKey().getSimpleName(), entry.getValue());
+            // [classname] [padded to length 32 with spaces] [formatted time]
+            str += String.format("%1$-32s%2$s\n", entry.getKey().getSimpleName(),
+                    TextUtils.asTimeInCentralEurope(entry.getValue()));
         }
 
         str = str + "```";

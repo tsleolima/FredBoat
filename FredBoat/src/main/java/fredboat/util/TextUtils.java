@@ -39,12 +39,17 @@ import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {
 
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^(\\d?\\d)(?::([0-5]?\\d))?(?::([0-5]?\\d))?$");
+    public static final DateTimeFormatter TIME_IN_CENTRAL_EUROPE = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss z")
+            .withZone(ZoneId.of("Europe/Copenhagen"));
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TextUtils.class);
 
@@ -248,5 +253,13 @@ public class TextUtils {
         }
 
         return str;
+    }
+
+    public static String getTimeInCentralEurope() {
+        return asTimeInCentralEurope(System.currentTimeMillis());
+    }
+
+    public static String asTimeInCentralEurope(final long epochMillis) {
+        return TIME_IN_CENTRAL_EUROPE.format(Instant.ofEpochMilli(epochMillis));
     }
 }
