@@ -51,10 +51,6 @@ public class FredBoatBot extends FredBoat {
     private final EventListener listener;
     private static final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
 
-    public FredBoatBot(int shardId) {
-        this(shardId, null);
-    }
-
     public FredBoatBot(int shardId, EventListener listener) {
         this.shardId = shardId;
         this.listener = listener;

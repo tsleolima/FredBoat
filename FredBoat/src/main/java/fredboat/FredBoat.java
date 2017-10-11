@@ -49,7 +49,6 @@ import fredboat.util.JDAUtil;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
-import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import net.dv8tion.jda.core.entities.Guild;
@@ -448,12 +447,7 @@ public abstract class FredBoat {
 
     public ShardInfo getShardInfo() {
         int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
-
-        if (jda.getAccountType() == AccountType.CLIENT) {
-            return new ShardInfo(0, 1);
-        } else {
-            return new ShardInfo(sId, Config.CONFIG.getNumShards());
-        }
+        return new ShardInfo(sId, Config.CONFIG.getNumShards());
     }
 
     public long getGuildCount() {
@@ -470,7 +464,6 @@ public abstract class FredBoat {
         return shardWatchdogListener;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static class ShardInfo {
 
         int shardId;
