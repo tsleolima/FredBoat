@@ -28,6 +28,9 @@ package fredboat.event;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.hooks.EventListener;
 
+//this isnt used anymore, but gets actually called a tremendous amount of times; should be phased out with together with
+//the watchdog
+@Deprecated
 public class ShardWatchdogListener implements EventListener {
 
     private String lastEvent = null;

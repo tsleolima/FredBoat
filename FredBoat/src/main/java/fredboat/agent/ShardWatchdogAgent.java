@@ -37,6 +37,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+//JDAs reconnection code is good enough:tm:. this isnt being used in production anymore (disabled via feature flag)
+//and should be removed in the near future
+@Deprecated
 public class ShardWatchdogAgent extends FredBoatAgent {
 
     private static final Logger log = LoggerFactory.getLogger(ShardWatchdogAgent.class);
