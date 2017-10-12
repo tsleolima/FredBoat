@@ -28,6 +28,7 @@ package fredboat;
 import com.google.common.base.CharMatcher;
 import fredboat.audio.player.PlayerLimitManager;
 import fredboat.command.admin.SentryDsnCommand;
+import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.DiscordUtil;
 import org.apache.commons.io.FileUtils;
@@ -321,7 +322,10 @@ public class Config {
     }
 
     public String getRandomGoogleKey() {
-        return getGoogleKeys().get((int) Math.floor(Math.random() * getGoogleKeys().size()));
+        if (googleKeys.isEmpty()) {
+            throw new MessagingException("No Youtube API key detected. Please read the documentation of the credentials file on how to obtain one.");
+        }
+        return googleKeys.get((int) Math.floor(Math.random() * getGoogleKeys().size()));
     }
 
     public DistributionEnum getDistribution() {
