@@ -63,7 +63,7 @@ public class ReviveCommand extends Command implements ICommandRestricted {
 
         context.replyWithName("Attempting to revive shard " + shardId);
         try {
-            String answer = FredBoat.getInstance(shardId).revive(force);
+            String answer = FredBoat.getShard(shardId).revive(force);
             context.replyWithName(answer);
         } catch (IndexOutOfBoundsException e) {
             context.replyWithName("No such shard: " + shardId);

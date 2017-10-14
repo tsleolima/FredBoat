@@ -87,7 +87,7 @@ public final class AkinatorListener extends UserListener {
 
     private void checkTimeout() {
         if (System.currentTimeMillis() - lastActionReceived > TimeUnit.MINUTES.toMillis(5)) {
-            FredBoat.getListenerBot().removeListener(userId);
+            FredBoat.getMainEventListener().removeListener(userId);
             timeoutTask.cancel(false);
         }
     }
@@ -121,7 +121,7 @@ public final class AkinatorListener extends UserListener {
                 context.reply("Bravo !\n"
                         + "You have defeated me !\n"
                         + "<http://akinator.com>");
-                FredBoat.getListenerBot().removeListener(userId);
+                FredBoat.getMainEventListener().removeListener(userId);
                 return;
             }
 
@@ -151,7 +151,7 @@ public final class AkinatorListener extends UserListener {
                 context.reply("Great! Guessed right one more time.\n"
                         + "I love playing with you!\n"
                         + "<http://akinator.com>");
-                FredBoat.getListenerBot().removeListener(userId);
+                FredBoat.getMainEventListener().removeListener(userId);
             } else if (answer == 1) {
                 Http.get(EXCLUSION_URL,
                         Http.Params.of(

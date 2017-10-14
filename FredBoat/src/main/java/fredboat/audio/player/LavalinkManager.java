@@ -54,7 +54,7 @@ public class LavalinkManager {
         lavalink = new Lavalink(
                 userId,
                 Config.CONFIG.getNumShards(),
-                shardId -> FredBoat.getInstance(shardId).getJda()
+                shardId -> FredBoat.getShard(shardId).getJda()
         );
 
         List<Config.LavalinkHost> hosts = Config.CONFIG.getLavalinkHosts();

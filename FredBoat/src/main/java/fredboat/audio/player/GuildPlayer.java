@@ -83,7 +83,7 @@ public class GuildPlayer extends AbstractPlayer {
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
-        this.shard = FredBoat.getInstance(guild.getJDA());
+        this.shard = FredBoat.getShard(guild.getJDA());
         this.guildId = guild.getIdLong();
 
         if (!LavalinkManager.ins.isEnabled()) {

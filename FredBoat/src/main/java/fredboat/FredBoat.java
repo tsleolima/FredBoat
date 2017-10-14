@@ -30,9 +30,7 @@ import fredboat.agent.CarbonitexAgent;
 import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.FredBoatAgent;
 import fredboat.api.API;
-import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.init.MainCommandInitializer;
@@ -54,7 +52,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
-import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.core.requests.SessionReconnectQueue;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import org.json.JSONObject;
@@ -65,8 +63,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -77,23 +73,20 @@ public abstract class FredBoat {
 
     private static final Logger log = LoggerFactory.getLogger(FredBoat.class);
 
-    static final int SHARD_CREATION_SLEEP_INTERVAL = 5500;
-
-    private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
+    public static final int SHARD_CREATION_SLEEP_INTERVAL = 5500;
     public static final long START_TIME = System.currentTimeMillis();
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
     public static int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
-    static EventListenerBoat listenerBot;
-
-    //For when we need to join a revived shard with it's old GuildPlayers
-    final ArrayList<String> channelsToRejoin = new ArrayList<>();
-
     //unlimited threads = http://i.imgur.com/H3b7H1S.gif
     //use this executor for various small async tasks
     public final static ExecutorService executor = Executors.newCachedThreadPool();
 
+    //central event listener that all events by all shards pass through
+    protected static EventListenerBoat mainEventListener;
+    protected static final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
 
     private static DatabaseManager dbManager;
+    private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
 
     public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException, IOException {
         //just post the info to the console
@@ -145,17 +138,14 @@ public abstract class FredBoat {
         }
 
         //Initialise event listeners
-        listenerBot = new EventListenerBoat();
+        mainEventListener = new EventListenerBoat();
         LavalinkManager.ins.start();
 
         //Commands
         if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT)
             MainCommandInitializer.initCommands();
 
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT
-                || Config.CONFIG.getDistribution() == DistributionEnum.MUSIC
-                || Config.CONFIG.getDistribution() == DistributionEnum.PATRON)
-            MusicCommandInitializer.initCommands();
+        MusicCommandInitializer.initCommands();
 
         log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
 
@@ -169,13 +159,17 @@ public abstract class FredBoat {
         executor.submit(FredBoat::hasValidOpenWeatherKey);
 
         /* Init JDA */
-        initBotShards(listenerBot);
+        initBotShards(mainEventListener);
 
-        if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && Config.CONFIG.getCarbonKey() != null) {
-            FredBoatAgent.start(new CarbonitexAgent(Config.CONFIG.getCarbonKey()));
+        String carbonKey = Config.CONFIG.getCarbonKey();
+        if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && carbonKey != null && !carbonKey.isEmpty()) {
+            FredBoatAgent.start(new CarbonitexAgent(carbonKey));
         }
-
     }
+
+    // ################################################################################
+    // ##                     Login / credential tests
+    // ################################################################################
 
     private static boolean hasValidMALLogin() {
         String malUser = Config.CONFIG.getMalUser();
@@ -265,7 +259,7 @@ public abstract class FredBoat {
     private static void initBotShards(EventListener listener) {
         for (int i = 0; i < Config.CONFIG.getNumShards(); i++) {
             try {
-                shards.add(i, new FredBoatBot(i, listener));
+                shards.add(i, new FredBoatShard(i, listener));
             } catch (Exception e) {
                 log.error("Caught an exception while starting shard " + i + "!", e);
             }
@@ -278,31 +272,6 @@ public abstract class FredBoat {
 
         log.info(shards.size() + " shards have been constructed");
 
-    }
-
-    public void onInit(ReadyEvent readyEvent) {
-        log.info("Received ready event for " + FredBoat.getInstance(readyEvent.getJDA()).getShardInfo().getShardString());
-
-        if (Config.CONFIG.getNumShards() <= 10) {
-            //the current implementation of music persistence is not a good idea on big bots
-            MusicPersistenceHandler.reloadPlaylists(this);
-        }
-
-        //Rejoin old channels if revived
-        channelsToRejoin.forEach(vcid -> {
-            VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
-            if (channel == null) return;
-            GuildPlayer player = PlayerRegistry.getOrCreate(channel.getGuild());
-
-            LavalinkManager.ins.openConnection(channel);
-
-            if (!LavalinkManager.ins.isEnabled()) {
-                AudioManager am = channel.getGuild().getAudioManager();
-                am.setSendingHandler(player);
-            }
-        });
-
-        channelsToRejoin.clear();
     }
 
     //Shutdown hook
@@ -332,12 +301,9 @@ public abstract class FredBoat {
         System.exit(code);
     }
 
-    public static EventListenerBoat getListenerBot() {
-        return listenerBot;
+    public static EventListenerBoat getMainEventListener() {
+        return mainEventListener;
     }
-
-    /* Sharding */
-
 
     public static List<FredBoat> getShards() {
         return shards;
@@ -380,6 +346,10 @@ public abstract class FredBoat {
         return JDAUtil.countAllUniqueUsers(shards, biggestUserCount);
     }
 
+    // ################################################################################
+    // ##                           Global lookups
+    // ################################################################################
+
     @Nullable
     public static TextChannel getTextChannelById(String id) {
         for (FredBoat fb : shards) {
@@ -413,7 +383,7 @@ public abstract class FredBoat {
     }
 
     @Nonnull
-    public static FredBoat getInstance(@Nonnull JDA jda) {
+    public static FredBoat getShard(@Nonnull JDA jda) {
         int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
         for (FredBoat fb : shards) {
             if (fb.getShardId() == sId) {
@@ -423,19 +393,9 @@ public abstract class FredBoat {
         throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed, shardId: " + sId);
     }
 
-    public static FredBoat getInstance(int id) {
+    public static FredBoat getShard(int id) {
         return shards.get(id);
     }
-
-    public long getGuildCount() {
-        return JDAUtil.countAllGuilds(Collections.singletonList(this));
-    }
-
-    public long getUserCount() {
-        return JDAUtil.countAllUniqueUsers(Collections.singletonList(this), biggestUserCount);
-    }
-
-    public abstract String revive(boolean... force);
 
     @Nullable
     public static DatabaseManager getDbManager() {
@@ -473,9 +433,26 @@ public abstract class FredBoat {
                 + "\n\tLavaplayer     " + PlayerLibrary.VERSION
                 + "\n";
     }
+
+
+    // ################################################################################
+    // ##                           Shard definition
+    // ################################################################################
+
     @Nonnull
     public abstract JDA getJda();
+
+    @Nonnull
+    public abstract String revive(boolean... force);
+
     public abstract int getShardId();
+
     @Nonnull
     public abstract JDA.ShardInfo getShardInfo();
+
+    public abstract int getGuildCount();
+
+    public abstract long getUserCount();
+
+    public abstract void onInit(@Nonnull ReadyEvent readyEvent);
 }

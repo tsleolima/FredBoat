@@ -43,7 +43,7 @@ public class AkinatorCommand extends Command implements IFunCommand {
         try {
             String userId = context.invoker.getUser().getId();
             AkinatorListener akinator = new AkinatorListener(context);
-            FredBoat.getListenerBot().putListener(userId, akinator);
+            FredBoat.getMainEventListener().putListener(userId, akinator);
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }

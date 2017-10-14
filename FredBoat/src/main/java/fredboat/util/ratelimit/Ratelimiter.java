@@ -78,7 +78,7 @@ public class Ratelimiter {
         Set<Long> whitelist = new ConcurrentHashSet<>();
 
         //it is ok to use the jda of any shard as long as we aren't using it for guild specific stuff
-        JDA jda = FredBoat.getInstance(0).getJda();
+        JDA jda = FredBoat.getShard(0).getJda();
         whitelist.add(Long.valueOf(DiscordUtil.getOwnerId(jda)));
         whitelist.add(jda.getSelfUser().getIdLong());
         //only works for those admins who are added with their userId and not through a roleId

@@ -26,35 +26,48 @@
 package fredboat;
 
 import fredboat.audio.nas.NativeAudioSendFactory;
+import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.event.EventLogger;
+import fredboat.util.JDAUtil;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.EventListener;
-import net.dv8tion.jda.core.requests.SessionReconnectQueue;
+import net.dv8tion.jda.core.managers.AudioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class FredBoatBot extends FredBoat {
+/**
+ * This class represents a FredBoat shard, containing all non-static FredBoat shard-level logic.
+ */
+public class FredBoatShard extends FredBoat {
 
-    private static final Logger log = LoggerFactory.getLogger(FredBoatBot.class);
+    private static final Logger log = LoggerFactory.getLogger(FredBoatShard.class);
     private final int shardId;
     private final EventListener listener;
-    private static final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
+
+    //For when we need to join a revived shard with it's old GuildPlayers
+    protected final ArrayList<String> channelsToRejoin = new ArrayList<>();
+
     @Nonnull
-    protected JDA jda;
+    protected volatile JDA jda;
 
 
-    public FredBoatBot(int shardId, EventListener listener) {
+    public FredBoatShard(int shardId, EventListener listener) {
         this.shardId = shardId;
         this.listener = listener;
         log.info("Building shard " + shardId);
@@ -118,9 +131,36 @@ public class FredBoatBot extends FredBoat {
         return newJda;
     }
 
+    @Override
+    public void onInit(@Nonnull ReadyEvent readyEvent) {
+        log.info("Received ready event for {}", readyEvent.getJDA().getShardInfo().toString());
+
+        if (Config.CONFIG.getNumShards() <= 10) {
+            //the current implementation of music persistence is not a good idea on big bots
+            MusicPersistenceHandler.reloadPlaylists(this);
+        }
+
+        //Rejoin old channels if revived
+        channelsToRejoin.forEach(vcid -> {
+            VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
+            if (channel == null) return;
+            GuildPlayer player = PlayerRegistry.getOrCreate(channel.getGuild());
+
+            LavalinkManager.ins.openConnection(channel);
+
+            if (!LavalinkManager.ins.isEnabled()) {
+                AudioManager am = channel.getGuild().getAudioManager();
+                am.setSendingHandler(player);
+            }
+        });
+
+        channelsToRejoin.clear();
+    }
+
     private volatile Future reviveTask;
     private volatile long reviveTaskStarted;
 
+    @Nonnull
     @Override
     public synchronized String revive(boolean... force) {
 
@@ -194,5 +234,18 @@ public class FredBoatBot extends FredBoat {
     @Nonnull
     public JDA getJda() {
         return jda;
+    }
+
+    @Override
+    public int getGuildCount() {
+        return JDAUtil.countAllGuilds(Collections.singletonList(this));
+    }
+
+
+    private final AtomicInteger biggestUserCountShard = new AtomicInteger(-1);
+
+    @Override
+    public long getUserCount() {
+        return JDAUtil.countAllUniqueUsers(Collections.singletonList(this), biggestUserCountShard);
     }
 }
