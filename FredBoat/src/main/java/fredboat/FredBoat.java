@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -91,7 +92,6 @@ public abstract class FredBoat {
     //use this executor for various small async tasks
     public final static ExecutorService executor = Executors.newCachedThreadPool();
 
-    JDA jda;
 
     private static DatabaseManager dbManager;
 
@@ -338,9 +338,6 @@ public abstract class FredBoat {
 
     /* Sharding */
 
-    public JDA getJda() {
-        return jda;
-    }
 
     public static List<FredBoat> getShards() {
         return shards;
@@ -415,10 +412,11 @@ public abstract class FredBoat {
         return null;
     }
 
-    public static FredBoat getInstance(JDA jda) {
+    @Nonnull
+    public static FredBoat getInstance(@Nonnull JDA jda) {
         int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
         for (FredBoat fb : shards) {
-            if (((FredBoatBot) fb).getShardId() == sId) {
+            if (fb.getShardId() == sId) {
                 return fb;
             }
         }
@@ -427,15 +425,6 @@ public abstract class FredBoat {
 
     public static FredBoat getInstance(int id) {
         return shards.get(id);
-    }
-
-    public static JDA getFirstJDA() {
-        return shards.get(0).getJda();
-    }
-
-    public ShardInfo getShardInfo() {
-        int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
-        return new ShardInfo(sId, Config.CONFIG.getNumShards());
     }
 
     public long getGuildCount() {
@@ -447,34 +436,6 @@ public abstract class FredBoat {
     }
 
     public abstract String revive(boolean... force);
-
-    public static class ShardInfo {
-
-        int shardId;
-        int shardTotal;
-
-        ShardInfo(int shardId, int shardTotal) {
-            this.shardId = shardId;
-            this.shardTotal = shardTotal;
-        }
-
-        public int getShardId() {
-            return this.shardId;
-        }
-
-        public int getShardTotal() {
-            return this.shardTotal;
-        }
-
-        public String getShardString() {
-            return String.format("[%02d / %02d]", this.shardId, this.shardTotal);
-        }
-
-        @Override
-        public String toString() {
-            return getShardString();
-        }
-    }
 
     @Nullable
     public static DatabaseManager getDbManager() {
@@ -512,4 +473,9 @@ public abstract class FredBoat {
                 + "\n\tLavaplayer     " + PlayerLibrary.VERSION
                 + "\n";
     }
+    @Nonnull
+    public abstract JDA getJda();
+    public abstract int getShardId();
+    @Nonnull
+    public abstract JDA.ShardInfo getShardInfo();
 }

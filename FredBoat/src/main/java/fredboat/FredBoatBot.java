@@ -41,6 +41,7 @@ import net.dv8tion.jda.core.requests.SessionReconnectQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.Future;
 
 public class FredBoatBot extends FredBoat {
@@ -49,6 +50,9 @@ public class FredBoatBot extends FredBoat {
     private final int shardId;
     private final EventListener listener;
     private static final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
+    @Nonnull
+    protected JDA jda;
+
 
     public FredBoatBot(int shardId, EventListener listener) {
         this.shardId = shardId;
@@ -174,7 +178,21 @@ public class FredBoatBot extends FredBoat {
         return info;
     }
 
-    int getShardId() {
+    @Override
+    public int getShardId() {
         return shardId;
+    }
+
+    @Nonnull
+    @Override
+    public JDA.ShardInfo getShardInfo() {
+        //assuming this is never null because we are forcing sharding in the Config
+        return getJda().getShardInfo();
+    }
+
+    @Override
+    @Nonnull
+    public JDA getJda() {
+        return jda;
     }
 }

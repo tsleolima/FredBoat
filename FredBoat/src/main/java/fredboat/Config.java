@@ -208,24 +208,22 @@ public class Config {
                 });
             }
 
-            if (getDistribution() == DistributionEnum.DEVELOPMENT) {
-                log.info("Development distribution; forcing 2 shards");
-                numShards = 2;
-            } else {
-                //this is the first request on start
-                //it sometimes fails cause network isn'T set up yet. wait 10 sec and try one more time in that case
+            //this is the first request on start
+            //it sometimes fails cause network isn't set up yet. wait 10 sec and try one more time in that case
+            try {
+                numShards = DiscordUtil.getRecommendedShardCount(getBotToken());
+            } catch (Exception e) {
                 try {
-                    numShards = DiscordUtil.getRecommendedShardCount(getBotToken());
-                } catch (Exception e) {
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException ex) {
-                        //duh
-                    }
-                    numShards = DiscordUtil.getRecommendedShardCount(getBotToken());
+                    Thread.sleep(10000);
+                } catch (InterruptedException ex) {
+                    //duh
                 }
-                log.info("Discord recommends " + numShards + " shard(s)");
+                numShards = DiscordUtil.getRecommendedShardCount(getBotToken());
             }
+            log.info("Discord recommends " + numShards + " shard(s)");
+            //overriding to always use sharding. saves us a headache with tons of null checks while keeping the code
+            // usable for selfhosters because we can assume JDA#getShardInfo will never be null
+            if (numShards < 2) numShards = 2;
 
             //more database connections don't help with performance, so use a value based on available cores
             //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
