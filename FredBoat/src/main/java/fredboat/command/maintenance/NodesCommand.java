@@ -137,7 +137,7 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
         boolean showHost = false;
 
         if (context.args.length == 2 && context.args[1].equals("host")) {
-            if (PermsUtil.isUserBotOwner(context.invoker.getUser())) {
+            if (PermsUtil.checkPerms(PermissionLevel.BOT_OWNER, context.invoker)) {
                 showHost = true;
             } else {
                 context.replyWithName("You do not have permission to view the hosts!");

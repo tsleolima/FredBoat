@@ -126,8 +126,11 @@ public class CommandsCommand extends Command implements IUtilCommand {
             out += "\n" + mod;
         }
 
-        if (PermsUtil.isUserBotOwner(context.invoker.getUser())) {
+        if (PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker)) {
             out += "\n" + maint;
+        }
+
+        if (PermsUtil.checkPerms(PermissionLevel.BOT_OWNER, context.invoker)) {
             out += "\n" + owner;
         }
 

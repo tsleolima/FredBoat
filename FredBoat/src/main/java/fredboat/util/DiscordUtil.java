@@ -59,9 +59,9 @@ public class DiscordUtil {
 
     private DiscordUtil() {
     }
-    
-    public static String getOwnerId(JDA jda) {
-        return getApplicationInfo(jda).getOwner().getId();
+
+    public static long getOwnerId(@Nonnull JDA jda) {
+        return getApplicationInfo(jda).getOwner().getIdLong();
     }
 
     public static boolean isMainBotPresent(Guild guild) {
