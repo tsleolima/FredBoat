@@ -150,7 +150,13 @@ public abstract class Context {
     //checks whether we have the provided permissions for the channel of this context
     @CheckReturnValue
     public boolean hasPermissions(Permission... permissions) {
-        return getGuild().getSelfMember().hasPermission(getTextChannel(), permissions);
+        return hasPermissions(getTextChannel(), permissions);
+    }
+
+    //checks whether we have the provided permissions for the provided channel
+    @CheckReturnValue
+    public boolean hasPermissions(@Nonnull TextChannel tc, Permission... permissions) {
+        return getGuild().getSelfMember().hasPermission(tc, permissions);
     }
 
     /**
