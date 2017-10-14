@@ -25,6 +25,7 @@
 
 package fredboat.command.admin;
 
+import fredboat.FredBoat;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -32,6 +33,7 @@ import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import lavalink.client.io.LavalinkSocket;
+import net.dv8tion.jda.core.entities.Guild;
 
 import javax.annotation.Nonnull;
 
@@ -39,14 +41,26 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        LavalinkSocket node = LavalinkManager.ins.getLavalink().getLink(context.getGuild()).getCurrentSocket();
+        Guild guild;
+        String[] args = context.args;
+        if (args.length == 2) {
+            long guildId = Long.parseUnsignedLong(args[1]);
+            guild = FredBoat.getGuildById(guildId);
+        } else {
+            guild = context.guild;
+        }
+        if (guild == null) {
+            context.reply("Guild not found.");
+            return;
+        }
+        LavalinkSocket node = LavalinkManager.ins.getLavalink().getLink(guild).getCurrentSocket();
 
         String reply = String.format("Guild %s id `%s` lavalink socket: `%s`",
                 context.guild.getName(), context.guild.getIdLong(), String.valueOf(node));
 
         //sensitive info, send it by DM
         context.replyPrivate(reply,
-                __ -> context.replyWithName("Sent you a DM with the data"),
+                __ -> context.replyWithName("Sent you a DM with the data."),
                 t -> context.replyWithName("Could not DM you, adjust your privacy settings.")
         );
     }
