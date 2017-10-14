@@ -93,6 +93,24 @@
             <version>1.1</version>
         </dependency>
         <dependency>
+            <!-- utility -->
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <!-- utility -->
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <!-- used for some config options for lavaplayer-->
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        <dependency>
             <!-- logging framework -->
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -121,19 +139,6 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.18</version>
-        </dependency>
-        <dependency>
-            <!-- provides a webclient which we use to get around cloudflare protection -->
-            <groupId>net.sourceforge.htmlunit</groupId>
-            <artifactId>htmlunit</artifactId>
-            <version>2.27</version>
-            <exclusions>
-                <exclusion>
-                    <!-- exclude a transient dependency that clashes with one required by spark -->
-                    <groupId>org.eclipse.jetty.websocket</groupId>
-                    <artifactId>websocket-client</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <!-- faster and, more importantly, memory efficient collections -->
