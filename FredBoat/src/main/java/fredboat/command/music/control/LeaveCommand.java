@@ -47,7 +47,6 @@ public class LeaveCommand extends Command implements IMusicCommand, ICommandRest
     public void onInvoke(@Nonnull CommandContext context) {
         try {
             GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-            player.setCurrentTC(context.channel);
             player.pause();
             player.leaveVoiceChannelRequest(context, false);
         } catch (Exception e) {

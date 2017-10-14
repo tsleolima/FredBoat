@@ -63,7 +63,6 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-        player.setCurrentTC(context.channel);
 
         if (player.isQueueEmpty()) {
             context.reply(context.i18n("skipEmpty"));

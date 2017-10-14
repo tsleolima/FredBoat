@@ -35,7 +35,6 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-        player.setCurrentTC(context.channel);
 
         // No point to allow voteskip if you are not in the vc at all
         // as votes only count as long are you are in the vc

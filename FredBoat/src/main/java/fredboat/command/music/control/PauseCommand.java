@@ -42,7 +42,6 @@ public class PauseCommand extends Command implements IMusicCommand, ICommandRest
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-        player.setCurrentTC(context.channel);
         if (player.isQueueEmpty()) {
             context.reply(context.i18n("playQueueEmpty"));
         } else if (player.isPaused()) {

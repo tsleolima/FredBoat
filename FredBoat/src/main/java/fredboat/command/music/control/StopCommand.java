@@ -41,7 +41,6 @@ public class StopCommand extends Command implements IMusicCommand, ICommandRestr
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-        player.setCurrentTC(context.channel);
         int tracksCount = player.getTrackCount();
 
         player.pause();

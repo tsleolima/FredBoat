@@ -43,7 +43,6 @@ public class JoinCommand extends Command implements IMusicCommand, ICommandRestr
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         VoiceChannel vc = player.getUserCurrentVoiceChannel(context.invoker);
-        player.setCurrentTC(context.channel);
         try {
             player.joinChannel(vc);
             if (vc != null) {

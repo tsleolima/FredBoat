@@ -76,7 +76,6 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
         if (!context.msg.getAttachments().isEmpty()) {
             GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-            player.setCurrentTC(context.channel);
 
             for (Attachment atc : context.msg.getAttachments()) {
                 player.queue(atc.getUrl(), context);
@@ -105,7 +104,6 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-        player.setCurrentTC(context.channel);
 
         player.queue(args[1], context);
         player.setPause(false);
@@ -116,7 +114,6 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
     private void handleNoArguments(CommandContext context) {
         Guild guild = context.guild;
         GuildPlayer player = PlayerRegistry.getOrCreate(guild);
-        player.setCurrentTC(context.channel);
         if (player.isQueueEmpty()) {
             context.reply(context.i18n("playQueueEmpty"));
         } else if (player.isPlaying()) {
@@ -189,7 +186,6 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 }
 
                 CentralMessaging.editMessage(outMsg, builder.build());
-                player.setCurrentTC(context.channel);
                 VideoSelection.put(context.invoker, new VideoSelection(selectable, outMsg));
             }
         });
