@@ -29,7 +29,6 @@ import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.CarbonitexAgent;
 import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.FredBoatAgent;
-import fredboat.agent.ShardWatchdogAgent;
 import fredboat.api.API;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
@@ -40,7 +39,6 @@ import fredboat.commandmeta.init.MainCommandInitializer;
 import fredboat.commandmeta.init.MusicCommandInitializer;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
-import fredboat.event.ShardWatchdogListener;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.AppInfo;
@@ -85,7 +83,6 @@ public abstract class FredBoat {
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
     public static int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
     static EventListenerBoat listenerBot;
-    ShardWatchdogListener shardWatchdogListener = null;
 
     //For when we need to join a revived shard with it's old GuildPlayers
     final ArrayList<String> channelsToRejoin = new ArrayList<>();
@@ -178,7 +175,6 @@ public abstract class FredBoat {
             FredBoatAgent.start(new CarbonitexAgent(Config.CONFIG.getCarbonKey()));
         }
 
-        FredBoatAgent.start(new ShardWatchdogAgent());
     }
 
     private static boolean hasValidMALLogin() {
@@ -451,10 +447,6 @@ public abstract class FredBoat {
     }
 
     public abstract String revive(boolean... force);
-
-    public ShardWatchdogListener getShardWatchdogListener() {
-        return shardWatchdogListener;
-    }
 
     public static class ShardInfo {
 

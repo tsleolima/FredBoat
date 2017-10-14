@@ -29,7 +29,6 @@ import fredboat.audio.nas.NativeAudioSendFactory;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.event.EventLogger;
-import fredboat.event.ShardWatchdogListener;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -59,8 +58,6 @@ public class FredBoatBot extends FredBoat {
     }
 
     private JDA buildJDA(boolean... blocking) {
-        shardWatchdogListener = new ShardWatchdogListener();
-
         JDA newJda = null;
 
         try {
@@ -68,7 +65,6 @@ public class FredBoatBot extends FredBoat {
             while (!success) {
                 JDABuilder builder = new JDABuilder(AccountType.BOT)
                         .addEventListener(new EventLogger("216689009110417408"))
-                        .addEventListener(shardWatchdogListener)
                         .setToken(Config.CONFIG.getBotToken())
                         .setGame(Game.of(Config.CONFIG.getGame()))
                         .setBulkDeleteSplittingEnabled(true)
@@ -161,7 +157,6 @@ public class FredBoatBot extends FredBoat {
                 }
 
                 //remove listeners from decommissioned jda for good memory hygiene
-                jda.removeEventListener(shardWatchdogListener);
                 jda.removeEventListener(listener);
 
                 jda.shutdown();
