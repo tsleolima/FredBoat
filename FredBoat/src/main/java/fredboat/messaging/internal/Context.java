@@ -199,7 +199,7 @@ public abstract class Context {
     }
 
     private static MessageEmbed embedImage(String url) {
-        return CentralMessaging.getClearThreadLocalEmbedBuilder()
+        return CentralMessaging.getColoredEmbedBuilder()
                 .setImage(url)
                 .build();
     }

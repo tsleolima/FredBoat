@@ -38,7 +38,6 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
-import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
 import lavalink.client.player.LavalinkPlayer;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -83,7 +82,7 @@ public class DebugCommand extends Command implements IMaintenanceCommand, IComma
     }
 
     private EmbedBuilder getDebugEmbed(GuildPlayer player) {
-        EmbedBuilder embed = CentralMessaging.getClearThreadLocalEmbedBuilder();
+        EmbedBuilder embed = CentralMessaging.getColoredEmbedBuilder();
         embed.setTitle("Debug information for \"" + player.getGuild().getName() + "\"");
 
         //embed = addAudioDebug(embed, player); doesnt work currently
@@ -92,7 +91,6 @@ public class DebugCommand extends Command implements IMaintenanceCommand, IComma
         embed = addVoiceChannelDebug(embed, player);
         embed = addAllTextChannelDebug(embed, player.getGuild());
         embed = gaddllVoiceChannelDebug(embed, player.getGuild());
-        embed.setColor(BotConstants.FREDBOAT_COLOR);
 
         return embed;
     }

@@ -37,7 +37,6 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
-import fredboat.shared.constant.BotConstants;
 import fredboat.util.ArgumentUtil;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
@@ -199,8 +198,7 @@ public class PermissionsCommand extends Command implements IModerationCommand {
         if (roleMentions.isEmpty()) roleMentions = "<none>";
         if (memberMentions.isEmpty()) memberMentions = "<none>";
 
-        EmbedBuilder eb = CentralMessaging.getClearThreadLocalEmbedBuilder()
-                .setColor(BotConstants.FREDBOAT_COLOR)
+        EmbedBuilder eb = CentralMessaging.getColoredEmbedBuilder()
                 .setTitle(context.i18nFormat("permsListTitle", permissionLevel))
                 .setAuthor(invoker.getEffectiveName(), null, invoker.getUser().getAvatarUrl())
                 .addField("Roles", roleMentions, true)

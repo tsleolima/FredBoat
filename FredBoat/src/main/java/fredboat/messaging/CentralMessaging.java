@@ -26,6 +26,7 @@
 package fredboat.messaging;
 
 import fredboat.feature.I18n;
+import fredboat.shared.constant.BotConstants;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -81,6 +82,12 @@ public class CentralMessaging {
 
     public static MessageBuilder getClearThreadLocalMessageBuilder() {
         return threadLocalMessageBuilder.get().clear();
+    }
+
+    //presets fredboat color on a clear embed
+    public static EmbedBuilder getColoredEmbedBuilder() {
+        return getClearThreadLocalEmbedBuilder()
+                .setColor(BotConstants.FREDBOAT_COLOR);
     }
 
     public static EmbedBuilder getClearThreadLocalEmbedBuilder() {

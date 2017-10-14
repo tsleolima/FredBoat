@@ -40,7 +40,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.YoutubeAPI;
@@ -216,11 +215,10 @@ public class NowplayingCommand extends Command implements IMusicCommand {
                         + TextUtils.formatTime(atc.getEffectiveDuration())
                         + "]";
 
-        return CentralMessaging.getClearThreadLocalEmbedBuilder()
+        return CentralMessaging.getColoredEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), at.getIdentifier())
-                .setDescription(atc.i18nFormat("npLoadedFromHTTP", desc, at.getIdentifier())) //TODO: Probe data
-                .setColor(BotConstants.FREDBOAT_COLOR);
+                .setDescription(atc.i18nFormat("npLoadedFromHTTP", desc, at.getIdentifier())); //TODO: Probe data
     }
 
     private EmbedBuilder getDefaultEmbed(AudioTrackContext atc, AudioTrack at) {
@@ -232,11 +230,10 @@ public class NowplayingCommand extends Command implements IMusicCommand {
                         + TextUtils.formatTime(atc.getEffectiveDuration())
                         + "]";
 
-        return CentralMessaging.getClearThreadLocalEmbedBuilder()
+        return CentralMessaging.getColoredEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), null)
-                .setDescription(atc.i18nFormat("npLoadedDefault", desc, at.getSourceManager().getSourceName()))
-                .setColor(BotConstants.FREDBOAT_COLOR);
+                .setDescription(atc.i18nFormat("npLoadedDefault", desc, at.getSourceManager().getSourceName()));
     }
 
     @Nonnull

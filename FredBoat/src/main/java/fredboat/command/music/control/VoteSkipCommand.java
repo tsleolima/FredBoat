@@ -11,7 +11,6 @@ import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
-import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -158,11 +157,10 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
                 field.append("| ").append(member.getEffectiveName()).append("\n");
             }
         }
-        EmbedBuilder embed = CentralMessaging.getClearThreadLocalEmbedBuilder();
+        EmbedBuilder embed = CentralMessaging.getColoredEmbedBuilder();
         embed.addField("", field1.toString(), true);
         embed.addField("", field2.toString(), true);
         embed.setTitle(context.i18nFormat("voteSkipEmbedVoters", voters.size(), player.getHumanUsersInCurrentVC().size()));
-        embed.setColor(BotConstants.FREDBOAT_COLOR);
         context.reply(embed.build());
     }
 
