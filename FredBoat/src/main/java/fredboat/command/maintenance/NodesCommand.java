@@ -42,6 +42,7 @@ import lavalink.client.io.LavalinkSocket;
 import lavalink.client.io.RemoteStats;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NodesCommand extends Command implements IMaintenanceCommand {
@@ -84,12 +85,12 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
             return;
         }
 
-        String str = "";
+        List<String> messages = new ArrayList<>();
 
         int i = 0;
         for (LavalinkSocket socket : nodes) {
             RemoteStats stats = socket.getStats();
-            str += "Socket:             #" + i + "\n";
+            String str = "Socket:             #" + i + "\n";
 
             if (showHosts) {
                 str += "Address:                 " + socket.getRemoteUri() + "\n";
@@ -121,10 +122,13 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
             str += "Raw: " + penalties.toString() + "\n";
             str += "---------------\n\n";
 
+            messages.add(str);
             i++;
         }
 
-        context.reply(TextUtils.asCodeBlock(str));
+        for (String str : messages) {
+            context.reply(TextUtils.asCodeBlock(str));
+        }
     }
 
     private void handleLavaplayer(CommandContext context) {
