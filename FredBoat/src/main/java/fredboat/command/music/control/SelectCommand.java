@@ -39,12 +39,15 @@ import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
+import fredboat.util.ArgumentUtil;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public class SelectCommand extends Command implements IMusicCommand, ICommandRestricted {
 
@@ -60,29 +63,74 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
         VideoSelection selection = VideoSelection.get(invoker);
         if (selection != null) {
             try {
-                int i = 1;
+                // Handle duplicates.
+                LinkedHashSet<Integer> requestChoices = new LinkedHashSet<>();
+                ArrayList<Integer> validChoices = new ArrayList<>();
 
                 if (args.length >= 1) {
-                    String contentWithoutPrefix = args[0].substring(Config.CONFIG.getPrefix().length());
-                    if (StringUtils.isNumeric(contentWithoutPrefix)) {
-                        i = Integer.valueOf(contentWithoutPrefix);
+                    // Combine all args except the first part of the arg
+                    StringBuilder sb = new StringBuilder();
+                    for (String value : args) {
+                        sb.append(value);
+                        sb.append(" ");
+                    }
+
+                    String combinedArgs = sb.toString();
+                    String commandOptions = combinedArgs.substring(Config.CONFIG.getPrefix().length());
+                    commandOptions = ArgumentUtil.combineArgs(new String[]{commandOptions});
+
+                    String sanitizedQuery = sanitizeQueryForMultiSelect(commandOptions);
+
+                    if (StringUtils.isNumeric(commandOptions)) {
+                        requestChoices.add(Integer.valueOf(commandOptions));
+
+                    } else if (TextUtils.isSplitSelect(sanitizedQuery)) {
+                        // Remove all non comma or number character.
+                        String[] querySplit = sanitizedQuery.split(",|\\s");
+
+                        for (String value : querySplit) {
+                            if (StringUtils.isNumeric(value)) {
+                                requestChoices.add(Integer.valueOf(value));
+                            }
+                        }
                     } else {
-                        i = Integer.valueOf(args[1]);
+                        requestChoices.add(Integer.valueOf(args[1]));
                     }
                 }
 
-                if (selection.choices.size() < i || i < 1) {
+                // Only include the valid values.
+                for (Integer value : requestChoices) {
+                    if (selection.choices.size() >= value && value >= 1) {
+                        validChoices.add(value);
+                    }
+                }
+                // Check if there is a valid request exist.
+                if (validChoices.isEmpty()) {
                     throw new NumberFormatException();
+
                 } else {
-                    AudioTrack selected = selection.choices.get(i - 1);
+                    AudioTrack[] selectedTracks = new AudioTrack[validChoices.size()];
+                    StringBuilder outputMsgBuilder = new StringBuilder();
+
+                    for (int i = 0; i < validChoices.size(); i++) {
+                        selectedTracks[i] = selection.choices.get(validChoices.get(i) - 1);
+
+                        String msg = context.i18nFormat("selectSuccess", validChoices.get(i), selectedTracks[i].getInfo().title,
+                                TextUtils.formatTime(selectedTracks[0].getInfo().length));
+                        if (i < validChoices.size()) {
+                            outputMsgBuilder.append("\n");
+                        }
+                        outputMsgBuilder.append(msg);
+
+                        player.queue(new AudioTrackContext(selectedTracks[i], invoker));
+                    }
+
                     VideoSelection.remove(invoker);
                     TextChannel tc = FredBoat.getTextChannelById(Long.toString(selection.channelId));
                     if (tc != null) {
-                        String msg = context.i18nFormat("selectSuccess", i, selected.getInfo().title,
-                                TextUtils.formatTime(selected.getInfo().length));
-                        CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(msg));
+                        CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(outputMsgBuilder.toString()));
                     }
-                    player.queue(new AudioTrackContext(selected, invoker));
+
                     player.setPause(false);
                     context.deleteMessage();
                 }
@@ -105,4 +153,15 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;
     }
+
+    /**
+     * Helper method to remove all characters from arg that is not numerical or comma.
+     *
+     * @param arg String to be sanitized.
+     * @return Sanitized string.
+     */
+    private static String sanitizeQueryForMultiSelect(@Nonnull String arg) {
+        return arg.replaceAll("[^0-9$., ]", "");
+    }
+
 }

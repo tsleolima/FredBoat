@@ -40,6 +40,7 @@ import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
+import fredboat.util.ArgumentUtil;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.SearchUtil;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -91,8 +92,16 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
-        //What if we want to select a selection instead?
-        if (args.length == 2 && StringUtils.isNumeric(args[1])){
+        // Combine all args except the first part of the arg
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < args.length; i++) {
+            sb.append(args[i]);
+            sb.append(" ");
+        }
+        String argsOptions = sb.toString();
+        argsOptions = ArgumentUtil.combineArgs(new String[]{argsOptions});
+        // What if we want to select a selection instead? or multi-select?
+        if (args.length >= 2 && TextUtils.isSplitSelect(argsOptions)) {
             SelectCommand.select(context);
             return;
         }

@@ -32,6 +32,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,6 +154,21 @@ public class ArgumentUtil {
         String raw = message.getRawContent();
         raw = raw.substring(args[0].length() + args[1].length() + 2); //arg0 is prefix, arg1 is add / remove and + 2 for the 2 spaces
         return raw.substring(raw.indexOf(args[argsToStrip]));
+    }
+
+    /**
+     * Helper method to combine all the options from command into a single String.
+     * Will call trim on each combine.
+     *
+     * @param args Command arguments.
+     * @return String object of the combined args or empty string.
+     */
+    public static String combineArgs(@Nonnull String[] args) {
+        StringBuilder sb = new StringBuilder();
+        for (String arg : args) {
+            sb.append(arg.trim());
+        }
+        return sb.toString().trim();
     }
 
 }

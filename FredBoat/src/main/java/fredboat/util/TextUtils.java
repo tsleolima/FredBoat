@@ -36,6 +36,7 @@ import net.dv8tion.jda.core.entities.Message;
 import org.json.JSONException;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.Instant;
@@ -251,6 +252,18 @@ public class TextUtils {
         return str;
     }
 
+    /**
+     * Helper method to check for string that matches ONLY contain digit(s), comma(s) or space(s).
+     *
+     * @param arg String of the argument.
+     * @return True if it matches, false if empty string or not match.
+     */
+    public static boolean isSplitSelect(@Nonnull String arg) {
+        String temp = arg.replaceAll(" +", " ");
+
+        return arg.length() > 0 && temp.matches("(\\d*,*\\s*)*");
+    }
+    
     public static String getTimeInCentralEurope() {
         return asTimeInCentralEurope(System.currentTimeMillis());
     }
