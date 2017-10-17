@@ -40,6 +40,7 @@ import fredboat.event.EventListenerBoat;
 import fredboat.feature.I18n;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.AppInfo;
+import fredboat.util.ConnectQueue;
 import fredboat.util.GitRepoState;
 import fredboat.util.JDAUtil;
 import fredboat.util.rest.Http;
@@ -52,7 +53,6 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
-import net.dv8tion.jda.core.requests.SessionReconnectQueue;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import org.json.JSONObject;
@@ -73,7 +73,6 @@ public abstract class FredBoat {
 
     private static final Logger log = LoggerFactory.getLogger(FredBoat.class);
 
-    public static final int SHARD_CREATION_SLEEP_INTERVAL = 5500;
     public static final long START_TIME = System.currentTimeMillis();
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
     public static int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
@@ -83,7 +82,7 @@ public abstract class FredBoat {
 
     //central event listener that all events by all shards pass through
     protected static EventListenerBoat mainEventListener;
-    protected static final SessionReconnectQueue reconnectQueue = new SessionReconnectQueue();
+    protected static final ConnectQueue connectQueue = new ConnectQueue();
 
     private static DatabaseManager dbManager;
     private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
@@ -259,14 +258,10 @@ public abstract class FredBoat {
     private static void initBotShards(EventListener listener) {
         for (int i = 0; i < Config.CONFIG.getNumShards(); i++) {
             try {
+                //NOTE: This will take a while since creating shards happens in a blocking fashion
                 shards.add(i, new FredBoatShard(i, listener));
             } catch (Exception e) {
                 log.error("Caught an exception while starting shard " + i + "!", e);
-            }
-            try {
-                Thread.sleep(SHARD_CREATION_SLEEP_INTERVAL);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Got interrupted while setting up bot shards!", e);
             }
         }
 
@@ -400,19 +395,6 @@ public abstract class FredBoat {
     @Nullable
     public static DatabaseManager getDbManager() {
         return dbManager;
-    }
-
-    private static volatile long lastCoinGivenOut = 0;
-
-    // if you get a coin, you are allowed to build a shard (= perform a login to discord)
-    public static synchronized boolean getShardCoin(int shardId) {
-        long now = System.currentTimeMillis();
-        if (now - lastCoinGivenOut >= SHARD_CREATION_SLEEP_INTERVAL) {
-            lastCoinGivenOut = now;
-            log.info("Coin for shard {}", shardId);
-            return true;
-        }
-        return false;
     }
 
     private static String getVersionInfo() {

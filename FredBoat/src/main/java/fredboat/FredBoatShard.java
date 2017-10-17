@@ -86,7 +86,7 @@ public class FredBoatShard extends FredBoat {
                         .setGame(Game.of(Config.CONFIG.getGame()))
                         .setBulkDeleteSplittingEnabled(true)
                         .setEnableShutdownHook(false)
-                        .setReconnectQueue(reconnectQueue);
+                        .setReconnectQueue(connectQueue);
 
                 if(listener != null) {
                     builder.addEventListener(listener);
@@ -108,10 +108,7 @@ public class FredBoatShard extends FredBoat {
                     builder.useSharding(shardId, Config.CONFIG.getNumShards());
                 }
                 try {
-                    while (!getShardCoin(shardId)) {
-                        //beg aggressively for a coin
-                        Thread.sleep(1000);
-                    }
+                    connectQueue.requestCoin(shardId);
                     if (blocking.length > 0 && blocking[0]) {
                         newJda = builder.buildBlocking();
                     } else {
