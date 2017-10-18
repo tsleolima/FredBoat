@@ -43,7 +43,7 @@ public class PermsUtil {
     public static PermissionLevel getPerms(Member member) {
         if (DiscordUtil.getOwnerId(member.getJDA()) == member.getUser().getIdLong()) {
             return PermissionLevel.BOT_OWNER; // https://fred.moe/Q-EB.png
-        } else if (isAdmin(member)) {
+        } else if (isBotAdmin(member)) {
             return PermissionLevel.BOT_ADMIN;
         } else if (PermissionUtil.checkPermission(member, Permission.ADMINISTRATOR)) {
             return PermissionLevel.ADMIN;
@@ -86,17 +86,17 @@ public class PermsUtil {
     /**
      * returns true if the member is or holds a role defined as admin in the configuration file
      */
-    private static boolean isAdmin(Member member) {
-        boolean admin = false;
+    private static boolean isBotAdmin(Member member) {
+        boolean botAdmin = false;
         for (String id : Config.CONFIG.getAdminIds()) {
             Role r = member.getGuild().getRoleById(id);
             if (member.getUser().getId().equals(id)
                     || (r != null && member.getRoles().contains(r))) {
-                admin = true;
+                botAdmin = true;
                 break;
             }
         }
-        return admin;
+        return botAdmin;
     }
 
     public static boolean checkList(List<String> list, Member member) {
