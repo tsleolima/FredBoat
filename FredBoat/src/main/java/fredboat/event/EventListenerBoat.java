@@ -43,7 +43,6 @@ import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
@@ -68,7 +67,6 @@ public class EventListenerBoat extends AbstractEventListener {
             .expireAfterWrite(6, TimeUnit.HOURS)
             .build();
 
-    private User lastUserToReceiveHelp;
 
     public EventListenerBoat() {
     }
@@ -161,18 +159,13 @@ public class EventListenerBoat extends AbstractEventListener {
             }
         }
 
-        if (event.getAuthor() == lastUserToReceiveHelp) {
-            //Ignore, they just got help! Stops any bot chain reactions
+        //technically not possible anymore to receive private messages from bots but better safe than sorry
+        //also ignores our own messages since we're a bot
+        if (event.getAuthor().isBot()) {
             return;
         }
 
-        if (event.getAuthor().equals(event.getJDA().getSelfUser())) {
-            //Don't reply to ourselves
-            return;
-        }
-
-        CentralMessaging.sendMessage(event.getChannel(), HelpCommand.getHelpDmMsg(null));
-        lastUserToReceiveHelp = event.getAuthor();
+        HelpCommand.sendGeneralHelp(event);
     }
 
     /* music related */

@@ -25,6 +25,8 @@
 
 package fredboat.command.util;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import fredboat.Config;
 import fredboat.command.music.control.SelectCommand;
 import fredboat.commandmeta.CommandRegistry;
@@ -33,25 +35,29 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.feature.I18n;
+import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.MessageFormat;
+import java.util.concurrent.TimeUnit;
 
 public class HelpCommand extends Command implements IUtilCommand {
 
     //This can be set using eval in case we need to change it in the future ~Fre_d
     public static String inviteLink = "https://discord.gg/cgPFW4q";
 
-    private static final Logger log = LoggerFactory.getLogger(HelpCommand.class);
+    //keeps track of whether a user received help lately to avoid spamming/clogging up DMs which are rather harshly ratelimited
+    private static final Cache<Long, Boolean> helpReceivedRecently = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
@@ -69,9 +75,16 @@ public class HelpCommand extends Command implements IUtilCommand {
         return "{0}{1} OR {0}{1} <command>\n#" + context.i18n("helpHelpCommand");
     }
 
-    public static void sendGeneralHelp(CommandContext context) {
+    //for answering the help command from a guild
+    public static void sendGeneralHelp(@Nonnull CommandContext context) {
+        long userId = context.invoker.getUser().getIdLong();
+        if (helpReceivedRecently.getIfPresent(userId) != null) {
+            return;
+        }
+
         context.replyPrivate(getHelpDmMsg(context.guild),
                 success -> {
+                    helpReceivedRecently.put(userId, true);
                     String out = context.i18n("helpSent");
                     out += "\n" + context.i18nFormat("helpCommandsPromotion",
                             "`" + Config.CONFIG.getPrefix() + "commands`");
@@ -85,6 +98,16 @@ public class HelpCommand extends Command implements IUtilCommand {
                     }
                 }
         );
+    }
+
+    //for answering private messages with the help
+    public static void sendGeneralHelp(@Nonnull PrivateMessageReceivedEvent event) {
+        if (helpReceivedRecently.getIfPresent(event.getAuthor().getIdLong()) != null) {
+            return;
+        }
+
+        helpReceivedRecently.put(event.getAuthor().getIdLong(), true);
+        CentralMessaging.sendMessage(event.getChannel(), getHelpDmMsg(null));
     }
 
     public static String getFormattedCommandHelp(Context context, Command command, String commandOrAlias) {
