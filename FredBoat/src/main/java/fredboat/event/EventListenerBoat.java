@@ -29,6 +29,8 @@ import com.google.common.cache.CacheBuilder;
 import fredboat.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.command.maintenance.ShardsCommand;
+import fredboat.command.maintenance.StatsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.CommandManager;
@@ -37,11 +39,13 @@ import fredboat.db.EntityReader;
 import fredboat.feature.I18n;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.messaging.CentralMessaging;
+import fredboat.util.DiscordUtil;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
@@ -163,6 +167,23 @@ public class EventListenerBoat extends AbstractEventListener {
         //also ignores our own messages since we're a bot
         if (event.getAuthor().isBot()) {
             return;
+        }
+
+        //quick n dirty bot admin / owner check
+        if (Config.CONFIG.getAdminIds().contains(event.getAuthor().getId())
+                || DiscordUtil.getApplicationInfo(event.getJDA()).getOwner().getId().equals(event.getAuthor().getId())) {
+
+            //hack in / hardcode some commands; this is not meant to look clean
+            String raw = event.getMessage().getRawContent().toLowerCase();
+            if (raw.contains("shard")) {
+                for (Message message : ShardsCommand.getShardStatus(event.getMessage())) {
+                    CentralMessaging.sendMessage(event.getChannel(), message);
+                }
+                return;
+            } else if (raw.contains("stats")) {
+                CentralMessaging.sendMessage(event.getChannel(), StatsCommand.getStats(null, event.getJDA()));
+                return;
+            }
         }
 
         HelpCommand.sendGeneralHelp(event);

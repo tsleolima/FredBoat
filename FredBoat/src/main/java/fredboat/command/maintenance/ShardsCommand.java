@@ -45,16 +45,21 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
 
     private static final int SHARDS_PER_MESSAGE = 30;
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+        for (Message message : getShardStatus(context.msg)) {
+            context.reply(message);
+        }
+    }
+
+    public static List<Message> getShardStatus(@Nonnull Message input) {
         MessageBuilder mb = null;
         List<Message> messages = new ArrayList<>();
 
         //do a full report? or just a summary
         boolean full = false;
-        String[] args = context.args;
-        if (args.length > 1 && ("full".equals(args[1]) || "all".equals(args[1]))) {
+        String raw = input.getRawContent().toLowerCase();
+        if (raw.contains("full") || raw.contains("all")) {
             full = true;
         }
 
@@ -74,6 +79,7 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
                     }
                     mb = CentralMessaging.getClearThreadLocalMessageBuilder().append("```diff\n");
                 }
+                //noinspection ConstantConditions
                 mb.append(fb.getJda().getStatus() == JDA.Status.CONNECTED ? "+" : "-")
                         .append(" ")
                         .append(fb.getShardInfo().getShardString())
@@ -96,13 +102,10 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
         if (!full) {
             String content = String.format("+ %s of %s shards are %s -- Guilds: %s -- Users: %s", (shards.size() - borkenShards),
                     Config.CONFIG.getNumShards(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
-            context.reply(TextUtils.asCodeBlock(content, "diff"));
+            messages.add(0, CentralMessaging.getClearThreadLocalMessageBuilder().append(TextUtils.asCodeBlock(content, "diff")).build());
         }
 
-        //detailed shards
-        for (Message message : messages) {
-            context.reply(message);
-        }
+        return messages;
     }
 
     @Nonnull
