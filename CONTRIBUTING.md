@@ -81,7 +81,7 @@ public class ShuffleCommand extends Command implements IMusicCommand, ICommandRe
 
 If you want to fix existing translations, you are welcome to contribute over at [FredBoat's Crowdin project](https://crowdin.com/project/fredboat).
 
-To include new translation strings, add them to the `en_US.properties` file that you can find in the `resources/lang` folder. A collaborateur will take care of regularly syncing and updating the other translation files through [Crowdin](https://crowdin.com/project/fredboat).
+To include new translation strings, add them to the `en_US.properties` file that you can find in the `resources/lang` folder. A collaborator will take care of regularly syncing and updating the other translation files through [Crowdin](https://crowdin.com/project/fredboat).
 
 ### Rules for translations
 - present tense, imperative verbs
