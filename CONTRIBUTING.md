@@ -79,13 +79,9 @@ public class ShuffleCommand extends Command implements IMusicCommand, ICommandRe
 
 ## Translations
 
-If you just want to fix existing translations, you are welcome to contribute over at [FredBoat's Crowdin project](https://crowdin.com/project/fredboat).
+If you want to fix existing translations, you are welcome to contribute over at [FredBoat's Crowdin project](https://crowdin.com/project/fredboat).
 
-Adding new translation strings to FredBoat requires the following steps:
-1. Check out the [FredBoat translation repo](https://github.com/Frederikam/FredBoat-i13n)
-2. Edit the `en_US.properties`, and only that file. Make sure to keep your style as close as possible to the existing strings and place new strings at the topically appropriate place
-3. Open a PR to the [FredBoat translation repo](https://github.com/Frederikam/FredBoat-i13n) with your edits/additions to the `en_US.properties` file.
-4. If you are writing a PR for FredBoat, that relies on the new strings, you will have to await a successful review of both PRs. A collaborateur will then import your new strings into crowdin, make a build, and update the translation repo. After that has happened, your FredBoat PR will need to point to the new head commit of the translation project, and will then be merged.
+To include new translation strings, add them to the `en_US.properties` file that you can find in the `resources/lang` folder. A collaborateur will take care of regularly syncing and updating the other translation files through [Crowdin](https://crowdin.com/project/fredboat).
 
 ### Rules for translations
 - present tense, imperative verbs
