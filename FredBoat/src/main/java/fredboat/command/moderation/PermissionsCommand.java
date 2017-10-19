@@ -69,13 +69,12 @@ public class PermissionsCommand extends Command implements IModerationCommand {
             context.reply("Permissions are currently disabled.");
             return;
         }
-        String[] args = context.args;
-        if (args.length < 2) {
+        if (context.args.length < 1) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
 
-        switch (args[1]) {
+        switch (context.args[0]) {
             case "del":
             case "delete":
             case "remove":
@@ -83,7 +82,7 @@ public class PermissionsCommand extends Command implements IModerationCommand {
             case "rm":
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
 
-                if (args.length < 3) {
+                if (context.args.length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
                     return;
                 }
@@ -93,7 +92,7 @@ public class PermissionsCommand extends Command implements IModerationCommand {
             case "add":
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
 
-                if (args.length < 3) {
+                if (context.args.length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
                     return;
                 }
@@ -113,7 +112,8 @@ public class PermissionsCommand extends Command implements IModerationCommand {
     public void remove(CommandContext context) {
         Guild guild = context.guild;
         Member invoker = context.invoker;
-        String term = ArgumentUtil.getSearchTerm(context.msg, context.args, 2);
+        //remove the first argument aka add / remove etc to get a nice search term
+        String term = context.rawArgs.replaceFirst(context.args[0], "").trim();
 
         List<IMentionable> search = new ArrayList<>();
         search.addAll(ArgumentUtil.fuzzyRoleSearch(guild, term));
@@ -147,7 +147,8 @@ public class PermissionsCommand extends Command implements IModerationCommand {
 
     public void add(CommandContext context) {
         Guild guild = context.guild;
-        String term = ArgumentUtil.getSearchTerm(context.msg, context.args, 2);
+        //remove the first argument aka add / remove etc to get a nice search term
+        String term = context.rawArgs.replaceFirst(context.args[0], "").trim();
 
         List<IMentionable> list = new ArrayList<>();
         list.addAll(ArgumentUtil.fuzzyRoleSearch(guild, term));

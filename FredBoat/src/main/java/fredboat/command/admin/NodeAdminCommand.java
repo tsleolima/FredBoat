@@ -43,11 +43,11 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
         if (!LavalinkManager.ins.isEnabled()) {
             context.reply("Lavalink is disabled");
         }
-        if (context.args.length == 1) {
+        if (context.args.length == 0) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
-        switch (context.args[1]) {
+        switch (context.args[0]) {
             case "del":
             case "delete":
             case "remove":
@@ -66,7 +66,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
     }
 
     private void remove(CommandContext context) {
-        int key = Integer.valueOf(context.args[2]);
+        int key = Integer.valueOf(context.args[1]);
         LavalinkManager.ins.getLavalink().removeNode(key);
         context.reply("Removed node #" + key);
     }
@@ -74,12 +74,12 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
     private void add(CommandContext context) {
         URI uri;
         try {
-            uri = new URI(context.args[2]);
+            uri = new URI(context.args[1]);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
 
-        String password = context.args[3];
+        String password = context.args[2];
         LavalinkManager.ins.getLavalink().addNode(uri, password);
         context.reply("Added node: " + uri.toString());
     }

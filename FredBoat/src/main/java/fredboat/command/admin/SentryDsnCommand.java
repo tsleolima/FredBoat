@@ -54,13 +54,13 @@ public class SentryDsnCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (context.args.length < 2) {
+        if (context.rawArgs.isEmpty()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
-        String dsn = context.args[1];
+        String dsn = context.rawArgs;
 
-        if (dsn.equals("stop") || dsn.equals("clear")) {
+        if (dsn.equalsIgnoreCase("stop") || dsn.equalsIgnoreCase("clear")) {
             turnOff();
             context.replyWithName("Sentry service has been stopped");
         } else {

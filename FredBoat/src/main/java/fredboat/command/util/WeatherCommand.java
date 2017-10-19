@@ -24,19 +24,12 @@ public class WeatherCommand extends Command implements IUtilCommand {
     }
 
     @Override
-    public void onInvoke(CommandContext context) {
+    public void onInvoke(@Nonnull CommandContext context) {
 
         context.sendTyping();
-        if (context.args.length > 1) {
+        if (context.args.length > 0) {
             try {
-
-                StringBuilder argStringBuilder = new StringBuilder();
-                for (int i = 1; i < context.args.length; i++) {
-                    argStringBuilder.append(context.args[i]);
-                    argStringBuilder.append(" ");
-                }
-
-                String query = argStringBuilder.toString().trim();
+                String query = context.rawArgs;
                 String alphabeticalQuery = query.replaceAll("[^A-Za-z]", "");
 
                 if (alphabeticalQuery == null || alphabeticalQuery.length() == 0) {

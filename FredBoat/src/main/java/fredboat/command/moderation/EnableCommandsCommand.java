@@ -15,21 +15,19 @@ public class EnableCommandsCommand extends Command implements ICommandRestricted
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.args.length  == 2) {
-            try {
-                CommandRegistry.CommandEntry commandEntry = CommandRegistry.getCommand(context.args[1]);
-
-                if (CommandManager.disabledCommands.contains(commandEntry.command)) {
-                    CommandManager.disabledCommands.remove(commandEntry.command);
-                    context.reply(":ok_hand: Command `" + commandEntry.name + "` enabled!");
-                    return;
-                }
-                context.reply("This command is not disabled!");
-
-            } catch (NullPointerException ex) {
+        if (context.args.length == 1) {
+            CommandRegistry.CommandEntry commandEntry = CommandRegistry.getCommand(context.args[0]);
+            if (commandEntry == null) {
                 context.reply("This command doesn't exist!");
+                return;
             }
 
+            if (CommandManager.disabledCommands.contains(commandEntry.command)) {
+                CommandManager.disabledCommands.remove(commandEntry.command);
+                context.reply(":ok_hand: Command `" + commandEntry.name + "` enabled!");
+                return;
+            }
+            context.reply("This command is not disabled!");
         } else {
             HelpCommand.sendFormattedCommandHelp(context);
         }

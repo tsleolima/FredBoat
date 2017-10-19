@@ -46,7 +46,7 @@ public class ConfigCommand extends Command implements IModerationCommand, IComma
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (context.args.length == 1) {
+        if (context.args.length == 0) {
             printConfig(context);
         } else {
             setConfig(context);
@@ -66,20 +66,19 @@ public class ConfigCommand extends Command implements IModerationCommand, IComma
     }
 
     private void setConfig(CommandContext context) {
-        String[] args = context.args;
         Member invoker = context.invoker;
         if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
             return;
         }
 
-        if(args.length != 3) {
+        if (context.args.length != 2) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
 
         GuildConfig gc = EntityReader.getGuildConfig(context.guild.getId());
-        String key = args[1];
-        String val = args[2];
+        String key = context.args[0];
+        String val = context.args[1];
 
         switch (key) {
             case "track_announce":

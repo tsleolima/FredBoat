@@ -63,9 +63,9 @@ public class TestCommand extends Command implements ICommandRestricted {
 
         int t = 20;
         int o = 2000;
-        if (args.length > 2) {
-            t = Integer.valueOf(args[1]);
-            o = Integer.valueOf(args[2]);
+        if (args.length > 1) {
+            t = Integer.valueOf(args[0]);
+            o = Integer.valueOf(args[1]);
         }
         final int threads = t;
         final int operations = o;

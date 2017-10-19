@@ -58,7 +58,6 @@ import java.util.regex.Pattern;
 public class MALCommand extends Command implements IUtilCommand {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(MALCommand.class);
-    private static Pattern regex = Pattern.compile("^\\S+\\s+([\\W\\w]*)");
 
     //MALs API is wonky af and loves to take its time to answer requests, so we are setting rather high time outs
     private static OkHttpClient malHttpClient = new OkHttpClient.Builder()
@@ -69,14 +68,12 @@ public class MALCommand extends Command implements IUtilCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Matcher matcher = regex.matcher(context.msg.getContent());
-
-        if (!matcher.find()) {
+        if (context.rawArgs.isEmpty()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
 
-        String term = matcher.group(1).replace(' ', '+').trim();
+        String term = context.rawArgs.replace(' ', '+').trim();
         log.debug("TERM:" + term);
 
         FredBoat.executor.submit(() -> requestAsync(term, context));

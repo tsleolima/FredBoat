@@ -60,9 +60,9 @@ public class ListCommand extends Command implements IMusicCommand {
         MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder();
 
         int page = 1;
-        if (context.args.length >= 2) {
+        if (context.args.length > 0) {
             try {
-                page = Integer.valueOf(context.args[1]);
+                page = Integer.valueOf(context.args[0]);
             } catch (NumberFormatException e) {
                 page = 1;
             }

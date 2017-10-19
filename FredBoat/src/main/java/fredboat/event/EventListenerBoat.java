@@ -42,7 +42,6 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.util.DiscordUtil;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -98,28 +97,28 @@ public class EventListenerBoat extends AbstractEventListener {
             return;
         }
 
-        String content = event.getMessage().getContent();
-        if (content.length() <= Config.CONFIG.getPrefix().length()) {
+        TextChannel channel = event.getTextChannel(); //never null since we are filtering private messages out above
+
+        //preliminary permission filter to avoid a ton of parsing
+        //let messages pass on to parsing that contain "help" since we want to answer help requests even from channels
+        // where we can't talk in
+        if (!channel.canTalk() && !event.getMessage().getRawContent().toLowerCase().contains("help")) {
             return;
         }
 
-        if (content.startsWith(Config.CONFIG.getPrefix())) {
-            log.info(event.getGuild().getName() + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
-
-            CommandContext context = CommandContext.parse(event);
-
-            if (context == null) {
-                return;
-            }
-
-            //ignore all commands in channels where we can't write, except for the help command
-            if (!context.hasPermissions(Permission.MESSAGE_WRITE) && !(context.command instanceof HelpCommand)) {
-                log.debug("Ignored command because this bot cannot write in that channel");
-                return;
-            }
-
-            limitOrExecuteCommand(context);
+        CommandContext context = CommandContext.parse(event);
+        if (context == null) {
+            return;
         }
+        log.info(event.getGuild().getName() + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
+
+        //ignore all commands in channels where we can't talk, except for the help command
+        if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
+            log.debug("Ignored command because this bot cannot write in that channel");
+            return;
+        }
+
+        limitOrExecuteCommand(context);
     }
 
     /**
@@ -171,7 +170,7 @@ public class EventListenerBoat extends AbstractEventListener {
 
         //quick n dirty bot admin / owner check
         if (Config.CONFIG.getAdminIds().contains(event.getAuthor().getId())
-                || DiscordUtil.getApplicationInfo(event.getJDA()).ownerId == event.getAuthor().getIdLong()) {
+                || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
             String raw = event.getMessage().getRawContent().toLowerCase();
