@@ -54,14 +54,14 @@ public class DiscordUtil {
     private static final Logger log = LoggerFactory.getLogger(DiscordUtil.class);
     private static final String USER_AGENT = "FredBoat DiscordBot (https://github.com/Frederikam/FredBoat, 1.0)";
 
-    private static volatile ApplicationInfo discordAppInfo; //access this object through getApplicationInfo(jda)
-    private static final Object discordAppInfoLock = new Object();
+    private static volatile DiscordAppInfo selfDiscordAppInfo; //access this object through getApplicationInfo(jda)
+    private static final Object selfDiscordAppInfoLock = new Object();
 
     private DiscordUtil() {
     }
 
     public static long getOwnerId(@Nonnull JDA jda) {
-        return getApplicationInfo(jda).getOwner().getIdLong();
+        return getApplicationInfo(jda).ownerId;
     }
 
     public static boolean isMainBotPresent(Guild guild) {
@@ -115,14 +115,15 @@ public class DiscordUtil {
     }
 
     @Nonnull
-    public static ApplicationInfo getApplicationInfo(@Nonnull JDA jda) {
+    public static DiscordAppInfo getApplicationInfo(@Nonnull JDA jda) {
         //double checked lock pattern
-        ApplicationInfo info = discordAppInfo;
+        DiscordAppInfo info = selfDiscordAppInfo;
         if (info == null) {
-            synchronized (discordAppInfoLock) {
-                info = discordAppInfo;
+            synchronized (selfDiscordAppInfoLock) {
+                info = selfDiscordAppInfo;
                 if (info == null) {
-                    discordAppInfo = info = jda.asBot().getApplicationInfo().complete();
+                    //todo this method can be improved by reloading the info regularly. possibly some async loading guava cache?
+                    selfDiscordAppInfo = info = new DiscordAppInfo(jda.asBot().getApplicationInfo().complete());
                 }
             }
         }
@@ -171,5 +172,30 @@ public class DiscordUtil {
         int auditLogMaxLength = 512 - i18nAuditLogMessage.length(); //512 is a hard limit by discord
         return i18nAuditLogMessage + (plainReason.length() > auditLogMaxLength ?
                 plainReason.substring(0, auditLogMaxLength) : plainReason);
+    }
+
+
+    //like JDAs ApplicationInfo but without any references to JDA objects to prevent leaks
+    //use this to cache the app info
+    public static class DiscordAppInfo {
+        public final boolean doesBotRequireCodeGrant;
+        public final boolean isBotPublic;
+        public final long botId;
+        public final String iconId;
+        public final String description;
+        public final String appName;
+        public final long ownerId;
+        public final String ownerName;
+
+        public DiscordAppInfo(ApplicationInfo applicationInfo) {
+            this.doesBotRequireCodeGrant = applicationInfo.doesBotRequireCodeGrant();
+            this.isBotPublic = applicationInfo.isBotPublic();
+            this.botId = applicationInfo.getIdLong();
+            this.iconId = applicationInfo.getIconId();
+            this.description = applicationInfo.getDescription();
+            this.appName = applicationInfo.getName();
+            this.ownerId = applicationInfo.getOwner().getIdLong();
+            this.ownerName = applicationInfo.getOwner().getName();
+        }
     }
 }
