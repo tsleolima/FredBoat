@@ -31,7 +31,7 @@ public class SetAvatarCommand extends Command implements ICommandRestricted {
         if (!context.msg.getAttachments().isEmpty()) {
             Attachment attachment = context.msg.getAttachments().get(0);
             imageUrl = attachment.getUrl();
-        } else if (context.args.length > 0) {
+        } else if (context.hasArguments()) {
             imageUrl = context.args[0];
         }
 

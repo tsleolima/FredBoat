@@ -46,7 +46,7 @@ public class ConfigCommand extends Command implements IModerationCommand, IComma
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             printConfig(context);
         } else {
             setConfig(context);

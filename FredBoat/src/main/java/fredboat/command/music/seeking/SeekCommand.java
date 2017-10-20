@@ -50,7 +50,7 @@ public class SeekCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

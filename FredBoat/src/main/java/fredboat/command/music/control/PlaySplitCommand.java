@@ -45,7 +45,7 @@ public class PlaySplitCommand extends Command implements IMusicCommand, ICommand
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.args.length < 1) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

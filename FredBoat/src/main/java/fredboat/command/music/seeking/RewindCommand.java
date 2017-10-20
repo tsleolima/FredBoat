@@ -49,7 +49,7 @@ public class RewindCommand extends Command implements IMusicCommand, ICommandRes
             return;
         }
 
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

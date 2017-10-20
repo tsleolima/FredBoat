@@ -55,7 +55,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
             guildIdToLastSkip.put(context.guild.getId(), System.currentTimeMillis());
         }
 
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             String response = addVoteWithResponse(context);
             float actualMinSkip = player.getHumanUsersInCurrentVC().size() < 3 ? 1.0f : MIN_SKIP_PERCENTAGE;
 
@@ -77,7 +77,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
                 context.reply(response + "\n" + context.i18nFormat("voteSkipNotEnough", skipPerc, minSkipPerc));
             }
 
-        } else if (context.args.length == 1 && context.args[0].toLowerCase().equals("list")) {
+        } else if (context.args[0].toLowerCase().equals("list")) {
             displayVoteList(context, player);
         } else {
             HelpCommand.sendFormattedCommandHelp(context);

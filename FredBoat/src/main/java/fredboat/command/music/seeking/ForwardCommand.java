@@ -51,7 +51,7 @@ public class ForwardCommand extends Command implements IMusicCommand, ICommandRe
             return;
         }
 
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

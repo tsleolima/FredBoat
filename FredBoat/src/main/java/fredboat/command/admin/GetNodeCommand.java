@@ -47,7 +47,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         }
 
         Guild guild = null;
-        if (context.args.length == 1) {
+        if (context.hasArguments()) {
             try {
                 long guildId = Long.parseUnsignedLong(context.args[0]);
                 guild = FredBoat.getGuildById(guildId);

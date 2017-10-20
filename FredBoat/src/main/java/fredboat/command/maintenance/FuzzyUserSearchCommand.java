@@ -42,7 +42,7 @@ public class FuzzyUserSearchCommand extends Command implements IMaintenanceComma
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (context.rawArgs.isEmpty()) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
         } else {
             String query = context.rawArgs;

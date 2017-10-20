@@ -47,7 +47,7 @@ public class LanguageCommand extends Command implements IModerationCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;
-        if (context.args.length < 1) {
+        if (!context.hasArguments()) {
             handleNoArgs(context);
             return;
         }

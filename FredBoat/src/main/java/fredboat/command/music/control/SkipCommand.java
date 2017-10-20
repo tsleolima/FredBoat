@@ -75,11 +75,11 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
             guildIdToLastSkip.put(context.guild.getId(), System.currentTimeMillis());
         }
 
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             skipNext(context);
-        } else if (context.args.length == 1 && StringUtils.isNumeric(context.args[0])) {
+        } else if (context.hasArguments() && StringUtils.isNumeric(context.args[0])) {
             skipGivenIndex(player, context);
-        } else if (context.args.length == 1 && trackRangePattern.matcher(context.args[0]).matches()) {
+        } else if (context.hasArguments() && trackRangePattern.matcher(context.args[0]).matches()) {
             skipInRange(player, context);
         } else if (!context.getMentionedUsers().isEmpty()) {
             skipUser(player, context, context.getMentionedUsers());

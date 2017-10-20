@@ -69,7 +69,7 @@ public class PermissionsCommand extends Command implements IModerationCommand {
             context.reply("Permissions are currently disabled.");
             return;
         }
-        if (context.args.length < 1) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

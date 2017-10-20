@@ -55,7 +55,7 @@ public class DebugCommand extends Command implements IMaintenanceCommand, IComma
     public void onInvoke(@Nonnull CommandContext context) {
 
         Guild guild;
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             guild = context.guild;
         } else {
             try {

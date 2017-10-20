@@ -55,7 +55,7 @@ public class JokeCommand extends Command implements IFunCommand {
 
             if (!context.getMentionedUsers().isEmpty()) {
                 joke = joke.replaceAll("Chuck Norris", context.getMentionedUsers().get(0).getAsMention());
-            } else if (!context.rawArgs.isEmpty()) {
+            } else if (context.hasArguments()) {
                 joke = joke.replaceAll("Chuck Norris", context.rawArgs);
             }
             

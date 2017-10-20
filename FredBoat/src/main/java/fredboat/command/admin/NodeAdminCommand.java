@@ -43,7 +43,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
         if (!LavalinkManager.ins.isEnabled()) {
             context.reply("Lavalink is disabled");
         }
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
@@ -53,10 +53,18 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
             case "remove":
             case "rem":
             case "rm":
-                remove(context);
+                if (context.args.length < 2) {
+                    HelpCommand.sendFormattedCommandHelp(context);
+                } else {
+                    remove(context);
+                }
                 break;
             case "add":
-                add(context);
+                if (context.args.length < 3) {
+                    HelpCommand.sendFormattedCommandHelp(context);
+                } else {
+                    add(context);
+                }
                 break;
             case "list":
             default:

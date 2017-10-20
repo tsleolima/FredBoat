@@ -112,7 +112,7 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.args.length == 0) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

@@ -50,7 +50,7 @@ public class SoftbanCommand extends Command implements IModerationCommand {
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;
         //Ensure we have a search term
-        if (context.args.length < 1) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }

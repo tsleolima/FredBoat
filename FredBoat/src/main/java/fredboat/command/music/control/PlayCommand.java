@@ -82,7 +82,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
-        if (context.args.length < 1) {
+        if (!context.hasArguments()) {
             handleNoArguments(context);
             return;
         }

@@ -173,21 +173,29 @@ public class CommandContext extends Context {
         }
     }
 
+    public boolean hasArguments() {
+        return args.length > 0 && !rawArgs.isEmpty();
+    }
+
+    @Nonnull
     @Override
     public TextChannel getTextChannel() {
         return channel;
     }
 
+    @Nonnull
     @Override
     public Guild getGuild() {
         return guild;
     }
 
+    @Nonnull
     @Override
     public Member getMember() {
         return invoker;
     }
 
+    @Nonnull
     @Override
     public User getUser() {
         return invoker.getUser();

@@ -63,7 +63,7 @@ public class CompileCommand extends Command implements ICommandRestricted {
             Runtime rt = Runtime.getRuntime();
 
             String branch = "master";
-            if (context.args.length > 0) {
+            if (context.hasArguments()) {
                 branch = context.args[0];
             }
             String githubUser = "Frederikam";
