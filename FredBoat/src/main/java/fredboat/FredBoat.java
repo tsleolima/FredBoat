@@ -120,8 +120,6 @@ public abstract class FredBoat {
 
         I18n.start();
 
-        Config.loadDefaultConfig();
-
         try {
             API.start();
         } catch (Exception e) {

@@ -55,11 +55,25 @@ public class Config {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
-    public static Config CONFIG = null;
-
     public static String DEFAULT_PREFIX = ";;";
     //see https://github.com/brettwooldridge/HikariCP connectionTimeout
     public static int HIKARI_TIMEOUT_MILLISECONDS = 1000;
+
+    public static final Config CONFIG;
+
+    static {
+        Config c;
+        try {
+            c = new Config(
+                    loadConfigFile("credentials"),
+                    loadConfigFile("config")
+            );
+        } catch (final IOException e) {
+            c = null;
+            log.error("Could not load config files!", e);
+        }
+        CONFIG = c;
+    }
 
     private final DistributionEnum distribution;
     private final String botToken;
@@ -262,13 +276,6 @@ public class Config {
                     "Try using an online yaml validator.");
             throw e;
         }
-    }
-
-    static void loadDefaultConfig() throws IOException {
-        Config.CONFIG = new Config(
-                loadConfigFile("credentials"),
-                loadConfigFile("config")
-        );
     }
 
     /**
