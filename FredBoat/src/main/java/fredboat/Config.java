@@ -221,9 +221,6 @@ public class Config {
                 numShards = DiscordUtil.getRecommendedShardCount(getBotToken());
             }
             log.info("Discord recommends " + numShards + " shard(s)");
-            //overriding to always use sharding. saves us a headache with tons of null checks while keeping the code
-            // usable for selfhosters because we can assume JDA#getShardInfo will never be null
-            if (numShards < 2) numShards = 2;
 
             //more database connections don't help with performance, so use a value based on available cores
             //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
