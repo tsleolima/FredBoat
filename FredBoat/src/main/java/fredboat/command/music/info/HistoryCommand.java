@@ -36,7 +36,6 @@ import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Member;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.text.MessageFormat;
@@ -44,16 +43,11 @@ import java.util.List;
 
 public class HistoryCommand extends Command implements IMusicCommand {
 
-  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HistoryCommand.class);
-
   private static final int PAGE_SIZE = 10;
 
   @Override
-  public void onInvoke(CommandContext context) {
+  public void onInvoke(@Nonnull CommandContext context) {
       GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-      player.setCurrentTC(context.channel);
-
-      MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder();
 
       if (player.isHistoryQueueEmpty()) {
           context.reply(context.i18n("npNotInHistory"));
@@ -61,9 +55,9 @@ public class HistoryCommand extends Command implements IMusicCommand {
       }
 
       int page = 1;
-      if (context.args.length >= 2) {
+      if (context.hasArguments()) {
           try {
-              page = Integer.valueOf(context.args[1]);
+              page = Integer.valueOf(context.args[0]);
           } catch (NumberFormatException e) {
               page = 1;
           }
@@ -83,12 +77,12 @@ public class HistoryCommand extends Command implements IMusicCommand {
 
       List<AudioTrackContext> sublist = player.getTracksInHistory(i, listEnd);
 
-      mb.append(context.i18n("listShowHistory"));
-      mb.append("\n");
-
-      mb.append(MessageFormat.format(context.i18n("listPageNum"), page, maxPages));
-      mb.append("\n");
-      mb.append("\n");
+      MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder()
+              .append(context.i18n("listShowHistory"))
+              .append("\n")
+              .append(MessageFormat.format(context.i18n("listPageNum"), page, maxPages))
+              .append("\n")
+              .append("\n");
 
       for (AudioTrackContext atc: sublist) {
           String status = " ";
@@ -112,6 +106,7 @@ public class HistoryCommand extends Command implements IMusicCommand {
       context.reply(mb.build());
   }
 
+  @Nonnull
   @Override
   public String help(@Nonnull Context context) {
       String usage = "{0}{1}\n#";

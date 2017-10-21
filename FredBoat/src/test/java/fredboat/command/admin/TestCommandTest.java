@@ -28,7 +28,7 @@ class TestCommandTest extends ProvideJDASingleton {
     void onInvoke() {
         Assumptions.assumeFalse(isTravisEnvironment(), () -> "Aborting test: Travis CI detected");
         Assumptions.assumeTrue(initialized);
-        String[] args = {"test", "10", "10"};
+        String[] args = {"10", "10"};
 
         //test the connection if one was specified
         String jdbcUrl = Config.CONFIG.getJdbcUrl();
@@ -44,7 +44,7 @@ class TestCommandTest extends ProvideJDASingleton {
         }
 
         //test the internal SQLite db
-        args[1] = args[2] = "2";
+        args[0] = args[1] = "2";
         DatabaseManager dbm = new DatabaseManager("jdbc:sqlite:fredboat.db", "org.hibernate.dialect.SQLiteDialect", 1);
         try {
             dbm.startup();

@@ -52,12 +52,11 @@ public class JokeCommand extends Command implements IFunCommand {
             }
             
             String joke = object.getJSONObject("value").getString("joke");
-            String remainder = context.msg.getContent().substring(context.args[0].length()).trim();
 
-            if (context.msg.getMentionedUsers().size() > 0) {
-                joke = joke.replaceAll("Chuck Norris", context.msg.getMentionedUsers().get(0).getAsMention());
-            } else if (remainder.length() > 0){
-                joke = joke.replaceAll("Chuck Norris", remainder);
+            if (!context.getMentionedUsers().isEmpty()) {
+                joke = joke.replaceAll("Chuck Norris", context.getMentionedUsers().get(0).getAsMention());
+            } else if (context.hasArguments()) {
+                joke = joke.replaceAll("Chuck Norris", context.rawArgs);
             }
             
             joke = joke.replaceAll("&quot;", "\"");

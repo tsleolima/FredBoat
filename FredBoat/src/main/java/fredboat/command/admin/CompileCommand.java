@@ -63,12 +63,12 @@ public class CompileCommand extends Command implements ICommandRestricted {
             Runtime rt = Runtime.getRuntime();
 
             String branch = "master";
-            if (context.args.length > 1) {
-                branch = context.args[1];
+            if (context.hasArguments()) {
+                branch = context.args[0];
             }
             String githubUser = "Frederikam";
-            if (context.args.length > 2) {
-                githubUser = context.args[2];
+            if (context.args.length > 1) {
+                githubUser = context.args[1];
             }
 
             //Clear any old update folder if it is still present

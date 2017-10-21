@@ -49,12 +49,12 @@ public class UnblacklistCommand extends Command implements ICommandRestricted {
             return;
         }
 
-        if (context.msg.getMentionedUsers().isEmpty()) {
+        if (context.getMentionedUsers().isEmpty()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
 
-        User user = context.msg.getMentionedUsers().get(0);
+        User user = context.getMentionedUsers().get(0);
         String userId = user.getId();
 
         if (userId == null || "".equals(userId)) {

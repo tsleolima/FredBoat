@@ -62,8 +62,8 @@ public class HelpCommand extends Command implements IUtilCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.args.length > 1) {
-            sendFormattedCommandHelp(context, context.args[1]);
+        if (context.hasArguments()) {
+            sendFormattedCommandHelp(context, context.args[0]);
         } else {
             sendGeneralHelp(context);
         }

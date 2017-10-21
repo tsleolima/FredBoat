@@ -60,18 +60,18 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
     @SuppressWarnings("StringConcatenationInLoop")
     private void handleLavalink(CommandContext context) {
         Lavalink lavalink = LavalinkManager.ins.getLavalink();
-        if (context.args.length >= 2 && !context.args[1].equals("host")) {
+        if (context.hasArguments() && !context.args[0].equals("host")) {
             try {
-                LavalinkSocket socket = lavalink.getNodes().get(Integer.parseInt(context.args[1]));
+                LavalinkSocket socket = lavalink.getNodes().get(Integer.parseInt(context.args[0]));
                 context.reply(TextUtils.asCodeBlock(socket.getStats().getAsJson().toString(4), "json"));
                 return;
             } catch (NumberFormatException | IndexOutOfBoundsException ignored) { //fallthrough
-                context.replyWithName(String.format("No such node: `%s`, showing all nodes instead.", context.args[1]));
+                context.replyWithName(String.format("No such node: `%s`, showing all nodes instead.", context.args[0]));
             }
         }
 
         boolean showHosts = false;
-        if (context.args.length >= 2 && context.args[1].equals("host")) {
+        if (context.hasArguments() && context.args[0].equals("host")) {
             if (PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                 showHosts = true;
             } else {
@@ -136,7 +136,7 @@ public class NodesCommand extends Command implements IMaintenanceCommand {
         List<RemoteNode> nodes = pm.getRemoteNodeRegistry().getNodes();
         boolean showHost = false;
 
-        if (context.args.length == 2 && context.args[1].equals("host")) {
+        if (context.hasArguments() && context.args[0].equals("host")) {
             if (PermsUtil.checkPerms(PermissionLevel.BOT_OWNER, context.invoker)) {
                 showHost = true;
             } else {

@@ -63,8 +63,7 @@ public class AnnounceCommand extends Command implements ICommandRestricted {
         if (players.isEmpty()) {
             return;
         }
-        String input = context.msg.getRawContent().substring(context.args[0].length() + 1);
-        String msg = HEAD + input;
+        String msg = HEAD + context.rawArgs;
 
         context.reply(String.format("[0/%d]", players.size()),
                 //success handler

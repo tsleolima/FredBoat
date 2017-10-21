@@ -27,7 +27,6 @@ package fredboat.command.fun;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.messaging.internal.Context;
-import net.dv8tion.jda.core.entities.Message;
 
 import javax.annotation.Nonnull;
 
@@ -48,14 +47,13 @@ public class HugCommand extends RandomImageCommand implements IFunCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Message msg = context.msg;
         String hugMessage = null;
-        if (msg.getMentionedUsers().size() > 0) {
-            if (msg.getMentionedUsers().get(0).getIdLong() == msg.getJDA().getSelfUser().getIdLong()) {
+        if (!context.getMentionedUsers().isEmpty()) {
+            if (context.getMentionedUsers().get(0).getIdLong() == context.guild.getJDA().getSelfUser().getIdLong()) {
                 hugMessage = context.i18n("hugBot");
             } else {
                 hugMessage = "_"
-                        + context.i18nFormat("hugSuccess", msg.getMentionedUsers().get(0).getAsMention())
+                        + context.i18nFormat("hugSuccess", context.getMentionedUsers().get(0).getAsMention())
                         + "_";
             }
         }

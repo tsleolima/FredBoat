@@ -61,7 +61,11 @@ public class DiscordUtil {
     }
 
     public static long getOwnerId(@Nonnull JDA jda) {
-        return getApplicationInfo(jda).ownerId;
+        return getApplicationInfo(jda).ownerIdLong;
+    }
+
+    public static long getSelfId(@Nonnull JDA jda) {
+        return getApplicationInfo(jda).botIdLong;
     }
 
     public static boolean isMainBotPresent(Guild guild) {
@@ -159,8 +163,8 @@ public class DiscordUtil {
     // ########## Moderation related helper functions
     public static String getReasonForModAction(CommandContext context) {
         String r = null;
-        if (context.args.length > 2) {
-            r = String.join(" ", Arrays.copyOfRange(context.args, 2, context.args.length));
+        if (context.args.length > 1) { //ignore the first arg which contains the name/mention of the user
+            r = String.join(" ", Arrays.copyOfRange(context.args, 1, context.args.length));
         }
 
         return context.i18n("modReason") + ": " + (r != null ? r : "No reason provided.");
@@ -180,21 +184,25 @@ public class DiscordUtil {
     public static class DiscordAppInfo {
         public final boolean doesBotRequireCodeGrant;
         public final boolean isBotPublic;
-        public final long botId;
+        public final long botIdLong;
+        public final String botId;
         public final String iconId;
         public final String description;
         public final String appName;
-        public final long ownerId;
+        public final long ownerIdLong;
+        public final String ownerId;
         public final String ownerName;
 
         public DiscordAppInfo(ApplicationInfo applicationInfo) {
             this.doesBotRequireCodeGrant = applicationInfo.doesBotRequireCodeGrant();
             this.isBotPublic = applicationInfo.isBotPublic();
-            this.botId = applicationInfo.getIdLong();
+            this.botIdLong = applicationInfo.getIdLong();
+            this.botId = applicationInfo.getId();
             this.iconId = applicationInfo.getIconId();
             this.description = applicationInfo.getDescription();
             this.appName = applicationInfo.getName();
-            this.ownerId = applicationInfo.getOwner().getIdLong();
+            this.ownerIdLong = applicationInfo.getOwner().getIdLong();
+            this.ownerId = applicationInfo.getOwner().getId();
             this.ownerName = applicationInfo.getOwner().getName();
         }
     }

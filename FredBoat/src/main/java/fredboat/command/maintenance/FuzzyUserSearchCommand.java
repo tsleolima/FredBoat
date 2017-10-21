@@ -42,10 +42,11 @@ public class FuzzyUserSearchCommand extends Command implements IMaintenanceComma
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (context.args.length == 1) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
         } else {
-            List<Member> list = ArgumentUtil.fuzzyMemberSearch(context.guild, context.args[1], true);
+            String query = context.rawArgs;
+            List<Member> list = ArgumentUtil.fuzzyMemberSearch(context.guild, query, true);
 
             if(list.isEmpty()){
                 context.replyWithName(context.i18n("fuzzyNoResults"));
@@ -78,14 +79,14 @@ public class FuzzyUserSearchCommand extends Command implements IMaintenanceComma
                     + TextUtils.padWithSpaces("Nick", nickPadding + 1, false) + "\n");
 
             for (String line : lines) {
-                if (sb.length() + line.length() < 1900) { //respect max message size
+                if (sb.length() + line.length() + query.length() < 1900) { //respect max message size
                     sb.append(line);
                 } else {
                     sb.append("[...]");
                     break;
                 }
             }
-            context.replyWithName(TextUtils.asCodeBlock(sb.toString()));
+            context.replyWithName("Results for `" + query + "`: " + TextUtils.asCodeBlock(sb.toString()));
         }
     }
 

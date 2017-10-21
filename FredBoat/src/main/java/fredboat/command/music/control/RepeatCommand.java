@@ -44,13 +44,13 @@ public class RepeatCommand extends Command implements IMusicCommand, ICommandRes
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
 
-        if (context.args.length < 2) {
+        if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
 
         RepeatMode desiredRepeatMode;
-        String userInput = context.args[1];
+        String userInput = context.args[0];
         switch (userInput) {
             case "off":
             case "out":

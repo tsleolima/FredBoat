@@ -51,6 +51,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
@@ -368,6 +369,15 @@ public abstract class FredBoat {
         for (FredBoat fb : shards) {
             Guild g = fb.getJda().getGuildById(id);
             if (g != null) return g;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static User getUserById(long id) {
+        for (FredBoat fb : shards) {
+            User u = fb.getJda().getUserById(id);
+            if (u != null) return u;
         }
         return null;
     }

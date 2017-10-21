@@ -29,7 +29,6 @@ import fredboat.FredBoat;
 import fredboat.audio.player.AudioLossCounter;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -55,29 +54,24 @@ public class DebugCommand extends Command implements IMaintenanceCommand, IComma
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.args.length == 1 || context.args.length == 2) {
-
-            Guild guild;
-            if (context.args.length == 1) {
-                guild = context.guild;
-            } else {
-                try {
-                    if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
-                        return;
-                    }
-                    guild = FredBoat.getGuildById(Long.parseLong(context.args[1]));
-                } catch (NumberFormatException ignored) {
-                    guild = null;
-                }
-            }
-
-            if (guild != null) {
-                context.reply(getDebugEmbed(PlayerRegistry.getOrCreate(guild)).build());
-            } else {
-                context.replyWithName(String.format("There is no guild with id `%s`.", context.args[1]));
-            }
+        Guild guild;
+        if (!context.hasArguments()) {
+            guild = context.guild;
         } else {
-            HelpCommand.sendFormattedCommandHelp(context);
+            try {
+                if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
+                    return;
+                }
+                guild = FredBoat.getGuildById(Long.parseLong(context.args[0]));
+            } catch (NumberFormatException ignored) {
+                guild = null;
+            }
+        }
+
+        if (guild != null) {
+            context.reply(getDebugEmbed(PlayerRegistry.getOrCreate(guild)).build());
+        } else {
+            context.replyWithName(String.format("There is no guild with id `%s`.", context.args[0]));
         }
     }
 

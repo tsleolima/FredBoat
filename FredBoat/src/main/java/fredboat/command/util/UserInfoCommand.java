@@ -50,10 +50,10 @@ public class UserInfoCommand extends Command implements IUtilCommand {
         StringBuilder knownServers = new StringBuilder();
         List<String> matchedGuildNames = new ArrayList<>();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
-        if (context.args.length == 1) {
+        if (!context.hasArguments()) {
             target = context.invoker;
         } else {
-            target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.args[1], true);
+            target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.rawArgs, true);
         }
         if (target == null) return;
         FredBoat.getAllGuilds().forEach(guild -> {
