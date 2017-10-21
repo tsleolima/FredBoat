@@ -32,6 +32,10 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
     public static Map<Long, Set<Long>> guildSkipVotes = new HashMap<>();
     private static final float MIN_SKIP_PERCENTAGE = 0.5f;
 
+    public VoteSkipCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);

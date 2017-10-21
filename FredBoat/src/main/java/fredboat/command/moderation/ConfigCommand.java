@@ -44,6 +44,10 @@ import javax.annotation.Nonnull;
 
 public class ConfigCommand extends Command implements IModerationCommand, ICommandRestricted {
 
+    public ConfigCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (!context.hasArguments()) {

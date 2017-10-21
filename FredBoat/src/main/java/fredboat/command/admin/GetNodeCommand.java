@@ -39,6 +39,10 @@ import javax.annotation.Nonnull;
 
 public class GetNodeCommand extends Command implements ICommandRestricted {
 
+    public GetNodeCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (!LavalinkManager.ins.isEnabled()) {

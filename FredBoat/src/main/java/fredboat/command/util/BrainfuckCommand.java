@@ -36,6 +36,10 @@ import java.nio.ByteBuffer;
 
 public class BrainfuckCommand extends Command implements IUtilCommand {
 
+    public BrainfuckCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     ByteBuffer bytes = null;
     char[] code;
     public static final int MAX_CYCLE_COUNT = 10000;

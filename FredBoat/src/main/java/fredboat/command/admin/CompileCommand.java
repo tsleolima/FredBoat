@@ -48,6 +48,10 @@ public class CompileCommand extends Command implements ICommandRestricted {
 
     private static final Logger log = LoggerFactory.getLogger(CompileCommand.class);
 
+    public CompileCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         context.reply("*Now updating...*\n\nRunning `git clone`... ",

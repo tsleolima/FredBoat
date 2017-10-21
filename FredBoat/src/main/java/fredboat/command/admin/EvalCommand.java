@@ -55,7 +55,8 @@ public class EvalCommand extends Command implements ICommandRestricted {
     //Thanks Dinos!
     private ScriptEngine engine;
 
-    public EvalCommand() {
+    public EvalCommand(String name, String... aliases) {
+        super(name, aliases);
         engine = new ScriptEngineManager().getEngineByName("nashorn");
         try {
             engine.eval("var imports = new JavaImporter(java.io, java.lang, java.util);");

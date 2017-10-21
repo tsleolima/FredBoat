@@ -41,6 +41,10 @@ import javax.annotation.Nonnull;
 
 public class SeekCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public SeekCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getExisting(context.guild);

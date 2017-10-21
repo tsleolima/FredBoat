@@ -34,6 +34,10 @@ import javax.annotation.Nonnull;
 
 public class AvatarCommand extends Command implements IUtilCommand {
 
+    public AvatarCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (context.getMentionedUsers().isEmpty()) {

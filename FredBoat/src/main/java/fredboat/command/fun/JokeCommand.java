@@ -42,6 +42,10 @@ public class JokeCommand extends Command implements IFunCommand {
 
     private static final Logger log = LoggerFactory.getLogger(JokeCommand.class);
 
+    public JokeCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         try {

@@ -38,6 +38,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class NodeAdminCommand extends Command implements ICommandRestricted {
+
+    public NodeAdminCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (!LavalinkManager.ins.isEnabled()) {

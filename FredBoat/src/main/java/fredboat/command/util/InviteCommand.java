@@ -35,6 +35,10 @@ import javax.annotation.Nonnull;
 
 public class InviteCommand extends Command implements IUtilCommand {
 
+    public InviteCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         DiscordUtil.DiscordAppInfo appInfo = DiscordUtil.getApplicationInfo(context.guild.getJDA());

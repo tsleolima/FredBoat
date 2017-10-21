@@ -33,12 +33,8 @@ import javax.annotation.Nonnull;
 
 public class PatCommand extends RandomImageCommand implements IFunCommand {
 
-    public PatCommand(String[] urls) {
-        super(urls);
-    }
-
-    public PatCommand(String imgurAlbumUrl) {
-        super(imgurAlbumUrl);
+    public PatCommand(String imgurAlbumUrl, String name, String... aliases) {
+        super(imgurAlbumUrl, name, aliases);
     }
 
     @Override

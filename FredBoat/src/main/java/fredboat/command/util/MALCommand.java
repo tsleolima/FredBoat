@@ -39,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
@@ -57,7 +58,11 @@ import java.util.regex.Pattern;
 @Deprecated
 public class MALCommand extends Command implements IUtilCommand {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(MALCommand.class);
+    private static final Logger log = LoggerFactory.getLogger(MALCommand.class);
+
+    public MALCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
 
     //MALs API is wonky af and loves to take its time to answer requests, so we are setting rather high time outs
     private static OkHttpClient malHttpClient = new OkHttpClient.Builder()

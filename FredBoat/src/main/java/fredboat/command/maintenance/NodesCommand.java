@@ -47,6 +47,10 @@ import java.util.List;
 
 public class NodesCommand extends Command implements IMaintenanceCommand {
 
+    public NodesCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (LavalinkManager.ins.isEnabled()) {

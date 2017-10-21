@@ -54,6 +54,10 @@ import java.io.IOException;
 
 public class NowplayingCommand extends Command implements IMusicCommand {
 
+    public NowplayingCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);

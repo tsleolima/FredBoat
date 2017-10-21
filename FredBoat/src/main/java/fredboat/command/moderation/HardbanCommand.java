@@ -52,6 +52,10 @@ public class HardbanCommand extends Command implements IModerationCommand {
 
     private static final Logger log = LoggerFactory.getLogger(HardbanCommand.class);
 
+    public HardbanCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;

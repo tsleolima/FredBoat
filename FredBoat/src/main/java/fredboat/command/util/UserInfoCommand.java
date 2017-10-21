@@ -44,6 +44,11 @@ import java.util.List;
  * Created by midgard on 17/01/20.
  */
 public class UserInfoCommand extends Command implements IUtilCommand {
+
+    public UserInfoCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Member target;

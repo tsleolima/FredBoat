@@ -37,12 +37,8 @@ import javax.annotation.Nonnull;
  */
 public class HugCommand extends RandomImageCommand implements IFunCommand {
 
-    public HugCommand(String[] urls) {
-        super(urls);
-    }
-
-    public HugCommand(String imgurAlbumUrl) {
-        super(imgurAlbumUrl);
+    public HugCommand(String imgurAlbumUrl, String name, String... aliases) {
+        super(imgurAlbumUrl, name, aliases);
     }
 
     @Override

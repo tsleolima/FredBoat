@@ -52,6 +52,10 @@ public class KickCommand extends Command implements IModerationCommand {
 
     private static final Logger log = LoggerFactory.getLogger(KickCommand.class);
 
+    public KickCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;

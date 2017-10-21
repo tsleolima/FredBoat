@@ -56,6 +56,10 @@ public class AnnounceCommand extends Command implements ICommandRestricted {
 
     private static final String HEAD = "__**[BROADCASTED MESSAGE]**__\n";
 
+    public AnnounceCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         List<GuildPlayer> players = PlayerRegistry.getPlayingPlayers();

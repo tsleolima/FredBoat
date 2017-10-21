@@ -40,6 +40,10 @@ import java.util.stream.Collectors;
 
 public class FuzzyUserSearchCommand extends Command implements IMaintenanceCommand {
 
+    public FuzzyUserSearchCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (!context.hasArguments()) {

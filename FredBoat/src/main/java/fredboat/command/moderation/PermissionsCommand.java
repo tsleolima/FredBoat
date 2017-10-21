@@ -59,7 +59,8 @@ public class PermissionsCommand extends Command implements IModerationCommand {
 
     public final PermissionLevel permissionLevel;
 
-    public PermissionsCommand(PermissionLevel permissionLevel) {
+    public PermissionsCommand(PermissionLevel permissionLevel, String name, String... aliases) {
+        super(name, aliases);
         this.permissionLevel = permissionLevel;
     }
 

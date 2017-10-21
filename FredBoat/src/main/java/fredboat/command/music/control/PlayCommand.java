@@ -48,17 +48,17 @@ import net.dv8tion.jda.core.entities.Message.Attachment;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.List;
 
 public class PlayCommand extends Command implements IMusicCommand, ICommandRestricted {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlayCommand.class);
     private final List<SearchUtil.SearchProvider> searchProviders;
-    private static final JoinCommand JOIN_COMMAND = new JoinCommand();
+    private static final JoinCommand JOIN_COMMAND = new JoinCommand("");
 
-    public PlayCommand(SearchUtil.SearchProvider... searchProviders) {
-        this.searchProviders = Arrays.asList(searchProviders);
+    public PlayCommand(List<SearchUtil.SearchProvider> searchProviders, String name, String... aliases) {
+        super(name, aliases);
+        this.searchProviders = searchProviders;
     }
 
     @Override

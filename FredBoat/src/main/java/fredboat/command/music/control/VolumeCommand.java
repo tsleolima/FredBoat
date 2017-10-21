@@ -41,6 +41,10 @@ import java.util.concurrent.TimeUnit;
 
 public class VolumeCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public VolumeCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 

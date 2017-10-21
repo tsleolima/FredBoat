@@ -49,6 +49,10 @@ import java.util.LinkedHashSet;
 
 public class SelectCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public SelectCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         select(context);

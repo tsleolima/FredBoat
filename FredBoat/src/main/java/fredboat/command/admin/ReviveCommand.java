@@ -42,6 +42,10 @@ import javax.annotation.Nonnull;
  */
 public class ReviveCommand extends Command implements ICommandRestricted {
 
+    public ReviveCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 

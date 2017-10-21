@@ -44,6 +44,10 @@ import java.util.List;
 
 public class LanguageCommand extends Command implements IModerationCommand {
 
+    public LanguageCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;

@@ -19,7 +19,8 @@ public class WeatherCommand extends Command implements IUtilCommand {
     private static final String LOCATION_WEATHER_STRING_FORMAT = "{0} - {1}";
     private static final String HELP_STRING_FORMAT = "{0}{1} <location>\n#";
 
-    public WeatherCommand(Weather weatherImplementation) {
+    public WeatherCommand(Weather weatherImplementation, String name, String... aliases) {
+        super(name, aliases);
         weather = weatherImplementation;
     }
 

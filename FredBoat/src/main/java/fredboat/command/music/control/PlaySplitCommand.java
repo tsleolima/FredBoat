@@ -41,6 +41,9 @@ import javax.annotation.Nonnull;
 
 public class PlaySplitCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public PlaySplitCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {

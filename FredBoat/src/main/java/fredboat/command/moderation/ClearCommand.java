@@ -44,6 +44,10 @@ import java.util.List;
 
 public class ClearCommand extends Command implements IModerationCommand {
 
+    public ClearCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     //TODO: Redo this
     //TODO: i18n this class
     @Override

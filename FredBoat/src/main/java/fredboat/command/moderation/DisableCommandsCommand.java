@@ -12,6 +12,11 @@ import fredboat.perms.PermissionLevel;
 import javax.annotation.Nonnull;
 
 public class DisableCommandsCommand extends Command implements ICommandRestricted {
+
+    public DisableCommandsCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 

@@ -42,6 +42,10 @@ import javax.annotation.Nonnull;
 
 public class ForwardCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public ForwardCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getExisting(context.guild);

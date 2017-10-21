@@ -52,6 +52,10 @@ public class DanceCommand extends Command implements IFunCommand {
 
     private final Semaphore allowed = new Semaphore(5);
 
+    public DanceCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         //locking by use of java.util.concurrent.locks

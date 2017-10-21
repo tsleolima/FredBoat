@@ -46,6 +46,10 @@ public class MathCommand extends Command implements IUtilCommand {
 
     private static final BigDecimal HUNDRED = new BigDecimal("100");
 
+    public MathCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         String output;

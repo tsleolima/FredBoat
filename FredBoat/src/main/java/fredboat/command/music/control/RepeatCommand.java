@@ -40,6 +40,10 @@ import javax.annotation.Nonnull;
 
 public class RepeatCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public RepeatCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);

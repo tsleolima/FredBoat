@@ -24,6 +24,10 @@ public class SetAvatarCommand extends Command implements ICommandRestricted {
 
     private static final Logger log = LoggerFactory.getLogger(SetAvatarCommand.class);
 
+    public SetAvatarCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         String imageUrl = null;

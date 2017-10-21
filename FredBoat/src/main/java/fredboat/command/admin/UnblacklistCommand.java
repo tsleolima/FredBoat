@@ -42,6 +42,11 @@ import javax.annotation.Nonnull;
  * Lift ratelimit and remove a user from the blacklist
  */
 public class UnblacklistCommand extends Command implements ICommandRestricted {
+
+    public UnblacklistCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (!FeatureFlags.RATE_LIMITER.isActive()) {

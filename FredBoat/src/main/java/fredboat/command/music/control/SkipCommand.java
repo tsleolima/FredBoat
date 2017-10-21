@@ -50,6 +50,10 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
     private static final String TRACK_RANGE_REGEX = "^(0?\\d+)-(0?\\d+)$";
     private static final Pattern trackRangePattern = Pattern.compile(TRACK_RANGE_REGEX);
 
+    public SkipCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     /**
      * Represents the relationship between a <b>guild's id</b> and <b>skip cooldown</b>.
      */

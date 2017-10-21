@@ -51,6 +51,11 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public class DebugCommand extends Command implements IMaintenanceCommand, ICommandRestricted {
+
+    public DebugCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 

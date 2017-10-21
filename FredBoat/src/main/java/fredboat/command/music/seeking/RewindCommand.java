@@ -40,6 +40,10 @@ import javax.annotation.Nonnull;
 
 public class RewindCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public RewindCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         GuildPlayer player = PlayerRegistry.getExisting(context.guild);

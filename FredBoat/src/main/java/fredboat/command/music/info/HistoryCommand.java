@@ -45,6 +45,10 @@ public class HistoryCommand extends Command implements IMusicCommand {
 
   private static final int PAGE_SIZE = 10;
 
+    public HistoryCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
   @Override
   public void onInvoke(@Nonnull CommandContext context) {
       GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);

@@ -37,7 +37,7 @@ class TestCommandTest extends ProvideJDASingleton {
             DatabaseManager dbm = new DatabaseManager(jdbcUrl, null, Config.CONFIG.getHikariPoolSize());
             try {
                 dbm.startup();
-                Assertions.assertTrue(new TestCommand().invoke(dbm, new FakeContext(testChannel, testSelfMember, testGuild), args));
+                Assertions.assertTrue(new TestCommand("").invoke(dbm, new FakeContext(testChannel, testSelfMember, testGuild), args));
             } finally {
                 dbm.shutdown();
             }
@@ -48,7 +48,7 @@ class TestCommandTest extends ProvideJDASingleton {
         DatabaseManager dbm = new DatabaseManager("jdbc:sqlite:fredboat.db", "org.hibernate.dialect.SQLiteDialect", 1);
         try {
             dbm.startup();
-            Assertions.assertTrue(new TestCommand().invoke(dbm, new FakeContext(testChannel, testSelfMember, testGuild), args));
+            Assertions.assertTrue(new TestCommand("").invoke(dbm, new FakeContext(testChannel, testSelfMember, testGuild), args));
         } finally {
             dbm.shutdown();
         }

@@ -46,6 +46,10 @@ public class SoftbanCommand extends Command implements IModerationCommand {
 
     private static final Logger log = LoggerFactory.getLogger(SoftbanCommand.class);
 
+    public SoftbanCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;

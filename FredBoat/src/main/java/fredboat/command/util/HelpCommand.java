@@ -59,6 +59,10 @@ public class HelpCommand extends Command implements IUtilCommand {
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .build();
 
+    public HelpCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 

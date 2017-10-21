@@ -52,6 +52,10 @@ public class SentryDsnCommand extends Command implements ICommandRestricted {
     private static final Logger log = LoggerFactory.getLogger(SentryDsnCommand.class);
     private static final String SENTRY_APPENDER_NAME = "SENTRY";
 
+    public SentryDsnCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (!context.hasArguments()) {
