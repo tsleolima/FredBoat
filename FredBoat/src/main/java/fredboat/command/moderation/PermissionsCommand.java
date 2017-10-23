@@ -37,6 +37,7 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
+import fredboat.shared.constant.BotConstants;
 import fredboat.util.ArgumentUtil;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
@@ -252,7 +253,7 @@ public class PermissionsCommand extends Command implements IModerationCommand {
     @Override
     public String help(@Nonnull Context context) {
         String usage = "{0}{1} add <role/user>\n{0}{1} del <role/user>\n{0}{1} list\n#";
-        return usage + context.i18nFormat("helpPerms", permissionLevel.getName()) + " https://docs.fredboat.com/permissions";
+        return usage + context.i18nFormat("helpPerms", permissionLevel.getName()) + "\n" + BotConstants.DOCS_PERMISSIONS_URL;
     }
 
 }

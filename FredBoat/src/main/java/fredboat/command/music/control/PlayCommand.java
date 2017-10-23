@@ -40,6 +40,7 @@ import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
+import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.SearchUtil;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -182,7 +183,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
     @Override
     public String help(@Nonnull Context context) {
         String usage = "{0}{1} <url> OR {0}{1} <search-term>\n#";
-        return usage + context.i18n("helpPlayCommand");
+        return usage + context.i18nFormat("helpPlayCommand", BotConstants.DOCS_URL);
     }
 
     @Nonnull
