@@ -81,7 +81,7 @@ public class ShuffleCommand extends Command implements IMusicCommand, ICommandRe
     }
 }
 ```
-To be fully usable, the command is registered in one of the CommandInitialiazers with its name and aliases:
+To be fully usable, the command is registered in one of the CommandInitializers with its name and aliases:
 ```java
 MusicCommandInitializer.java
         [...]
