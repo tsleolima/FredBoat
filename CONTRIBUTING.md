@@ -6,7 +6,9 @@ When submitting a pull request, please submit against the `development` branch, 
 ## Code conventions
 Code is indented with 4 spaces and without brackets on newlines. Please use the logging system (SLF4J) instead of `System.out` or `System.err`.
 
-It is a good practice to make use of the default code formatter of your IDE to adhere to existing conventions of the project.
+It is a good practice to make use of the default code formatter of your IDE to adhere to existing conventions of the project. However, please do not reformat any lines that you aren't actually changing.
+
+This project makes use of additional annotations to improve quality and cleanliness of the code, most notably `javax.annotation.Nonnull` & `javax.annotation.Nullable` for parameters and return values of methods. Please use these to describe the contracts of any methods you are adding. Feel invited to add these when you spot missing ones in the existing code base.
 
 ## Issue labels
 * **Beginner** Means that the issue should be suitable for new contributors.
@@ -50,9 +52,13 @@ The [ShuffleCommand.java](https://github.com/Frederikam/FredBoat/blob/master/Fre
 ```java
 public class ShuffleCommand extends Command implements IMusicCommand, ICommandRestricted {
 
+    public ShuffleCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.get(context.guild);
+        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         player.setShuffle(!player.isShuffle());
 
         if (player.isShuffle()) {
@@ -68,11 +74,19 @@ public class ShuffleCommand extends Command implements IMusicCommand, ICommandRe
         return "{0}{1}\n#" + context.i18n("helpShuffleCommand");
     }
 
+    @Nonnull
     @Override
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.DJ;
     }
 }
+```
+To be fully usable, the command is registered in one of the CommandInitialiazers with its name and aliases:
+```java
+MusicCommandInitializer.java
+        [...]
+        CommandRegistry.registerCommand(new ShuffleCommand("shuffle", "sh", "random"));
+        [...]
 ```
 </details>
 
