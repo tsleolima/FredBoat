@@ -287,7 +287,7 @@ public class FredBoatShard extends FredBoat {
                         && !System.getProperty("os.arch").equalsIgnoreCase("arm-linux")
                         && !System.getProperty("os.arch").equalsIgnoreCase("darwin")
                         && !System.getProperty("os.name").equalsIgnoreCase("Mac OS X")) {
-                    builder.setAudioSendFactory(new NativeAudioSendFactory());
+                    builder.setAudioSendFactory(new NativeAudioSendFactory(800));
                 }
 
                 defaultShardBuilder = builder;
