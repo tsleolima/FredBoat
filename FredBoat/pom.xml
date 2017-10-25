@@ -63,28 +63,15 @@
         </dependency>
         <dependency>
             <!-- audio player for discord -->
-            <groupId>com.fredboat.fork</groupId>
-            <artifactId>com.sedmelluq.lavaplayer</artifactId>
-            <version>1.2.44.4</version>
-        </dependency>
-        <dependency>
-            <!-- gradle's pom scope is wrong, depending on it again -->
-            <groupId>com.fredboat.fork</groupId>
-            <artifactId>com.sedmelluq.lavaplayer-common</artifactId>
-            <version>1.0.5</version>
+            <groupId>com.sedmelluq</groupId>
+            <artifactId>lavaplayer</artifactId>
+            <version>1.2.44</version>
         </dependency>
         <dependency>
             <!-- native audio system to avoid gc stutter in the audio -->
-            <!-- we replaced the classes temporarily, but need the native parts -->
-            <groupId>com.fredboat.fork</groupId>
-            <artifactId>com.sedmelluq.jda-nas</artifactId>
-            <version>1.0.5.1</version>
-        </dependency>
-        <dependency>
-            <!-- gradle pls -->
-            <groupId>com.fredboat.fork</groupId>
-            <artifactId>com.sedmelluq.udp-queue</artifactId>
-            <version>1.0.6.1</version>
+            <groupId>com.github.FredBoat</groupId>
+            <artifactId>jda-nas</artifactId>
+            <version>1.0.5.1-JDA</version>
         </dependency>
         <dependency>
             <!-- utility -->
@@ -248,7 +235,7 @@
                 <dependency>
                     <groupId>com.github.Frederikam</groupId>
                     <artifactId>Lavalink</artifactId>
-                    <version>ef6bc58308269a25317472a7771ac19254803ce4</version>
+                    <version>bf5f3b09c16d600caf6befc6e786cc381a79fce8</version>
                     <exclusions>
                         <exclusion>
                             <groupId>com.github.Frederikam.Lavalink</groupId>

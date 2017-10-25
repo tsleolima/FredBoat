@@ -25,8 +25,8 @@
 
 package fredboat;
 
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import fredboat.agent.StatsAgent;
-import fredboat.audio.nas.NativeAudioSendFactory;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
