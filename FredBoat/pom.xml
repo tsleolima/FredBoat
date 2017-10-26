@@ -269,7 +269,7 @@
                 <dependency>
                     <groupId>com.github.Frederikam</groupId>
                     <artifactId>Lavalink</artifactId>
-                    <version>0fa4dc2959cbadf441e29363a01c5c1955db2fee</version>
+                    <version>44e6fec3e1bcaaa1cd970b8ab0d48dcc1e181581</version>
                     <exclusions>
                         <exclusion>
                             <groupId>com.github.Frederikam.Lavalink</groupId>
