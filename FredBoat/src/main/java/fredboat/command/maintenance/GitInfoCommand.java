@@ -29,10 +29,11 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
 import fredboat.messaging.CentralMessaging;
+import fredboat.messaging.internal.Context;
 import fredboat.util.GitRepoState;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Guild;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -47,13 +48,17 @@ import java.util.regex.Pattern;
  */
 public class GitInfoCommand extends Command implements IMaintenanceCommand {
 
-    private RandomImageCommand octocats = new RandomImageCommand("https://imgur.com/a/sBkTj");
+    private RandomImageCommand octocats = new RandomImageCommand("https://imgur.com/a/sBkTj", "");
 
     //https://regex101.com/r/wqfWBI/6/tests
     private static final Pattern GITHUB_URL_PATTERN = Pattern.compile("^(git@|https?://)(.+)[:/](.+)/(.+)(\\.git)?$");
 
+    public GitInfoCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     @Override
-    public void onInvoke(CommandContext context) {
+    public void onInvoke(@Nonnull CommandContext context) {
 
         GitRepoState gitRepoState = GitRepoState.getGitRepositoryState();
         if (gitRepoState == null) {
@@ -108,8 +113,9 @@ public class GitInfoCommand extends Command implements IMaintenanceCommand {
         return result;
     }
 
+    @Nonnull
     @Override
-    public String help(Guild guild) {
+    public String help(@Nonnull Context context) {
         return "{0}{1}\n#Display some git meta information about this build.";
     }
 }

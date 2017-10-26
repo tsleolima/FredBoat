@@ -29,28 +29,35 @@ import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IModerationCommand;
-import fredboat.feature.I18n;
 import fredboat.messaging.CentralMessaging;
+import fredboat.messaging.internal.Context;
+import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClearCommand extends Command implements IModerationCommand {
 
+    public ClearCommand(String name, String... aliases) {
+        super(name, aliases);
+    }
+
     //TODO: Redo this
     //TODO: i18n this class
     @Override
-    public void onInvoke(CommandContext context) {
+    public void onInvoke(@Nonnull CommandContext context) {
         JDA jda = context.guild.getJDA();
         TextChannel channel = context.channel;
         Member invoker = context.invoker;
 
-        if (!invoker.hasPermission(channel, Permission.MESSAGE_MANAGE) && !PermsUtil.isUserBotOwner(invoker.getUser())) {
+        if (!invoker.hasPermission(channel, Permission.MESSAGE_MANAGE)
+                && !PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, invoker)) {
             context.replyWithName("You must have Manage Messages to do that!");
             return;
         }
@@ -80,16 +87,16 @@ public class ClearCommand extends Command implements IModerationCommand {
                 }
 
                 context.reply("Deleting **" + myMessages.size() + "** messages.");
-                CentralMessaging.deleteMessages(myMessages);
+                CentralMessaging.deleteMessages(channel, myMessages);
             }
         } catch (RateLimitedException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @Nonnull
     @Override
-    public String help(Guild guild) {
-        String usage = "{0}{1}\n#";
-        return usage + I18n.get(guild).getString("helpClearCommand");
+    public String help(@Nonnull Context context) {
+        return "{0}{1}\n#" + context.i18n("helpClearCommand");
     }
 }

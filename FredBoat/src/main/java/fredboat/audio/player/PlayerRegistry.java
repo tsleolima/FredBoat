@@ -31,12 +31,13 @@ import net.dv8tion.jda.core.entities.Guild;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerRegistry {
 
-    private static final HashMap<String, GuildPlayer> REGISTRY = new HashMap<>();
+    private static final Map<String, GuildPlayer> REGISTRY = new ConcurrentHashMap<>();
     public static final float DEFAULT_VOLUME = 1f;
 
     public static void put(String k, GuildPlayer v) {
@@ -44,12 +45,12 @@ public class PlayerRegistry {
     }
 
     @Nonnull
-    public static GuildPlayer get(@Nonnull Guild guild) {
-        return get(guild.getJDA(), guild.getId());
+    public static GuildPlayer getOrCreate(@Nonnull Guild guild) {
+        return getOrCreate(guild.getJDA(), guild.getId());
     }
 
     @Nonnull
-    public static GuildPlayer get(JDA jda, String k) {
+    public static GuildPlayer getOrCreate(JDA jda, String k) {
         GuildPlayer player = REGISTRY.get(k);
         if (player == null) {
             player = new GuildPlayer(jda.getGuildById(k));
@@ -73,7 +74,7 @@ public class PlayerRegistry {
     @Nullable
     public static GuildPlayer getExisting(JDA jda, String k) {
         if (REGISTRY.containsKey(k)) {
-            return get(jda, k);
+            return getOrCreate(jda, k);
         }
         return null;
     }
@@ -82,7 +83,7 @@ public class PlayerRegistry {
         return REGISTRY.remove(k);
     }
 
-    public static HashMap<String, GuildPlayer> getRegistry() {
+    public static Map<String, GuildPlayer> getRegistry() {
         return REGISTRY;
     }
 

@@ -27,12 +27,12 @@ package fredboat.commandmeta;
 
 
 import fredboat.Config;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.command.fun.AkinatorCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
-import fredboat.feature.I18n;
 import fredboat.feature.PatronageChecker;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.perms.PermissionLevel;
@@ -48,8 +48,8 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,6 +58,7 @@ public class CommandManager {
     private static final Logger log = LoggerFactory.getLogger(CommandManager.class);
 
     public static final AtomicInteger commandsExecuted = new AtomicInteger(0);
+    public static final Set<Command> disabledCommands = new HashSet<>(0);
 
     public static void prefixCalled(CommandContext context) {
         Guild guild = context.guild;
@@ -112,15 +113,24 @@ public class CommandManager {
             }
         }
 
+        if (disabledCommands.contains(invoked)) {
+            context.replyWithName("Sorry the `"+ context.cmdName +"` command is currently disabled. Please try again later");
+            return;
+        }
+
         if (invoked instanceof ICommandRestricted) {
             //Check if invoker actually has perms
             PermissionLevel minPerms = ((ICommandRestricted) invoked).getMinimumPerms();
             PermissionLevel actual = PermsUtil.getPerms(invoker);
 
             if(actual.getLevel() < minPerms.getLevel()) {
-                context.replyWithName(MessageFormat.format(I18n.get(context, "cmdPermsTooLow"), minPerms, actual));
+                context.replyWithName(context.i18nFormat("cmdPermsTooLow", minPerms, actual));
                 return;
             }
+        }
+
+        if (invoked instanceof IMusicCommand) {
+            PlayerRegistry.getOrCreate(guild).setCurrentTC(channel);
         }
 
         try {
@@ -129,54 +139,6 @@ public class CommandManager {
             TextUtils.handleException(e, context);
         }
 
-    }
-
-    public static String[] commandToArguments(String cmd) {
-        ArrayList<String> a = new ArrayList<>();
-        int argi = 0;
-        boolean isInQuote = false;
-
-        for (Character ch : cmd.toCharArray()) {
-            if (Character.isWhitespace(ch) && !isInQuote) {
-                String arg = null;
-                try {
-                    arg = a.get(argi);
-                } catch (IndexOutOfBoundsException e) {
-                }
-                if (arg != null) {
-                    argi++;//On to the next arg
-                }//else ignore
-
-            } else if (ch.equals('"')) {
-                isInQuote = !isInQuote;
-            } else {
-                a = writeToArg(a, argi, ch);
-            }
-        }
-
-        String[] newA = new String[a.size()];
-        int i = 0;
-        for (String str : a) {
-            newA[i] = str;
-            i++;
-        }
-
-        return newA;
-    }
-
-    private static ArrayList<String> writeToArg(ArrayList<String> a, int argi, char ch) {
-        String arg = null;
-        try {
-            arg = a.get(argi);
-        } catch (IndexOutOfBoundsException ignored) {
-        }
-        if (arg == null) {
-            a.add(argi, String.valueOf(ch));
-        } else {
-            a.set(argi, arg + ch);
-        }
-
-        return a;
     }
 
     //holder class pattern for the checker

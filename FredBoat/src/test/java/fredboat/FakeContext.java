@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -20,36 +21,49 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.event;
+package fredboat;
 
-import net.dv8tion.jda.core.events.Event;
-import net.dv8tion.jda.core.hooks.EventListener;
+import fredboat.messaging.internal.Context;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 
-public class ShardWatchdogListener implements EventListener {
+/**
+ * Created by napster on 02.10.17.
+ */
+public class FakeContext extends Context {
 
-    private String lastEvent = null;
-    private long lastEventTime = System.currentTimeMillis();
-    private long eventCount = 0;
+    private final TextChannel channel;
+    private final Member member;
+    private final Guild guild;
+
+    public FakeContext(TextChannel channel, Member member, Guild guild) {
+        this.channel = channel;
+        this.member = member;
+        this.guild = guild;
+    }
 
     @Override
-    public void onEvent(Event event) {
-        lastEvent = event.getClass().getSimpleName();
-        lastEventTime = System.currentTimeMillis();
-        eventCount++;
+    public TextChannel getTextChannel() {
+        return channel;
     }
 
-    public String getLastEvent() {
-        return lastEvent;
+    @Override
+    public Guild getGuild() {
+        return guild;
     }
 
-    public long getLastEventTime() {
-        return lastEventTime;
+    @Override
+    public Member getMember() {
+        return member;
     }
 
-    public long getEventCount() {
-        return eventCount;
+    @Override
+    public User getUser() {
+        return getMember().getUser();
     }
+    
 }
