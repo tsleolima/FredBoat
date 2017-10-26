@@ -65,10 +65,6 @@ public class DiscordUtil {
         return getApplicationInfo(jda).ownerIdLong;
     }
 
-    public static long getSelfId(@Nonnull JDA jda) {
-        return getApplicationInfo(jda).botIdLong;
-    }
-
     public static boolean isMainBotPresent(Guild guild) {
         JDA jda = guild.getJDA();
         User other = jda.getUserById(BotConstants.MAIN_BOT_ID);
@@ -186,8 +182,8 @@ public class DiscordUtil {
     public static class DiscordAppInfo {
         public final boolean doesBotRequireCodeGrant;
         public final boolean isBotPublic;
-        public final long botIdLong;
-        public final String botId;
+        //public final long botIdLong;
+        //public final String botId;
         public final String iconId;
         public final String description;
         public final String appName;
@@ -198,8 +194,13 @@ public class DiscordUtil {
         public DiscordAppInfo(ApplicationInfo applicationInfo) {
             this.doesBotRequireCodeGrant = applicationInfo.doesBotRequireCodeGrant();
             this.isBotPublic = applicationInfo.isBotPublic();
-            this.botIdLong = applicationInfo.getIdLong();
-            this.botId = applicationInfo.getId();
+            //for old accounts, like the public FredBoat♪♪ one, this does not return the public bot id that one gets
+            // when rightclick -> copy Id or mentioning, but a different one, an application id. due to risks of
+            // introducing bugs on the public boat when using this (as happened with the mention prefix) it has been
+            // commented out and shall stay this way as a warning to not use it. Usually the JDA#getSelfUser() method is
+            // accessible to gain access to our own bot id
+            //this.botIdLong = applicationInfo.getIdLong();
+            //this.botId = applicationInfo.getId();
             this.iconId = applicationInfo.getIconId();
             this.description = applicationInfo.getDescription();
             this.appName = applicationInfo.getName();
