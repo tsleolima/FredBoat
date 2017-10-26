@@ -294,7 +294,9 @@ public class FredBoatShard extends FredBoat {
                         .setHttpClientBuilder(new OkHttpClient.Builder()
                                 .eventListener(new OkHttpEventMetrics("jda")))
                         .addEventListener(Metrics.instance().jdaEventsMetricsListener)
-                        .addEventListener(new EventLogger("216689009110417408"));
+                        .addEventListener(new EventLogger(Config.CONFIG.getEventLogWebhookId(),
+                                Config.CONFIG.getEventLogWebhookToken()));
+
 
                 if (LavalinkManager.ins.isEnabled()) {
                     builder.addEventListener(LavalinkManager.ins.getLavalink());
