@@ -40,6 +40,7 @@
 
     <properties>
         <start-class>fredboat.FredBoat</start-class>
+        <prometheus.version>0.1.0</prometheus.version>
     </properties>
 
     <dependencies>
@@ -110,6 +111,12 @@
             <version>1.6.1</version>
         </dependency>
         <dependency>
+            <!-- http client lib -->
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
             <!-- runs the fredboat rest api -->
             <groupId>com.sparkjava</groupId>
             <artifactId>spark-core</artifactId>
@@ -132,6 +139,39 @@
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
             <version>3.1.0</version>
+        </dependency>
+
+        <!-- Metrics stuff -->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_hotspot</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_logback</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_hibernate</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_guava</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <!-- expose prometheus with a servlet-->
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_servlet</artifactId>
+            <version>${prometheus.version}</version>
         </dependency>
 
         <!-- Database stuff -->
