@@ -184,7 +184,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
                     context.i18nFormat("npRatingRange", data.getJSONObject("MISC").getInt("RATING"), data.getJSONObject("MISC").getInt("TIMESRATED"));
 
             String albumArt = data.getJSONObject("MISC").getString("ALBUMART").equals("") ?
-                    "https://i.imgur.com/diwlC.png" :
+                    "https://cdn.discordapp.com/attachments/240116420946427905/373019550725177344/gr-logo-placeholder.png" :
                     "https://gensokyoradio.net/images/albums/original/" + data.getJSONObject("MISC").getString("ALBUMART");
 
             String titleUrl = data.getJSONObject("MISC").getString("CIRCLELINK").equals("") ?
