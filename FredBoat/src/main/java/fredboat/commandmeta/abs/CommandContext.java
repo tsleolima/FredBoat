@@ -27,9 +27,9 @@ package fredboat.commandmeta.abs;
 
 import fredboat.Config;
 import fredboat.commandmeta.CommandRegistry;
+import fredboat.feature.metrics.Metrics;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -82,21 +82,22 @@ public class CommandContext extends Context {
      * @return The full context for the triggered command, or null if it's not a command that we know.
      */
     public static CommandContext parse(MessageReceivedEvent event) {
-        String selfId = DiscordUtil.getApplicationInfo(event.getJDA()).botId;
         String raw = event.getMessage().getRawContent();
 
         String triggeredPrefix;
         String input;
         Matcher mentionMatcher = MENTION_PREFIX.matcher(raw);
         // either starts with a mention of us
-        if (mentionMatcher.find() && mentionMatcher.group(2).equals(selfId)) {
+        if (mentionMatcher.find() && mentionMatcher.group(2).equals(event.getJDA().getSelfUser().getId())) {
             triggeredPrefix = mentionMatcher.group(1);
             input = mentionMatcher.group(3).trim();
+            Metrics.prefixParsed.labels("mention").inc();
         }
         // or starts with our prefix
         else if (raw.startsWith(Config.CONFIG.getPrefix())) {
             triggeredPrefix = Config.CONFIG.getPrefix();
             input = raw.substring(triggeredPrefix.length());
+            Metrics.prefixParsed.labels("default").inc(); //todo count custom prefix usage
         } else {
             //no match
             return null;

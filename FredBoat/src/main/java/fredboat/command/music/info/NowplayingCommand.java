@@ -184,7 +184,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
                     context.i18nFormat("npRatingRange", data.getJSONObject("MISC").getInt("RATING"), data.getJSONObject("MISC").getInt("TIMESRATED"));
 
             String albumArt = data.getJSONObject("MISC").getString("ALBUMART").equals("") ?
-                    "https://gensokyoradio.net/images/albums/c200/gr6_circular.png" :
+                    "https://cdn.discordapp.com/attachments/240116420946427905/373019550725177344/gr-logo-placeholder.png" :
                     "https://gensokyoradio.net/images/albums/original/" + data.getJSONObject("MISC").getString("ALBUMART");
 
             String titleUrl = data.getJSONObject("MISC").getString("CIRCLELINK").equals("") ?
@@ -204,7 +204,10 @@ public class NowplayingCommand extends Command implements IMusicCommand {
             return eb.addField(context.i18n("rating"), rating, true)
                     .addField(context.i18n("listeners"), Integer.toString(data.getJSONObject("SERVERINFO").getInt("LISTENERS")), true)
                     .setImage(albumArt)
-                    .setColor(new Color(66, 16, 80));
+                    .setColor(new Color(66, 16, 80))
+                    .setFooter("Content provided by gensokyoradio.net.\n" +
+                            "The GR logo is a trademark of Gensokyo Radio." +
+                            "\nGensokyo Radio is © LunarSpotlight.", null);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

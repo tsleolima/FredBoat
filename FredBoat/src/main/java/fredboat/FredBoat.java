@@ -39,11 +39,13 @@ import fredboat.commandmeta.init.MusicCommandInitializer;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.I18n;
+import fredboat.feature.metrics.Metrics;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.AppInfo;
 import fredboat.util.ConnectQueue;
 import fredboat.util.GitRepoState;
 import fredboat.util.JDAUtil;
+import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
@@ -103,6 +105,7 @@ public abstract class FredBoat {
             System.out.println("Version info printed, exiting.");
             return;
         }
+        Metrics.setup();
 
         Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, "FredBoat main shutdownhook"));
         log.info(getVersionInfo());
@@ -173,9 +176,12 @@ public abstract class FredBoat {
             Thread.sleep(1000);
         }
 
+        //force a count and then turn on metrics to be served
+        jdaEntityCountsTotal.count(shards);
         jdaEntityCountAgent.addAction(new FredBoatStatsCounter(
                 () -> jdaEntityCountsTotal.count(shards)));
-        FredBoatAgent.startNow(jdaEntityCountAgent);
+        FredBoatAgent.start(jdaEntityCountAgent);
+        API.turnOnMetrics();
     }
 
     // ################################################################################
@@ -332,6 +338,8 @@ public abstract class FredBoat {
         return JDAUtil.getGuilds(shards);
     }
 
+
+    //JDA total entity counts
     public static int getTotalUniqueUsersCount() {
         return jdaEntityCountsTotal.uniqueUsersCount;
     }
@@ -339,6 +347,27 @@ public abstract class FredBoat {
     public static int getTotalGuildsCount() {
         return jdaEntityCountsTotal.guildsCount;
     }
+
+    public static int getTotalTextChannelsCount() {
+        return jdaEntityCountsTotal.textChannelsCount;
+    }
+
+    public static int getTotalVoiceChannelsCount() {
+        return jdaEntityCountsTotal.voiceChannelsCount;
+    }
+
+    public static int getTotalCategoriesCount() {
+        return jdaEntityCountsTotal.categoriesCount;
+    }
+
+    public static int getTotalEmotesCount() {
+        return jdaEntityCountsTotal.emotesCount;
+    }
+
+    public static int getTotalRolesCount() {
+        return jdaEntityCountsTotal.rolesCount;
+    }
+
 
 
     // ################################################################################
@@ -413,7 +442,7 @@ public abstract class FredBoat {
                 + "\n\tVersion:       " + AppInfo.getAppInfo().VERSION
                 + "\n\tBuild:         " + AppInfo.getAppInfo().BUILD_NUMBER
                 + "\n\tCommit:        " + GitRepoState.getGitRepositoryState().commitIdAbbrev + " (" + GitRepoState.getGitRepositoryState().branch + ")"
-                + "\n\tCommit time:   " + GitRepoState.getGitRepositoryState().commitTime
+                + "\n\tCommit time:   " + TextUtils.asTimeInCentralEurope(GitRepoState.getGitRepositoryState().commitTime)
                 + "\n\tJVM:           " + System.getProperty("java.version")
                 + "\n\tJDA:           " + JDAInfo.VERSION
                 + "\n\tLavaplayer     " + PlayerLibrary.VERSION
@@ -436,15 +465,26 @@ public abstract class FredBoat {
     @Nonnull
     public abstract JDA.ShardInfo getShardInfo();
 
-    public abstract int getGuildCount();
-
-    public abstract long getUserCount();
-
     public abstract void onInit(@Nonnull ReadyEvent readyEvent);
 
-    public abstract int getShardUniqueUsersCount();
 
-    public abstract int getShardGuildsCount();
+    //JDA entity counts
+
+    public abstract int getUserCount();
+
+    public abstract int getGuildCount();
+
+    public abstract int getTextChannelCount();
+
+    public abstract int getVoiceChannelCount();
+
+    public abstract int getCategoriesCount();
+
+    public abstract int getEmotesCount();
+
+    public abstract int getRolesCount();
+
+
 
     // ################################################################################
     //                              Counting things
