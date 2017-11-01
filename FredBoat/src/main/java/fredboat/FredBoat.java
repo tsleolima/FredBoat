@@ -26,10 +26,7 @@
 package fredboat;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
-import fredboat.agent.CarbonitexAgent;
-import fredboat.agent.DBConnectionWatchdogAgent;
-import fredboat.agent.FredBoatAgent;
-import fredboat.agent.StatsAgent;
+import fredboat.agent.*;
 import fredboat.api.API;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.queue.MusicPersistenceHandler;
@@ -151,6 +148,14 @@ public abstract class FredBoat {
             MainCommandInitializer.initCommands();
 
         MusicCommandInitializer.initCommands();
+
+        if (!Config.CONFIG.isPatronDistribution() && Config.CONFIG.useVoiceChannelCleanup()) {
+            log.info("Starting VoiceChannelCleanupAgent.");
+            FredBoatAgent.start(new VoiceChannelCleanupAgent());
+        } else {
+            log.info("Skipped setting up the VoiceChannelCleanupAgent, " +
+                    "either running Patron distro or overridden by temp config");
+        }
 
         log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
 
