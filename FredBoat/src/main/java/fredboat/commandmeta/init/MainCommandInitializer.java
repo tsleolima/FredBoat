@@ -24,46 +24,11 @@
 
 package fredboat.commandmeta.init;
 
-import fredboat.command.admin.BotRestartCommand;
-import fredboat.command.admin.EvalCommand;
-import fredboat.command.admin.ExitCommand;
-import fredboat.command.admin.LeaveServerCommand;
-import fredboat.command.admin.ReviveCommand;
-import fredboat.command.admin.SentryDsnCommand;
-import fredboat.command.admin.TestCommand;
-import fredboat.command.admin.UnblacklistCommand;
-import fredboat.command.fun.AkinatorCommand;
-import fredboat.command.fun.CatgirlCommand;
-import fredboat.command.fun.DanceCommand;
-import fredboat.command.fun.FacedeskCommand;
-import fredboat.command.fun.HugCommand;
-import fredboat.command.fun.JokeCommand;
-import fredboat.command.fun.PatCommand;
-import fredboat.command.fun.RemoteFileCommand;
-import fredboat.command.fun.RiotCommand;
-import fredboat.command.fun.RollCommand;
-import fredboat.command.fun.TextCommand;
-import fredboat.command.maintenance.FuzzyUserSearchCommand;
-import fredboat.command.maintenance.GitInfoCommand;
-import fredboat.command.maintenance.PingCommand;
-import fredboat.command.maintenance.ShardsCommand;
-import fredboat.command.maintenance.StatsCommand;
-import fredboat.command.maintenance.VersionCommand;
-import fredboat.command.moderation.ClearCommand;
-import fredboat.command.moderation.HardbanCommand;
-import fredboat.command.moderation.KickCommand;
-import fredboat.command.moderation.SoftbanCommand;
-import fredboat.command.util.AvatarCommand;
-import fredboat.command.util.BrainfuckCommand;
-import fredboat.command.util.CommandsCommand;
-import fredboat.command.util.HelpCommand;
-import fredboat.command.util.InviteCommand;
-import fredboat.command.util.MALCommand;
-import fredboat.command.util.MathCommand;
-import fredboat.command.util.SayCommand;
-import fredboat.command.util.ServerInfoCommand;
-import fredboat.command.util.UserInfoCommand;
-import fredboat.command.util.WeatherCommand;
+import fredboat.command.admin.*;
+import fredboat.command.fun.*;
+import fredboat.command.maintenance.*;
+import fredboat.command.moderation.*;
+import fredboat.command.util.*;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.util.AsciiArtConstant;
 import fredboat.util.rest.OpenWeatherAPI;
@@ -94,6 +59,7 @@ public class MainCommandInitializer {
         CommandRegistry.registerCommand(new KickCommand("kick"));
         CommandRegistry.registerCommand(new SoftbanCommand("softban"));
         CommandRegistry.registerCommand(new ClearCommand("clear"));
+        CommandRegistry.registerCommand(new PrefixCommand("prefix", "pre"));
         
         /* Util */
         CommandRegistry.registerCommand(new ServerInfoCommand("serverinfo", "guildinfo"));
