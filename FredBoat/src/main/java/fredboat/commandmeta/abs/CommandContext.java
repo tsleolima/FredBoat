@@ -32,11 +32,7 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +65,6 @@ public class CommandContext extends Context {
     @Nonnull public final Member invoker;
     @Nonnull public final Message msg;
 
-//    @Nonnull public String prefix = Config.CONFIG.getPrefix();  // the prefix that is in effect in this guild
              public boolean isMention = false;                  // whether a mention was used to trigger this command
     @Nonnull public String trigger = "";                        // the command trigger, e.g. "play", or "p", or "pLaY", whatever the user typed
     @Nonnull public String[] args = new String[0];              // the arguments split by whitespace, excluding prefix and trigger
@@ -189,13 +184,6 @@ public class CommandContext extends Context {
 
     public boolean hasArguments() {
         return args.length > 0 && !rawArgs.isEmpty();
-    }
-
-    /**
-     * Convenience method to get the prefix of the guild of this context.
-     */
-    public String getPrefix() {
-        return PrefixCommand.giefPrefix(guild);
     }
 
     @Nonnull
