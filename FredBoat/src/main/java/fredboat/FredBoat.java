@@ -26,10 +26,7 @@
 package fredboat;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
-import fredboat.agent.CarbonitexAgent;
-import fredboat.agent.DBConnectionWatchdogAgent;
-import fredboat.agent.FredBoatAgent;
-import fredboat.agent.StatsAgent;
+import fredboat.agent.*;
 import fredboat.api.API;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.queue.MusicPersistenceHandler;
@@ -41,6 +38,7 @@ import fredboat.event.EventListenerBoat;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.shared.constant.DistributionEnum;
+import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
 import fredboat.util.ConnectQueue;
 import fredboat.util.GitRepoState;
@@ -129,17 +127,24 @@ public abstract class FredBoat {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
 
-        if (!Config.CONFIG.getJdbcUrl().equals("")) {
-            dbManager = DatabaseManager.postgres();
-            dbManager.startup();
-            FredBoatAgent.start(new DBConnectionWatchdogAgent(dbManager));
-        } else if (Config.CONFIG.getNumShards() > 2) {
-            log.warn("No JDBC URL and more than 2 shard found! Initializing the SQLi DB is potentially dangerous too. Skipping...");
-        } else {
-            log.warn("No JDBC URL found, skipped database connection, falling back to internal SQLite db.");
-            dbManager = DatabaseManager.sqlite();
-            dbManager.startup();
+        dbManager = DatabaseManager.postgres();
+        //attempt to connect to the database a few times
+        // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
+        // container will be started before the fredboat one
+        int dbConnectionAttempts = 0;
+        while (!dbManager.isAvailable() && dbConnectionAttempts++ < 10) {
+            try {
+                dbManager.startup();
+            } catch (Exception e) {
+                log.error("Could not connect to the database. Retrying in a moment...", e);
+                Thread.sleep(5000);
+            }
         }
+        if (!dbManager.isAvailable()) {
+            log.error("Could not establish database connection. Exiting...");
+            shutdown(ExitCodes.EXIT_CODE_ERROR);
+        }
+        FredBoatAgent.start(new DBConnectionWatchdogAgent(dbManager));
 
         //Initialise event listeners
         mainEventListener = new EventListenerBoat();
@@ -150,6 +155,14 @@ public abstract class FredBoat {
             MainCommandInitializer.initCommands();
 
         MusicCommandInitializer.initCommands();
+
+        if (!Config.CONFIG.isPatronDistribution() && Config.CONFIG.useVoiceChannelCleanup()) {
+            log.info("Starting VoiceChannelCleanupAgent.");
+            FredBoatAgent.start(new VoiceChannelCleanupAgent());
+        } else {
+            log.info("Skipped setting up the VoiceChannelCleanupAgent, " +
+                    "either running Patron distro or overridden by temp config");
+        }
 
         log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
 
@@ -273,7 +286,7 @@ public abstract class FredBoat {
     }
 
     private static void initBotShards(EventListenerBoat mainListener) {
-        for (int i = 0; i < Config.CONFIG.getNumShards(); i++) {
+        for (int i = 0; i < Config.getNumShards(); i++) {
             try {
                 //NOTE: This will take a while since creating shards happens in a blocking fashion
                 shards.add(i, new FredBoatShard(i, mainListener));
@@ -441,7 +454,7 @@ public abstract class FredBoat {
                 + "\n\tVersion:       " + AppInfo.getAppInfo().VERSION
                 + "\n\tBuild:         " + AppInfo.getAppInfo().BUILD_NUMBER
                 + "\n\tCommit:        " + GitRepoState.getGitRepositoryState().commitIdAbbrev + " (" + GitRepoState.getGitRepositoryState().branch + ")"
-                + "\n\tCommit time:   " + TextUtils.asTimeInCentralEurope(GitRepoState.getGitRepositoryState().commitTime)
+                + "\n\tCommit time:   " + TextUtils.asTimeInCentralEurope(GitRepoState.getGitRepositoryState().commitTime * 1000)
                 + "\n\tJVM:           " + System.getProperty("java.version")
                 + "\n\tJDA:           " + JDAInfo.VERSION
                 + "\n\tLavaplayer     " + PlayerLibrary.VERSION

@@ -24,29 +24,15 @@
 
 package fredboat.commandmeta.init;
 
-import fredboat.Config;
-import fredboat.agent.FredBoatAgent;
-import fredboat.agent.VoiceChannelCleanupAgent;
 import fredboat.command.admin.*;
 import fredboat.command.maintenance.*;
 import fredboat.command.moderation.*;
 import fredboat.command.music.control.*;
-import fredboat.command.music.info.ExportCommand;
-import fredboat.command.music.info.GensokyoRadioCommand;
-import fredboat.command.music.info.HistoryCommand;
-import fredboat.command.music.info.ListCommand;
-import fredboat.command.music.info.NowplayingCommand;
-import fredboat.command.music.seeking.ForwardCommand;
-import fredboat.command.music.seeking.RestartCommand;
-import fredboat.command.music.seeking.RewindCommand;
-import fredboat.command.music.seeking.SeekCommand;
-import fredboat.command.util.CommandsCommand;
-import fredboat.command.util.HelpCommand;
-import fredboat.command.util.MusicHelpCommand;
-import fredboat.command.util.UserInfoCommand;
+import fredboat.command.music.info.*;
+import fredboat.command.music.seeking.*;
+import fredboat.command.util.*;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.perms.PermissionLevel;
-import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.rest.SearchUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,9 +93,6 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand(new BotRestartCommand("mbotrestart"));
         CommandRegistry.registerCommand(new StatsCommand("mstats"));
         CommandRegistry.registerCommand(new EvalCommand("meval"));
-        CommandRegistry.registerCommand(new UpdateCommand("mupdate"));
-        CommandRegistry.registerCommand(new CompileCommand("mcompile"));
-        CommandRegistry.registerCommand(new MavenTestCommand("mmvntest"));
         CommandRegistry.registerCommand(new GetIdCommand("getid"));
         CommandRegistry.registerCommand(new PlayerDebugCommand("playerdebug"));
         CommandRegistry.registerCommand(new NodesCommand("nodes"));
@@ -127,6 +110,7 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand(new SetAvatarCommand("setavatar"));
 
         /* Bot configuration */
+        CommandRegistry.registerCommand(new PrefixCommand("prefix", "pre"));
         CommandRegistry.registerCommand(new ConfigCommand("config", "cfg"));
         CommandRegistry.registerCommand(new LanguageCommand("language", "lang"));
         
@@ -134,13 +118,6 @@ public class MusicCommandInitializer {
         CommandRegistry.registerCommand(new PermissionsCommand(PermissionLevel.ADMIN, "admin"));
         CommandRegistry.registerCommand(new PermissionsCommand(PermissionLevel.DJ, "dj"));
         CommandRegistry.registerCommand(new PermissionsCommand(PermissionLevel.USER, "user"));
-
-        // The null check is to ensure we can run this in a test run
-        if (Config.CONFIG == null || Config.CONFIG.getDistribution() != DistributionEnum.PATRON) {
-            FredBoatAgent.start(new VoiceChannelCleanupAgent());
-        } else {
-            log.info("Skipped setting up the VoiceChannelCleanupAgent since we are running as PATRON distribution.");
-        }
     }
 
     /**

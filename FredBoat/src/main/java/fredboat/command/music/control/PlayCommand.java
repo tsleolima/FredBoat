@@ -27,7 +27,6 @@ package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerLimitManager;
@@ -46,6 +45,7 @@ import fredboat.util.rest.SearchUtil;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message.Attachment;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
@@ -93,15 +93,16 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
+        String url = StringUtils.strip(context.args[0], "<>");
         //Search youtube for videos and let the user select a video
-        if (!context.args[0].startsWith("http")) {
+        if (!url.startsWith("http")) {
             searchForVideos(context);
             return;
         }
 
         GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
 
-        player.queue(context.args[0], context);
+        player.queue(url, context);
         player.setPause(false);
 
         context.deleteMessage();
@@ -158,7 +159,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 }
 
                 MessageBuilder builder = CentralMessaging.getClearThreadLocalMessageBuilder();
-                builder.append(context.i18nFormat("playSelectVideo", Config.CONFIG.getPrefix()));
+                builder.append(context.i18nFormat("playSelectVideo", TextUtils.escapeMarkdown(context.getPrefix())));
 
                 int i = 1;
                 for (AudioTrack track : selectable) {

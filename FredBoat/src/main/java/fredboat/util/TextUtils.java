@@ -43,12 +43,17 @@ import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {
 
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^(\\d?\\d)(?::([0-5]?\\d))?(?::([0-5]?\\d))?$");
+
+    private static final List<Character> markdownChars = Arrays.asList('*', '`', '~', '_');
+
     public static final DateTimeFormatter TIME_IN_CENTRAL_EUROPE = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss z")
             .withZone(ZoneId.of("Europe/Copenhagen"));
 
@@ -62,7 +67,7 @@ public class TextUtils {
     public static Message prefaceWithName(Member member, String msg) {
         msg = ensureSpace(msg);
         return CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(member.getEffectiveName())
+                .append(escapeMarkdown(member.getEffectiveName()))
                 .append(": ")
                 .append(msg)
                 .build();
@@ -190,7 +195,7 @@ public class TextUtils {
         Pattern pattern = Pattern.compile("^([\\w\\W]{" + len + "}\\S+?)\\s");
         Matcher matcher = pattern.matcher(str);
 
-        if(matcher.find()){
+        if (matcher.find()){
             return matcher.group(1);
         } else {
             //Oh well
@@ -243,6 +248,18 @@ public class TextUtils {
         return "```" + sty + "\n" + str + "\n```";
     }
 
+    public static String escapeMarkdown(String str) {
+        StringBuilder revisedString = new StringBuilder(str.length());
+        for (Character n : str.toCharArray()) {
+            if (markdownChars.contains(n)) {
+                revisedString.append("\\");
+            }
+            revisedString.append(n);
+        }
+        return revisedString.toString();
+    }
+
+
     public static String forceNDigits(int i, int n) {
         String str = Integer.toString(i);
 
@@ -293,5 +310,17 @@ public class TextUtils {
             log.error("Could not parse epoch millis as long, returning 0", e);
         }
         return TIME_IN_CENTRAL_EUROPE.format(Instant.ofEpochMilli(millis));
+    }
+
+    //returns the input shortened to the requested size, replacing the last 3 characters with dots
+    public static String shorten(@Nonnull String input, int size) {
+        if (input.length() <= size) {
+            return input;
+        }
+        StringBuilder shortened = new StringBuilder(input.substring(0, Math.max(0, size - 3)));
+        while (shortened.length() < size) {
+            shortened.append(".");
+        }
+        return shortened.toString();
     }
 }
