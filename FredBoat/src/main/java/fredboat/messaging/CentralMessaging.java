@@ -516,7 +516,9 @@ public class CentralMessaging {
         try {
             channel.sendMessage(message).queue(successWrapper, failureWrapper);
         } catch (InsufficientPermissionException e) {
-            failureWrapper.accept(e);
+            if (onFail != null) {
+                onFail.accept(e);
+            }
             if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
                 handleInsufficientPermissionsException(channel, e);
             } else {
@@ -558,7 +560,9 @@ public class CentralMessaging {
             // this is scheduled to be fixed through JDA's message-rw branch
             channel.sendFile(FileUtils.readFileToByteArray(file), file.getName(), message).queue(successWrapper, failureWrapper);
         } catch (InsufficientPermissionException e) {
-            failureWrapper.accept(e);
+            if (onFail != null) {
+                onFail.accept(e);
+            }
             handleInsufficientPermissionsException(channel, e);
         } catch (IOException e) {
             log.error("Could not send file {}, it appears to be borked", file.getAbsolutePath(), e);
@@ -595,7 +599,9 @@ public class CentralMessaging {
         try {
             channel.editMessageById(oldMessageId, newMessage).queue(successWrapper, failureWrapper);
         } catch (InsufficientPermissionException e) {
-            failureWrapper.accept(e);
+            if (onFail != null) {
+                onFail.accept(e);
+            }
             handleInsufficientPermissionsException(channel, e);
         }
         return result;
