@@ -33,6 +33,7 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.EventLogger;
+import fredboat.feature.dike.DikeGatewayProviderFactory;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.OkHttpEventMetrics;
 import fredboat.util.TextUtils;
@@ -66,6 +67,7 @@ public class FredBoatShard extends FredBoat {
     //For when we need to join a revived shard with it's old GuildPlayers
     protected final ArrayList<String> channelsToRejoin = new ArrayList<>();
     protected final JdaEntityCounts jdaEntityCountsShard = new JdaEntityCounts();
+    private static final DikeGatewayProviderFactory gatewayProvider = new DikeGatewayProviderFactory();
 
     @Nonnull
     protected volatile JDA jda;
@@ -300,6 +302,10 @@ public class FredBoatShard extends FredBoat {
 
                 if (LavalinkManager.ins.isEnabled()) {
                     builder.addEventListener(LavalinkManager.ins.getLavalink());
+                }
+
+                if(Config.CONFIG.getDikeUrl() != null) {
+                    builder.setGatewayProviderFactory(gatewayProvider);
                 }
 
                 if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
