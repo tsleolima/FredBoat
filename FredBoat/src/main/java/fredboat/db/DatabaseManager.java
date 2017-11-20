@@ -53,7 +53,7 @@ public class DatabaseManager {
     private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "fredboat.default";
 
     //see https://github.com/brettwooldridge/HikariCP connectionTimeout
-    private static final int HIKARI_TIMEOUT_MILLISECONDS = 1000;
+    private static final int HIKARI_TIMEOUT_MILLISECONDS = 10000;
 
     private EntityManagerFactory emf;
     private Session sshTunnel;
