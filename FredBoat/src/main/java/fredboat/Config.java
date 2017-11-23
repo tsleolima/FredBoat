@@ -278,13 +278,9 @@ public class Config {
             numShards = recommendedShardCount;
             log.info("Discord recommends " + numShards + " shard(s)");
 
-            //more database connections don't help with performance, so use a value based on available cores
+            //more database connections don't help with performance, so use a value based on available cores, but not too low
             //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
-            if (jdbcUrl == null || jdbcUrl.isEmpty() || distribution == DistributionEnum.DEVELOPMENT)
-                //more than one connection for the fallback sqlite db is problematic as there is currently (2017-04-16)
-                // no supported way in the custom driver and/or dialect to set lock timeouts
-                hikariPoolSize = 1;
-            else hikariPoolSize = Math.max(2, Runtime.getRuntime().availableProcessors());
+            hikariPoolSize = Math.max(4, Runtime.getRuntime().availableProcessors());
             log.info("Hikari max pool size set to " + hikariPoolSize);
 
             PlayerLimitManager.setLimit((Integer) config.getOrDefault("playerLimit", -1));
