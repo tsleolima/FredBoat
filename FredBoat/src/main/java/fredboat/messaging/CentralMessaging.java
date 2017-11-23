@@ -57,7 +57,7 @@ import java.util.function.Consumer;
 /**
  * Created by napster on 10.09.17.
  * <p>
- * Everything related to sending things out from FredBoat
+ * Everything related to sending RestActions from FredBoat
  */
 @SuppressWarnings("UnusedReturnValue")
 public class CentralMessaging {
