@@ -293,8 +293,16 @@ public class FredBoatShard extends FredBoat {
                         .setReconnectQueue(connectQueue)
                         .setHttpClientBuilder(new OkHttpClient.Builder()
                                 .eventListener(new OkHttpEventMetrics("jda")))
-                        .addEventListener(Metrics.instance().jdaEventsMetricsListener)
-                        .addEventListener(new EventLogger(Config.CONFIG.getEventLogWebhook()));
+                        .addEventListener(Metrics.instance().jdaEventsMetricsListener);
+
+                String eventLogWebhook = Config.CONFIG.getEventLogWebhook();
+                if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {
+                    try {
+                        builder.addEventListener(new EventLogger(Config.CONFIG.getEventLogWebhook()));
+                    } catch (Exception e) {
+                        log.error("Failed to create Eventlogger, events will not be logged to discord via webhook", e);
+                    }
+                }
 
 
                 if (LavalinkManager.ins.isEnabled()) {

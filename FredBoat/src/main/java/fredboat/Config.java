@@ -321,12 +321,30 @@ public class Config {
         }
     }
 
-    public String getRandomGoogleKey() {
-        if (googleKeys.isEmpty()) {
-            throw new MessagingException("No Youtube API key detected. Please read the documentation of the credentials file on how to obtain one.");
+
+    public static class LavalinkHost {
+
+        private final URI uri;
+        private final String password;
+
+        public LavalinkHost(URI uri, String password) {
+            this.uri = uri;
+            this.password = password;
         }
-        return googleKeys.get((int) Math.floor(Math.random() * getGoogleKeys().size()));
+
+        public URI getUri() {
+            return uri;
+        }
+
+        public String getPassword() {
+            return password;
+        }
     }
+
+
+    // ********************************************************************************
+    //                           Config Getters
+    // ********************************************************************************
 
     public DistributionEnum getDistribution() {
         return distribution;
@@ -340,65 +358,8 @@ public class Config {
         return distribution == DistributionEnum.DEVELOPMENT;
     }
 
-    public String getBotToken() {
-        return botToken;
-    }
-
-    public String getJdbcUrl() {
-        return jdbcUrl;
-    }
-
-    public int getHikariPoolSize() {
-        return hikariPoolSize;
-    }
-
-    //this static method works even when called from tests with invalid config files leading to a null config
-    public static int getNumShards() {
-        if (CONFIG != null) {
-            return CONFIG.numShards;
-        } else {
-            return 1;
-        }
-    }
-
-    public String getMalUser() {
-        return malUser;
-    }
-
-    public String getMalPassword() {
-        return malPassword;
-    }
-
-    public String getImgurClientId() {
-        return imgurClientId;
-    }
-
-    public List<String> getGoogleKeys() {
-        return googleKeys;
-    }
-
-    public String getCarbonKey() {
-        return carbonKey;
-    }
-
-    public String getSpotifyId() {
-        return spotifyId;
-    }
-
-    public String getSpotifySecret() {
-        return spotifySecret;
-    }
-
     public String getPrefix() {
         return prefix;
-    }
-
-    public String getOpenWeatherKey() {
-        return openWeatherKey;
-    }
-
-    public String getEventLogWebhook() {
-        return eventLogWebhook;
     }
 
     public boolean isRestServerEnabled() {
@@ -421,57 +382,8 @@ public class Config {
         }
     }
 
-    public boolean getContinuePlayback() { return continuePlayback; }
-
-    public String getTestBotToken() {
-        return testBotToken;
-    }
-
-    public String getTestChannelId() {
-        return testChannelId;
-    }
-
-    public boolean isUseSshTunnel() {
-        return useSshTunnel;
-    }
-
-    public String getSshHost() {
-        return sshHost;
-    }
-
-    public String getSshUser() {
-        return sshUser;
-    }
-
-    public String getSshPrivateKeyFile() {
-        return sshPrivateKeyFile;
-    }
-
-    public int getForwardToPort() {
-        return forwardToPort;
-    }
-
-    public List<LavalinkHost> getLavalinkHosts() {
-        return lavalinkHosts;
-    }
-
-    public class LavalinkHost {
-
-        private final URI uri;
-        private final String password;
-
-        public LavalinkHost(URI uri, String password) {
-            this.uri = uri;
-            this.password = password;
-        }
-
-        public URI getUri() {
-            return uri;
-        }
-
-        public String getPassword() {
-            return password;
-        }
+    public boolean getContinuePlayback() {
+        return continuePlayback;
     }
 
     public boolean isYouTubeEnabled() {
@@ -506,5 +418,113 @@ public class Config {
         return httpAudio;
     }
 
-    public boolean useVoiceChannelCleanup() {return useVoiceChannelCleanup; }
+
+    public boolean useVoiceChannelCleanup() {
+        return useVoiceChannelCleanup;
+    }
+
+    // ********************************************************************************
+    //                           Credentials Getters
+    // ********************************************************************************
+
+    public String getBotToken() {
+        return botToken;
+    }
+
+    public List<String> getGoogleKeys() {
+        return googleKeys;
+    }
+
+    public String getRandomGoogleKey() {
+        if (googleKeys.isEmpty()) {
+            throw new MessagingException("No Youtube API key detected. Please read the documentation of the credentials file on how to obtain one.");
+        }
+        return googleKeys.get((int) Math.floor(Math.random() * getGoogleKeys().size()));
+    }
+
+    public String getMalUser() {
+        return malUser;
+    }
+
+    public String getMalPassword() {
+        return malPassword;
+    }
+
+    public String getImgurClientId() {
+        return imgurClientId;
+    }
+
+    public String getSpotifyId() {
+        return spotifyId;
+    }
+
+    public String getSpotifySecret() {
+        return spotifySecret;
+    }
+
+    public String getOpenWeatherKey() {
+        return openWeatherKey;
+    }
+
+    public String getJdbcUrl() {
+        return jdbcUrl;
+    }
+
+    public boolean isUseSshTunnel() {
+        return useSshTunnel;
+    }
+
+    public String getSshHost() {
+        return sshHost;
+    }
+
+    public String getSshUser() {
+        return sshUser;
+    }
+
+    public String getSshPrivateKeyFile() {
+        return sshPrivateKeyFile;
+    }
+
+    public int getForwardToPort() {
+        return forwardToPort;
+    }
+
+    public List<LavalinkHost> getLavalinkHosts() {
+        return lavalinkHosts;
+    }
+
+    public String getEventLogWebhook() {
+        return eventLogWebhook;
+    }
+
+    public String getTestBotToken() {
+        return testBotToken;
+    }
+
+    public String getTestChannelId() {
+        return testChannelId;
+    }
+
+
+    // ********************************************************************************
+    //                       Derived and unofficial values
+    // ********************************************************************************
+
+    //this static method works even when called from tests with invalid config files leading to a null config
+    public static int getNumShards() {
+        if (CONFIG != null) {
+            return CONFIG.numShards;
+        } else {
+            return 1;
+        }
+    }
+
+    public int getHikariPoolSize() {
+        return hikariPoolSize;
+    }
+
+    public String getCarbonKey() {
+        return carbonKey;
+    }
 }
