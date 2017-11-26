@@ -31,9 +31,9 @@ shadowJar {
 
 dependencies {
     compile project(':Shared')
-    compile group: 'net.dv8tion', name: 'JDA', version: '3.3.1_306'
-    compile group: 'com.github.FredBoat', name: 'lavaplayer', version: '1.2.44.2-FredBoat'
-    compile group: 'com.github.FredBoat', name: 'jda-nas', version: '1.0.5.1-JDA'
+    compile group: 'net.dv8tion', name: 'JDA', version: '3.3.1_307'
+    compile group: 'com.sedmelluq', name: 'lavaplayer', version: '1.2.45'
+    compile group: 'com.sedmelluq', name: 'jda-nas', version: '1.0.6'
 
     if (System.getenv('dev') == 'true') {
         compile(group: 'lavalink', name: 'Lavalink-Client', version: '-SNAPSHOT')
