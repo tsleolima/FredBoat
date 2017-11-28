@@ -26,16 +26,13 @@
 package fredboat.db;
 
 import fredboat.FredBoat;
-import fredboat.db.entity.BlacklistEntry;
-import fredboat.db.entity.GuildConfig;
-import fredboat.db.entity.GuildPermissions;
-import fredboat.db.entity.IEntity;
-import fredboat.db.entity.UConfig;
-import org.hibernate.exception.JDBCConnectionException;
+import fredboat.db.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 public class EntityWriter {
 
@@ -58,32 +55,26 @@ public class EntityWriter {
     }
 
     private static void merge(IEntity entity) {
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException();
-        }
-
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             em.merge(entity);
             em.getTransaction().commit();
-        } catch (JDBCConnectionException e) {
+        } catch (PersistenceException | DatabaseException e) {
             log.error("Failed to merge entity {}", entity, e);
             throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
     }
 
     public static void deleteBlacklistEntry(long id) {
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException("The database is not available currently. Please try again later.");
-        }
-
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             BlacklistEntry ble = em.find(BlacklistEntry.class, id);
             em.getTransaction().commit();
@@ -93,8 +84,13 @@ public class EntityWriter {
                 em.remove(ble);
                 em.getTransaction().commit();
             }
+        } catch (DatabaseException | PersistenceException e) {
+            log.error("Db blew up while deleting black list entry for id {}", id, e);
+            throw new DatabaseNotReadyException("The database is not available currently. Please try again later.");
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
     }
 }

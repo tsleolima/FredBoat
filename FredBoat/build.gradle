@@ -60,13 +60,8 @@ dependencies {
     compile group: 'io.prometheus', name: 'simpleclient_guava', version: '0.1.0'
     compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.1.0'
 
-    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.12.Final'
+    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: '6f65ef5493595165a5f2c7695ad3edad4ec30046'
     compile group: 'org.hibernate', name: 'hibernate-ehcache', version: '5.2.12.Final'
-    compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: '5.2.12.Final'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.5.9.RELEASE'
-    compile group: 'org.springframework', name: 'spring-orm', version: '4.3.13.RELEASE'//v5 breaks things (spring boot)
-    compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
-    compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
     compile group: 'org.togglz', name: 'togglz-core', version: '2.5.0.Final'
     compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
     compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: '3.0.2'

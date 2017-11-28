@@ -27,14 +27,11 @@ package fredboat.db;
 
 
 import fredboat.FredBoat;
-import fredboat.db.entity.BlacklistEntry;
-import fredboat.db.entity.GuildConfig;
-import fredboat.db.entity.GuildPermissions;
-import fredboat.db.entity.IEntity;
-import fredboat.db.entity.UConfig;
+import fredboat.db.entity.*;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -57,22 +54,20 @@ public class EntityReader {
     }
 
     private static <E extends IEntity> E getEntity(String id, Class<E> clazz) throws DatabaseNotReadyException {
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException();
-        }
-
-        EntityManager em = dbManager.getEntityManager();
-        E config = null;
+        EntityManager em = null;
+        E config;
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             config = em.find(clazz, id);
             em.getTransaction().commit();
-        } catch (PersistenceException e) {
-            log.error("Error while trying to find entity of class {} from DB for id {}", clazz.getName(), id, e);
+        } catch (DatabaseException | PersistenceException e) {
+            log.error("Failed to find entity of class {} from DB for id {}", clazz.getName(), id, e);
             throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
         //return a fresh object if we didn't find the one we were looking for
         if (config == null) config = newInstance(id, clazz);
@@ -90,18 +85,20 @@ public class EntityReader {
     }
 
     public static List<BlacklistEntry> loadBlacklist() {
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException("The database is not available currently. Please try again later.");
-        }
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         List<BlacklistEntry> result;
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             result = em.createQuery("SELECT b FROM BlacklistEntry b", BlacklistEntry.class).getResultList();
             em.getTransaction().commit();
+        } catch (DatabaseException | PersistenceException e) {
+            log.error("Failed to load blacklist", e);
+            throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
         return result;
     }

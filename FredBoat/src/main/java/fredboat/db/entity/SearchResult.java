@@ -32,7 +32,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.FredBoat;
-import fredboat.db.DatabaseManager;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.util.rest.SearchUtil;
 import org.apache.commons.lang3.SerializationUtils;
@@ -40,16 +39,9 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseException;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.PersistenceException;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -106,23 +98,21 @@ public class SearchResult implements Serializable {
      */
     public static AudioPlaylist load(AudioPlayerManager playerManager, SearchUtil.SearchProvider provider,
                                      String searchTerm, long maxAgeMillis) throws DatabaseNotReadyException {
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException();
-        }
-
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         SearchResult sr;
         SearchResultId sId = new SearchResultId(provider, searchTerm);
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             sr = em.find(SearchResult.class, sId);
             em.getTransaction().commit();
-        } catch (PersistenceException e) {
+        } catch (DatabaseException | PersistenceException e) {
             log.error("Unexpected error while trying to look up a search result for provider {} and search term {}", provider.name(), searchTerm, e);
             throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
 
         if (sr != null && (maxAgeMillis < 0 || System.currentTimeMillis() < sr.timestamp + maxAgeMillis)) {
@@ -138,23 +128,21 @@ public class SearchResult implements Serializable {
      * @return the merged SearchResult object
      */
     public SearchResult save() {
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException();
-        }
-
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             SearchResult managed = em.merge(this);
             em.getTransaction().commit();
             return managed;
-        } catch (PersistenceException e) {
+        } catch (DatabaseException | PersistenceException e) {
             log.error("Unexpected error while saving a search result for provider {} and search term {}",
                     searchResultId.provider, searchResultId.searchTerm, e);
             throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
     }
 

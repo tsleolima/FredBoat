@@ -26,21 +26,15 @@
 package fredboat.db.entity;
 
 import fredboat.FredBoat;
-import fredboat.db.DatabaseManager;
 import fredboat.db.DatabaseNotReadyException;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseException;
 
 import javax.annotation.Nullable;
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.PersistenceException;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
@@ -161,14 +155,11 @@ public class GuildConfig implements IEntity, Serializable {
     @Nullable
     public static Optional<String> getPrefix(long guildId) {
         log.debug("loading prefix for guild {}", guildId);
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException();
-        }
         //language=JPAQL
         String query = "SELECT gf.prefix FROM GuildConfig gf WHERE gf.guildId = :guildId";
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         try {
+            em = FredBoat.getDbConnection().getEntityManager();
             em.getTransaction().begin();
             List<String> result = em.createQuery(query, String.class)
                     .setParameter("guildId", Long.toString(guildId))
@@ -179,11 +170,13 @@ public class GuildConfig implements IEntity, Serializable {
             } else {
                 return Optional.ofNullable(result.get(0));
             }
-        } catch (PersistenceException e) {
+        } catch (DatabaseException | PersistenceException e) {
             log.error("Failed to load prefix for guild {}", guildId, e);
             throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
     }
 }
