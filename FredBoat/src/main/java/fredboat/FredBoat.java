@@ -66,6 +66,7 @@ import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -108,15 +109,20 @@ public abstract class FredBoat {
         Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, "FredBoat main shutdownhook"));
         log.info(getVersionInfo());
 
-        String javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
+        String javaVersionMinor = null;
+        try {
+            javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
+        } catch (Exception e) {
+            log.error("Exception while checking if java 8", e);
+        }
 
-        if (!javaVersionMinor.equals("8")) {
+        if (!Objects.equals(javaVersionMinor, "8")) {
             log.warn("\n\t\t __      ___   ___ _  _ ___ _  _  ___ \n" +
                     "\t\t \\ \\    / /_\\ | _ \\ \\| |_ _| \\| |/ __|\n" +
                     "\t\t  \\ \\/\\/ / _ \\|   / .` || || .` | (_ |\n" +
                     "\t\t   \\_/\\_/_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\n" +
                     "\t\t                                      ");
-            log.warn("FredBoat only supports Java 8. You are running Java " + javaVersionMinor);
+            log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
         }
 
         I18n.start();
