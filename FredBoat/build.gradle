@@ -39,7 +39,7 @@ dependencies {
         compile(group: 'lavalink', name: 'Lavalink-Client', version: '-SNAPSHOT')
     } else {
         //production
-        compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: 'f5d50964f89fea0bc3224feebe2d8a1e560f4155')
+        compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: 'f58ae576aa8a59ef01b98d7c8638f187c5349b1a')
     }
 
     compile group: 'org.apache.commons', name: 'commons-text', version: '1.1'
