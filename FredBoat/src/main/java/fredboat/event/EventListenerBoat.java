@@ -83,7 +83,7 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         try (// before execution set some variables that can help with finding traces that belong to each other
-                MDC.MDCCloseable _guild = MDC.putCloseable("guild", event.getGuild().getId());
+                MDC.MDCCloseable _guild = MDC.putCloseable("guild", event.getGuild() != null ? event.getGuild().getId() : "PRIVATE");
                 MDC.MDCCloseable _channel = MDC.putCloseable("channel", event.getChannel().getId());
                 MDC.MDCCloseable _invoker = MDC.putCloseable("invoker", event.getAuthor().getId());
                 ) {
