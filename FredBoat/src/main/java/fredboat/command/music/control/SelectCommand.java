@@ -75,19 +75,11 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
 
             // Combine all args and the command trigger. if the trigger is not a number it will be sanitized away
             String commandOptions = (context.trigger + " " + context.rawArgs).trim();
-            String sanitizedQuery = sanitizeQueryForMultiSelect(commandOptions).trim();
 
             if (StringUtils.isNumeric(commandOptions)) {
                 requestChoices.add(Integer.valueOf(commandOptions));
-            } else if (TextUtils.isSplitSelect(sanitizedQuery)) {
-                // Remove all non comma or number characters
-                String[] querySplit = sanitizedQuery.split(",|\\s");
-
-                for (String value : querySplit) {
-                    if (StringUtils.isNumeric(value)) {
-                        requestChoices.add(Integer.valueOf(value));
-                    }
-                }
+            } else if (TextUtils.isSplitSelect(commandOptions)) {
+                requestChoices.addAll(TextUtils.getSplitSelect(commandOptions));
             }
 
             //Step 2: Use only valid numbers (usually 1-5)
@@ -147,15 +139,4 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
     public PermissionLevel getMinimumPerms() {
         return PermissionLevel.USER;
     }
-
-    /**
-     * Helper method to remove all characters from arg that is not numerical or comma.
-     *
-     * @param arg String to be sanitized.
-     * @return Sanitized string.
-     */
-    private static String sanitizeQueryForMultiSelect(@Nonnull String arg) {
-        return arg.replaceAll("[^0-9$., ]", "");
-    }
-
 }
