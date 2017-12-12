@@ -284,7 +284,7 @@ public class FredBoatShard extends FredBoat {
             if (defaultShardBuilder == null) {
                 JDABuilder builder = new JDABuilder(AccountType.BOT)
                         .setToken(Config.CONFIG.getBotToken())
-                        .setGame(Game.listening(Config.CONFIG.getGame()))
+                        .setGame(Game.playing(Config.CONFIG.getGame()))
                         .setBulkDeleteSplittingEnabled(false)
                         .setEnableShutdownHook(false)
                         .setAudioEnabled(true)
