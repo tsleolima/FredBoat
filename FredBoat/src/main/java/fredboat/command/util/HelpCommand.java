@@ -34,25 +34,24 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IUtilCommand;
-import fredboat.feature.I18n;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
+import fredboat.shared.constant.BotConstants;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 public class HelpCommand extends Command implements IUtilCommand {
-
-    //This can be set using eval in case we need to change it in the future ~Fre_d
-    public static String inviteLink = "https://discord.gg/cgPFW4q";
 
     //keeps track of whether a user received help lately to avoid spamming/clogging up DMs which are rather harshly ratelimited
     public static final Cache<Long, Boolean> HELP_RECEIVED_RECENTLY = CacheBuilder.newBuilder()
@@ -87,7 +86,7 @@ public class HelpCommand extends Command implements IUtilCommand {
             return;
         }
 
-        context.replyPrivate(getHelpDmMsg(context.guild),
+        context.replyPrivate(getHelpDmMsg(context),
                 success -> {
                     HELP_RECEIVED_RECENTLY.put(userId, true);
                     String out = context.i18n("helpSent");
@@ -113,7 +112,27 @@ public class HelpCommand extends Command implements IUtilCommand {
         }
 
         HELP_RECEIVED_RECENTLY.put(event.getAuthor().getIdLong(), true);
-        CentralMessaging.sendMessage(event.getChannel(), getHelpDmMsg(null));
+        CentralMessaging.sendMessage(event.getChannel(), getHelpDmMsg(new Context() { //yeah this is ugly ¯\_(ツ)_/¯
+            @Override
+            public TextChannel getTextChannel() {
+                return null;
+            }
+
+            @Override
+            public Guild getGuild() {
+                return null;
+            }
+
+            @Override
+            public Member getMember() {
+                return null;
+            }
+
+            @Override
+            public User getUser() {
+                return event.getAuthor();
+            }
+        }));
     }
 
     public static String getFormattedCommandHelp(Context context, Command command, String commandOrAlias) {
@@ -154,7 +173,12 @@ public class HelpCommand extends Command implements IUtilCommand {
         context.replyWithName(out);
     }
 
-    public static String getHelpDmMsg(@Nullable Guild guild) {
-        return MessageFormat.format(I18n.get(guild).getString("helpDM"), inviteLink);
+    @Nonnull
+    public static String getHelpDmMsg(@Nonnull Context context) {
+        String docsLocation = context.i18n("helpDocsLocation") + "\n" + BotConstants.DOCS_URL;
+        String botInvite = context.i18n("helpBotInvite") + "\n<" + BotConstants.botInvite + ">";
+        String hangoutInvite = context.i18n("helpHangoutInvite") + "\n" + BotConstants.hangoutInvite;
+        String footer = context.i18n("helpNoDmCommands") + "\n" + context.i18n("helpCredits");
+        return docsLocation + "\n\n" + botInvite + "\n\n" + hangoutInvite + "\n\n" + footer;
     }
 }
