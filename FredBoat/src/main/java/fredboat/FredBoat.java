@@ -136,6 +136,7 @@ public abstract class FredBoat {
         try {
             mainDbConn = DatabaseManager.main();
         } catch (Exception e) {
+            log.error("Exception when connecting to main db", e);
             shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
         //attempt to connect to the database a few times
@@ -159,6 +160,7 @@ public abstract class FredBoat {
         try {
             cacheDbConn = DatabaseManager.cache();
         } catch (Exception e) {
+            log.error("Exception when connecting to cache db", e);
             shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
