@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package fredboat.db.entity;
+package fredboat.db.entity.cache;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
@@ -102,7 +102,7 @@ public class SearchResult implements Serializable {
         SearchResult sr;
         SearchResultId sId = new SearchResultId(provider, searchTerm);
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getCacheDbConnection().getEntityManager();
             em.getTransaction().begin();
             sr = em.find(SearchResult.class, sId);
             em.getTransaction().commit();
@@ -130,7 +130,7 @@ public class SearchResult implements Serializable {
     public SearchResult save() {
         EntityManager em = null;
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getCacheDbConnection().getEntityManager();
             em.getTransaction().begin();
             SearchResult managed = em.merge(this);
             em.getTransaction().commit();

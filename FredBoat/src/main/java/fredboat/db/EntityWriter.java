@@ -26,7 +26,11 @@
 package fredboat.db;
 
 import fredboat.FredBoat;
-import fredboat.db.entity.*;
+import fredboat.db.entity.IEntity;
+import fredboat.db.entity.main.BlacklistEntry;
+import fredboat.db.entity.main.GuildConfig;
+import fredboat.db.entity.main.GuildPermissions;
+import fredboat.db.entity.main.UConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseException;
@@ -57,7 +61,7 @@ public class EntityWriter {
     private static void merge(IEntity entity) {
         EntityManager em = null;
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             em.merge(entity);
             em.getTransaction().commit();
@@ -74,7 +78,7 @@ public class EntityWriter {
     public static void deleteBlacklistEntry(long id) {
         EntityManager em = null;
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             BlacklistEntry ble = em.find(BlacklistEntry.class, id);
             em.getTransaction().commit();

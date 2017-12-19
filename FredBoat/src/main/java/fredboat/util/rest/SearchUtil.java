@@ -37,7 +37,7 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.Config;
 import fredboat.FredBoat;
 import fredboat.db.DatabaseNotReadyException;
-import fredboat.db.entity.SearchResult;
+import fredboat.db.entity.cache.SearchResult;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import org.apache.http.client.config.CookieSpecs;
@@ -86,7 +86,7 @@ public class SearchUtil {
 
     /**
      * @param query         The search term
-     * @param cacheMaxAge   Age of acceptable results from cache. See {@link fredboat.db.entity.SearchResult#load} for details.
+     * @param cacheMaxAge   Age of acceptable results from cache. See {@link SearchResult#load} for details.
      * @param timeoutMillis How long to wait for each lavaplayer search to answer
      * @param providers     Providers that shall be used for the search. They will be used in the order they are provided, the
      *                      result of the first successful one will be returned

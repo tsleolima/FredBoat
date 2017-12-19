@@ -60,7 +60,7 @@ public class TestCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        FredBoat.executor.submit(() -> invoke(FredBoat.getDbConnection(), context, context.args));
+        FredBoat.executor.submit(() -> invoke(FredBoat.getMainDbConnection(), context, context.args));
     }
 
     boolean invoke(DatabaseConnection dbConn, Context context, String args[]) {

@@ -23,10 +23,11 @@
  *
  */
 
-package fredboat.db.entity;
+package fredboat.db.entity.main;
 
 import fredboat.FredBoat;
 import fredboat.db.DatabaseNotReadyException;
+import fredboat.db.entity.IEntity;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
@@ -159,7 +160,7 @@ public class GuildConfig implements IEntity, Serializable {
         String query = "SELECT gf.prefix FROM GuildConfig gf WHERE gf.guildId = :guildId";
         EntityManager em = null;
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             List<String> result = em.createQuery(query, String.class)
                     .setParameter("guildId", Long.toString(guildId))

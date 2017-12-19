@@ -60,7 +60,7 @@ dependencies {
     compile group: 'io.prometheus', name: 'simpleclient_guava', version: '0.1.0'
     compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.1.0'
 
-    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: '6f65ef5493595165a5f2c7695ad3edad4ec30046'
+    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: '0.0.3'
     compile group: 'org.hibernate', name: 'hibernate-ehcache', version: '5.2.12.Final'
     compile group: 'org.togglz', name: 'togglz-core', version: '2.5.0.Final'
     compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'

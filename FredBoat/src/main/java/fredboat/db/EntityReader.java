@@ -27,7 +27,11 @@ package fredboat.db;
 
 
 import fredboat.FredBoat;
-import fredboat.db.entity.*;
+import fredboat.db.entity.IEntity;
+import fredboat.db.entity.main.BlacklistEntry;
+import fredboat.db.entity.main.GuildConfig;
+import fredboat.db.entity.main.GuildPermissions;
+import fredboat.db.entity.main.UConfig;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +61,7 @@ public class EntityReader {
         EntityManager em = null;
         E config;
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             config = em.find(clazz, id);
             em.getTransaction().commit();
@@ -88,7 +92,7 @@ public class EntityReader {
         EntityManager em = null;
         List<BlacklistEntry> result;
         try {
-            em = FredBoat.getDbConnection().getEntityManager();
+            em = FredBoat.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             result = em.createQuery("SELECT b FROM BlacklistEntry b", BlacklistEntry.class).getResultList();
             em.getTransaction().commit();

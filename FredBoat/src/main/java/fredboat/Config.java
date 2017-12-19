@@ -36,7 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
+import space.npstr.sqlsauce.ssh.SshTunnel;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -106,13 +108,15 @@ public class Config {
     private String spotifySecret;
     private String openWeatherKey;
 
-    // database + SSH tunnel
+    // main database + SSH tunnel
     private String jdbcUrl;
-    private boolean useSshTunnel;
-    private String sshHost; //Eg localhost:22
-    private String sshUser; //Eg fredboat
-    private String sshPrivateKeyFile;
-    private int forwardToPort; //port where the remote database is listening, postgres default: 5432
+    @Nullable
+    private SshTunnel.SshDetails mainSshTunnelConfig;
+
+    // cache database + SSH tunnel
+    private String cacheJdbcUrl;
+    @Nullable
+    private SshTunnel.SshDetails cacheSshTunnelConfig;
 
     // misc
     private String sentryDsn;
@@ -228,14 +232,83 @@ public class Config {
             openWeatherKey = (String) creds.getOrDefault("openWeatherKey", "");
 
 
-            // database
+            // main database
             jdbcUrl = (String) creds.getOrDefault("jdbcUrl", "");
-            useSshTunnel = (boolean) creds.getOrDefault("useSshTunnel", false);
-            sshHost = (String) creds.getOrDefault("sshHost", "localhost:22");
-            sshUser = (String) creds.getOrDefault("sshUser", "fredboat");
-            sshPrivateKeyFile = (String) creds.getOrDefault("sshPrivateKeyFile", "database.ppk");
-            forwardToPort = (int) creds.getOrDefault("forwardToPort", 5432);
+            if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+                if ("docker".equals(System.getenv("ENV"))) {
+                    log.info("No main JDBC URL found, docker environment detected. Using default docker JDBC url");
+                    jdbcUrl = "jdbc:postgresql://db:5432/fredboat?user=fredboat";
+                } else {
+                    String message = "No main jdbcUrl provided in a non-docker environment.";
+                    log.error(message);
+                    throw new RuntimeException(message);
+                }
+            }
+            boolean useSshTunnel = (boolean) creds.getOrDefault("useSshTunnel", false);
+            if (useSshTunnel) {
+                //Parse host:port
+                String sshHostRaw = (String) creds.getOrDefault("sshHost", "localhost:22");
+                String sshHost = sshHostRaw.split(":")[0];
+                int sshPort;
+                try {
+                    sshPort = Integer.parseInt(sshHostRaw.split(":")[1]);
+                } catch (Exception e) {
+                    sshPort = 22;
+                }
+                String sshUser = (String) creds.getOrDefault("sshUser", "fredboat");
+                String sshPrivateKeyFile = (String) creds.getOrDefault("sshPrivateKeyFile", "database.ppk");
+                String sshKeyPassphrase = (String) creds.getOrDefault("sshKeyPassphrase", "");
+                int tunnelLocalPort = (int) creds.getOrDefault("tunnelLocalPort", 9333);//9333 is a legacy port for backwards compatibility
+                String tunnelRemotePortKey = "tunnelRemotePort";
+                if (creds.containsKey("forwardToPort")) {//legacy check
+                    tunnelRemotePortKey = "forwardToPort";
+                }
+                int tunnelRemotePort = (int) creds.getOrDefault(tunnelRemotePortKey, 5432);
 
+                mainSshTunnelConfig = new SshTunnel.SshDetails(sshHost, sshUser)
+                        .setKeyFile(sshPrivateKeyFile)
+                        .setPassphrase(sshKeyPassphrase == null || sshKeyPassphrase.isEmpty() ? null : sshKeyPassphrase)
+                        .setSshPort(sshPort)
+                        .setLocalPort(tunnelLocalPort)
+                        .setRemotePort(tunnelRemotePort);
+            }
+
+
+            // cache database
+            cacheJdbcUrl = (String) creds.getOrDefault("cacheJdbcUrl", "");
+            if (cacheJdbcUrl == null || cacheJdbcUrl.isEmpty()) {
+                if ("docker".equals(System.getenv("ENV"))) {
+                    log.info("No cacheJdbcUrl found, docker environment detected. Using default docker JDBC url");
+                    cacheJdbcUrl = "jdbc:postgresql://db:5432/fredboat_cache?user=fredboat";
+                } else {
+                    log.warn("No cacheJdbcUrl provided in a non-docker environment. Falling back to the main one.");
+                    cacheJdbcUrl = jdbcUrl;
+                }
+            }
+            boolean cacheUseSshTunnel = (boolean) creds.getOrDefault("cacheUseSshTunnel", false);
+            if (cacheUseSshTunnel) {
+                //Parse host:port
+                String cacheSshHostRaw = (String) creds.getOrDefault("cacheSshHost", "localhost:22");
+                String cacheSshHost = cacheSshHostRaw.split(":")[0];
+                int cacheSshPort;
+                try {
+                    cacheSshPort = Integer.parseInt(cacheSshHostRaw.split(":")[1]);
+                } catch (Exception e) {
+                    cacheSshPort = 22;
+                }
+                String cacheSshUser = (String) creds.getOrDefault("cacheSshUser", "fredboat");
+                String cacheSshPrivateKeyFile = (String) creds.getOrDefault("cacheSshPrivateKeyFile", "database.ppk");
+                String cacheSshKeyPassphrase = (String) creds.getOrDefault("cacheSshKeyPassphrase", "");
+                int cacheTunnelLocalPort = (int) creds.getOrDefault("cacheTunnelLocalPort", 5433);
+                int cacheTunnelRemotePort = (int) creds.getOrDefault("cacheTunnelRemotePort", 5432);
+
+                cacheSshTunnelConfig = new SshTunnel.SshDetails(cacheSshHost, cacheSshUser)
+                        .setKeyFile(cacheSshPrivateKeyFile)
+                        .setPassphrase(cacheSshKeyPassphrase == null || cacheSshKeyPassphrase.isEmpty() ? null : cacheSshKeyPassphrase)
+                        .setSshPort(cacheSshPort)
+                        .setLocalPort(cacheTunnelLocalPort)
+                        .setRemotePort(cacheTunnelRemotePort);
+            }
 
             // misc
             Map<String, String> linkNodes = (Map<String, String>) creds.get("lavalinkHosts");
@@ -466,24 +539,18 @@ public class Config {
         return jdbcUrl;
     }
 
-    public boolean isUseSshTunnel() {
-        return useSshTunnel;
+    @Nullable
+    public SshTunnel.SshDetails getMainSshTunnelConfig() {
+        return mainSshTunnelConfig;
     }
 
-    public String getSshHost() {
-        return sshHost;
+    public String getCacheJdbcUrl() {
+        return cacheJdbcUrl;
     }
 
-    public String getSshUser() {
-        return sshUser;
-    }
-
-    public String getSshPrivateKeyFile() {
-        return sshPrivateKeyFile;
-    }
-
-    public int getForwardToPort() {
-        return forwardToPort;
+    @Nullable
+    public SshTunnel.SshDetails getCacheSshTunnelConfig() {
+        return cacheSshTunnelConfig;
     }
 
     public List<LavalinkHost> getLavalinkHosts() {

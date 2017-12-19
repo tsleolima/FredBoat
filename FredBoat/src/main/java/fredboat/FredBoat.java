@@ -39,11 +39,7 @@ import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
-import fredboat.util.AppInfo;
-import fredboat.util.ConnectQueue;
-import fredboat.util.GitRepoState;
-import fredboat.util.JDAUtil;
-import fredboat.util.TextUtils;
+import fredboat.util.*;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
@@ -92,7 +88,8 @@ public abstract class FredBoat {
     protected final static StatsAgent jdaEntityCountAgent = new StatsAgent("jda entity counter");
 
     private final static JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
-    private static DatabaseConnection dbConn;
+    private static DatabaseConnection mainDbConn;
+    private static DatabaseConnection cacheDbConn;
     private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
 
     public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException,
@@ -136,24 +133,35 @@ public abstract class FredBoat {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
 
-        dbConn = DatabaseManager.postgres();
+        try {
+            mainDbConn = DatabaseManager.main();
+        } catch (Exception e) {
+            shutdown(ExitCodes.EXIT_CODE_ERROR);
+        }
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
         // container will be started before the fredboat one
         int dbConnectionAttempts = 0;
-        while (!dbConn.isAvailable() && dbConnectionAttempts++ < 10) {
+        while (!mainDbConn.isAvailable() && dbConnectionAttempts++ < 10) {
             try {
-                dbConn = DatabaseManager.postgres();
+                mainDbConn = DatabaseManager.main();
             } catch (Exception e) {
                 log.error("Could not connect to the database. Retrying in a moment...", e);
                 Thread.sleep(5000);
             }
         }
-        if (!dbConn.isAvailable()) {
+        if (!mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
             shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
-        FredBoatAgent.start(new DBConnectionWatchdogAgent(dbConn));
+        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
+
+        try {
+            cacheDbConn = DatabaseManager.cache();
+        } catch (Exception e) {
+            shutdown(ExitCodes.EXIT_CODE_ERROR);
+        }
+        Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
 
         //Initialise event listeners
         mainEventListener = new EventListenerBoat();
@@ -337,7 +345,12 @@ public abstract class FredBoat {
         }
 
         executor.shutdown();
-        dbConn.shutdown();
+        if (cacheDbConn != null) {
+            cacheDbConn.shutdown();
+        }
+        if (mainDbConn != null) {
+            mainDbConn.shutdown();
+        }
     };
 
     public static void shutdown(int code) {
@@ -447,8 +460,13 @@ public abstract class FredBoat {
     }
 
     @Nonnull
-    public static DatabaseConnection getDbConnection() {
-        return dbConn;
+    public static DatabaseConnection getMainDbConnection() {
+        return mainDbConn;
+    }
+
+    @Nonnull
+    public static DatabaseConnection getCacheDbConnection() {
+        return cacheDbConn;
     }
 
     private static String getVersionInfo() {
