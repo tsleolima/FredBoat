@@ -118,6 +118,9 @@ public class Config {
     private String sentryDsn;
     private List<LavalinkHost> lavalinkHosts = new ArrayList<>();
     private String eventLogWebhook;
+    private int eventLogInterval;
+    private String guildStatsWebhook;
+    private int guildStatsInterval;
     private String testBotToken;
     private String testChannelId;
 
@@ -251,6 +254,9 @@ public class Config {
             }
 
             eventLogWebhook = (String) creds.getOrDefault("eventLogWebhook", "");
+            eventLogInterval = (int) creds.getOrDefault("eventLogInterval", 1); //minutes
+            guildStatsWebhook = (String) creds.getOrDefault("guildStatsWebhook", "");
+            guildStatsInterval = (int) creds.getOrDefault("guildStatsInterval", 60); //minutes
 
             testBotToken = (String) creds.getOrDefault("testToken", "");
             testChannelId = creds.getOrDefault("testChannelId", "") + "";
@@ -492,6 +498,20 @@ public class Config {
 
     public String getEventLogWebhook() {
         return eventLogWebhook;
+    }
+
+    //minutes
+    public int getEventLogInterval() {
+        return eventLogInterval;
+    }
+
+    public String getGuildStatsWebhook() {
+        return guildStatsWebhook;
+    }
+
+    //minutes
+    public int getGuildStatsInterval() {
+        return guildStatsInterval;
     }
 
     public String getTestBotToken() {

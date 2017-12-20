@@ -298,7 +298,7 @@ public class FredBoatShard extends FredBoat {
                 String eventLogWebhook = Config.CONFIG.getEventLogWebhook();
                 if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {
                     try {
-                        builder.addEventListener(new EventLogger(Config.CONFIG.getEventLogWebhook()));
+                        builder.addEventListener(new EventLogger());
                     } catch (Exception e) {
                         log.error("Failed to create Eventlogger, events will not be logged to discord via webhook", e);
                     }
