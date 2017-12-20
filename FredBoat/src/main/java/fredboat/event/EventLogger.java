@@ -29,14 +29,9 @@ import fredboat.FredBoat;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
-import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
-import net.dv8tion.jda.core.events.DisconnectEvent;
-import net.dv8tion.jda.core.events.ReadyEvent;
-import net.dv8tion.jda.core.events.ReconnectedEvent;
-import net.dv8tion.jda.core.events.ResumedEvent;
-import net.dv8tion.jda.core.events.ShutdownEvent;
+import net.dv8tion.jda.core.events.*;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -45,19 +40,15 @@ import net.dv8tion.jda.webhook.WebhookClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * This overengineered class logs some events via a webhook into Discord.
@@ -96,27 +87,34 @@ public class EventLogger extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event) {
-        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(), ShardStatusEvent.StatusEvent.READY));
+        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
+                ShardStatusEvent.StatusEvent.READY, ""));
     }
 
     @Override
     public void onResume(ResumedEvent event) {
-        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(), ShardStatusEvent.StatusEvent.RESUME));
+        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
+                ShardStatusEvent.StatusEvent.RESUME, ""));
     }
 
     @Override
     public void onReconnect(ReconnectedEvent event) {
-        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(), ShardStatusEvent.StatusEvent.RECONNECT));
+        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
+                ShardStatusEvent.StatusEvent.RECONNECT, ""));
     }
 
     @Override
     public void onDisconnect(DisconnectEvent event) {
-        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(), ShardStatusEvent.StatusEvent.DISCONNECT));
+        String closeCodeStr = "close code " + (event.getCloseCode() == null ? "null" : event.getCloseCode().getCode());
+        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
+                ShardStatusEvent.StatusEvent.DISCONNECT, "with " + closeCodeStr));
     }
 
     @Override
     public void onShutdown(ShutdownEvent event) {
-        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(), ShardStatusEvent.StatusEvent.SHUTDOWN));
+        String closeCodeStr = "close code " + (event.getCloseCode() == null ? "null" : event.getCloseCode().getCode());
+        statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
+                ShardStatusEvent.StatusEvent.SHUTDOWN, "with " + closeCodeStr));
     }
 
     @Override
@@ -202,78 +200,21 @@ public class EventLogger extends ListenerAdapter {
             return;//nothing to report
         }
 
-        //~35 lines fit into a 2k char message, if we can get away with a max of 5 messages, post those, otherwise post a summary
-        if (events.size() <= 35 * 5) {
-            List<ShardStatusEvent> sublist = new ArrayList<>();
-            for (int i = 0; i < events.size(); i++) {
-                sublist.add(events.get(i));
-                if (i != 0 && (i % 35 == 0 || i == events.size() - 1)) {
-                    addMessageToWebhookQueue(CentralMessaging.getClearThreadLocalMessageBuilder()
-                            .appendCodeBlock(String.join("\n", sublist.stream().map(ShardStatusEvent::toString).collect(Collectors.toList())),
-                                    "diff")
-                            .build());
-                    sublist.clear();
-                }
-            }
-            drainMessageQueue();
-            return;
-        }
-
-        //too many events in a short time. sum them up
-        List<Integer> readied = new ArrayList<>();
-        List<Integer> resumed = new ArrayList<>();
-        List<Integer> reconnected = new ArrayList<>();
-        List<Integer> disconnected = new ArrayList<>();
-        List<Integer> shutdown = new ArrayList<>();
-
+        //split into messages of acceptable size (2k chars max)
+        StringBuilder msg = new StringBuilder();
         for (ShardStatusEvent event : events) {
-            switch (event.event) {
-                case READY:
-                    readied.add(event.shardId);
-                    break;
-                case RESUME:
-                    resumed.add(event.shardId);
-                    break;
-                case RECONNECT:
-                    reconnected.add(event.shardId);
-                    break;
-                case DISCONNECT:
-                    disconnected.add(event.shardId);
-                    break;
-                case SHUTDOWN:
-                    shutdown.add(event.shardId);
-                    break;
-                default:
-                    log.error("Unexpected status event type: {}", event.event.name());
+            String eventStr = event.toString();
+            if (msg.length() + eventStr.length() > 1900) {
+                addMessageToWebhookQueue(CentralMessaging.getClearThreadLocalMessageBuilder()
+                        .appendCodeBlock(msg.toString(), "diff").build());
+                msg = new StringBuilder();
             }
+            msg.append("\n").append(eventStr);
         }
-
-        String output = TextUtils.getTimeInCentralEurope() + " **Shard Events Summary:**\n";
-        if (!readied.isEmpty()) {
-            String shards = String.join(", ", readied.stream().map(i -> Integer.toString(i)).collect(Collectors.toList()));
-            output += TextUtils.asCodeBlock("+ " + readied.size() + " shard ready events:\n+ " + shards, "diff") + "\n";
+        if (msg.length() > 0) {//any leftovers?
+            addMessageToWebhookQueue(CentralMessaging.getClearThreadLocalMessageBuilder()
+                    .appendCodeBlock(msg.toString(), "diff").build());
         }
-        if (!resumed.isEmpty()) {
-            String shards = String.join(", ", resumed.stream().map(i -> Integer.toString(i)).collect(Collectors.toList()));
-            output += TextUtils.asCodeBlock("+ " + resumed.size() + " shard resume events:\n+ " + shards, "diff") + "\n";
-        }
-        if (!reconnected.isEmpty()) {
-            String shards = String.join(", ", reconnected.stream().map(i -> Integer.toString(i)).collect(Collectors.toList()));
-            output += TextUtils.asCodeBlock("+" + reconnected.size() + " shard reconnect events:\n+ " + shards, "diff") + "\n";
-        }
-        if (!disconnected.isEmpty()) {
-            String shards = String.join(", ", disconnected.stream().map(i -> Integer.toString(i)).collect(Collectors.toList()));
-            output += TextUtils.asCodeBlock("-" + disconnected.size() + " shard disconnect events:\n- " + shards, "diff") + "\n";
-        }
-        if (!shutdown.isEmpty()) {
-            String shards = String.join(", ", shutdown.stream().map(i -> Integer.toString(i)).collect(Collectors.toList()));
-            output += TextUtils.asCodeBlock("- " + shutdown.size() + " shard shutdown events:\n- " + shards, "diff") + "\n";
-        }
-
-        CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(output)
-                .buildAll(MessageBuilder.SplitPolicy.NEWLINE)
-                .forEach(this::addMessageToWebhookQueue);
         drainMessageQueue();
     }
 
@@ -302,12 +243,16 @@ public class EventLogger extends ListenerAdapter {
     private static class ShardStatusEvent {
 
         final int shardId;
+        @Nonnull
         final StatusEvent event;
+        @Nonnull
+        final String additionalInfo;
         final long timestamp;
 
-        private ShardStatusEvent(int shardId, StatusEvent event) {
+        private ShardStatusEvent(int shardId, @Nonnull StatusEvent event, @Nonnull String additionalInfo) {
             this.shardId = shardId;
             this.event = event;
+            this.additionalInfo = additionalInfo;
             this.timestamp = System.currentTimeMillis();
         }
 
@@ -329,8 +274,9 @@ public class EventLogger extends ListenerAdapter {
 
         @Override
         public String toString() {
-            return String.format("%s [%s] Shard %s %s", //NOTE when changing this, make sure the max message size is still respected in those place using this method
-                    event.diff, TextUtils.asTimeInCentralEurope(timestamp), TextUtils.forceNDigits(shardId, 3), event.str);
+            return String.format("%s [%s] Shard %s %s %s",
+                    event.diff, TextUtils.asTimeInCentralEurope(timestamp),
+                    TextUtils.forceNDigits(shardId, 3), event.str, additionalInfo);
         }
 
         @Override
