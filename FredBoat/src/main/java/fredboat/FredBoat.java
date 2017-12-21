@@ -39,11 +39,7 @@ import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
-import fredboat.util.AppInfo;
-import fredboat.util.ConnectQueue;
-import fredboat.util.GitRepoState;
-import fredboat.util.JDAUtil;
-import fredboat.util.TextUtils;
+import fredboat.util.*;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
@@ -59,6 +55,8 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseConnection;
+import space.npstr.sqlsauce.DatabaseException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -90,10 +88,12 @@ public abstract class FredBoat {
     protected final static StatsAgent jdaEntityCountAgent = new StatsAgent("jda entity counter");
 
     private final static JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
-    private static DatabaseManager dbManager;
+    private static DatabaseConnection mainDbConn;
+    private static DatabaseConnection cacheDbConn;
     private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
 
-    public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException, IOException {
+    public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException,
+                                                  IOException, DatabaseException {
         //just post the info to the console
         if (args.length > 0 &&
                 (args[0].equalsIgnoreCase("-v")
@@ -133,24 +133,37 @@ public abstract class FredBoat {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
 
-        dbManager = DatabaseManager.postgres();
+        try {
+            mainDbConn = DatabaseManager.main();
+        } catch (Exception e) {
+            log.error("Exception when connecting to main db", e);
+            shutdown(ExitCodes.EXIT_CODE_ERROR);
+        }
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
         // container will be started before the fredboat one
         int dbConnectionAttempts = 0;
-        while (!dbManager.isAvailable() && dbConnectionAttempts++ < 10) {
+        while (!mainDbConn.isAvailable() && dbConnectionAttempts++ < 10) {
             try {
-                dbManager.startup();
+                mainDbConn = DatabaseManager.main();
             } catch (Exception e) {
                 log.error("Could not connect to the database. Retrying in a moment...", e);
                 Thread.sleep(5000);
             }
         }
-        if (!dbManager.isAvailable()) {
+        if (!mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
             shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
-        FredBoatAgent.start(new DBConnectionWatchdogAgent(dbManager));
+        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
+
+        try {
+            cacheDbConn = DatabaseManager.cache();
+        } catch (Exception e) {
+            log.error("Exception when connecting to cache db", e);
+            shutdown(ExitCodes.EXIT_CODE_ERROR);
+        }
+        Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
 
         //Initialise event listeners
         mainEventListener = new EventListenerBoat();
@@ -334,7 +347,12 @@ public abstract class FredBoat {
         }
 
         executor.shutdown();
-        dbManager.shutdown();
+        if (cacheDbConn != null) {
+            cacheDbConn.shutdown();
+        }
+        if (mainDbConn != null) {
+            mainDbConn.shutdown();
+        }
     };
 
     public static void shutdown(int code) {
@@ -443,9 +461,14 @@ public abstract class FredBoat {
         return shards.get(id);
     }
 
-    @Nullable
-    public static DatabaseManager getDbManager() {
-        return dbManager;
+    @Nonnull
+    public static DatabaseConnection getMainDbConnection() {
+        return mainDbConn;
+    }
+
+    @Nonnull
+    public static DatabaseConnection getCacheDbConnection() {
+        return cacheDbConn;
     }
 
     private static String getVersionInfo() {

@@ -23,7 +23,9 @@
  *
  */
 
-package fredboat.db.entity;
+package fredboat.db.entity.main;
+
+import fredboat.db.entity.IEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
