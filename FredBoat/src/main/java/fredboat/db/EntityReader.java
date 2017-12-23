@@ -31,7 +31,6 @@ import fredboat.db.entity.IEntity;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.entity.main.GuildConfig;
 import fredboat.db.entity.main.GuildPermissions;
-import fredboat.db.entity.main.UConfig;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +43,6 @@ import java.util.List;
 public class EntityReader {
 
     private static final Logger log = LoggerFactory.getLogger(EntityReader.class);
-
-    public static UConfig getUConfig(String id) {
-        return getEntity(id, UConfig.class);
-    }
 
     public static GuildConfig getGuildConfig(String id) {
         return getEntity(id, GuildConfig.class);

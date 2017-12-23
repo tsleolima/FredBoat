@@ -31,6 +31,8 @@ import fredboat.feature.metrics.Metrics;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
@@ -46,7 +48,18 @@ public class DatabaseManager {
     private static final String CACHE_PERSISTENCE_UNIT_NAME = "fredboat.cache";
 
     public static DatabaseConnection main() throws DatabaseException {
-        String jdbc = Config.CONFIG.getJdbcUrl();
+        String jdbc = Config.CONFIG.getMainJdbcUrl();
+
+        //run flyway migrations ahead of connecting to the database, because hibernate will run
+        // additional validations on the schema
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(jdbc, null, null); //user and pass are part of the jdbc url
+        flyway.setBaselineOnMigrate(true);
+        flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
+        flyway.setBaselineDescription("Base Migration");
+        flyway.setLocations("classpath:fredboat/db/migrations/main");
+        flyway.migrate();
+
 
         HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
         hikariConfig.setMaximumPoolSize(Config.CONFIG.getHikariPoolSize());
@@ -57,6 +70,8 @@ public class DatabaseManager {
         hibernateProps.put("net.sf.ehcache.configurationResourceName", "/ehcache_main.xml");
         hibernateProps.put("hibernate.cache.provider_configuration_file_resource_path", "ehcache_main.xml");
         hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+        //we use flyway db now for migrations, hibernate shall only run validations
+        hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
 
         DatabaseConnection databaseConnection = new DatabaseConnection.Builder(MAIN_PERSISTENCE_UNIT_NAME, jdbc)
                 .setHikariConfig(hikariConfig)
@@ -88,6 +103,16 @@ public class DatabaseManager {
     public static DatabaseConnection cache() throws DatabaseException {
         String cacheJdbc = Config.CONFIG.getCacheJdbcUrl();
 
+        //run flyway migrations ahead of connecting to the database, because hibernate will run
+        // additional validations on the schema
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(cacheJdbc, null, null); //user and pass are part of the jdbc url
+        flyway.setBaselineOnMigrate(true);
+        flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
+        flyway.setBaselineDescription("Base Migration");
+        flyway.setLocations("classpath:fredboat/db/migrations/cache");
+        flyway.migrate();
+
         HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
         hikariConfig.setMaximumPoolSize(Config.CONFIG.getHikariPoolSize());
 
@@ -97,7 +122,8 @@ public class DatabaseManager {
         hibernateProps.put("net.sf.ehcache.configurationResourceName", "/ehcache_cache.xml");
         hibernateProps.put("hibernate.cache.provider_configuration_file_resource_path", "ehcache_cache.xml");
         hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
-
+        //we use flyway db now for migrations, hibernate shall only run validations
+        hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
 
         DatabaseConnection databaseConnection = new DatabaseConnection.Builder(CACHE_PERSISTENCE_UNIT_NAME, cacheJdbc)
                 .setHikariConfig(hikariConfig)

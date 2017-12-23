@@ -30,7 +30,6 @@ import fredboat.db.entity.IEntity;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.entity.main.GuildConfig;
 import fredboat.db.entity.main.GuildPermissions;
-import fredboat.db.entity.main.UConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseException;
@@ -41,10 +40,6 @@ import javax.persistence.PersistenceException;
 public class EntityWriter {
 
     private static final Logger log = LoggerFactory.getLogger(EntityWriter.class);
-
-    public static void mergeUConfig(UConfig config) {
-        merge(config);
-    }
 
     public static void mergeGuildConfig(GuildConfig config) {
         merge(config);

@@ -51,6 +51,7 @@ public class GuildConfig implements IEntity, Serializable {
     private static final long serialVersionUID = 5055243002380106205L;
 
     @Id
+    @Column(name = "guildid", nullable = false)
     private String guildId;
 
     @Column(name = "track_announce", nullable = false)

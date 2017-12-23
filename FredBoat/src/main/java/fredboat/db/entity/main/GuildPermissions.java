@@ -50,6 +50,7 @@ public class GuildPermissions implements IEntity, Serializable {
 
     // Guild ID
     @Id
+    @Column(name = "id")
     private String id;
 
     public GuildPermissions() {}

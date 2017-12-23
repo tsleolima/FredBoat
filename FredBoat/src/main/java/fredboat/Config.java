@@ -541,7 +541,7 @@ public class Config {
         return openWeatherKey;
     }
 
-    public String getJdbcUrl() {
+    public String getMainJdbcUrl() {
         return jdbcUrl;
     }
 
