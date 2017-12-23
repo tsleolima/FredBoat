@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
+import space.npstr.sqlsauce.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,7 +89,7 @@ public abstract class FredBoat {
     protected final static StatsAgent jdaEntityCountAgent = new StatsAgent("jda entity counter");
 
     private final static JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
-    private static DatabaseConnection mainDbConn;
+    private static DatabaseWrapper mainDbWrapper;
 
     @Nullable //will be null if no cache database has been configured
     private static DatabaseConnection cacheDbConn;
@@ -139,6 +140,7 @@ public abstract class FredBoat {
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
         // container will be started before the fredboat one
         int dbConnectionAttempts = 0;
+        DatabaseConnection mainDbConn = null;
         while ((mainDbConn == null || !mainDbConn.isAvailable()) && dbConnectionAttempts++ < 10) {
             try {
                 if (mainDbConn != null) {
@@ -153,8 +155,10 @@ public abstract class FredBoat {
         if (mainDbConn == null || !mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
             shutdown(ExitCodes.EXIT_CODE_ERROR);
+            return;
         }
         FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
+        mainDbWrapper = new DatabaseWrapper(mainDbConn);
 
         try {
             cacheDbConn = DatabaseManager.cache();
@@ -349,8 +353,8 @@ public abstract class FredBoat {
         if (cacheDbConn != null) {
             cacheDbConn.shutdown();
         }
-        if (mainDbConn != null) {
-            mainDbConn.shutdown();
+        if (mainDbWrapper != null) {
+            mainDbWrapper.unwrap().shutdown();
         }
     };
 
@@ -462,7 +466,12 @@ public abstract class FredBoat {
 
     @Nonnull
     public static DatabaseConnection getMainDbConnection() {
-        return mainDbConn;
+        return mainDbWrapper.unwrap();
+    }
+
+    @Nonnull
+    public static DatabaseWrapper getMainDbWrapper() {
+        return mainDbWrapper;
     }
 
     @Nullable //may return null if no cache database has been configured
