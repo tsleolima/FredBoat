@@ -139,6 +139,9 @@ public abstract class FredBoat {
         int dbConnectionAttempts = 0;
         while ((mainDbConn == null || !mainDbConn.isAvailable()) && dbConnectionAttempts++ < 10) {
             try {
+                if (mainDbConn != null) {
+                    mainDbConn.shutdown();
+                }
                 mainDbConn = DatabaseManager.main();
             } catch (Exception e) {
                 log.error("Could not connect to the database. Retrying in a moment...", e);
