@@ -28,7 +28,7 @@
          xsi:noNamespaceSchemaLocation="http://www.ehcache.org/ehcache.xsd" updateCheck="true"
          monitoring="autodetect" dynamicConfig="true" name="CACHE_CACHEMANAGER">
 
-    <diskStore path="java.io.tmpdir/ehcache"/>
+    <diskStore path="java.io.tmpdir/ehcache/fredboat_cache"/>
 
     <defaultCache maxEntriesLocalHeap="10000" eternal="false"
                   timeToIdleSeconds="120"
