@@ -20,12 +20,6 @@ trap _term SIGTERM
 echo "Running entry point"
 docker-entrypoint.sh postgres &
 
-# wait until the database is ready
-while ! pg_isready -U postgres; do
-    echo "Waiting on postgres to be ready"
-    sleep 1
-done
-
 # run our own init script
 echo "Running init db"
 initdb.sh

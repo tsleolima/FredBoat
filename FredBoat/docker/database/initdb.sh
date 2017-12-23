@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+while ! psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$POSTGRES_USER'" | grep -q 1; do
+    echo "Waiting on postgres own initial setup to finish"
+    sleep 1
+done
+sleep 1
+while ! pg_isready -U postgres; do
+    echo "Waiting on postgres to be ready"
+    sleep 1
+done
+
 # make sure the fredboat user exists
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -tAc "SELECT 1 FROM pg_roles WHERE rolname='fredboat'" | grep -q 1 || createuser -U "$POSTGRES_USER" fredboat
 
