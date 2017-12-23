@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -47,6 +49,7 @@ public class DatabaseManager {
     private static final String MAIN_PERSISTENCE_UNIT_NAME = "fredboat.main";
     private static final String CACHE_PERSISTENCE_UNIT_NAME = "fredboat.cache";
 
+    @Nonnull
     public static DatabaseConnection main() throws DatabaseException {
         String jdbc = Config.CONFIG.getMainJdbcUrl();
 
@@ -100,8 +103,12 @@ public class DatabaseManager {
     }
 
 
+    @Nullable //may return null of no cache db has been configured
     public static DatabaseConnection cache() throws DatabaseException {
         String cacheJdbc = Config.CONFIG.getCacheJdbcUrl();
+        if (cacheJdbc == null) {
+            return null;
+        }
 
         //run flyway migrations ahead of connecting to the database, because hibernate will run
         // additional validations on the schema

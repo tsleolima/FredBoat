@@ -89,6 +89,8 @@ public abstract class FredBoat {
 
     private final static JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
     private static DatabaseConnection mainDbConn;
+
+    @Nullable //will be null if no cache database has been configured
     private static DatabaseConnection cacheDbConn;
     private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
 
@@ -463,7 +465,7 @@ public abstract class FredBoat {
         return mainDbConn;
     }
 
-    @Nonnull
+    @Nullable //may return null if no cache database has been configured
     public static DatabaseConnection getCacheDbConnection() {
         return cacheDbConn;
     }

@@ -39,8 +39,10 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,15 +96,21 @@ public class SearchResult implements Serializable {
      * @param provider      the search provider that shall be used for this search
      * @param searchTerm    the query to search for
      * @param maxAgeMillis  the maximum age of the cached search result; provide a negative value for eternal cache
-     * @return the cached search result; may return null for a non-existing or outdated search
+     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
+     *         cache database
      */
+    @Nullable
     public static AudioPlaylist load(AudioPlayerManager playerManager, SearchUtil.SearchProvider provider,
                                      String searchTerm, long maxAgeMillis) throws DatabaseNotReadyException {
         EntityManager em = null;
         SearchResult sr;
         SearchResultId sId = new SearchResultId(provider, searchTerm);
+        DatabaseConnection cacheDbConn = FredBoat.getCacheDbConnection();
+        if (cacheDbConn == null) {
+            return null;
+        }
         try {
-            em = FredBoat.getCacheDbConnection().getEntityManager();
+            em = cacheDbConn.getEntityManager();
             em.getTransaction().begin();
             sr = em.find(SearchResult.class, sId);
             em.getTransaction().commit();
@@ -125,12 +133,17 @@ public class SearchResult implements Serializable {
     /**
      * Persist a search in the database.
      *
-     * @return the merged SearchResult object
+     * @return the merged SearchResult object, or null when there is no cache database
      */
+    @Nullable
     public SearchResult save() {
+        DatabaseConnection cacheDbConn = FredBoat.getCacheDbConnection();
+        if (cacheDbConn == null) {
+            return null;
+        }
         EntityManager em = null;
         try {
-            em = FredBoat.getCacheDbConnection().getEntityManager();
+            em = cacheDbConn.getEntityManager();
             em.getTransaction().begin();
             SearchResult managed = em.merge(this);
             em.getTransaction().commit();

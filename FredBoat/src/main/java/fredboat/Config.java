@@ -38,6 +38,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import space.npstr.sqlsauce.ssh.SshTunnel;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -109,11 +110,13 @@ public class Config {
     private String openWeatherKey;
 
     // main database + SSH tunnel
+    @Nonnull
     private String jdbcUrl;
     @Nullable
     private SshTunnel.SshDetails mainSshTunnelConfig;
 
     // cache database + SSH tunnel
+    @Nullable
     private String cacheJdbcUrl;
     @Nullable
     private SshTunnel.SshDetails cacheSshTunnelConfig;
@@ -239,10 +242,10 @@ public class Config {
             jdbcUrl = (String) creds.getOrDefault("jdbcUrl", "");
             if (jdbcUrl == null || jdbcUrl.isEmpty()) {
                 if ("docker".equals(System.getenv("ENV"))) {
-                    log.info("No main JDBC URL found, docker environment detected. Using default docker JDBC url");
+                    log.info("No main JDBC URL found, docker environment detected. Using default docker main JDBC url");
                     jdbcUrl = "jdbc:postgresql://db:5432/fredboat?user=fredboat";
                 } else {
-                    String message = "No main jdbcUrl provided in a non-docker environment.";
+                    String message = "No main jdbcUrl provided in a non-docker environment. FredBoat cannot work without a database.";
                     log.error(message);
                     throw new RuntimeException(message);
                 }
@@ -281,12 +284,20 @@ public class Config {
             cacheJdbcUrl = (String) creds.getOrDefault("cacheJdbcUrl", "");
             if (cacheJdbcUrl == null || cacheJdbcUrl.isEmpty()) {
                 if ("docker".equals(System.getenv("ENV"))) {
-                    log.info("No cacheJdbcUrl found, docker environment detected. Using default docker JDBC url");
+                    log.info("No cache jdbcUrl found, docker environment detected. Using default docker cache JDBC url");
                     cacheJdbcUrl = "jdbc:postgresql://db:5432/fredboat_cache?user=fredboat";
                 } else {
-                    log.warn("No cacheJdbcUrl provided in a non-docker environment. Falling back to the main one.");
-                    cacheJdbcUrl = jdbcUrl;
+                    log.warn("No cache jdbcUrl provided in a non-docker environment. This may lead to a degraded performance, "
+                            + "especially in a high usage environment, or when using Spotify playlists.");
+                    cacheJdbcUrl = null;
                 }
+            }
+            if (jdbcUrl.equals(cacheJdbcUrl)) {
+                log.warn("The main and cache jdbc urls may not point to the same database due to how flyway handles migrations. "
+                        + "Please read (an updated version of) the credentials.yaml.example on configuring the cache jdbc url. "
+                        + "The cache database will not be available in this execution of FredBoat. This may lead to a degraded performance, "
+                        + "especially in a high usage environment, or when using Spotify playlists.");
+                cacheJdbcUrl = null;
             }
             boolean cacheUseSshTunnel = (boolean) creds.getOrDefault("cacheUseSshTunnel", false);
             if (cacheUseSshTunnel) {
@@ -365,7 +376,7 @@ public class Config {
             PlayerLimitManager.setLimit((Integer) config.getOrDefault("playerLimit", -1));
         } catch (IOException e) {
             log.error("Failed to read config and or credentials files into strings.", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to read config and or credentials files into strings.", e);
         } catch (YAMLException | ClassCastException e) {
             log.error("Could not parse the credentials and/or config yaml files! They are probably misformatted. " +
                     "Try using an online yaml validator.", e);
@@ -541,6 +552,7 @@ public class Config {
         return openWeatherKey;
     }
 
+    @Nonnull
     public String getMainJdbcUrl() {
         return jdbcUrl;
     }
@@ -550,6 +562,8 @@ public class Config {
         return mainSshTunnelConfig;
     }
 
+    @Nullable
+    //may return null if no cache database was provided.
     public String getCacheJdbcUrl() {
         return cacheJdbcUrl;
     }
