@@ -146,8 +146,8 @@ public abstract class FredBoat {
                 }
                 mainDbConn = DatabaseManager.main();
             } catch (Exception e) {
-                log.error("Could not connect to the database. Retrying in a moment...", e);
-                Thread.sleep(5000);
+                log.info("Could not connect to the database. Retrying in a moment...", e);
+                Thread.sleep(6000);
             }
         }
         if (mainDbConn == null || !mainDbConn.isAvailable()) {
