@@ -133,17 +133,11 @@ public abstract class FredBoat {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
 
-        try {
-            mainDbConn = DatabaseManager.main();
-        } catch (Exception e) {
-            log.error("Exception when connecting to main db", e);
-            shutdown(ExitCodes.EXIT_CODE_ERROR);
-        }
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
         // container will be started before the fredboat one
         int dbConnectionAttempts = 0;
-        while (!mainDbConn.isAvailable() && dbConnectionAttempts++ < 10) {
+        while ((mainDbConn == null || !mainDbConn.isAvailable()) && dbConnectionAttempts++ < 10) {
             try {
                 mainDbConn = DatabaseManager.main();
             } catch (Exception e) {
@@ -151,7 +145,7 @@ public abstract class FredBoat {
                 Thread.sleep(5000);
             }
         }
-        if (!mainDbConn.isAvailable()) {
+        if (mainDbConn == null || !mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
             shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
