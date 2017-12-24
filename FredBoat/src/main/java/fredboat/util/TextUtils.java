@@ -376,4 +376,11 @@ public class TextUtils {
         }
         return shortened.toString();
     }
+
+    //put a zero width space between any @ and "here" and "everyone" in the input string
+    @Nonnull
+    public static String defuseMentions(@Nonnull String input) {
+        return input.replaceAll("@here", "@" + ZERO_WIDTH_CHAR + "here")
+                .replaceAll("@everyone", "@" + ZERO_WIDTH_CHAR + "everyone");
+    }
 }

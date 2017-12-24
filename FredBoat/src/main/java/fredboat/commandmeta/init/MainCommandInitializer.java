@@ -116,7 +116,7 @@ public class MainCommandInitializer {
         CommandRegistry.registerCommand(new TextCommand("/╲/╭( ͡° ͡° ͜ʖ ͡° ͡°)╮/╱\\", "spiderlenny"));
         CommandRegistry.registerCommand(new TextCommand("( ͡° ͜ʖ ͡°)", "lenny"));
         CommandRegistry.registerCommand(new TextCommand("┬┴┬┴┤ ͜ʖ ͡°) ├┬┴┬┴", "peeking", "peekinglenny", "peek"));
-        CommandRegistry.registerCommand(new TextCommand(AsciiArtConstant.MAGICAL_LENNY, "magicallenny", "lennymagical"));
+        CommandRegistry.registerCommand(new MagicCommand("magic", "magicallenny", "lennymagical"));
         CommandRegistry.registerCommand(new TextCommand(AsciiArtConstant.EAGLE_OF_LENNY, "eagleoflenny", "eol", "lennyeagle"));
 
         /* Misc - All commands under this line fall in this category */
