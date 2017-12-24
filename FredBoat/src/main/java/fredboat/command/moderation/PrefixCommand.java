@@ -84,7 +84,7 @@ public class PrefixCommand extends Command implements IModerationCommand {
             return Config.CONFIG.getPrefix();
         }
 
-        if (guild.getJDA().getSelfUser().getId().equalsIgnoreCase(BotConstants.PATRON_BOT_ID)) {
+        if (guild.getJDA().getSelfUser().getIdLong() == BotConstants.PATRON_BOT_ID) {
             return Config.CONFIG.getPrefix(); //todo lift this limitation after sorting out a data strategy
         }
 
@@ -103,7 +103,7 @@ public class PrefixCommand extends Command implements IModerationCommand {
             return;
         }
 
-        if (context.guild.getJDA().getSelfUser().getId().equalsIgnoreCase(BotConstants.PATRON_BOT_ID)) {
+        if (context.guild.getJDA().getSelfUser().getIdLong() == BotConstants.PATRON_BOT_ID) {
             context.reply("Sorry, this feature has not yet been enabled for the PatronBot! Have a picture of a wombat instead.");
             wombats.onInvoke(context);
             return;
