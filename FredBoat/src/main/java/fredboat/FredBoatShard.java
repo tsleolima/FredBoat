@@ -33,6 +33,7 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.EventLogger;
+import fredboat.feature.DikeSessionController;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.OkHttpEventMetrics;
 import fredboat.util.TextUtils;
@@ -44,6 +45,8 @@ import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.core.utils.SessionController;
+import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +55,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class represents a FredBoat shard, containing all non-static FredBoat shard-level logic.
@@ -274,11 +278,20 @@ public class FredBoatShard extends FredBoat {
 
     //some static aids around a singleton builder object
     protected static class ShardBuilder {
-        private static final FredBoatSessionController sessionController = new FredBoatSessionController();
         private static JDABuilder defaultShardBuilder;
+        private static AtomicReference<SessionController> sessionController = new AtomicReference<>();
 
         @Nonnull
         synchronized static JDABuilder getDefaultShardBuilder(@Nonnull EventListenerBoat mainListener) {
+            // Atomically compute if null
+            sessionController.updateAndGet(sc -> {
+                if (sc != null) return sc;
+
+                return Config.CONFIG.getDikeUrl() == null
+                        ? new SessionControllerAdapter()
+                        : new DikeSessionController();
+            });
+
             if (defaultShardBuilder == null) {
                 JDABuilder builder = new JDABuilder(AccountType.BOT)
                         .setToken(Config.CONFIG.getBotToken())
@@ -287,7 +300,7 @@ public class FredBoatShard extends FredBoat {
                         .setEnableShutdownHook(false)
                         .setAudioEnabled(true)
                         .setAutoReconnect(true)
-                        .setSessionController(sessionController)
+                        .setSessionController(sessionController.get())
                         .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
                         .setHttpClientBuilder(new OkHttpClient.Builder()
                                 .eventListener(new OkHttpEventMetrics("jda")))
