@@ -80,6 +80,7 @@ public class Config {
     private boolean useAutoBlacklist;
     private String game;
     private boolean continuePlayback;
+    private String dikeUrl;
 
     // audio managers
     private boolean youtubeAudio;
@@ -191,6 +192,7 @@ public class Config {
             useAutoBlacklist = (boolean) config.getOrDefault("useAutoBlacklist", true);
             game = (String) config.getOrDefault("game", "");
             continuePlayback = (boolean) config.getOrDefault("continuePlayback", false);
+            dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
 
             //Modular audiomanagers
             youtubeAudio = (Boolean) config.getOrDefault("enableYouTube", true);
@@ -603,6 +605,10 @@ public class Config {
         return testChannelId;
     }
 
+    @Nullable
+    public String getDikeUrl() {
+        return dikeUrl;
+    }
 
     // ********************************************************************************
     //                       Derived and unofficial values

@@ -274,6 +274,7 @@ public class FredBoatShard extends FredBoat {
 
     //some static aids around a singleton builder object
     protected static class ShardBuilder {
+        private static final FredBoatSessionController sessionController = new FredBoatSessionController();
         private static JDABuilder defaultShardBuilder;
 
         @Nonnull
@@ -286,6 +287,7 @@ public class FredBoatShard extends FredBoat {
                         .setEnableShutdownHook(false)
                         .setAudioEnabled(true)
                         .setAutoReconnect(true)
+                        .setSessionController(sessionController)
                         .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
                         .setHttpClientBuilder(new OkHttpClient.Builder()
                                 .eventListener(new OkHttpEventMetrics("jda")))
