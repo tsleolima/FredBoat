@@ -64,13 +64,13 @@ public class FredBoatShard extends FredBoat {
     private final int shardId;
 
     //For when we need to join a revived shard with it's old GuildPlayers
-    protected final ArrayList<String> channelsToRejoin = new ArrayList<>();
-    protected final JdaEntityCounts jdaEntityCountsShard = new JdaEntityCounts();
+    private final ArrayList<String> channelsToRejoin = new ArrayList<>();
+    private final JdaEntityCounts jdaEntityCountsShard = new JdaEntityCounts();
 
     @Nonnull
     protected volatile JDA jda;
 
-    public FredBoatShard(int shardId, @Nonnull EventListenerBoat mainListener) {
+    FredBoatShard(int shardId, @Nonnull EventListenerBoat mainListener) {
         this.shardId = shardId;
         log.info("Building shard " + shardId);
         jda = buildJDA(ShardBuilder.getDefaultShardBuilder(mainListener));
@@ -97,8 +97,6 @@ public class FredBoatShard extends FredBoat {
                             newJda = builder.buildAsync();
                         }
                         success = true;
-                    } catch (RateLimitedException e) {
-                        log.error("Got rate limited while building bot JDA instance! Retrying...", e);
                     } catch (Exception e) {
                         log.error("Generic exception when building a JDA instance! Retrying...", e);
                     }
@@ -280,7 +278,7 @@ public class FredBoatShard extends FredBoat {
         private static JDABuilder defaultShardBuilder;
 
         @Nonnull
-        protected synchronized static JDABuilder getDefaultShardBuilder(@Nonnull EventListenerBoat mainListener) {
+        synchronized static JDABuilder getDefaultShardBuilder(@Nonnull EventListenerBoat mainListener) {
             if (defaultShardBuilder == null) {
                 JDABuilder builder = new JDABuilder(AccountType.BOT)
                         .setToken(Config.CONFIG.getBotToken())
@@ -290,7 +288,6 @@ public class FredBoatShard extends FredBoat {
                         .setAudioEnabled(true)
                         .setAutoReconnect(true)
                         .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
-                        .setReconnectQueue(connectQueue)
                         .setHttpClientBuilder(new OkHttpClient.Builder()
                                 .eventListener(new OkHttpEventMetrics("jda")))
                         .addEventListener(Metrics.instance().jdaEventsMetricsListener);
