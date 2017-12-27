@@ -301,6 +301,7 @@ public class FredBoatShard extends FredBoat {
                         .setAudioEnabled(true)
                         .setAutoReconnect(true)
                         .setSessionController(sessionController.get())
+                        .setContextEnabled(false)
                         .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
                         .setHttpClientBuilder(new OkHttpClient.Builder()
                                 .eventListener(new OkHttpEventMetrics("jda")))
