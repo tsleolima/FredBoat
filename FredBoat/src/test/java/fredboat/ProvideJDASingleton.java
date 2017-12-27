@@ -11,7 +11,6 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
@@ -173,7 +172,7 @@ public abstract class ProvideJDASingleton {
             initialized = true;
             //post final test stats and shut down the JDA instance when testing is done
             Runtime.getRuntime().addShutdownHook(SHUTDOWNHOOK);
-        } catch (RateLimitedException | LoginException | InterruptedException | IOException | ExecutionException | TimeoutException e) {
+        } catch (LoginException | InterruptedException | IOException | ExecutionException | TimeoutException e) {
             log.error("Could not create JDA object for tests", e);
         }
     }
