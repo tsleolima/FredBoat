@@ -53,16 +53,11 @@ public class DatabaseManager {
     public static DatabaseConnection main() throws DatabaseException {
         String jdbc = Config.CONFIG.getMainJdbcUrl();
 
-        //run flyway migrations ahead of connecting to the database, because hibernate will run
-        // additional validations on the schema
         Flyway flyway = new Flyway();
-        flyway.setDataSource(jdbc, null, null); //user and pass are part of the jdbc url
         flyway.setBaselineOnMigrate(true);
         flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
         flyway.setBaselineDescription("Base Migration");
         flyway.setLocations("classpath:fredboat/db/migrations/main");
-        flyway.migrate();
-
 
         HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
         hikariConfig.setMaximumPoolSize(Config.CONFIG.getHikariPoolSize());
@@ -86,6 +81,7 @@ public class DatabaseManager {
                 .setHikariStats(Metrics.instance().hikariStats)
                 .setHibernateStats(Metrics.instance().hibernateStats)
                 .setCheckConnection(false)
+                .setFlyway(flyway)
                 .build();
 
         //adjusting the ehcache config
@@ -110,15 +106,11 @@ public class DatabaseManager {
             return null;
         }
 
-        //run flyway migrations ahead of connecting to the database, because hibernate will run
-        // additional validations on the schema
         Flyway flyway = new Flyway();
-        flyway.setDataSource(cacheJdbc, null, null); //user and pass are part of the jdbc url
         flyway.setBaselineOnMigrate(true);
         flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
         flyway.setBaselineDescription("Base Migration");
         flyway.setLocations("classpath:fredboat/db/migrations/cache");
-        flyway.migrate();
 
         HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
         hikariConfig.setMaximumPoolSize(Config.CONFIG.getHikariPoolSize());
@@ -141,6 +133,7 @@ public class DatabaseManager {
                 .setSshDetails(Config.CONFIG.getCacheSshTunnelConfig())
                 .setHikariStats(Metrics.instance().hikariStats)
                 .setHibernateStats(Metrics.instance().hibernateStats)
+                .setFlyway(flyway)
                 .build();
 
         //adjusting the ehcache config
