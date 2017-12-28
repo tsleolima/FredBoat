@@ -57,7 +57,7 @@ public class SearchUtil {
 
 
     public static final int MAX_RESULTS = 5;
-    public static final long DEFAULT_CACHE_MAX_AGE = TimeUnit.HOURS.toMillis(24); //24 hours
+    public static final long DEFAULT_CACHE_MAX_AGE = TimeUnit.HOURS.toMillis(48);
     public static final String PUNCTUATION_REGEX = "[.,/#!$%^&*;:{}=\\-_`~()\"\']";
 
     private static final Logger log = LoggerFactory.getLogger(SearchUtil.class);
