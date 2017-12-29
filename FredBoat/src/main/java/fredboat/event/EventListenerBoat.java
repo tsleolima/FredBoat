@@ -60,6 +60,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.concurrent.TimeUnit;
 
@@ -81,7 +82,17 @@ public class EventListenerBoat extends AbstractEventListener {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
+        try (// before execution set some variables that can help with finding traces that belong to each other
+                MDC.MDCCloseable _guild = MDC.putCloseable("guild", event.getGuild() != null ? event.getGuild().getId() : "PRIVATE");
+                MDC.MDCCloseable _channel = MDC.putCloseable("channel", event.getChannel().getId());
+                MDC.MDCCloseable _invoker = MDC.putCloseable("invoker", event.getAuthor().getId());
+                ) {
 
+            doOnMessageReceived(event);
+        }
+    }
+
+    private void doOnMessageReceived(MessageReceivedEvent event) {
         if (FeatureFlags.RATE_LIMITER.isActive()) {
             if (Ratelimiter.getRatelimiter().isBlacklisted(event.getAuthor().getIdLong())) {
                 Metrics.blacklistedMessagesReceived.inc();
@@ -95,7 +106,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         if (event.getAuthor().equals(event.getJDA().getSelfUser())) {
-            log.info(event.getGuild().getName() + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
+            log.info(event.getMessage().getRawContent());
             return;
         }
 
@@ -116,7 +127,7 @@ public class EventListenerBoat extends AbstractEventListener {
         if (context == null) {
             return;
         }
-        log.info(event.getGuild().getName() + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
+        log.info(event.getMessage().getRawContent());
 
         //ignore all commands in channels where we can't write, except for the help command
         if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {

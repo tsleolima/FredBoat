@@ -36,7 +36,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IModerationCommand;
 import fredboat.db.EntityReader;
 import fredboat.db.EntityWriter;
-import fredboat.db.entity.GuildConfig;
+import fredboat.db.entity.main.GuildConfig;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
@@ -66,7 +66,7 @@ public class PrefixCommand extends Command implements IModerationCommand {
             //the refresh value to have the changes reflect faster in the bot, or consider implementing a FredBoat wide
             //Listen/Notify system for changes to in memory cached values backed by the db
             .recordStats()
-            .refreshAfterWrite(1, TimeUnit.MINUTES) //NOTE: never use refreshing without async reloading
+            .refreshAfterWrite(1, TimeUnit.MINUTES) //NOTE: never use refreshing without async reloading, because Guavas cache uses the thread calling it to do cleanup tasks (including refreshing)
             .expireAfterAccess(1, TimeUnit.MINUTES) //evict inactive guilds
             .concurrencyLevel(Config.getNumShards())  //each shard has a thread (main JDA thread) accessing this cache many times
             .build(CacheLoader.asyncReloading(CacheLoader.from(GuildConfig::getPrefix), FredBoat.executor));
@@ -84,7 +84,7 @@ public class PrefixCommand extends Command implements IModerationCommand {
             return Config.CONFIG.getPrefix();
         }
 
-        if (guild.getJDA().getSelfUser().getId().equalsIgnoreCase(BotConstants.PATRON_BOT_ID)) {
+        if (guild.getJDA().getSelfUser().getIdLong() == BotConstants.PATRON_BOT_ID) {
             return Config.CONFIG.getPrefix(); //todo lift this limitation after sorting out a data strategy
         }
 
@@ -103,7 +103,7 @@ public class PrefixCommand extends Command implements IModerationCommand {
             return;
         }
 
-        if (context.guild.getJDA().getSelfUser().getId().equalsIgnoreCase(BotConstants.PATRON_BOT_ID)) {
+        if (context.guild.getJDA().getSelfUser().getIdLong() == BotConstants.PATRON_BOT_ID) {
             context.reply("Sorry, this feature has not yet been enabled for the PatronBot! Have a picture of a wombat instead.");
             wombats.onInvoke(context);
             return;

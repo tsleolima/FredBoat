@@ -23,24 +23,19 @@
  *
  */
 
-package fredboat.db.entity;
+package fredboat.db.entity.main;
 
 import fredboat.FredBoat;
-import fredboat.db.DatabaseManager;
 import fredboat.db.DatabaseNotReadyException;
+import fredboat.db.entity.IEntity;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.sqlsauce.DatabaseException;
 
 import javax.annotation.Nullable;
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.PersistenceException;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +51,7 @@ public class GuildConfig implements IEntity, Serializable {
     private static final long serialVersionUID = 5055243002380106205L;
 
     @Id
+    @Column(name = "guildid", nullable = false)
     private String guildId;
 
     @Column(name = "track_announce", nullable = false)
@@ -161,14 +157,11 @@ public class GuildConfig implements IEntity, Serializable {
     @Nullable
     public static Optional<String> getPrefix(long guildId) {
         log.debug("loading prefix for guild {}", guildId);
-        DatabaseManager dbManager = FredBoat.getDbManager();
-        if (dbManager == null || !dbManager.isAvailable()) {
-            throw new DatabaseNotReadyException();
-        }
         //language=JPAQL
         String query = "SELECT gf.prefix FROM GuildConfig gf WHERE gf.guildId = :guildId";
-        EntityManager em = dbManager.getEntityManager();
+        EntityManager em = null;
         try {
+            em = FredBoat.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             List<String> result = em.createQuery(query, String.class)
                     .setParameter("guildId", Long.toString(guildId))
@@ -179,11 +172,13 @@ public class GuildConfig implements IEntity, Serializable {
             } else {
                 return Optional.ofNullable(result.get(0));
             }
-        } catch (PersistenceException e) {
+        } catch (DatabaseException | PersistenceException e) {
             log.error("Failed to load prefix for guild {}", guildId, e);
             throw new DatabaseNotReadyException(e);
         } finally {
-            em.close();
+            if (em != null) {
+                em.close();
+            }
         }
     }
 }
