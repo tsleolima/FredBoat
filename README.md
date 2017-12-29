@@ -12,7 +12,7 @@ Help can be found at [https://fredboat.com/docs](https://fredboat.com/docs).
 
 For installation instructions, go to [https://fredboat.com/docs/selfhosting](https://fredboat.com/docs/selfhosting). The recommended method of installation is Docker.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/fredboat/fredboat.svg)](https://fredboat.com/docs/selfhosting)
+[![Docker Pulls](https://img.shields.io/docker/pulls/fredboat/fredboat.svg)](https://fredboat.com/docs/selfhosting) [![Docker layers](https://images.microbadger.com/badges/image/fredboat/fredboat:dev.svg)](https://microbadger.com/images/fredboat/fredboat:dev "Get your own image badge on microbadger.com")
 
 ## Contributing
 If you are interested, you can read about contributing to this project [here](https://github.com/Frederikam/FredBoat/blob/master/CONTRIBUTING.md).
