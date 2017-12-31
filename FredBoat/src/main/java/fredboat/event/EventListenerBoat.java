@@ -101,12 +101,12 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         if (event.getPrivateChannel() != null) {
-            log.info("PRIVATE" + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
+            log.info("PRIVATE" + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getContentRaw());
             return;
         }
 
         if (event.getAuthor().equals(event.getJDA().getSelfUser())) {
-            log.info(event.getMessage().getRawContent());
+            log.info(event.getMessage().getContentRaw());
             return;
         }
 
@@ -119,7 +119,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //preliminary permission filter to avoid a ton of parsing
         //let messages pass on to parsing that contain "help" since we want to answer help requests even from channels
         // where we can't talk in
-        if (!channel.canTalk() && !event.getMessage().getRawContent().toLowerCase().contains("help")) {
+        if (!channel.canTalk() && !event.getMessage().getContentRaw().toLowerCase().contains("help")) {
             return;
         }
 
@@ -127,7 +127,7 @@ public class EventListenerBoat extends AbstractEventListener {
         if (context == null) {
             return;
         }
-        log.info(event.getMessage().getRawContent());
+        log.info(event.getMessage().getContentRaw());
 
         //ignore all commands in channels where we can't write, except for the help command
         if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
@@ -205,7 +205,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
-            String raw = event.getMessage().getRawContent().toLowerCase();
+            String raw = event.getMessage().getContentRaw().toLowerCase();
             if (raw.contains("shard")) {
                 for (Message message : ShardsCommand.getShardStatus(event.getMessage())) {
                     CentralMessaging.sendMessage(event.getChannel(), message);

@@ -63,7 +63,7 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
 
         //do a full report? or just a summary
         boolean full = false;
-        String raw = input.getRawContent().toLowerCase();
+        String raw = input.getContentRaw().toLowerCase();
         if (raw.contains("full") || raw.contains("all")) {
             full = true;
         }

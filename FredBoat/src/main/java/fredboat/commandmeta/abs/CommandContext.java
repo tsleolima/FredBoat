@@ -78,7 +78,7 @@ public class CommandContext extends Context {
      * @return The full context for the triggered command, or null if it's not a command that we know.
      */
     public static CommandContext parse(MessageReceivedEvent event) {
-        String raw = event.getMessage().getRawContent();
+        String raw = event.getMessage().getContentRaw();
 
         String input;
         boolean isMention = false;
