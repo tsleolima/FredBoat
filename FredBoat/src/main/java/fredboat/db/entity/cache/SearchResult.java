@@ -32,7 +32,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.main.BotController;
-import fredboat.main.FredBoat;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.util.rest.SearchUtil;
 import org.apache.commons.lang3.SerializationUtils;

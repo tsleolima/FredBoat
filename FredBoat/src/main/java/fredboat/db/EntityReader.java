@@ -27,7 +27,6 @@ package fredboat.db;
 
 
 import fredboat.main.BotController;
-import fredboat.main.FredBoat;
 import fredboat.db.entity.IEntity;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.entity.main.GuildConfig;

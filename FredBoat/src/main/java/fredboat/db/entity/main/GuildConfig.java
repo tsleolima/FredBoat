@@ -26,7 +26,6 @@
 package fredboat.db.entity.main;
 
 import fredboat.main.BotController;
-import fredboat.main.FredBoat;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.entity.IEntity;
 import org.hibernate.annotations.Cache;
