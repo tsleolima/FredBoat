@@ -25,8 +25,10 @@
 
 package fredboat.api;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.main.BotController;
+import fredboat.main.BotMetrics;
+import fredboat.main.Config;
+import fredboat.main.FredBoat;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.Metrics;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -68,7 +70,7 @@ public class API {
             JSONObject root = new JSONObject();
             JSONArray a = new JSONArray();
 
-            for (FredBoat fb : FredBoat.getShards()) {
+            for (FredBoat fb : BotController.INS.getShards()) {
                 JSONObject fbStats = new JSONObject();
                 fbStats.put("id", fb.getShardInfo().getShardId())
                         .put("guilds", fb.getGuildCount())
@@ -82,8 +84,8 @@ public class API {
             g.put("playingPlayers", PlayerRegistry.getPlayingPlayers().size())
                     .put("totalPlayers", PlayerRegistry.getRegistry().size())
                     .put("distribution", Config.CONFIG.getDistribution())
-                    .put("guilds", FredBoat.getTotalGuildsCount())
-                    .put("users", FredBoat.getTotalUniqueUsersCount());
+                    .put("guilds", BotMetrics.getTotalGuildsCount())
+                    .put("users", BotMetrics.getTotalUniqueUsersCount());
 
             root.put("shards", a);
             root.put("global", g);

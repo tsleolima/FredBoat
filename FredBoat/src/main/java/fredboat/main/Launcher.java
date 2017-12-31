@@ -1,35 +1,9 @@
-/*
- * MIT License
- *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
-
-package fredboat;
+package fredboat.main;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.*;
 import fredboat.api.API;
 import fredboat.audio.player.LavalinkManager;
-import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.init.MainCommandInitializer;
 import fredboat.commandmeta.init.MusicCommandInitializer;
@@ -39,17 +13,14 @@ import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
-import fredboat.util.*;
+import fredboat.util.AppInfo;
+import fredboat.util.GitRepoState;
+import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.events.ReadyEvent;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import org.json.JSONObject;
@@ -59,44 +30,21 @@ import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
-public abstract class FredBoat {
+/**
+ * The class responsible for launching FredBoat
+ */
+public class Launcher {
 
-    private static final Logger log = LoggerFactory.getLogger(FredBoat.class);
-
+    private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
-    public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
-    public static int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
-    //unlimited threads = http://i.imgur.com/H3b7H1S.gif
-    //use this executor for various small async tasks
-    public final static ExecutorService executor = Executors.newCachedThreadPool();
+    private static final BotController FBC = BotController.INS;
 
-    //central event listener that all events by all shards pass through
-    protected static EventListenerBoat mainEventListener;
-    protected static final ConnectQueue connectQueue = new ConnectQueue();
-    protected final static StatsAgent jdaEntityCountAgent = new StatsAgent("jda entity counter");
-
-    private final static JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
-    private static DatabaseWrapper mainDbWrapper;
-
-    @Nullable //will be null if no cache database has been configured
-    private static DatabaseConnection cacheDbConn;
-    private static final List<FredBoat> shards = new CopyOnWriteArrayList<>();
-
-    public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException,
-                                                  IOException, DatabaseException {
+    public static void main(String[] args) throws IllegalArgumentException, InterruptedException, DatabaseException {
         //just post the info to the console
         if (args.length > 0 &&
                 (args[0].equalsIgnoreCase("-v")
@@ -109,7 +57,7 @@ public abstract class FredBoat {
         }
         Metrics.setup();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, "FredBoat main shutdownhook"));
+        Runtime.getRuntime().addShutdownHook(new Thread(FBC.shutdownHook, "FredBoat main shutdownhook"));
         log.info(getVersionInfo());
 
         String javaVersionMinor = null;
@@ -154,22 +102,22 @@ public abstract class FredBoat {
         }
         if (mainDbConn == null || !mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
-            shutdown(ExitCodes.EXIT_CODE_ERROR);
+            FBC.shutdown(ExitCodes.EXIT_CODE_ERROR);
             return;
         }
         FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
-        mainDbWrapper = new DatabaseWrapper(mainDbConn);
+        FBC.setMainDbWrapper(new DatabaseWrapper(mainDbConn));
 
         try {
-            cacheDbConn = DatabaseManager.cache();
+            FBC.setCacheDbConn(DatabaseManager.cache());
         } catch (Exception e) {
             log.error("Exception when connecting to cache db", e);
-            shutdown(ExitCodes.EXIT_CODE_ERROR);
+            FBC.shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
 
         //Initialise event listeners
-        mainEventListener = new EventListenerBoat();
+        FBC.setMainEventListener(new EventListenerBoat());
         LavalinkManager.ins.start();
 
         //Commands
@@ -188,17 +136,21 @@ public abstract class FredBoat {
 
         log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
 
+        ExecutorService executor = FBC.getExecutor();
+
+
+
         //Check MAL creds
-        executor.submit(FredBoat::hasValidMALLogin);
+        executor.submit(Launcher::hasValidMALLogin);
 
         //Check imgur creds
-        executor.submit(FredBoat::hasValidImgurCredentials);
+        executor.submit(Launcher::hasValidImgurCredentials);
 
         //Check OpenWeather key
-        executor.submit(FredBoat::hasValidOpenWeatherKey);
+        executor.submit(Launcher::hasValidOpenWeatherKey);
 
         /* Init JDA */
-        initBotShards(mainEventListener);
+        initBotShards();
 
         String carbonKey = Config.CONFIG.getCarbonKey();
         if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && carbonKey != null && !carbonKey.isEmpty()) {
@@ -211,8 +163,11 @@ public abstract class FredBoat {
         }
 
         //force a count and then turn on metrics to be served
+        List<FredBoat> shards = FBC.getShards();
+        StatsAgent jdaEntityCountAgent = FBC.getJdaEntityCountAgent();
+        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = FBC.getJdaEntityCountsTotal();
         jdaEntityCountsTotal.count(shards);
-        jdaEntityCountAgent.addAction(new FredBoatStatsCounter(
+        FBC.getJdaEntityCountAgent().addAction(new BotMetrics.FredBoatStatsCounter(
                 () -> jdaEntityCountsTotal.count(shards)));
         FredBoatAgent.start(jdaEntityCountAgent);
         API.turnOnMetrics();
@@ -307,11 +262,11 @@ public abstract class FredBoat {
         return isSuccess;
     }
 
-    private static void initBotShards(EventListenerBoat mainListener) {
+    private static void initBotShards() {
         for (int i = 0; i < Config.getNumShards(); i++) {
             try {
                 //NOTE: This will take a while since creating shards happens in a blocking fashion
-                shards.add(i, new FredBoatShard(i, mainListener));
+                FBC.addShard(i, new FredBoatShard(i));
             } catch (Exception e) {
                 //todo this is fatal and requires a restart to fix, so either remove it by guaranteeing that
                 //todo shard creation never fails, or have a proper handling for it
@@ -319,164 +274,18 @@ public abstract class FredBoat {
             }
         }
 
-        log.info(shards.size() + " shards have been constructed");
+        log.info(FBC.getShards().size() + " shards have been constructed");
 
     }
 
     //returns true if all registered shards are reporting back as CONNECTED, false otherwise
     private static boolean areWeReadyYet() {
-        for (FredBoat shard : shards) {
+        for (FredBoat shard : FBC.getShards()) {
             if (shard.getJda().getStatus() != JDA.Status.CONNECTED) {
                 return false;
             }
         }
         return true;
-    }
-
-    //Shutdown hook
-    private static final Runnable ON_SHUTDOWN = () -> {
-        int code = shutdownCode != UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
-
-        FredBoatAgent.shutdown();
-
-        try {
-            MusicPersistenceHandler.handlePreShutdown(code);
-        } catch (Exception e) {
-            log.error("Critical error while handling music persistence.", e);
-        }
-
-        for (FredBoat fb : shards) {
-            fb.getJda().shutdown();
-        }
-
-        executor.shutdown();
-        if (cacheDbConn != null) {
-            cacheDbConn.shutdown();
-        }
-        if (mainDbWrapper != null) {
-            mainDbWrapper.unwrap().shutdown();
-        }
-    };
-
-    public static void shutdown(int code) {
-        log.info("Shutting down with exit code " + code);
-        shutdownCode = code;
-
-        System.exit(code);
-    }
-
-    public static EventListenerBoat getMainEventListener() {
-        return mainEventListener;
-    }
-
-    public static List<FredBoat> getShards() {
-        return shards;
-    }
-
-    public static Stream<Guild> getAllGuilds() {
-        return JDAUtil.getGuilds(shards);
-    }
-
-
-    //JDA total entity counts
-    public static int getTotalUniqueUsersCount() {
-        return jdaEntityCountsTotal.uniqueUsersCount;
-    }
-
-    public static int getTotalGuildsCount() {
-        return jdaEntityCountsTotal.guildsCount;
-    }
-
-    public static int getTotalTextChannelsCount() {
-        return jdaEntityCountsTotal.textChannelsCount;
-    }
-
-    public static int getTotalVoiceChannelsCount() {
-        return jdaEntityCountsTotal.voiceChannelsCount;
-    }
-
-    public static int getTotalCategoriesCount() {
-        return jdaEntityCountsTotal.categoriesCount;
-    }
-
-    public static int getTotalEmotesCount() {
-        return jdaEntityCountsTotal.emotesCount;
-    }
-
-    public static int getTotalRolesCount() {
-        return jdaEntityCountsTotal.rolesCount;
-    }
-
-
-
-    // ################################################################################
-    // ##                           Global lookups
-    // ################################################################################
-
-    @Nullable
-    public static TextChannel getTextChannelById(long id) {
-        for (FredBoat fb : shards) {
-            TextChannel tc = fb.getJda().getTextChannelById(id);
-            if (tc != null) return tc;
-        }
-        return null;
-    }
-
-    @Nullable
-    public static VoiceChannel getVoiceChannelById(long id) {
-        for (FredBoat fb : shards) {
-            VoiceChannel vc = fb.getJda().getVoiceChannelById(id);
-            if (vc != null) return vc;
-        }
-        return null;
-    }
-
-    @Nullable
-    public static Guild getGuildById(long id) {
-        for (FredBoat fb : shards) {
-            Guild g = fb.getJda().getGuildById(id);
-            if (g != null) return g;
-        }
-        return null;
-    }
-
-    @Nullable
-    public static User getUserById(long id) {
-        for (FredBoat fb : shards) {
-            User u = fb.getJda().getUserById(id);
-            if (u != null) return u;
-        }
-        return null;
-    }
-
-    @Nonnull
-    public static FredBoat getShard(@Nonnull JDA jda) {
-        int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
-        for (FredBoat fb : shards) {
-            if (fb.getShardId() == sId) {
-                return fb;
-            }
-        }
-        throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed, shardId: " + sId);
-    }
-
-    public static FredBoat getShard(int id) {
-        return shards.get(id);
-    }
-
-    @Nonnull
-    public static DatabaseConnection getMainDbConnection() {
-        return mainDbWrapper.unwrap();
-    }
-
-    @Nonnull
-    public static DatabaseWrapper getMainDbWrapper() {
-        return mainDbWrapper;
-    }
-
-    @Nullable //may return null if no cache database has been configured
-    public static DatabaseConnection getCacheDbConnection() {
-        return cacheDbConn;
     }
 
     private static String getVersionInfo() {
@@ -498,106 +307,4 @@ public abstract class FredBoat {
                 + "\n";
     }
 
-
-    // ################################################################################
-    // ##                           Shard definition
-    // ################################################################################
-
-    @Nonnull
-    public abstract JDA getJda();
-
-    @Nonnull
-    public abstract String revive(boolean... force);
-
-    public abstract int getShardId();
-
-    @Nonnull
-    public abstract JDA.ShardInfo getShardInfo();
-
-    public abstract void onInit(@Nonnull ReadyEvent readyEvent);
-
-
-    //JDA entity counts
-
-    public abstract int getUserCount();
-
-    public abstract int getGuildCount();
-
-    public abstract int getTextChannelCount();
-
-    public abstract int getVoiceChannelCount();
-
-    public abstract int getCategoriesCount();
-
-    public abstract int getEmotesCount();
-
-    public abstract int getRolesCount();
-
-
-
-    // ################################################################################
-    //                              Counting things
-    // ################################################################################
-
-
-    //holds counts of JDA entities
-    //this is a central place for stats agents to make calls to
-    //stats agents are prefered to triggering counts by JDA events, since we cannot predict JDA events
-    //the resulting lower resolution of datapoints is fine, we don't need a high data resolution for these anyways
-    protected static class JdaEntityCounts {
-
-        protected int uniqueUsersCount;
-        protected int guildsCount;
-        protected int textChannelsCount;
-        protected int voiceChannelsCount;
-        protected int categoriesCount;
-        protected int emotesCount;
-        protected int rolesCount;
-
-        private final AtomicInteger expectedUniqueUserCount = new AtomicInteger(-1);
-
-        //counts things
-        // also checks shards for readiness and only counts if all of them are ready
-        // the force is an option for when we want to do a count when receiving the onReady event, but JDAs status is
-        // not CONNECTED at that point
-        protected boolean count(Collection<FredBoat> shards, boolean... force) {
-            for (FredBoat shard : shards) {
-                if ((shard.getJda().getStatus() != JDA.Status.CONNECTED) && (force.length < 1 || !force[0])) {
-                    log.info("Skipping counts since not all requested shards are ready.");
-                    return false;
-                }
-            }
-
-            this.uniqueUsersCount = JDAUtil.countUniqueUsers(shards, expectedUniqueUserCount);
-            //never shrink the expected user count (might happen due to unready/reloading shards)
-            this.expectedUniqueUserCount.accumulateAndGet(uniqueUsersCount, Math::max);
-
-            this.guildsCount = JDAUtil.countGuilds(shards);
-            this.textChannelsCount = JDAUtil.countTextChannels(shards);
-            this.voiceChannelsCount = JDAUtil.countVoiceChannels(shards);
-            this.categoriesCount = JDAUtil.countCategories(shards);
-            this.emotesCount = JDAUtil.countEmotes(shards);
-            this.rolesCount = JDAUtil.countRoles(shards);
-
-            return true;
-        }
-    }
-
-    private static class FredBoatStatsCounter implements StatsAgent.Action {
-        private final StatsAgent.Action action;
-
-        FredBoatStatsCounter(StatsAgent.Action action) {
-            this.action = action;
-        }
-
-        @Override
-        public String getName() {
-            return "jda entity stats for fredboat";
-        }
-
-        @Override
-        public void act() throws Exception {
-            action.act();
-        }
-    }
 }

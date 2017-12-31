@@ -26,7 +26,8 @@
 package fredboat.db;
 
 
-import fredboat.FredBoat;
+import fredboat.main.BotController;
+import fredboat.main.FredBoat;
 import fredboat.db.entity.IEntity;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.entity.main.GuildConfig;
@@ -56,7 +57,7 @@ public class EntityReader {
         EntityManager em = null;
         E config;
         try {
-            em = FredBoat.getMainDbConnection().getEntityManager();
+            em = BotController.INS.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             config = em.find(clazz, id);
             em.getTransaction().commit();
@@ -87,7 +88,7 @@ public class EntityReader {
         EntityManager em = null;
         List<BlacklistEntry> result;
         try {
-            em = FredBoat.getMainDbConnection().getEntityManager();
+            em = BotController.INS.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             result = em.createQuery("SELECT b FROM BlacklistEntry b", BlacklistEntry.class).getResultList();
             em.getTransaction().commit();

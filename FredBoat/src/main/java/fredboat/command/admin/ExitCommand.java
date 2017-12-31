@@ -25,10 +25,10 @@
 
 package fredboat.command.admin;
 
-import fredboat.FredBoat;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.shared.constant.ExitCodes;
@@ -54,7 +54,7 @@ public class ExitCommand extends Command implements ICommandRestricted {
             context.replyWithName(":wave:").getWithDefaultTimeout();
         } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
         }
-        FredBoat.shutdown(ExitCodes.EXIT_CODE_NORMAL);
+        BotController.INS.shutdown(ExitCodes.EXIT_CODE_NORMAL);
     }
 
     @Nonnull

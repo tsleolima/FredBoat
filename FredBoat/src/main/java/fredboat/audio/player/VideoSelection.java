@@ -28,7 +28,7 @@ package fredboat.audio.player;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import fredboat.messaging.CentralMessaging;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;

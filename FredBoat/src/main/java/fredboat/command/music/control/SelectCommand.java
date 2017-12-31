@@ -26,7 +26,7 @@
 package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.player.VideoSelection;

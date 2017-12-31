@@ -1,5 +1,6 @@
 package fredboat;
 
+import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;

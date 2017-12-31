@@ -24,7 +24,7 @@
 
 package fredboat.command.util;
 
-import fredboat.Config;
+import fredboat.main.Config;
 import fredboat.command.fun.RemoteFileCommand;
 import fredboat.command.fun.TextCommand;
 import fredboat.commandmeta.CommandRegistry;

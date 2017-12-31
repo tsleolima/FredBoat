@@ -25,7 +25,7 @@
 
 package fredboat.messaging.internal;
 
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;

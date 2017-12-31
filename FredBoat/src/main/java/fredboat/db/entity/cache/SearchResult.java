@@ -31,7 +31,8 @@ import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
-import fredboat.FredBoat;
+import fredboat.main.BotController;
+import fredboat.main.FredBoat;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.util.rest.SearchUtil;
 import org.apache.commons.lang3.SerializationUtils;
@@ -105,7 +106,7 @@ public class SearchResult implements Serializable {
         EntityManager em = null;
         SearchResult sr;
         SearchResultId sId = new SearchResultId(provider, searchTerm);
-        DatabaseConnection cacheDbConn = FredBoat.getCacheDbConnection();
+        DatabaseConnection cacheDbConn = BotController.INS.getCacheDbConnection();
         if (cacheDbConn == null) {
             return null;
         }
@@ -137,7 +138,7 @@ public class SearchResult implements Serializable {
      */
     @Nullable
     public SearchResult save() {
-        DatabaseConnection cacheDbConn = FredBoat.getCacheDbConnection();
+        DatabaseConnection cacheDbConn = BotController.INS.getCacheDbConnection();
         if (cacheDbConn == null) {
             return null;
         }

@@ -27,7 +27,7 @@ package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import fredboat.audio.queue.AbstractTrackProvider;
 import fredboat.audio.queue.AudioLoader;
 import fredboat.audio.queue.AudioTrackContext;

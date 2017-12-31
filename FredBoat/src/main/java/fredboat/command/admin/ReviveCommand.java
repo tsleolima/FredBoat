@@ -25,8 +25,8 @@
 
 package fredboat.command.admin;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.main.Config;
+import fredboat.main.FredBoat;
 import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;

@@ -26,7 +26,7 @@
 package fredboat.db;
 
 import com.zaxxer.hikari.HikariConfig;
-import fredboat.Config;
+import fredboat.main.Config;
 import fredboat.feature.metrics.Metrics;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;

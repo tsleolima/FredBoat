@@ -24,8 +24,8 @@
 
 package fredboat.util.ratelimit;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.main.Config;
+import fredboat.main.FredBoat;
 import fredboat.audio.queue.PlaylistInfo;
 import fredboat.command.maintenance.ShardsCommand;
 import fredboat.command.music.control.SkipCommand;

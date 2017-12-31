@@ -25,7 +25,7 @@
 
 package fredboat.command.maintenance;
 
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import fredboat.audio.player.AudioLossCounter;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;

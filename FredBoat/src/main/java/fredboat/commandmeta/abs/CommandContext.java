@@ -25,7 +25,7 @@
 
 package fredboat.commandmeta.abs;
 
-import fredboat.Config;
+import fredboat.main.Config;
 import fredboat.command.moderation.PrefixCommand;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.feature.metrics.Metrics;

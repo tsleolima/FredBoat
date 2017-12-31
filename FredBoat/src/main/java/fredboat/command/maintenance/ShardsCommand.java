@@ -25,8 +25,9 @@
 
 package fredboat.command.maintenance;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.main.BotController;
+import fredboat.main.Config;
+import fredboat.main.FredBoat;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
@@ -67,7 +68,7 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
             full = true;
         }
 
-        List<FredBoat> shards = FredBoat.getShards();
+        List<FredBoat> shards = BotController.INS.getShards();
         int borkenShards = 0;
         int healthyGuilds = 0;
         int healthyUsers = 0;

@@ -1,6 +1,6 @@
 package fredboat.feature;
 
-import fredboat.Config;
+import fredboat.main.Config;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import net.dv8tion.jda.core.utils.tuple.ImmutablePair;

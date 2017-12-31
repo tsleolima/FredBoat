@@ -25,10 +25,10 @@
 
 package fredboat.command.admin;
 
-import fredboat.FredBoat;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.shared.constant.ExitCodes;
@@ -88,7 +88,7 @@ public class UpdateCommand extends Command implements ICommandRestricted {
             context.reply("Now restarting...").getWithDefaultTimeout();
         } catch (TimeoutException | InterruptedException | ExecutionException ignored) {
         }
-        FredBoat.shutdown(ExitCodes.EXIT_CODE_UPDATE);
+        BotController.INS.shutdown(ExitCodes.EXIT_CODE_UPDATE);
     }
 
     @Nonnull

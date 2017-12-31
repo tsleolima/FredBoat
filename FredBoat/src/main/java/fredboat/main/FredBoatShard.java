@@ -23,7 +23,7 @@
  *
  */
 
-package fredboat;
+package fredboat.main;
 
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import fredboat.agent.StatsAgent;
@@ -63,26 +63,27 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FredBoatShard extends FredBoat {
 
     private static final Logger log = LoggerFactory.getLogger(FredBoatShard.class);
+    private static final BotController FBC = BotController.INS;
 
     private final int shardId;
 
     //For when we need to join a revived shard with it's old GuildPlayers
     private final ArrayList<String> channelsToRejoin = new ArrayList<>();
-    private final JdaEntityCounts jdaEntityCountsShard = new JdaEntityCounts();
+    private final BotMetrics.JdaEntityCounts jdaEntityCountsShard = new BotMetrics.JdaEntityCounts();
 
     @Nonnull
     protected volatile JDA jda;
 
-    FredBoatShard(int shardId, @Nonnull EventListenerBoat mainListener) {
+    FredBoatShard(int shardId) {
         this.shardId = shardId;
         log.info("Building shard " + shardId);
-        jda = buildJDA(ShardBuilder.getDefaultShardBuilder(mainListener));
+        jda = buildJDA(ShardBuilder.getDefaultShardBuilder(), false);
 
-        jdaEntityCountAgent.addAction(new ShardStatsCounter(jda.getShardInfo(),
+        FBC.getJdaEntityCountAgent().addAction(new ShardStatsCounter(jda.getShardInfo(),
                 () -> jdaEntityCountsShard.count(Collections.singletonList(this))));
     }
 
-    private JDA buildJDA(final JDABuilder builder, boolean... blocking) {
+    private JDA buildJDA(final JDABuilder builder, boolean blocking) {
         JDA newJda = null;
 
         try {
@@ -93,12 +94,8 @@ public class FredBoatShard extends FredBoat {
                     builder.useSharding(shardId, Config.getNumShards());
 
                     try {
-                        connectQueue.requestCoin(shardId);
-                        if (blocking.length > 0 && blocking[0]) {
-                            newJda = builder.buildBlocking();
-                        } else {
-                            newJda = builder.buildAsync();
-                        }
+                        newJda = blocking ? builder.buildBlocking() : builder.buildAsync();
+
                         success = true;
                     } catch (Exception e) {
                         log.error("Generic exception when building a JDA instance! Retrying...", e);
@@ -166,7 +163,7 @@ public class FredBoatShard extends FredBoat {
 
         //wrap this into a task to avoid blocking a thread
         reviveTaskStarted = System.currentTimeMillis();
-        reviveTask = FredBoat.executor.submit(() -> {
+        reviveTask = BotController.INS.getExecutor().submit(() -> {
             try {
                 log.info("Reviving shard " + shardId);
 
@@ -190,7 +187,7 @@ public class FredBoatShard extends FredBoat {
 
                 //a blocking build makes sure the revive task runs until the shard is connected, otherwise the shard may
                 // get revived again accidentally while still connecting
-                jda = buildJDA(ShardBuilder.getDefaultShardBuilder(mainEventListener), true);
+                jda = buildJDA(ShardBuilder.getDefaultShardBuilder(), true);
 
             } catch (Exception e) {
                 log.error("Task to revive shard {} threw an exception after running for {}",
@@ -282,7 +279,7 @@ public class FredBoatShard extends FredBoat {
         private static AtomicReference<SessionController> sessionController = new AtomicReference<>();
 
         @Nonnull
-        synchronized static JDABuilder getDefaultShardBuilder(@Nonnull EventListenerBoat mainListener) {
+        synchronized static JDABuilder getDefaultShardBuilder() {
             // Atomically compute if null
             sessionController.updateAndGet(sc -> {
                 if (sc != null) return sc;
@@ -328,6 +325,8 @@ public class FredBoatShard extends FredBoat {
 
                 defaultShardBuilder = builder;
             }
+
+            EventListenerBoat mainListener = BotController.INS.getMainEventListener();
 
             return defaultShardBuilder
                     .removeEventListener(mainListener) //prevent duplicates

@@ -25,10 +25,10 @@
 
 package fredboat.command.admin;
 
-import fredboat.FredBoat;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.shared.constant.ExitCodes;
@@ -53,7 +53,7 @@ public class BotRestartCommand extends Command implements ICommandRestricted {
         } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
         }
 
-        FredBoat.shutdown(ExitCodes.EXIT_CODE_RESTART);
+        BotController.INS.shutdown(ExitCodes.EXIT_CODE_RESTART);
     }
 
     @Nonnull

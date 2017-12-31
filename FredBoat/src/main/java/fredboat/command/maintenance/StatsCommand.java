@@ -26,8 +26,6 @@
 package fredboat.command.maintenance;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
-import fredboat.Config;
-import fredboat.FredBoat;
 import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.CommandManager;
@@ -35,6 +33,9 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
 import fredboat.feature.I18n;
+import fredboat.main.BotMetrics;
+import fredboat.main.Config;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.AppInfo;
@@ -61,7 +62,7 @@ public class StatsCommand extends Command implements IMaintenanceCommand {
     }
 
     public static Message getStats(@Nullable Context context, @Nonnull JDA jda) {
-        long totalSecs = (System.currentTimeMillis() - FredBoat.START_TIME) / 1000;
+        long totalSecs = (System.currentTimeMillis() - Launcher.START_TIME) / 1000;
         int days = (int) (totalSecs / (60 * 60 * 24));
         int hours = (int) ((totalSecs / (60 * 60)) % 24);
         int mins = (int) ((totalSecs / 60) % 60);
@@ -93,8 +94,8 @@ public class StatsCommand extends Command implements IMaintenanceCommand {
 
         content += "Sharding:                       " + jda.getShardInfo().getShardString() + "\n";
         content += "Players playing:                " + PlayerRegistry.getPlayingPlayers().size() + "\n";
-        content += "Known servers:                  " + FredBoat.getTotalGuildsCount() + "\n";
-        content += "Known users in servers:         " + FredBoat.getTotalUniqueUsersCount() + "\n";
+        content += "Known servers:                  " + BotMetrics.getTotalGuildsCount() + "\n";
+        content += "Known users in servers:         " + BotMetrics.getTotalUniqueUsersCount() + "\n";
         content += "Distribution:                   " + Config.CONFIG.getDistribution() + "\n";
         content += "JDA responses total:            " + jda.getResponseTotal() + "\n";
         content += "JDA version:                    " + JDAInfo.VERSION + "\n";

@@ -25,7 +25,7 @@
 
 package fredboat.audio.queue;
 
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import fredboat.messaging.internal.LeakSafeContext;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;

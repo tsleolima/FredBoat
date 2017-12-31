@@ -24,7 +24,7 @@
  */
 package fredboat.util;
 
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import gnu.trove.procedure.TObjectProcedure;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.dv8tion.jda.core.entities.Guild;

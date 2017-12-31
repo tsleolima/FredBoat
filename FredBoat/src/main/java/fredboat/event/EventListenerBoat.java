@@ -26,7 +26,7 @@ package fredboat.event;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import fredboat.Config;
+import fredboat.main.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.command.maintenance.ShardsCommand;

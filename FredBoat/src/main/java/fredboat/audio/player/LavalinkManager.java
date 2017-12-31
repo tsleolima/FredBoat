@@ -25,8 +25,8 @@
 
 package fredboat.audio.player;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.main.Config;
+import fredboat.main.FredBoat;
 import fredboat.util.DiscordUtil;
 import lavalink.client.io.Lavalink;
 import lavalink.client.player.IPlayer;

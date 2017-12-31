@@ -25,7 +25,7 @@
 
 package fredboat.event;
 
-import fredboat.FredBoat;
+import fredboat.main.FredBoat;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
