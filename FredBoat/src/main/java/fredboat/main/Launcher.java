@@ -163,7 +163,7 @@ public class Launcher {
         }
 
         //force a count and then turn on metrics to be served
-        List<FredBoat> shards = FBC.getShards();
+        List<Shard> shards = FBC.getShards();
         StatsAgent jdaEntityCountAgent = FBC.getJdaEntityCountAgent();
         BotMetrics.JdaEntityCounts jdaEntityCountsTotal = FBC.getJdaEntityCountsTotal();
         jdaEntityCountsTotal.count(shards);
@@ -266,7 +266,7 @@ public class Launcher {
         for (int i = 0; i < Config.getNumShards(); i++) {
             try {
                 //NOTE: This will take a while since creating shards happens in a blocking fashion
-                FBC.addShard(i, new FredBoatShard(i));
+                FBC.addShard(i, new Shard(i));
             } catch (Exception e) {
                 //todo this is fatal and requires a restart to fix, so either remove it by guaranteeing that
                 //todo shard creation never fails, or have a proper handling for it
@@ -280,7 +280,7 @@ public class Launcher {
 
     //returns true if all registered shards are reporting back as CONNECTED, false otherwise
     private static boolean areWeReadyYet() {
-        for (FredBoat shard : FBC.getShards()) {
+        for (Shard shard : FBC.getShards()) {
             if (shard.getJda().getStatus() != JDA.Status.CONNECTED) {
                 return false;
             }

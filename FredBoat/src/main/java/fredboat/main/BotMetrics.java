@@ -63,8 +63,8 @@ public class BotMetrics {
         // also checks shards for readiness and only counts if all of them are ready
         // the force is an option for when we want to do a count when receiving the onReady event, but JDAs status is
         // not CONNECTED at that point
-        protected boolean count(Collection<FredBoat> shards, boolean... force) {
-            for (FredBoat shard : shards) {
+        protected boolean count(Collection<Shard> shards, boolean... force) {
+            for (Shard shard : shards) {
                 if ((shard.getJda().getStatus() != JDA.Status.CONNECTED) && (force.length < 1 || !force[0])) {
                     log.info("Skipping counts since not all requested shards are ready.");
                     return false;

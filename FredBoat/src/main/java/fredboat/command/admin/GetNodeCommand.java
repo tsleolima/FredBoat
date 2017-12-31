@@ -25,7 +25,7 @@
 
 package fredboat.command.admin;
 
-import fredboat.main.FredBoat;
+import fredboat.main.BotController;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -54,7 +54,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         if (context.hasArguments()) {
             try {
                 long guildId = Long.parseUnsignedLong(context.args[0]);
-                guild = FredBoat.getGuildById(guildId);
+                guild = BotController.getGuildById(guildId);
             } catch (NumberFormatException ignored) {
             }
             if (guild == null) {

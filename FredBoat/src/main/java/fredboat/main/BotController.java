@@ -5,6 +5,11 @@ import fredboat.agent.StatsAgent;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.event.EventListenerBoat;
 import net.dv8tion.jda.bot.sharding.ShardManager;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.VoiceChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
@@ -42,7 +47,7 @@ public class BotController {
     @Nullable //will be null if no cache database has been configured
     private DatabaseConnection cacheDbConn;
 
-    private List<FredBoat> shards = new CopyOnWriteArrayList<>();
+    private List<Shard> shards = new CopyOnWriteArrayList<>();
 
     public ExecutorService getExecutor() {
         return executor;
@@ -103,11 +108,11 @@ public class BotController {
     }
 
     @Nonnull
-    public List<FredBoat> getShards() {
+    public List<Shard> getShards() {
         return Collections.unmodifiableList(shards);
     }
 
-    protected void addShard(int index, @Nonnull FredBoat shard) {
+    protected void addShard(int index, @Nonnull Shard shard) {
         shards.add(shard);
     }
 
@@ -123,7 +128,7 @@ public class BotController {
             log.error("Critical error while handling music persistence.", e);
         }
 
-        for (FredBoat fb : shards) {
+        for (Shard fb : shards) {
             fb.getJda().shutdown();
         }
 
@@ -138,5 +143,62 @@ public class BotController {
 
     public int getShutdownCode() {
         return shutdownCode;
+    }
+
+    // ################################################################################
+    // ##                           Global lookups
+    // ################################################################################
+
+    // TODO: Make nonstatic
+
+    @Nullable
+    public static TextChannel getTextChannelById(long id) {
+        for (Shard fb : INS.getShards()) {
+            TextChannel tc = fb.getJda().getTextChannelById(id);
+            if (tc != null) return tc;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static VoiceChannel getVoiceChannelById(long id) {
+        for (Shard fb : INS.getShards()) {
+            VoiceChannel vc = fb.getJda().getVoiceChannelById(id);
+            if (vc != null) return vc;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Guild getGuildById(long id) {
+        for (Shard fb : INS.getShards()) {
+            Guild g = fb.getJda().getGuildById(id);
+            if (g != null) return g;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static User getUserById(long id) {
+        for (Shard fb : INS.getShards()) {
+            User u = fb.getJda().getUserById(id);
+            if (u != null) return u;
+        }
+        return null;
+    }
+
+    @Nonnull
+    public static Shard getShard(@Nonnull JDA jda) {
+        int sId = jda.getShardInfo() == null ? 0 : jda.getShardInfo().getShardId();
+        for (Shard fb : INS.getShards()) {
+            if (fb.getShardId() == sId) {
+                return fb;
+            }
+        }
+        throw new IllegalStateException("Attempted to get instance for JDA shard that is not indexed, shardId: " + sId);
+    }
+
+    public static Shard getShard(int id) {
+        return INS.getShards().get(id);
     }
 }

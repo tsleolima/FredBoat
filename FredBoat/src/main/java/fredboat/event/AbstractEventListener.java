@@ -25,7 +25,7 @@
 
 package fredboat.event;
 
-import fredboat.main.FredBoat;
+import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
@@ -48,7 +48,7 @@ public abstract class AbstractEventListener extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event) {
-        FredBoat.getShard(event.getJDA()).onInit(event);
+        BotController.getShard(event.getJDA()).onInit(event);
     }
 
     @Override

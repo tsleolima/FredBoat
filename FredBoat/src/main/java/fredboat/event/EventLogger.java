@@ -27,7 +27,7 @@ package fredboat.event;
 
 import fredboat.main.BotController;
 import fredboat.main.Config;
-import fredboat.main.FredBoat;
+import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
@@ -218,10 +218,10 @@ public class EventLogger extends ListenerAdapter {
                 .addField("Guilds joined", Integer.toString(guildsJoinedEvents.getAndSet(0)), true)
                 .addField("Guilds left", Integer.toString(guildsLeftEvents.getAndSet(0)), true);
 
-        List<FredBoat> shards = BotController.INS.getShards();
+        List<Shard> shards = BotController.INS.getShards();
 
         if (!shards.isEmpty()) {
-            FredBoat anyShard = shards.get(0);
+            Shard anyShard = shards.get(0);
             User self = anyShard.getJda().getSelfUser();
             eb.setFooter(self.getName(), self.getEffectiveAvatarUrl());
         }

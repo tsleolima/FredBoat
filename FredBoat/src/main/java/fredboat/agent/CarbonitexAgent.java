@@ -28,7 +28,7 @@ package fredboat.agent;
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
 import fredboat.main.Config;
-import fredboat.main.FredBoat;
+import fredboat.main.Shard;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.JDA;
 import okhttp3.Response;
@@ -56,9 +56,9 @@ public class CarbonitexAgent extends FredBoatAgent {
     }
 
     private void sendStats() {
-        List<FredBoat> shards = BotController.INS.getShards();
+        List<Shard> shards = BotController.INS.getShards();
 
-        for (FredBoat fb : shards) {
+        for (Shard fb : shards) {
             if (fb.getJda().getStatus() != JDA.Status.CONNECTED) {
                 log.warn("Skipping posting stats because not all shards are online!");
                 return;

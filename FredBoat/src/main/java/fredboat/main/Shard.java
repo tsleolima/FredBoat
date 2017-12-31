@@ -25,29 +25,16 @@
 
 package fredboat.main;
 
-import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
-import fredboat.event.EventListenerBoat;
-import fredboat.event.EventLogger;
-import fredboat.feature.DikeSessionController;
-import fredboat.feature.metrics.Metrics;
-import fredboat.feature.metrics.OkHttpEventMetrics;
 import fredboat.util.TextUtils;
-import fredboat.util.rest.Http;
-import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.managers.AudioManager;
-import net.dv8tion.jda.core.utils.SessionController;
-import net.dv8tion.jda.core.utils.SessionControllerAdapter;
-import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,14 +42,13 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class represents a FredBoat shard, containing all non-static FredBoat shard-level logic.
  */
-public class FredBoatShard extends FredBoat {
+public class Shard implements IShard {
 
-    private static final Logger log = LoggerFactory.getLogger(FredBoatShard.class);
+    private static final Logger log = LoggerFactory.getLogger(Shard.class);
     private static final BotController FBC = BotController.INS;
 
     private final int shardId;
@@ -74,39 +60,13 @@ public class FredBoatShard extends FredBoat {
     @Nonnull
     protected volatile JDA jda;
 
-    FredBoatShard(int shardId) {
+    Shard(int shardId) {
         this.shardId = shardId;
         log.info("Building shard " + shardId);
-        jda = buildJDA(ShardBuilder.getDefaultShardBuilder(), false);
+        jda = ShardBuilder.buildJDA(shardId, false);
 
         FBC.getJdaEntityCountAgent().addAction(new ShardStatsCounter(jda.getShardInfo(),
                 () -> jdaEntityCountsShard.count(Collections.singletonList(this))));
-    }
-
-    private JDA buildJDA(final JDABuilder builder, boolean blocking) {
-        JDA newJda = null;
-
-        try {
-            boolean success = false;
-            while (!success) {
-                //noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (builder) {
-                    builder.useSharding(shardId, Config.getNumShards());
-
-                    try {
-                        newJda = blocking ? builder.buildBlocking() : builder.buildAsync();
-
-                        success = true;
-                    } catch (Exception e) {
-                        log.error("Generic exception when building a JDA instance! Retrying...", e);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to start JDA shard " + shardId, e);
-        }
-
-        return newJda;
     }
 
     @Override
@@ -187,7 +147,7 @@ public class FredBoatShard extends FredBoat {
 
                 //a blocking build makes sure the revive task runs until the shard is connected, otherwise the shard may
                 // get revived again accidentally while still connecting
-                jda = buildJDA(ShardBuilder.getDefaultShardBuilder(), true);
+                jda = ShardBuilder.buildJDA(shardId, true);
 
             } catch (Exception e) {
                 log.error("Task to revive shard {} threw an exception after running for {}",
@@ -270,68 +230,6 @@ public class FredBoatShard extends FredBoat {
         @Override
         public void act() throws Exception {
             action.act();
-        }
-    }
-
-    //some static aids around a singleton builder object
-    protected static class ShardBuilder {
-        private static JDABuilder defaultShardBuilder;
-        private static AtomicReference<SessionController> sessionController = new AtomicReference<>();
-
-        @Nonnull
-        synchronized static JDABuilder getDefaultShardBuilder() {
-            // Atomically compute if null
-            sessionController.updateAndGet(sc -> {
-                if (sc != null) return sc;
-
-                return Config.CONFIG.getDikeUrl() == null
-                        ? new SessionControllerAdapter()
-                        : new DikeSessionController();
-            });
-
-            if (defaultShardBuilder == null) {
-                JDABuilder builder = new JDABuilder(AccountType.BOT)
-                        .setToken(Config.CONFIG.getBotToken())
-                        .setGame(Game.playing(Config.CONFIG.getGame()))
-                        .setBulkDeleteSplittingEnabled(false)
-                        .setEnableShutdownHook(false)
-                        .setAudioEnabled(true)
-                        .setAutoReconnect(true)
-                        .setSessionController(sessionController.get())
-                        .setContextEnabled(false)
-                        .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
-                        .setHttpClientBuilder(new OkHttpClient.Builder()
-                                .eventListener(new OkHttpEventMetrics("jda")))
-                        .addEventListener(Metrics.instance().jdaEventsMetricsListener);
-
-                String eventLogWebhook = Config.CONFIG.getEventLogWebhook();
-                if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {
-                    try {
-                        builder.addEventListener(new EventLogger());
-                    } catch (Exception e) {
-                        log.error("Failed to create Eventlogger, events will not be logged to discord via webhook", e);
-                    }
-                }
-
-
-                if (LavalinkManager.ins.isEnabled()) {
-                    builder.addEventListener(LavalinkManager.ins.getLavalink());
-                }
-
-                if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
-                        && !System.getProperty("os.arch").equalsIgnoreCase("arm-linux")) {
-                    builder.setAudioSendFactory(new NativeAudioSendFactory(800));
-                }
-
-                defaultShardBuilder = builder;
-            }
-
-            EventListenerBoat mainListener = BotController.INS.getMainEventListener();
-
-            return defaultShardBuilder
-                    .removeEventListener(mainListener) //prevent duplicates
-                    .addEventListener(mainListener);
-
         }
     }
 }
