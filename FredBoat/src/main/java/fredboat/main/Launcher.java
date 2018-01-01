@@ -19,6 +19,8 @@ import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
+import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import okhttp3.Credentials;
@@ -30,6 +32,7 @@ import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
+import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -75,6 +78,18 @@ public class Launcher {
                     "\t\t   \\_/\\_/_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\n" +
                     "\t\t                                      ");
             log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
+        }
+
+        try {
+            ShardManager shardManager = new DefaultShardManagerBuilder()
+                    .setToken(Config.CONFIG.getBotToken())
+                    .setShardsTotal(Config.getNumShards())
+                    .setContextEnabled(false)
+                    .build();
+
+            FBC.setShardManager(shardManager);
+        } catch (LoginException e) {
+            throw new RuntimeException("Failed to log in to Discord! Is your token invalid?", e);
         }
 
         I18n.start();

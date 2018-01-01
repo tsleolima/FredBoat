@@ -47,8 +47,6 @@ public class BotController {
     @Nullable //will be null if no cache database has been configured
     private DatabaseConnection cacheDbConn;
 
-    private BotController(){}
-
     /**
      * Initialises the event listener. This can't be done during construction,
      *   since that causes an NPE as ins() returns null during that time
@@ -58,6 +56,10 @@ public class BotController {
     BotController postInit() {
         mainEventListener = new EventListenerBoat();
         return this;
+    }
+
+    void setShardManager(ShardManager shardManager) {
+        this.shardManager = shardManager;
     }
 
     private List<Shard> shards = new CopyOnWriteArrayList<>();
