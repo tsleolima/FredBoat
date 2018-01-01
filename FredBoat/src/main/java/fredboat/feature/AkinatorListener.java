@@ -183,7 +183,7 @@ public final class AkinatorListener extends UserListener {
 
         byte answer;
         //<editor-fold defaultstate="collapsed" desc="switch">
-        switch (event.getMessage().getStrippedContent().trim().toLowerCase()) {
+        switch (event.getMessage().getContentStripped().trim().toLowerCase()) {
             case "yes":
                 answer = 0;
                 break;

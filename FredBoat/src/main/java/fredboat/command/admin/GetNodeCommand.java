@@ -64,7 +64,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         } else {
             guild = context.guild;
         }
-        LavalinkSocket node = LavalinkManager.ins.getLavalink().getLink(guild).getCurrentSocket();
+        LavalinkSocket node = LavalinkManager.ins.getLavalink().getLink(guild).getNode();
 
         String reply = String.format("Guild %s id `%s` lavalink socket: `%s`",
                 context.guild.getName(), context.guild.getIdLong(), String.valueOf(node));
