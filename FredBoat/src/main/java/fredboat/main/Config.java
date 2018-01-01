@@ -23,7 +23,7 @@
  *
  */
 
-package fredboat;
+package fredboat.main;
 
 import com.google.common.base.CharMatcher;
 import fredboat.audio.player.PlayerLimitManager;

@@ -25,8 +25,8 @@
 
 package fredboat.command.admin;
 
-import fredboat.Config;
-import fredboat.FredBoat;
+import fredboat.main.BotController;
+import fredboat.main.Config;
 import fredboat.command.util.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -73,7 +73,7 @@ public class ReviveCommand extends Command implements ICommandRestricted {
 
         context.replyWithName("Attempting to revive shard " + shardId);
         try {
-            String answer = FredBoat.getShard(shardId).revive(force);
+            String answer = BotController.getShard(shardId).revive(force);
             context.replyWithName(answer);
         } catch (IndexOutOfBoundsException e) {
             context.replyWithName("No such shard: " + shardId);

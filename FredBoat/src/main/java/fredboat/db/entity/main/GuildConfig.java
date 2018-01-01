@@ -25,7 +25,7 @@
 
 package fredboat.db.entity.main;
 
-import fredboat.FredBoat;
+import fredboat.main.BotController;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.entity.IEntity;
 import org.hibernate.annotations.Cache;
@@ -161,7 +161,7 @@ public class GuildConfig implements IEntity, Serializable {
         String query = "SELECT gf.prefix FROM GuildConfig gf WHERE gf.guildId = :guildId";
         EntityManager em = null;
         try {
-            em = FredBoat.getMainDbConnection().getEntityManager();
+            em = BotController.INS.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             List<String> result = em.createQuery(query, String.class)
                     .setParameter("guildId", Long.toString(guildId))

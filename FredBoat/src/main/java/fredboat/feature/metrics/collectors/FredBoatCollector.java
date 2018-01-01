@@ -25,8 +25,10 @@
 
 package fredboat.feature.metrics.collectors;
 
-import fredboat.FredBoat;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.main.BotController;
+import fredboat.main.BotMetrics;
+import fredboat.main.Shard;
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;
 
@@ -57,7 +59,7 @@ public class FredBoatCollector extends Collector {
 
 
         //per shard stats
-        for (FredBoat fb : FredBoat.getShards()) {
+        for (Shard fb : BotController.INS.getShards()) {
             String shardId = Integer.toString(fb.getShardId());
             jdaEntities.addMetric(Arrays.asList(shardId, "User"), fb.getUserCount());
             jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), fb.getGuildCount());
@@ -69,13 +71,13 @@ public class FredBoatCollector extends Collector {
         }
 
         //global stats
-        jdaEntities.addMetric(Arrays.asList("total", "User"), FredBoat.getTotalUniqueUsersCount());
-        jdaEntities.addMetric(Arrays.asList("total", "Guild"), FredBoat.getTotalGuildsCount());
-        jdaEntities.addMetric(Arrays.asList("total", "TextChannel"), FredBoat.getTotalTextChannelsCount());
-        jdaEntities.addMetric(Arrays.asList("total", "VoiceChannel"), FredBoat.getTotalVoiceChannelsCount());
-        jdaEntities.addMetric(Arrays.asList("total", "Category"), FredBoat.getTotalCategoriesCount());
-        jdaEntities.addMetric(Arrays.asList("total", "Emote"), FredBoat.getTotalEmotesCount());
-        jdaEntities.addMetric(Arrays.asList("total", "Role"), FredBoat.getTotalRolesCount());
+        jdaEntities.addMetric(Arrays.asList("total", "User"), BotMetrics.getTotalUniqueUsersCount());
+        jdaEntities.addMetric(Arrays.asList("total", "Guild"), BotMetrics.getTotalGuildsCount());
+        jdaEntities.addMetric(Arrays.asList("total", "TextChannel"), BotMetrics.getTotalTextChannelsCount());
+        jdaEntities.addMetric(Arrays.asList("total", "VoiceChannel"), BotMetrics.getTotalVoiceChannelsCount());
+        jdaEntities.addMetric(Arrays.asList("total", "Category"), BotMetrics.getTotalCategoriesCount());
+        jdaEntities.addMetric(Arrays.asList("total", "Emote"), BotMetrics.getTotalEmotesCount());
+        jdaEntities.addMetric(Arrays.asList("total", "Role"), BotMetrics.getTotalRolesCount());
         playersPlaying.addMetric(Arrays.asList("total", "Players"), PlayerRegistry.playingCount());
 
         return mfs;

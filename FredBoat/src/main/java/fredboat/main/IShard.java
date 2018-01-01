@@ -23,49 +23,43 @@
  *
  */
 
-package fredboat.command.admin;
+package fredboat.main;
 
-import fredboat.commandmeta.abs.Command;
-import fredboat.commandmeta.abs.CommandContext;
-import fredboat.commandmeta.abs.ICommandRestricted;
-import fredboat.main.BotController;
-import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
-import fredboat.shared.constant.ExitCodes;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.events.ReadyEvent;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
-/**
- *
- * @author frederik
- */
-public class ExitCommand extends Command implements ICommandRestricted {
-
-    public ExitCommand(String name, String... aliases) {
-        super(name, aliases);
-    }
-
-    @Override
-    public void onInvoke(@Nonnull CommandContext context) {
-
-        try {
-            context.replyWithName(":wave:").getWithDefaultTimeout();
-        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
-        }
-        BotController.INS.shutdown(ExitCodes.EXIT_CODE_NORMAL);
-    }
+public interface IShard {
 
     @Nonnull
-    @Override
-    public String help(@Nonnull Context context) {
-        return "{0}{1}\n#Shut down the bot.";
-    }
+    JDA getJda();
 
     @Nonnull
-    @Override
-    public PermissionLevel getMinimumPerms() {
-        return PermissionLevel.BOT_ADMIN;
-    }
+    String revive(boolean... force);
+
+    int getShardId();
+
+    @Nonnull
+    JDA.ShardInfo getShardInfo();
+
+    void onInit(@Nonnull ReadyEvent readyEvent);
+
+
+    //JDA entity counts
+
+    int getUserCount();
+
+    int getGuildCount();
+
+    int getTextChannelCount();
+
+    int getVoiceChannelCount();
+
+    int getCategoriesCount();
+
+    int getEmotesCount();
+
+    int getRolesCount();
+
 }

@@ -28,12 +28,12 @@ package fredboat.audio.queue;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.Config;
-import fredboat.FredBoat;
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.I18n;
+import fredboat.main.Config;
+import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
@@ -154,7 +154,7 @@ public class MusicPersistenceHandler {
         }
     }
 
-    public static void reloadPlaylists(FredBoat shard) {
+    public static void reloadPlaylists(Shard shard) {
         File dir = new File("music_persistence");
 
         if(Config.CONFIG.getDistribution() == DistributionEnum.MUSIC) {

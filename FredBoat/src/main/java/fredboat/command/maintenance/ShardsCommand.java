@@ -25,11 +25,12 @@
 
 package fredboat.command.maintenance;
 
-import fredboat.Config;
-import fredboat.FredBoat;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMaintenanceCommand;
+import fredboat.main.BotController;
+import fredboat.main.Config;
+import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
@@ -62,16 +63,16 @@ public class ShardsCommand extends Command implements IMaintenanceCommand {
 
         //do a full report? or just a summary
         boolean full = false;
-        String raw = input.getRawContent().toLowerCase();
+        String raw = input.getContentRaw().toLowerCase();
         if (raw.contains("full") || raw.contains("all")) {
             full = true;
         }
 
-        List<FredBoat> shards = FredBoat.getShards();
+        List<Shard> shards = BotController.INS.getShards();
         int borkenShards = 0;
         int healthyGuilds = 0;
         int healthyUsers = 0;
-        for (FredBoat fb : shards) {
+        for (Shard fb : shards) {
             if (fb.getJda().getStatus() == JDA.Status.CONNECTED && !full) {
                 healthyGuilds += fb.getGuildCount();
                 healthyUsers += fb.getUserCount();

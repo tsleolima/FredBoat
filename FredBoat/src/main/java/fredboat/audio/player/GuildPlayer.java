@@ -27,13 +27,7 @@ package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.FredBoat;
-import fredboat.audio.queue.AbstractTrackProvider;
-import fredboat.audio.queue.AudioLoader;
-import fredboat.audio.queue.AudioTrackContext;
-import fredboat.audio.queue.IdentifierContext;
-import fredboat.audio.queue.RepeatMode;
-import fredboat.audio.queue.SimpleTrackProvider;
+import fredboat.audio.queue.*;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.CommandContext;
@@ -41,6 +35,8 @@ import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.EntityReader;
 import fredboat.db.entity.main.GuildConfig;
 import fredboat.feature.I18n;
+import fredboat.main.BotController;
+import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
@@ -68,7 +64,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(GuildPlayer.class);
 
-    private final FredBoat shard;
+    private final Shard shard;
     private final long guildId;
     private long currentTCId;
 
@@ -82,7 +78,7 @@ public class GuildPlayer extends AbstractPlayer {
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
-        this.shard = FredBoat.getShard(guild.getJDA());
+        this.shard = BotController.getShard(guild.getJDA());
         this.guildId = guild.getIdLong();
 
         if (!LavalinkManager.ins.isEnabled()) {

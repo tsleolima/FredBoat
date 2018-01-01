@@ -69,14 +69,14 @@ public class MavenTestCommand extends Command implements ICommandRestricted {
             Runtime rt = Runtime.getRuntime();
 
             try {
-                CentralMessaging.editMessage(status, status.getRawContent() + "\n\nRunning `mvn test`... ")
+                CentralMessaging.editMessage(status, status.getContentRaw() + "\n\nRunning `mvn test`... ")
                         .getWithDefaultTimeout();
             } catch (TimeoutException | ExecutionException ignored) {
             }
             File pom = new File("FredBoat/pom.xml");
             if (!pom.exists()) pom = new File("pom.xml");
             if (!pom.exists()) {
-                CentralMessaging.editMessage(status, status.getRawContent() + "[:anger: could not locate pom.xml:]\n\n");
+                CentralMessaging.editMessage(status, status.getContentRaw() + "[:anger: could not locate pom.xml:]\n\n");
                 throw new RuntimeException("Could not locate file: pom.xml");
             }
 
@@ -86,15 +86,15 @@ public class MavenTestCommand extends Command implements ICommandRestricted {
             new SLF4JInputStreamErrorLogger(log, mvnBuild.getInputStream()).start();
 
             if (!mvnBuild.waitFor(600, TimeUnit.SECONDS)) {
-                CentralMessaging.editMessage(status, status.getRawContent() + "[:anger: timed out]\n\n");
+                CentralMessaging.editMessage(status, status.getContentRaw() + "[:anger: timed out]\n\n");
                 throw new RuntimeException("Operation timed out: mvn test");
             } else if (mvnBuild.exitValue() != 0) {
                 CentralMessaging.editMessage(status,
-                        status.getRawContent() + "[:anger: returned code " + mvnBuild.exitValue() + "]\n\n");
+                        status.getContentRaw() + "[:anger: returned code " + mvnBuild.exitValue() + "]\n\n");
                 throw new RuntimeException("Bad response code");
             }
 
-            CentralMessaging.editMessage(status, status.getRawContent() + "👌🏽");
+            CentralMessaging.editMessage(status, status.getContentRaw() + "👌🏽");
 
         } catch (InterruptedException | IOException ex) {
             ex.printStackTrace();

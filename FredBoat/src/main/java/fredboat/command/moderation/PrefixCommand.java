@@ -28,8 +28,6 @@ package fredboat.command.moderation;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import fredboat.Config;
-import fredboat.FredBoat;
 import fredboat.command.fun.RandomImageCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -37,6 +35,8 @@ import fredboat.commandmeta.abs.IModerationCommand;
 import fredboat.db.EntityReader;
 import fredboat.db.EntityWriter;
 import fredboat.db.entity.main.GuildConfig;
+import fredboat.main.BotController;
+import fredboat.main.Config;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
@@ -69,7 +69,7 @@ public class PrefixCommand extends Command implements IModerationCommand {
             .refreshAfterWrite(1, TimeUnit.MINUTES) //NOTE: never use refreshing without async reloading, because Guavas cache uses the thread calling it to do cleanup tasks (including refreshing)
             .expireAfterAccess(1, TimeUnit.MINUTES) //evict inactive guilds
             .concurrencyLevel(Config.getNumShards())  //each shard has a thread (main JDA thread) accessing this cache many times
-            .build(CacheLoader.asyncReloading(CacheLoader.from(GuildConfig::getPrefix), FredBoat.executor));
+            .build(CacheLoader.asyncReloading(CacheLoader.from(GuildConfig::getPrefix), BotController.INS.getExecutor()));
 
     @Nonnull
     private static String giefPrefix(long guildId) {
