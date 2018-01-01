@@ -83,8 +83,8 @@ public class CommandManager {
 
         //Hardcode music commands in FredBoatHangout. Blacklist any channel that isn't #general or #staff, but whitelist Frederikam
         if ((invoked instanceof IMusicCommand || invoked instanceof AkinatorCommand) // the hate is real
-                && guild.getId().equals(BotConstants.FREDBOAT_HANGOUT_ID)
-                && guild.getJDA().getSelfUser().getId().equals(BotConstants.MUSIC_BOT_ID)) {
+                && guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID
+                && guild.getJDA().getSelfUser().getIdLong() == BotConstants.MUSIC_BOT_ID) {
             if (!channel.getId().equals("174821093633294338") // #spam_and_music
                     && !channel.getId().equals("217526705298866177") // #staff
                     && !invoker.getUser().getId().equals("203330266461110272")//Cynth
