@@ -93,39 +93,4 @@ public class GuildConfig implements IEntity, Serializable {
         this.lang = lang;
     }
 
-    /*@OneToMany
-    @JoinColumn(name = "guildconfig")
-    private Set<TCConfig> textChannels;
-
-    public GuildConfig(Guild guild) {
-        this.guildId = Long.parseLong(guild.getId());
-
-        textChannels = new CopyOnWriteArraySet<>();
-
-        for (TextChannel tc : guild.getTextChannels()) {
-            TCConfig tcc = new TCConfig(this, tc);
-            textChannels.add(tcc);
-        }
-
-        for (TCConfig tcc : textChannels) {
-            DatabaseManager.getEntityManager().persist(tcc);
-        }
-    }
-
-    public Set<TCConfig> getTextChannels() {
-        return textChannels;
-    }
-
-    public void addTextChannel(TCConfig tcc){
-        textChannels.add(tcc);
-    }
-
-    public void removeTextChannel(TCConfig tcc){
-        textChannels.remove(tcc);
-    }
-
-    public long getGuildId() {
-        return guildId;
-    }
-    */
 }

@@ -26,7 +26,7 @@
 package fredboat.command.admin;
 
 import fredboat.audio.player.LavalinkManager;
-import fredboat.command.util.HelpCommand;
+import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;

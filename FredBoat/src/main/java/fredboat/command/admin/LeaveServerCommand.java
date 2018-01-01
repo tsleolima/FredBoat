@@ -30,9 +30,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
-
 import net.dv8tion.jda.core.entities.Message;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

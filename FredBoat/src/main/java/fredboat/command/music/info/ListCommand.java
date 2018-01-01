@@ -157,6 +157,6 @@ public class ListCommand extends Command implements IMusicCommand {
     @Nonnull
     @Override
     public String help(@Nonnull Context context) {
-        return "{0}{1}\n#" + context.i18n("helpListCommand");
+        return "{0}{1} (page)\n#" + context.i18n("helpListCommand");
     }
 }

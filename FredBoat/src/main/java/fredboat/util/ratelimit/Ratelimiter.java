@@ -27,7 +27,7 @@ package fredboat.util.ratelimit;
 import fredboat.main.BotController;
 import fredboat.main.Config;
 import fredboat.audio.queue.PlaylistInfo;
-import fredboat.command.maintenance.ShardsCommand;
+import fredboat.command.info.ShardsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.command.util.WeatherCommand;
 import fredboat.commandmeta.abs.Command;

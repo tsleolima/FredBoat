@@ -29,27 +29,27 @@ import com.google.common.cache.CacheBuilder;
 import fredboat.main.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.command.maintenance.ShardsCommand;
-import fredboat.command.maintenance.StatsCommand;
+import fredboat.command.info.HelpCommand;
+import fredboat.command.info.ShardsCommand;
+import fredboat.command.info.StatsCommand;
 import fredboat.command.music.control.SkipCommand;
-import fredboat.command.util.HelpCommand;
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
+import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.EntityReader;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.messaging.CentralMessaging;
+import fredboat.perms.PermissionLevel;
+import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
 import io.prometheus.client.Histogram;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent;
@@ -119,7 +119,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //preliminary permission filter to avoid a ton of parsing
         //let messages pass on to parsing that contain "help" since we want to answer help requests even from channels
         // where we can't talk in
-        if (!channel.canTalk() && !event.getMessage().getContentRaw().toLowerCase().contains("help")) {
+        if (!channel.canTalk() && !event.getMessage().getContentRaw().toLowerCase().contains(CommandInitializer.HELP_COMM_NAME)) {
             return;
         }
 
@@ -131,11 +131,23 @@ public class EventListenerBoat extends AbstractEventListener {
 
         //ignore all commands in channels where we can't write, except for the help command
         if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
-            log.info("Ignored command because this bot cannot write in that channel");
+            log.info("Ignoring command {} because this bot cannot write in that channel", context.command.name);
             return;
         }
 
         Metrics.commandsReceived.labels(context.command.getClass().getSimpleName()).inc();
+
+        //BOT_ADMINs can always use all commands everywhere
+        if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, event.getMember())) {
+
+            //ignore commands of disabled modules for plebs
+            CommandRegistry.Module module = context.command.getModule();
+            if (module != null && !context.getEnabledModules().contains(module)) {
+                log.debug("Ignoring command {} because its module {} is disabled in guild {}",
+                        context.command.name, module.name(), event.getGuild().getIdLong());
+                return;
+            }
+        }
 
         limitOrExecuteCommand(context);
     }
@@ -168,7 +180,7 @@ public class EventListenerBoat extends AbstractEventListener {
             if (ratelimiterResult.b == SkipCommand.class) { //we can compare classes with == as long as we are using the same classloader (which we are)
                 //add a nice reminder on how to skip more than 1 song
                 out += "\n" + context.i18nFormat("ratelimitedSkipCommand",
-                        "`" + TextUtils.escapeMarkdown(context.getPrefix()) + "skip n-m`");
+                        "`" + TextUtils.escapeMarkdown(context.getPrefix()) + CommandInitializer.SKIP_COMM_NAME + " n-m`");
             }
             context.replyWithMention(out);
         }

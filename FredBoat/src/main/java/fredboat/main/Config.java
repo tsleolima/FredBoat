@@ -28,6 +28,7 @@ package fredboat.main;
 import com.google.common.base.CharMatcher;
 import fredboat.audio.player.PlayerLimitManager;
 import fredboat.command.admin.SentryDsnCommand;
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.DiscordUtil;
@@ -464,7 +465,7 @@ public class Config {
 
     public String getGame() {
         if (game == null || game.isEmpty()) {
-            return "Say " + getPrefix() + "help";
+            return "Say " + getPrefix() + CommandInitializer.HELP_COMM_NAME;
         } else {
             return game;
         }

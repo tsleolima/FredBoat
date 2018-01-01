@@ -25,10 +25,13 @@
 
 package fredboat.commandmeta.abs;
 
-import fredboat.main.Config;
-import fredboat.command.moderation.PrefixCommand;
+import fredboat.command.config.PrefixCommand;
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
+import fredboat.db.entity.main.GuildModules;
 import fredboat.feature.metrics.Metrics;
+import fredboat.main.BotController;
+import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.Permission;
@@ -40,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,7 +104,7 @@ public class CommandContext extends Context {
                 }
             } else {
                 //hardcoded check for the help command that is always displayed as FredBoat status
-                if (raw.startsWith(Config.CONFIG.getPrefix() + "help")) {
+                if (raw.startsWith(Config.CONFIG.getPrefix() + CommandInitializer.HELP_COMM_NAME)) {
                     Metrics.prefixParsed.labels("default").inc();
                     input = raw.substring(Config.CONFIG.getPrefix().length());
                 } else {
@@ -126,8 +130,8 @@ public class CommandContext extends Context {
 
         String commandTrigger = args[0];
 
-        CommandRegistry.CommandEntry entry = CommandRegistry.getCommand(commandTrigger.toLowerCase());
-        if (entry == null) {
+        Command command = CommandRegistry.findCommand(commandTrigger.toLowerCase());
+        if (command == null) {
             log.info("Unknown command:\t{}", commandTrigger);
             return null;
         } else {
@@ -139,7 +143,7 @@ public class CommandContext extends Context {
 
             context.isMention = isMention;
             context.trigger = commandTrigger;
-            context.command = entry.command;
+            context.command = command;
             context.args = Arrays.copyOfRange(args, 1, args.length);//exclude args[0] that contains the command trigger
             context.rawArgs = input.replaceFirst(commandTrigger, "").trim();
             return context;
@@ -187,6 +191,11 @@ public class CommandContext extends Context {
 
     public boolean hasArguments() {
         return args.length > 0 && !rawArgs.isEmpty();
+    }
+
+    @Nonnull
+    public Collection<CommandRegistry.Module> getEnabledModules() {
+        return BotController.INS.getMainDbWrapper().getOrCreate(GuildModules.key(this.guild)).getEnabledModules();
     }
 
     @Nonnull

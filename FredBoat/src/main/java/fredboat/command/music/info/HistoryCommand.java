@@ -114,7 +114,7 @@ public class HistoryCommand extends Command implements IMusicCommand {
   @Nonnull
   @Override
   public String help(@Nonnull Context context) {
-      String usage = "{0}{1}\n#";
+      String usage = "{0}{1} (page)\n#";
       return usage + context.i18n("helpHistoryCommand");
   }
 }

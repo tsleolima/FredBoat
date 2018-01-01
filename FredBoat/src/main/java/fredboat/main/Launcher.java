@@ -4,9 +4,8 @@ import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.*;
 import fredboat.api.API;
 import fredboat.audio.player.LavalinkManager;
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
-import fredboat.commandmeta.init.MainCommandInitializer;
-import fredboat.commandmeta.init.MusicCommandInitializer;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.I18n;
@@ -137,10 +136,8 @@ public class Launcher {
         LavalinkManager.ins.start();
 
         //Commands
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT)
-            MainCommandInitializer.initCommands();
-
-        MusicCommandInitializer.initCommands();
+        CommandInitializer.initCommands();
+        log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!Config.CONFIG.isPatronDistribution() && Config.CONFIG.useVoiceChannelCleanup()) {
             log.info("Starting VoiceChannelCleanupAgent.");
@@ -150,11 +147,7 @@ public class Launcher {
                     "either running Patron distro or overridden by temp config");
         }
 
-        log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
-
         ExecutorService executor = FBC.getExecutor();
-
-
 
         //Check MAL creds
         executor.submit(Launcher::hasValidMALLogin);
