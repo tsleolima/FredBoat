@@ -42,7 +42,7 @@ public class Launcher {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
-    private static final BotController FBC = BotController.INS;
+    private static final BotController FBC = BotController.INS.postInit();
 
     public static void main(String[] args) throws IllegalArgumentException, InterruptedException, DatabaseException {
         //just post the info to the console
@@ -56,6 +56,7 @@ public class Launcher {
             return;
         }
         Metrics.setup();
+        FBC.postInit();
 
         Runtime.getRuntime().addShutdownHook(new Thread(FBC.shutdownHook, "FredBoat main shutdownhook"));
         log.info(getVersionInfo());

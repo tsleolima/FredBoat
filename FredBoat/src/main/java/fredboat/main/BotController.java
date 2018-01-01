@@ -38,7 +38,7 @@ public class BotController {
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     //central event listener that all events by all shards pass through
-    private EventListenerBoat mainEventListener = new EventListenerBoat();
+    private EventListenerBoat mainEventListener;
     private final StatsAgent jdaEntityCountAgent = new StatsAgent("jda entity counter");
     private final BotMetrics.JdaEntityCounts jdaEntityCountsTotal = new BotMetrics.JdaEntityCounts();
     private DatabaseWrapper mainDbWrapper;
@@ -46,6 +46,19 @@ public class BotController {
 
     @Nullable //will be null if no cache database has been configured
     private DatabaseConnection cacheDbConn;
+
+    private BotController(){}
+
+    /**
+     * Initialises the event listener. This can't be done during construction,
+     *   since that causes an NPE as ins() returns null during that time
+     *
+     * @return this instance
+     */
+    BotController postInit() {
+        mainEventListener = new EventListenerBoat();
+        return this;
+    }
 
     private List<Shard> shards = new CopyOnWriteArrayList<>();
 
