@@ -30,9 +30,8 @@ import fredboat.agent.*;
 import fredboat.api.API;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.queue.MusicPersistenceHandler;
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
-import fredboat.commandmeta.init.MainCommandInitializer;
-import fredboat.commandmeta.init.MusicCommandInitializer;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.I18n;
@@ -173,10 +172,8 @@ public abstract class FredBoat {
         LavalinkManager.ins.start();
 
         //Commands
-        if (Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT)
-            MainCommandInitializer.initCommands();
-
-        MusicCommandInitializer.initCommands();
+        CommandInitializer.initCommands();
+        log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!Config.CONFIG.isPatronDistribution() && Config.CONFIG.useVoiceChannelCleanup()) {
             log.info("Starting VoiceChannelCleanupAgent.");
@@ -185,8 +182,6 @@ public abstract class FredBoat {
             log.info("Skipped setting up the VoiceChannelCleanupAgent, " +
                     "either running Patron distro or overridden by temp config");
         }
-
-        log.info("Loaded commands, registry size is " + CommandRegistry.getSize());
 
         //Check MAL creds
         executor.submit(FredBoat::hasValidMALLogin);

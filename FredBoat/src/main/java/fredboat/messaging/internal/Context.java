@@ -25,7 +25,7 @@
 
 package fredboat.messaging.internal;
 
-import fredboat.command.moderation.PrefixCommand;
+import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
