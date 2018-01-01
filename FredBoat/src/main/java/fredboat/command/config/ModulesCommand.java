@@ -25,7 +25,6 @@
 
 package fredboat.command.config;
 
-import fredboat.FredBoat;
 import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
@@ -33,6 +32,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.db.entity.main.GuildModules;
+import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
@@ -107,11 +107,11 @@ public class ModulesCommand extends Command implements IConfigCommand {
             context.reply(context.i18nFormat("moduleDisable", "**" + context.i18n(module.translationKey) + "**"));
         }
 
-        FredBoat.getMainDbWrapper().findApplyAndMerge(GuildModules.key(context.guild), transform);
+        BotController.INS.getMainDbWrapper().findApplyAndMerge(GuildModules.key(context.guild), transform);
     }
 
     private static void displayModuleStatus(@Nonnull CommandContext context) {
-        GuildModules gm = FredBoat.getMainDbWrapper().getOrCreate(GuildModules.key(context.guild));
+        GuildModules gm = BotController.INS.getMainDbWrapper().getOrCreate(GuildModules.key(context.guild));
         Function<CommandRegistry.Module, String> moduleStatusFormatter = moduleStatusLine(gm, context);
         String moduleStatus = "";
 
