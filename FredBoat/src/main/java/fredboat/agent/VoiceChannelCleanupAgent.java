@@ -68,7 +68,7 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
         final AtomicInteger totalVcs = new AtomicInteger(0);
         final AtomicInteger closedVcs = new AtomicInteger(0);
 
-        BotController.INS.getShardManager().getGuilds().forEach(guild -> {
+        BotController.INS.getShardManager().getGuildCache().stream().forEach(guild -> {
             try {
                 totalGuilds.incrementAndGet();
                 if (guild != null
