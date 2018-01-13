@@ -31,7 +31,7 @@ shadowJar {
 
 dependencies {
     compile project(':Shared')
-    compile group: 'com.github.DV8FromTheWorld', name: 'JDA', version: '6834f8ddb3d2ddb8f524a2dddeedd50359ab27f6'
+    compile group: 'net.dv8tion', name: 'JDA', version: '3.5.0_327'
     compile group: 'com.sedmelluq', name: 'lavaplayer', version: '1.2.45'
     compile group: 'com.sedmelluq', name: 'jda-nas', version: '1.0.6'
 
