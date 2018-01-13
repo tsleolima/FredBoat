@@ -42,6 +42,7 @@ import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 public class ClearCommand extends Command implements IModerationCommand {
@@ -64,30 +65,37 @@ public class ClearCommand extends Command implements IModerationCommand {
             return;
         }
 
+        if (!context.guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_HISTORY)) {
+            context.reply(context.i18n("permissionMissingBot") + " **" + Permission.MESSAGE_HISTORY.getName() + "**");
+            return;
+        }
+
         MessageHistory history = new MessageHistory(channel);
         history.retrievePast(50).queue(msgs -> {
                     Metrics.successfulRestActions.labels("retrieveMessageHistory").inc();
-                    ArrayList<Message> myMessages = new ArrayList<>();
+                    ArrayList<Message> toDelete = new ArrayList<>();
 
                     for (Message msg : msgs) {
-                        if (msg.getAuthor().equals(jda.getSelfUser())) {
-                            myMessages.add(msg);
+                        if (msg.getAuthor().equals(jda.getSelfUser())
+                                && youngerThanTwoWeeks(msg)) {
+                            toDelete.add(msg);
                         }
                     }
 
-                    if (myMessages.isEmpty()) {
+                    if (toDelete.isEmpty()) {
                         throw new MessagingException("No messages found.");
-                    } else if (myMessages.size() == 1) {
+                    } else if (toDelete.size() == 1) {
                         context.reply("Found one message, deleting.");
-                        CentralMessaging.deleteMessage(myMessages.get(0));
+                        CentralMessaging.deleteMessage(toDelete.get(0));
                     } else {
 
                         if (!context.hasPermissions(Permission.MESSAGE_MANAGE)) {
                             context.reply("I must have the `Manage Messages` permission to delete my own messages in bulk.");
+                            return;
                         }
 
-                        context.reply("Deleting **" + myMessages.size() + "** messages.");
-                        CentralMessaging.deleteMessages(channel, myMessages);
+                        context.reply("Deleting **" + toDelete.size() + "** messages.");
+                        CentralMessaging.deleteMessages(channel, toDelete);
                     }
                 },
                 CentralMessaging.getJdaRestActionFailureHandler(
@@ -95,6 +103,11 @@ public class ClearCommand extends Command implements IModerationCommand {
                                 channel.getId(), context.guild.getId())
                 )
         );
+    }
+
+    private boolean youngerThanTwoWeeks(@Nonnull Message msg) {
+        return msg.getCreationTime().isAfter(OffsetDateTime.now().minusWeeks(2)
+                .plusMinutes(2));//some tolerance
     }
 
     @Nonnull
