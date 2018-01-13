@@ -47,10 +47,11 @@ public class BotController {
         mainEventListener = new EventListenerBoat();
     }
 
-    void setShardManager(ShardManager shardManager) {
+    void setShardManager(@Nonnull ShardManager shardManager) {
         this.shardManager = shardManager;
     }
 
+    @Nonnull
     public ExecutorService getExecutor() {
         return executor;
     }
@@ -59,14 +60,16 @@ public class BotController {
         return mainEventListener;
     }
 
-    protected void setMainEventListener(EventListenerBoat mainEventListener) {
+    protected void setMainEventListener(@Nonnull EventListenerBoat mainEventListener) {
         this.mainEventListener = mainEventListener;
     }
 
+    @Nonnull
     protected StatsAgent getJdaEntityCountAgent() {
         return jdaEntityCountAgent;
     }
 
+    // Can be null during init, but usually not
     public ShardManager getShardManager() {
         return shardManager;
     }
@@ -81,17 +84,13 @@ public class BotController {
         return mainDbWrapper;
     }
 
+    @Nullable
     public DatabaseConnection getCacheDbConnection() {
         return cacheDbConn;
     }
 
-    public void setMainDbWrapper(DatabaseWrapper mainDbWrapper) {
+    public void setMainDbWrapper(@Nonnull DatabaseWrapper mainDbWrapper) {
         this.mainDbWrapper = mainDbWrapper;
-    }
-
-    @Nullable
-    public DatabaseConnection getCacheDbConn() {
-        return cacheDbConn;
     }
 
     public void setCacheDbConn(@Nullable DatabaseConnection cacheDbConn) {
