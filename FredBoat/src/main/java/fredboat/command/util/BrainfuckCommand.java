@@ -52,7 +52,7 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
     char[] code;
     public static final int MAX_CYCLE_COUNT = 10000;
 
-    public String process(String input, Context context) {
+    public String process(@Nonnull String input, @Nonnull Context context) {
         int data = 0;
         char[] inChars = input.toCharArray();
         int inChar = 0;
@@ -94,7 +94,10 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
                     if (bytes.get(data) == 0) {
                         int depth = 1;
                         do {
-                            command = code[++instruction];
+                            if (++instruction >= code.length) {
+                                throw new BrainfuckException("Instruction out of bounds at position " + (inChar + 1));
+                            }
+                            command = code[instruction];
                             if (command == '[') {
                                 ++depth;
                             } else if (command == ']') {
@@ -107,7 +110,10 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
                     if (bytes.get(data) != 0) {
                         int depth = -1;
                         do {
-                            command = code[--instruction];
+                            if (--instruction < 0) {
+                                throw new BrainfuckException("Instruction out of bounds at position " + (inChar + 1));
+                            }
+                            command = code[instruction];
                             if (command == '[') {
                                 ++depth;
                             } else if (command == ']') {
