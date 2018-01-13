@@ -35,11 +35,10 @@ import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.EntityReader;
 import fredboat.db.entity.main.GuildConfig;
 import fredboat.feature.I18n;
-import fredboat.main.BotController;
-import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
+import fredboat.main.ShardContext;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
@@ -64,7 +63,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(GuildPlayer.class);
 
-    private final Shard shard;
+    private final ShardContext shard;
     private final long guildId;
     private long currentTCId;
 
@@ -78,7 +77,7 @@ public class GuildPlayer extends AbstractPlayer {
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
-        this.shard = BotController.getShard(guild.getJDA());
+        this.shard = ShardContext.of(guild.getJDA());
         this.guildId = guild.getIdLong();
 
         if (!LavalinkManager.ins.isEnabled()) {
@@ -134,7 +133,7 @@ public class GuildPlayer extends AbstractPlayer {
 
         LavalinkManager.ins.openConnection(targetChannel);
         AudioManager manager = getGuild().getAudioManager();
-        manager.setConnectionListener(new DebugConnectionListener(guildId, shard.getShardInfo()));
+        manager.setConnectionListener(new DebugConnectionListener(guildId, shard.getJda().getShardInfo()));
 
         log.info("Connected to voice channel " + targetChannel);
     }

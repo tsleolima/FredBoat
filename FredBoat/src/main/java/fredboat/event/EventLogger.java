@@ -27,11 +27,11 @@ package fredboat.event;
 
 import fredboat.main.BotController;
 import fredboat.main.Config;
-import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.*;
@@ -218,11 +218,11 @@ public class EventLogger extends ListenerAdapter {
                 .addField("Guilds joined", Integer.toString(guildsJoinedEvents.getAndSet(0)), true)
                 .addField("Guilds left", Integer.toString(guildsLeftEvents.getAndSet(0)), true);
 
-        List<Shard> shards = BotController.INS.getShards();
+        List<JDA> shards = BotController.INS.getShardManager().getShards();
 
         if (!shards.isEmpty()) {
-            Shard anyShard = shards.get(0);
-            User self = anyShard.getJda().getSelfUser();
+            JDA anyShard = shards.get(0);
+            User self = anyShard.getSelfUser();
             eb.setFooter(self.getName(), self.getEffectiveAvatarUrl());
         }
 

@@ -30,7 +30,7 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
 import fredboat.main.Config;
-import fredboat.main.Shard;
+import net.dv8tion.jda.core.JDA;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -70,12 +70,12 @@ public class API {
             JSONObject root = new JSONObject();
             JSONArray a = new JSONArray();
 
-            for (Shard fb : BotController.INS.getShards()) {
+            for (JDA shard : BotController.INS.getShardManager().getShards()) {
                 JSONObject fbStats = new JSONObject();
-                fbStats.put("id", fb.getShardInfo().getShardId())
-                        .put("guilds", fb.getGuildCount())
-                        .put("users", fb.getUserCount())
-                        .put("status", fb.getJda().getStatus());
+                fbStats.put("id", shard.getShardInfo().getShardId())
+                        .put("guilds", shard.getGuildCache().size())
+                        .put("users", shard.getUserCache().size())
+                        .put("status", shard.getStatus());
 
                 a.put(fbStats);
             }

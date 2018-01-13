@@ -67,7 +67,7 @@ public class DebugCommand extends Command implements IInfoCommand, ICommandRestr
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                     return;
                 }
-                guild = BotController.getGuildById(Long.parseLong(context.args[0]));
+                guild = BotController.INS.getShardManager().getGuildById(Long.parseLong(context.args[0]));
             } catch (NumberFormatException ignored) {
                 guild = null;
             }

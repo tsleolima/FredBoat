@@ -28,9 +28,9 @@ package fredboat.feature.metrics.collectors;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
-import fredboat.main.Shard;
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;
+import net.dv8tion.jda.core.JDA;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,19 +57,6 @@ public class FredBoatCollector extends Collector {
                 "Currently playing music players", labelNames);
         mfs.add(playersPlaying);
 
-
-        //per shard stats
-        for (Shard fb : BotController.INS.getShards()) {
-            String shardId = Integer.toString(fb.getShardId());
-            jdaEntities.addMetric(Arrays.asList(shardId, "User"), fb.getUserCount());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), fb.getGuildCount());
-            jdaEntities.addMetric(Arrays.asList(shardId, "TextChannel"), fb.getTextChannelCount());
-            jdaEntities.addMetric(Arrays.asList(shardId, "VoiceChannel"), fb.getVoiceChannelCount());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Category"), fb.getCategoriesCount());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Emote"), fb.getEmotesCount());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Role"), fb.getRolesCount());
-        }
-
         //global stats
         jdaEntities.addMetric(Arrays.asList("total", "User"), BotMetrics.getTotalUniqueUsersCount());
         jdaEntities.addMetric(Arrays.asList("total", "Guild"), BotMetrics.getTotalGuildsCount());
@@ -79,6 +66,21 @@ public class FredBoatCollector extends Collector {
         jdaEntities.addMetric(Arrays.asList("total", "Emote"), BotMetrics.getTotalEmotesCount());
         jdaEntities.addMetric(Arrays.asList("total", "Role"), BotMetrics.getTotalRolesCount());
         playersPlaying.addMetric(Arrays.asList("total", "Players"), PlayerRegistry.playingCount());
+
+        //per shard stats
+        if(BotController.INS.getShardManager() == null) {
+            return mfs; // This collector is invoked when we begin building the shard manager
+        }
+        for (JDA shard : BotController.INS.getShardManager().getShards()) {
+            String shardId = Integer.toString(shard.getShardInfo().getShardId());
+            jdaEntities.addMetric(Arrays.asList(shardId, "User"), shard.getUserCache().size());
+            jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), shard.getGuildCache().size());
+            jdaEntities.addMetric(Arrays.asList(shardId, "TextChannel"), shard.getTextChannelCache().size());
+            jdaEntities.addMetric(Arrays.asList(shardId, "VoiceChannel"), shard.getVoiceChannelCache().size());
+            jdaEntities.addMetric(Arrays.asList(shardId, "Category"), shard.getCategoryCache().size());
+            jdaEntities.addMetric(Arrays.asList(shardId, "Emote"), shard.getEmoteCache().size());
+            jdaEntities.addMetric(Arrays.asList(shardId, "Role"), shard.getRoleCache().size());
+        }
 
         return mfs;
     }

@@ -33,7 +33,6 @@ import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.I18n;
 import fredboat.main.Config;
-import fredboat.main.Shard;
 import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
@@ -154,7 +153,7 @@ public class MusicPersistenceHandler {
         }
     }
 
-    public static void reloadPlaylists(Shard shard) {
+    public static void reloadPlaylists(JDA jda) {
         File dir = new File("music_persistence");
 
         if(Config.CONFIG.getDistribution() == DistributionEnum.MUSIC) {
@@ -163,7 +162,7 @@ public class MusicPersistenceHandler {
             return;
         }
 
-        log.info("Began reloading playlists for shard {}", shard.getShardInfo().getShardId());
+        log.info("Began reloading playlists for shard {}", jda.getShardInfo().getShardId());
         if (!dir.exists()) {
             log.info("No music persistence directory found.");
             return;
@@ -174,7 +173,6 @@ public class MusicPersistenceHandler {
             return;
         }
 
-        JDA jda = shard.getJda();
         for (File file : files) {
             try {
                 Guild guild = jda.getGuildById(file.getName());

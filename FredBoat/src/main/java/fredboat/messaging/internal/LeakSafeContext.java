@@ -63,13 +63,13 @@ public class LeakSafeContext extends Context {
     @Override
     @Nullable
     public TextChannel getTextChannel() {
-        return BotController.getTextChannelById(channelId);
+        return BotController.INS.getShardManager().getTextChannelById(channelId);
     }
 
     @Override
     @Nullable
     public Guild getGuild() {
-        return BotController.getGuildById(guildId);
+        return BotController.INS.getShardManager().getGuildById(guildId);
     }
 
     @Override

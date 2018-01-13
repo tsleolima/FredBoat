@@ -52,7 +52,7 @@ public class VideoSelection {
     }
 
     public void deleteMessage() {
-        TextChannel tc = BotController.getTextChannelById(channelId);
+        TextChannel tc = BotController.INS.getShardManager().getTextChannelById(channelId);
         if (tc != null) {
             //we can call this without an additional permission check, as this should be our own message that we are
             //deleting

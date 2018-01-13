@@ -8,8 +8,10 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
+import fredboat.feature.DikeSessionController;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
+import fredboat.feature.metrics.OkHttpEventMetrics;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
@@ -22,7 +24,11 @@ import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.utils.SessionController;
+import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -44,7 +50,7 @@ public class Launcher {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
-    private static final BotController FBC = BotController.INS.postInit();
+    private static final BotController FBC = BotController.INS;
 
     public static void main(String[] args) throws IllegalArgumentException, InterruptedException, DatabaseException {
         //just post the info to the console
@@ -57,8 +63,6 @@ public class Launcher {
             System.out.println("Version info printed, exiting.");
             return;
         }
-        Metrics.setup();
-        FBC.postInit();
 
         Runtime.getRuntime().addShutdownHook(new Thread(FBC.shutdownHook, "FredBoat main shutdownhook"));
         log.info(getVersionInfo());
@@ -79,17 +83,9 @@ public class Launcher {
             log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
         }
 
-        try {
-            ShardManager shardManager = new DefaultShardManagerBuilder()
-                    .setToken(Config.CONFIG.getBotToken())
-                    .setShardsTotal(Config.getNumShards())
-                    .setContextEnabled(false)
-                    .build();
+        FBC.postInit();
 
-            FBC.setShardManager(shardManager);
-        } catch (LoginException e) {
-            throw new RuntimeException("Failed to log in to Discord! Is your token invalid?", e);
-        }
+        Metrics.setup();
 
         I18n.start();
 
@@ -158,28 +154,19 @@ public class Launcher {
         //Check OpenWeather key
         executor.submit(Launcher::hasValidOpenWeatherKey);
 
-        /* Init JDA */
-        initBotShards();
-
         String carbonKey = Config.CONFIG.getCarbonKey();
         if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && carbonKey != null && !carbonKey.isEmpty()) {
             FredBoatAgent.start(new CarbonitexAgent(carbonKey));
         }
 
-        //wait for all shards to ready up before requesting a total count of jda entities
-        while (!areWeReadyYet()) {
-            Thread.sleep(1000);
+        // Log into Discord
+        try {
+            FBC.setShardManager(buildShardManager());
+        } catch (LoginException e) {
+            throw new RuntimeException("Failed to log in to Discord! Is your token invalid?", e);
         }
 
-        //force a count and then turn on metrics to be served
-        List<Shard> shards = FBC.getShards();
-        StatsAgent jdaEntityCountAgent = FBC.getJdaEntityCountAgent();
-        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = FBC.getJdaEntityCountsTotal();
-        jdaEntityCountsTotal.count(shards);
-        FBC.getJdaEntityCountAgent().addAction(new BotMetrics.FredBoatStatsCounter(
-                () -> jdaEntityCountsTotal.count(shards)));
-        FredBoatAgent.start(jdaEntityCountAgent);
-        API.turnOnMetrics();
+        enableMetrics();
     }
 
     // ################################################################################
@@ -271,30 +258,32 @@ public class Launcher {
         return isSuccess;
     }
 
-    private static void initBotShards() {
-        for (int i = 0; i < Config.getNumShards(); i++) {
-            try {
-                //NOTE: This will take a while since creating shards happens in a blocking fashion
-                FBC.addShard(i, new Shard(i));
-            } catch (Exception e) {
-                //todo this is fatal and requires a restart to fix, so either remove it by guaranteeing that
-                //todo shard creation never fails, or have a proper handling for it
-                log.error("Caught an exception while starting shard {}!", i, e);
-            }
-        }
-
-        log.info(FBC.getShards().size() + " shards have been constructed");
-
-    }
-
     //returns true if all registered shards are reporting back as CONNECTED, false otherwise
     private static boolean areWeReadyYet() {
-        for (Shard shard : FBC.getShards()) {
-            if (shard.getJda().getStatus() != JDA.Status.CONNECTED) {
+        for (JDA.Status status : FBC.getShardManager().getStatuses().values()) {
+            if (status != JDA.Status.CONNECTED) {
                 return false;
             }
         }
+
         return true;
+    }
+
+    private static void enableMetrics() throws InterruptedException {
+        //wait for all shards to ready up before requesting a total count of jda entities
+        while (!areWeReadyYet()) {
+            Thread.sleep(1000);
+        }
+
+        //force a count and then turn on metrics to be served
+        List<JDA> shards = FBC.getShardManager().getShards();
+        StatsAgent jdaEntityCountAgent = FBC.getJdaEntityCountAgent();
+        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = FBC.getJdaEntityCountsTotal();
+        jdaEntityCountsTotal.count(shards);
+        FBC.getJdaEntityCountAgent().addAction(new BotMetrics.FredBoatStatsCounter(
+                () -> jdaEntityCountsTotal.count(shards)));
+        FredBoatAgent.start(jdaEntityCountAgent);
+        API.turnOnMetrics();
     }
 
     private static String getVersionInfo() {
@@ -314,6 +303,28 @@ public class Launcher {
                 + "\n\tJDA:           " + JDAInfo.VERSION
                 + "\n\tLavaplayer     " + PlayerLibrary.VERSION
                 + "\n";
+    }
+
+    private static ShardManager buildShardManager() throws LoginException {
+        SessionController sessionController = Config.CONFIG.getDikeUrl() == null
+                ? new SessionControllerAdapter()
+                : new DikeSessionController();
+
+        return new DefaultShardManagerBuilder()
+                .setToken(Config.CONFIG.getBotToken())
+                .setGame(Game.playing(Config.CONFIG.getGame()))
+                .setBulkDeleteSplittingEnabled(false)
+                .setEnableShutdownHook(false)
+                .setAudioEnabled(true)
+                .setAutoReconnect(true)
+                .setSessionController(sessionController)
+                .setContextEnabled(false)
+                .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
+                .setHttpClientBuilder(new OkHttpClient.Builder()
+                        .eventListener(new OkHttpEventMetrics("jda")))
+                .addEventListeners(BotController.INS.getMainEventListener(), Metrics.instance().jdaEventsMetricsListener)
+                .setShardsTotal(Config.getNumShards())
+                .build();
     }
 
 }

@@ -54,7 +54,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         if (context.hasArguments()) {
             try {
                 long guildId = Long.parseUnsignedLong(context.args[0]);
-                guild = BotController.getGuildById(guildId);
+                guild = BotController.INS.getShardManager().getGuildById(guildId);
             } catch (NumberFormatException ignored) {
             }
             if (guild == null) {

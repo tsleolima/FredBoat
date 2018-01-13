@@ -118,7 +118,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                 }
 
                 VideoSelection.remove(invoker);
-                TextChannel tc = BotController.getTextChannelById(selection.channelId);
+                TextChannel tc = BotController.INS.getShardManager().getTextChannelById(selection.channelId);
                 if (tc != null) {
                     CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(outputMsgBuilder.toString()));
                 }

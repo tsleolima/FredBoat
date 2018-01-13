@@ -69,15 +69,8 @@ public class ReviveCommand extends Command implements ICommandRestricted {
             return;
         }
 
-        boolean force = context.rawArgs.toLowerCase().contains("force");
-
-        context.replyWithName("Attempting to revive shard " + shardId);
-        try {
-            String answer = BotController.getShard(shardId).revive(force);
-            context.replyWithName(answer);
-        } catch (IndexOutOfBoundsException e) {
-            context.replyWithName("No such shard: " + shardId);
-        }
+        context.replyWithName("Queued shard revive for shard " + shardId);
+        BotController.INS.getShardManager().restart(shardId); // If not found it will just function like #start()
     }
 
     @Nonnull
