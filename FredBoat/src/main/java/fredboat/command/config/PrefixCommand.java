@@ -30,16 +30,13 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import fredboat.Config;
 import fredboat.FredBoat;
-import fredboat.command.fun.img.RandomImageCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.db.entity.main.Prefix;
-import fredboat.feature.togglz.FeatureFlags;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
-import fredboat.shared.constant.BotConstants;
 import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
@@ -58,8 +55,6 @@ public class PrefixCommand extends Command implements IConfigCommand {
         super(name, aliases);
     }
 
-    private static final RandomImageCommand wombats = new RandomImageCommand("https://imgur.com/a/mnhzS", "");
-
     @SuppressWarnings("ConstantConditions")
     public static final LoadingCache<Long, Optional<String>> CUSTOM_PREFIXES = CacheBuilder.newBuilder()
             //it is fine to check the db for updates occasionally, as we currently dont have any use case where we change
@@ -74,10 +69,6 @@ public class PrefixCommand extends Command implements IConfigCommand {
 
     @Nonnull
     private static String giefPrefix(long guildId) {
-        if (DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID
-                && !FeatureFlags.PATRON_CUSTOM_PREFIX.isActive()) {
-            return Config.CONFIG.getPrefix();
-        }
         return CUSTOM_PREFIXES
                 .getUnchecked(guildId)
                 .orElse(Config.CONFIG.getPrefix());
@@ -101,13 +92,6 @@ public class PrefixCommand extends Command implements IConfigCommand {
         }
 
         if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
-            return;
-        }
-
-        if (DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID
-                && !FeatureFlags.PATRON_CUSTOM_PREFIX.isActive()) {
-            context.reply("Sorry, this feature has not yet been enabled for the PatronBot! Have a picture of a wombat instead.");
-            wombats.onInvoke(context);
             return;
         }
 
