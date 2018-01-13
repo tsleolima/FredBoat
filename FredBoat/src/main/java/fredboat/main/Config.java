@@ -81,7 +81,6 @@ public class Config {
     private boolean useAutoBlacklist;
     private String game;
     private boolean continuePlayback;
-    private String dikeUrl;
 
     // audio managers
     private boolean youtubeAudio;
@@ -134,9 +133,9 @@ public class Config {
     private String testChannelId;
 
 
-    // unofficial creds
+    // Undocumented creds
     private String carbonKey;
-
+    private String dikeUrl;
 
     //Derived Config values
     private int hikariPoolSize;
@@ -193,7 +192,6 @@ public class Config {
             useAutoBlacklist = (boolean) config.getOrDefault("useAutoBlacklist", true);
             game = (String) config.getOrDefault("game", "");
             continuePlayback = (boolean) config.getOrDefault("continuePlayback", false);
-            dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
 
             //Modular audiomanagers
             youtubeAudio = (Boolean) config.getOrDefault("enableYouTube", true);
@@ -349,8 +347,9 @@ public class Config {
             testChannelId = creds.getOrDefault("testChannelId", "") + "";
 
 
-            // unofficial creds
+            // Undocumented creds
             carbonKey = (String) creds.getOrDefault("carbonKey", "");
+            dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
 
 
             // Derived Config values
@@ -606,13 +605,8 @@ public class Config {
         return testChannelId;
     }
 
-    @Nullable
-    public String getDikeUrl() {
-        return dikeUrl;
-    }
-
     // ********************************************************************************
-    //                       Derived and unofficial values
+    //                       Derived and undocumented values
     // ********************************************************************************
 
     //this static method works even when called from tests with invalid config files leading to a null config
@@ -630,5 +624,10 @@ public class Config {
 
     public String getCarbonKey() {
         return carbonKey;
+    }
+
+    @Nullable
+    public String getDikeUrl() {
+        return dikeUrl;
     }
 }
