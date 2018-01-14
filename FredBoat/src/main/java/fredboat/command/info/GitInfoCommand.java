@@ -30,6 +30,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
+import fredboat.shared.constant.BotConstants;
 import fredboat.util.GitRepoState;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -92,7 +93,7 @@ public class GitInfoCommand extends Command implements IInfoCommand {
         String result = "Could not find or create a valid Github url.";
         GitRepoState gitRepoState = GitRepoState.getGitRepositoryState();
         if (gitRepoState != null) {
-            String originUrl = "git@github.com:Frederikam/FredBoat.git";// gitRepoState.remoteOriginUrl; FIXME unhardcode this. probably requires some gradle/groovy magic or a PR to the git info plugin were using
+            String originUrl = BotConstants.GITHUB_URL;// gitRepoState.remoteOriginUrl; FIXME unhardcode this. probably requires some gradle/groovy magic or a PR to the git info plugin were using
 
             Matcher m = GITHUB_URL_PATTERN.matcher(originUrl);
 

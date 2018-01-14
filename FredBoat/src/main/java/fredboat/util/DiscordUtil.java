@@ -58,8 +58,8 @@ import java.util.List;
 public class DiscordUtil {
 
     private static final Logger log = LoggerFactory.getLogger(DiscordUtil.class);
-    private static final String USER_AGENT = String.format("DiscordBot (https://github.com/Frederikam/FredBoat, %s)",
-            AppInfo.getAppInfo().getVersionBuild());
+    private static final String USER_AGENT = String.format("DiscordBot (%s, %s)",
+            BotConstants.GITHUB_URL, AppInfo.getAppInfo().getVersionBuild());
 
     private static volatile DiscordAppInfo selfDiscordAppInfo; //access this object through getApplicationInfo(jda)
     private static final Object selfDiscordAppInfoLock = new Object();

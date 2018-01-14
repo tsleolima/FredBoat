@@ -41,6 +41,7 @@ import fredboat.command.music.seeking.RewindCommand;
 import fredboat.command.music.seeking.SeekCommand;
 import fredboat.command.util.*;
 import fredboat.perms.PermissionLevel;
+import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.SearchUtil;
@@ -98,7 +99,7 @@ public class CommandInitializer {
         infoModule.registerCommand(new StatsCommand("stats", "uptime"));
         infoModule.registerCommand(new VersionCommand("version"));
         infoModule.registerCommand(new TextCommand("https://github.com/Frederikam", "github"));
-        infoModule.registerCommand(new TextCommand("https://github.com/Frederikam/FredBoat", "repo"));
+        infoModule.registerCommand(new TextCommand(BotConstants.GITHUB_URL, "repo"));
 
 
         // Configurational stuff - always on
