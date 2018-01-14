@@ -39,6 +39,7 @@ import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
+import fredboat.util.rest.CacheUtil;
 import net.dv8tion.jda.core.entities.Guild;
 
 import javax.annotation.Nonnull;
@@ -69,8 +70,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
 
     @Nonnull
     private static String giefPrefix(long guildId) {
-        return CUSTOM_PREFIXES
-                .getUnchecked(guildId)
+        return CacheUtil.getUncheckedUnwrapped(CUSTOM_PREFIXES, guildId)
                 .orElse(Config.CONFIG.getPrefix());
     }
 

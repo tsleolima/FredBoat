@@ -34,6 +34,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.shared.constant.BotConstants;
+import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.bot.entities.ApplicationInfo;
 import net.dv8tion.jda.core.JDA;
@@ -146,7 +147,7 @@ public class DiscordUtil {
 
     //uses our configured bot token to retrieve our own userid
     public static long getBotId() {
-        return BOT_ID.getUnchecked(Config.CONFIG.getBotToken());
+        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Config.CONFIG.getBotToken());
     }
 
     private static long getUserId(@Nonnull String token) {
