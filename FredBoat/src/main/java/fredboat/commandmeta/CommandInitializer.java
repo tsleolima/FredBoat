@@ -68,6 +68,7 @@ public class CommandInitializer {
         adminModule.registerCommand(new AnnounceCommand("announce"));
         adminModule.registerCommand(new BotRestartCommand("botrestart"));
         adminModule.registerCommand(new DisableCommandsCommand("disable"));
+        adminModule.registerCommand(new DiscordPermissionCommand("discordpermissions", "disperms"));
         adminModule.registerCommand(new EnableCommandsCommand("enable"));
         adminModule.registerCommand(new EvalCommand("eval"));
         adminModule.registerCommand(new ExitCommand("exit"));
@@ -80,7 +81,6 @@ public class CommandInitializer {
         adminModule.registerCommand(new SetAvatarCommand("setavatar"));
         adminModule.registerCommand(new TestCommand("test"));
         adminModule.registerCommand(new UnblacklistCommand("unblacklist", "unlimit"));
-        adminModule.registerCommand(new DiscordPermissionCommand("discordpermissions", "disperms"));
 
 
         // Informational / Debugging / Maintenance - always on
@@ -129,6 +129,7 @@ public class CommandInitializer {
         utilityModule.registerCommand(new BrainfuckCommand("brainfuck"));
         utilityModule.registerCommand(new MALCommand("mal"));
         utilityModule.registerCommand(new MathCommand("math"));
+        utilityModule.registerCommand(new RoleInfoCommand("roleinfo"));
         utilityModule.registerCommand(new ServerInfoCommand("serverinfo", "guildinfo"));
         utilityModule.registerCommand(new UserInfoCommand("userinfo", "memberinfo"));
         utilityModule.registerCommand(new WeatherCommand(new OpenWeatherAPI(), "weather"));

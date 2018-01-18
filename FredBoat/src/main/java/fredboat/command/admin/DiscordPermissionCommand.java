@@ -29,6 +29,7 @@ import fredboat.FredBoat;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
 import fredboat.util.TextUtils;
@@ -121,7 +122,7 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
         // channel overrides for roles + @everyone
         // channel override for member
 
-        EmbedBuilder eb = new EmbedBuilder();
+        EmbedBuilder eb = CentralMessaging.getColoredEmbedBuilder();
         eb.setTitle("Full allowed/denied discord permissions");
         eb.setDescription("Empty roles / permission overrides omitted.");
 
