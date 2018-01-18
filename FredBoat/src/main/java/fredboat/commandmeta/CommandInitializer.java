@@ -80,6 +80,7 @@ public class CommandInitializer {
         adminModule.registerCommand(new SetAvatarCommand("setavatar"));
         adminModule.registerCommand(new TestCommand("test"));
         adminModule.registerCommand(new UnblacklistCommand("unblacklist", "unlimit"));
+        adminModule.registerCommand(new DiscordPermissionCommand("discordpermissions", "disperms"));
 
 
         // Informational / Debugging / Maintenance - always on
