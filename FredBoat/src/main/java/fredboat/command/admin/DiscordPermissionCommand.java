@@ -49,6 +49,8 @@ import java.util.List;
 
 /**
  * Created by napster on 18.01.18.
+ *
+ * This command is for debugging and FredBoat support staff.
  */
 public class DiscordPermissionCommand extends Command implements ICommandRestricted {
 
@@ -65,7 +67,9 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
     @Nonnull
     @Override
     public String help(@Nonnull Context context) {
-        return "{0}{1} [channel id]\n#Shows permissions of FredBoat and any roles it has for a channel and guild for debugging.";
+        return "{0}{1} [channel id or mention] [user id or mention]\n#Show permissions of a user and any roles they "
+                + "have for a channel and guild. If no user is provided, FredBoat shows permissions for itself. If no "
+                + "channel is provided, permissions for the channel where the command is issued are shown.";
     }
 
     @Override
