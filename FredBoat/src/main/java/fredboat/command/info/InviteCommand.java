@@ -44,7 +44,7 @@ public class InviteCommand extends Command implements IInfoCommand {
     public void onInvoke(@Nonnull CommandContext context) {
         User self = context.guild.getJDA().getSelfUser();
         String str = "https://discordapp.com/oauth2/authorize?&client_id=" + self.getId() + "&scope=bot";
-        String send = context.i18nFormat("invite", TextUtils.escapeAndDefuse(TextUtils.escapeMarkdown(self.getName())));
+        String send = context.i18nFormat("invite", TextUtils.escapeAndDefuse(self.getName()));
         context.reply(send + "\n" + str);
     }
 

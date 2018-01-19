@@ -92,7 +92,7 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
                     EntityWriter.mergeGuildConfig(gc);
                     context.replyWithName("`track_announce` " + context.i18nFormat("configSetTo", val));
                 } else {
-                    context.reply(context.i18nFormat("configMustBeBoolean", TextUtils.escapeAndDefuse(TextUtils.escapeMarkdown(invoker.getEffectiveName()))));
+                    context.reply(context.i18nFormat("configMustBeBoolean", TextUtils.escapeAndDefuse(invoker.getEffectiveName())));
                 }
                 break;
             case "auto_resume":
