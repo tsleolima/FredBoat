@@ -89,7 +89,7 @@ public class TextUtils {
     public static Message prefaceWithName(Member member, String msg) {
         msg = ensureSpace(msg);
         return CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(escapeMarkdown(member.getEffectiveName()))
+                .append(escapeAndDefuse(member.getEffectiveName()))
                 .append(": ")
                 .append(msg)
                 .build();
@@ -382,5 +382,14 @@ public class TextUtils {
     public static String defuseMentions(@Nonnull String input) {
         return input.replaceAll("@here", "@" + ZERO_WIDTH_CHAR + "here")
                 .replaceAll("@everyone", "@" + ZERO_WIDTH_CHAR + "everyone");
+    }
+
+    /**
+     * @return the input, with escaped markdown and defused mentions
+     * It is a good idea to use this on any user generated values that we reply in plain text.
+     */
+    @Nonnull
+    public static String escapeAndDefuse(@Nonnull String input) {
+        return defuseMentions(escapeMarkdown(input));
     }
 }

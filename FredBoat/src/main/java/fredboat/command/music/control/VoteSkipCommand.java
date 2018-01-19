@@ -153,7 +153,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
 
             Member member = context.getGuild().getMemberById(userId);
             if (member != null) {
-                field.append("| ").append(TextUtils.escapeMarkdown(member.getEffectiveName())).append("\n");
+                field.append("| ").append(TextUtils.escapeAndDefuse(member.getEffectiveName())).append("\n");
             }
         }
         EmbedBuilder embed = CentralMessaging.getColoredEmbedBuilder();
