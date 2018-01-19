@@ -183,6 +183,7 @@ public class CommandInitializer {
         funModule.registerCommand(new TextCommand("┬┴┬┴┤ ͜ʖ ͡°) ├┬┴┬┴", "peeking", "peekinglenny", "peek"));
         funModule.registerCommand(new TextCommand(AsciiArtConstant.EAGLE_OF_LENNY, "eagleoflenny", "eol", "lennyeagle"));
         funModule.registerCommand(new MagicCommand("magic", "magicallenny", "lennymagical"));
+        funModule.registerCommand(new TextCommand("( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)", "lennygang"));
 
         /* Random images / image collections */
         funModule.registerCommand(new CatgirlCommand("catgirl", "neko", "catgrill"));
