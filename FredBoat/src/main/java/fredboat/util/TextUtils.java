@@ -38,6 +38,8 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.text.CharacterPredicates;
+import org.apache.commons.text.RandomStringGenerator;
 import org.json.JSONException;
 import org.slf4j.LoggerFactory;
 
@@ -391,5 +393,18 @@ public class TextUtils {
     @Nonnull
     public static String escapeAndDefuse(@Nonnull String input) {
         return defuseMentions(escapeMarkdown(input));
+    }
+
+    @Nonnull
+    private static RandomStringGenerator randomStringGenerator = new RandomStringGenerator.Builder()
+            .withinRange('0', 'z')
+            .filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS)
+            .build();
+
+    public static String randomAlphaNumericString(int length) {
+        if (length < 1) {
+            throw new IllegalArgumentException();
+        }
+        return randomStringGenerator.generate(length);
     }
 }
