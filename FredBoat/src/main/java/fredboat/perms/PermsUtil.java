@@ -34,10 +34,12 @@ import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.utils.PermissionUtil;
 
 import java.util.List;
 
+/**
+ * This class provides utility methods for FredBoat's own permission system, **not** the Discord permission system.
+ */
 public class PermsUtil {
 
     public static PermissionLevel getPerms(Member member) {
@@ -45,12 +47,12 @@ public class PermsUtil {
             return PermissionLevel.BOT_OWNER; // https://fred.moe/Q-EB.png
         } else if (isBotAdmin(member)) {
             return PermissionLevel.BOT_ADMIN;
-        } else if (PermissionUtil.checkPermission(member, Permission.ADMINISTRATOR)) {
+        } else if (member.hasPermission(Permission.ADMINISTRATOR)) {
             return PermissionLevel.ADMIN;
         }
 
         if (!FeatureFlags.PERMISSIONS.isActive()) {
-            return PermissionUtil.checkPermission(member, Permission.MESSAGE_MANAGE) ? PermissionLevel.DJ : PermissionLevel.USER;
+            return member.hasPermission(Permission.MESSAGE_MANAGE) ? PermissionLevel.DJ : PermissionLevel.USER;
         }
 
         GuildPermissions gp = EntityReader.getGuildPermissions(member.getGuild());
@@ -100,7 +102,7 @@ public class PermsUtil {
     }
 
     public static boolean checkList(List<String> list, Member member) {
-        if (PermissionUtil.checkPermission(member, Permission.ADMINISTRATOR)) return true;
+        if (member.hasPermission(Permission.ADMINISTRATOR)) return true;
 
         for (String id : list) {
             if (id.isEmpty()) continue;
