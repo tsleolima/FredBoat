@@ -163,11 +163,70 @@ public class CommandContext extends Context {
      */
     public void deleteMessage() {
         TextChannel tc = msg.getTextChannel();
-        if (tc != null && hasPermissions(tc, Permission.MESSAGE_MANAGE, //While Manage Message _should_ be enough as it _should_
-                Permission.MESSAGE_READ,                                // implicitly give us all the other Text permissions,
-                Permission.MESSAGE_HISTORY)) {                          // it is bugged, so we do some additional checks here.
-            CentralMessaging.deleteMessage(msg);                        // See https://github.com/DV8FromTheWorld/JDA/issues/414 for more info.
+
+        if (tc != null && hasPermissions(tc, Permission.MESSAGE_MANAGE)
+                && hasExplicitPermissionOrIsAdmin(tc, Permission.MESSAGE_MANAGE)) {
+            CentralMessaging.deleteMessage(msg);
         }
+    }
+
+    //workaround check for https://github.com/DV8FromTheWorld/JDA/issues/414
+    // we check all permission overrides and roles for channel, its optional parent, and serverwide roles for an explicit
+    // grant of the provided permission and return true if there is at least one such grant
+    @SuppressWarnings("Duplicates")
+    private static boolean hasExplicitPermissionOrIsAdmin(@Nonnull TextChannel channel, @Nonnull Permission permission) {
+        Member self = channel.getGuild().getSelfMember();
+        if (self == null) {
+            return false;
+        }
+        if (self.hasPermission(Permission.ADMINISTRATOR)) {
+            return true;
+        }
+
+        List<Role> roles = new ArrayList<>(self.getRoles());
+        roles.add(self.getGuild().getPublicRole());
+        Category parent = channel.getParent();
+
+
+        PermissionOverride memberChannelPO = channel.getPermissionOverride(self);
+        if (memberChannelPO != null) {
+            if (memberChannelPO.getAllowed().contains(permission)) {
+                return true;
+            }
+        }
+
+        if (parent != null) {
+            PermissionOverride memberCategoryPO = parent.getPermissionOverride(self);
+            if (memberCategoryPO != null) {
+                if (memberCategoryPO.getAllowed().contains(permission)) {
+                    return true;
+                }
+            }
+        }
+
+        for (Role role : roles) {
+            if (role.hasPermission(permission)) {
+                return true;
+            }
+
+            PermissionOverride roleChannelPO = channel.getPermissionOverride(role);
+            if (roleChannelPO != null) {
+                if (roleChannelPO.getAllowed().contains(permission)) {
+                    return true;
+                }
+            }
+
+            if (parent != null) {
+                PermissionOverride roleCategeoryPO = parent.getPermissionOverride(role);
+                if (roleCategeoryPO != null) {
+                    if (roleCategeoryPO.getAllowed().contains(permission)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
