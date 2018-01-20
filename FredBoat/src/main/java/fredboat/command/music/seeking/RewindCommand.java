@@ -72,7 +72,8 @@ public class RewindCommand extends Command implements IMusicCommand, ICommandRes
         t = Math.min(currentPosition, t);
 
         player.seekTo(currentPosition - t);
-        context.reply(context.i18nFormat("rewSuccess", player.getPlayingTrack().getEffectiveTitle(), TextUtils.formatTime(t)));
+        context.reply(context.i18nFormat("rewSuccess",
+                TextUtils.escapeAndDefuse(player.getPlayingTrack().getEffectiveTitle()), TextUtils.formatTime(t)));
     }
 
     @Nonnull

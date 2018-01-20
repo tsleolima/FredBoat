@@ -51,6 +51,7 @@ import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
+import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
@@ -285,7 +286,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
             log.info("Track " + track.getIdentifier() + " was cleaned up");
         } else if (endReason == AudioTrackEndReason.LOAD_FAILED) {
             if (onErrorHook != null)
-                onErrorHook.accept(new MessagingException("Track `" + track.getInfo().title + "` failed to load. Skipping..."));
+                onErrorHook.accept(new MessagingException("Track `" + TextUtils.escapeAndDefuse(track.getInfo().title) + "` failed to load. Skipping..."));
             audioTrackProvider.skipped();
             loadAndPlay();
         } else {

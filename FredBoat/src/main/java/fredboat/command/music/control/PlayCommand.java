@@ -166,7 +166,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                     builder.append("\n**")
                             .append(String.valueOf(i))
                             .append(":** ")
-                            .append(track.getInfo().title)
+                            .append(TextUtils.escapeAndDefuse(track.getInfo().title))
                             .append(" (")
                             .append(TextUtils.formatTime(track.getInfo().length))
                             .append(")");

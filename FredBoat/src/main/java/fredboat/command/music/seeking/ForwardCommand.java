@@ -76,7 +76,8 @@ public class ForwardCommand extends Command implements IMusicCommand, ICommandRe
         t = Math.min(atc.getEffectiveDuration(), t);
 
         player.seekTo(player.getPosition() + t);
-        context.reply(context.i18nFormat("fwdSuccess", atc.getEffectiveTitle(), TextUtils.formatTime(t)));
+        context.reply(context.i18nFormat("fwdSuccess",
+                TextUtils.escapeAndDefuse(atc.getEffectiveTitle()), TextUtils.formatTime(t)));
     }
 
     @Nonnull

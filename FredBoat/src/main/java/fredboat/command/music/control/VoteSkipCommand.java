@@ -67,7 +67,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
                     context.reply(context.i18n("skipTrackNotFound"));
                 } else {
                     String skipPerc = "`" + TextUtils.formatPercent(skipPercentage) + "`";
-                    String trackTitle = "**" + atc.getEffectiveTitle() + "**";
+                    String trackTitle = "**" + TextUtils.escapeAndDefuse(atc.getEffectiveTitle()) + "**";
                     context.reply(response + "\n" + context.i18nFormat("voteSkipSkipping", skipPerc, trackTitle));
                     player.skip();
                 }
