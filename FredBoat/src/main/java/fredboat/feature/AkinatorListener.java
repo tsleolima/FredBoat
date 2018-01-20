@@ -95,7 +95,7 @@ public final class AkinatorListener extends UserListener {
     }
 
     private void sendNextQuestion() {
-        String name = TextUtils.escapeMarkdown(context.getMember().getEffectiveName());
+        String name = TextUtils.escapeAndDefuse(context.getMember().getEffectiveName());
         String out = "**" + name + ": Question " + (stepInfo.getStepNum() + 1) + "**\n"
                 + stepInfo.getQuestion() + "\n [yes/no/idk/probably/probably not]";
         context.reply(out);

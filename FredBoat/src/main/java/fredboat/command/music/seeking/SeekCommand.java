@@ -74,7 +74,8 @@ public class SeekCommand extends Command implements IMusicCommand, ICommandRestr
         t = Math.min(atc.getEffectiveDuration(), t);
 
         player.seekTo(atc.getStartPosition() + t);
-        context.reply(context.i18nFormat("seekSuccess", atc.getEffectiveTitle(), TextUtils.formatTime(t)));
+        context.reply(context.i18nFormat("seekSuccess",
+                TextUtils.escapeAndDefuse(atc.getEffectiveTitle()), TextUtils.formatTime(t)));
     }
 
     @Nonnull

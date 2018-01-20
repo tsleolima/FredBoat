@@ -39,6 +39,7 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.main.ShardContext;
+import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
@@ -93,7 +94,7 @@ public class GuildPlayer extends AbstractPlayer {
             TextChannel activeTextChannel = getActiveTextChannel();
             if (activeTextChannel != null) {
                 CentralMessaging.sendMessage(activeTextChannel,
-                        atc.i18nFormat("trackAnnounce", atc.getEffectiveTitle()));
+                        atc.i18nFormat("trackAnnounce", TextUtils.escapeAndDefuse(atc.getEffectiveTitle())));
             }
         }
     }

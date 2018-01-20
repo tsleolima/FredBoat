@@ -151,6 +151,6 @@ public class ModulesCommand extends Command implements IConfigCommand {
     @Override
     public String help(@Nonnull Context context) {
         String usage = "{0}{1} OR {0}{1} enable/disable <module>\n#";
-        return usage + context.i18nFormat("helpModules");
+        return usage + context.i18n("helpModules");
     }
 }

@@ -67,7 +67,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
                     context.reply(context.i18n("skipTrackNotFound"));
                 } else {
                     String skipPerc = "`" + TextUtils.formatPercent(skipPercentage) + "`";
-                    String trackTitle = "**" + atc.getEffectiveTitle() + "**";
+                    String trackTitle = "**" + TextUtils.escapeAndDefuse(atc.getEffectiveTitle()) + "**";
                     context.reply(response + "\n" + context.i18nFormat("voteSkipSkipping", skipPerc, trackTitle));
                     player.skip();
                 }
@@ -153,7 +153,7 @@ public class VoteSkipCommand extends Command implements IMusicCommand, ICommandR
 
             Member member = context.getGuild().getMemberById(userId);
             if (member != null) {
-                field.append("| ").append(TextUtils.escapeMarkdown(member.getEffectiveName())).append("\n");
+                field.append("| ").append(TextUtils.escapeAndDefuse(member.getEffectiveName())).append("\n");
             }
         }
         EmbedBuilder embed = CentralMessaging.getColoredEmbedBuilder();

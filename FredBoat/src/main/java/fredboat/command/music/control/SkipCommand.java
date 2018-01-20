@@ -128,7 +128,8 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
         AudioTrackContext atc = player.getTracksInRange(givenIndex - 1, givenIndex).get(0);
 
-        String successMessage = context.i18nFormat("skipSuccess", givenIndex, atc.getEffectiveTitle());
+        String successMessage = context.i18nFormat("skipSuccess", givenIndex,
+                TextUtils.escapeAndDefuse(atc.getEffectiveTitle()));
         player.skipTracksForMemberPerms(context, Collections.singletonList(atc.getTrackId()), successMessage);
     }
 
@@ -205,14 +206,14 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
         if (userAtcIds.size() > 0) {
 
-            String title = player.getPlayingTrack().getEffectiveTitle();
+            String title = TextUtils.escapeAndDefuse(player.getPlayingTrack().getEffectiveTitle());
             player.skipTracks(userAtcIds);
 
             if (affectedUsers.size() > 1) {
                 context.reply(context.i18nFormat("skipUsersMultiple", ("`" + userAtcIds.size() + "`"), ("**" + affectedUsers.size() + "**")));
             } else {
                 User user = affectedUsers.get(0);
-                String userName = "**" + TextUtils.escapeMarkdown(user.getName()) + "#" + user.getDiscriminator() + "**";
+                String userName = "**" + TextUtils.escapeAndDefuse(user.getName()) + "#" + user.getDiscriminator() + "**";
                 if (userAtcIds.size() == 1) {
                     context.reply(context.i18nFormat("skipUserSingle", "**" + title + "**", userName));
                 } else {
@@ -230,7 +231,8 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
         if (atc == null) {
             context.reply(context.i18n("skipTrackNotFound"));
         } else {
-            String successMessage = context.i18nFormat("skipSuccess", 1, atc.getEffectiveTitle());
+            String successMessage = context.i18nFormat("skipSuccess", 1,
+                    TextUtils.escapeAndDefuse(atc.getEffectiveTitle()));
             player.skipTracksForMemberPerms(context, Collections.singletonList(atc.getTrackId()), successMessage);
         }
     }

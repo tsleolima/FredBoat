@@ -32,6 +32,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,7 +109,14 @@ public class ArgumentUtil {
         }
     }
 
-    public static IMentionable checkSingleFuzzySearchResult(List<IMentionable> list, CommandContext context, String term) {
+    /**
+     * Processes a list of mentionables (roles / users).
+     * Replies in the context of there are none / more than one mentionable and returns null, otherwise returns the
+     * single mentionable.
+     */
+    @Nullable
+    public static IMentionable checkSingleFuzzySearchResult(@Nonnull List<IMentionable> list,
+                                                            @Nonnull CommandContext context, @Nonnull String term) {
         switch (list.size()) {
             case 0:
                 context.reply(context.i18nFormat("fuzzyNothingFound", term));

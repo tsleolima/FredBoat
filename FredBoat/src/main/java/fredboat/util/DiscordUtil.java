@@ -34,6 +34,7 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.main.Config;
 import fredboat.main.BotController;
 import fredboat.shared.constant.BotConstants;
+import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.bot.entities.ApplicationInfo;
 import net.dv8tion.jda.core.JDA;
@@ -58,8 +59,8 @@ import java.util.List;
 public class DiscordUtil {
 
     private static final Logger log = LoggerFactory.getLogger(DiscordUtil.class);
-    private static final String USER_AGENT = String.format("DiscordBot (https://github.com/Frederikam/FredBoat, %s)",
-            AppInfo.getAppInfo().getVersionBuild());
+    private static final String USER_AGENT = String.format("DiscordBot (%s, %s)",
+            BotConstants.GITHUB_URL, AppInfo.getAppInfo().getVersionBuild());
 
     private static volatile DiscordAppInfo selfDiscordAppInfo; //access this object through getApplicationInfo(jda)
     private static final Object selfDiscordAppInfoLock = new Object();
@@ -146,7 +147,7 @@ public class DiscordUtil {
 
     //uses our configured bot token to retrieve our own userid
     public static long getBotId() {
-        return BOT_ID.getUnchecked(Config.CONFIG.getBotToken());
+        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Config.CONFIG.getBotToken());
     }
 
     private static long getUserId(@Nonnull String token) {

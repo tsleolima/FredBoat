@@ -43,17 +43,12 @@ import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.utils.PermissionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionsCommand extends Command implements IConfigCommand {
-
-    private static final Logger log = LoggerFactory.getLogger(PermissionsCommand.class);
 
     public final PermissionLevel permissionLevel;
 
@@ -132,7 +127,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
 
         if (permissionLevel == PermissionLevel.ADMIN
                 && PermissionLevel.BOT_ADMIN.getLevel() > PermsUtil.getPerms(invoker).getLevel()
-                && !PermissionUtil.checkPermission(invoker, Permission.ADMINISTRATOR)
+                && !invoker.hasPermission(Permission.ADMINISTRATOR)
                 && !PermsUtil.checkList(newList, invoker)) {
             context.replyWithName(context.i18n("permsFailSelfDemotion"));
             return;

@@ -41,6 +41,7 @@ import fredboat.command.music.seeking.RewindCommand;
 import fredboat.command.music.seeking.SeekCommand;
 import fredboat.command.util.*;
 import fredboat.perms.PermissionLevel;
+import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.SearchUtil;
@@ -67,6 +68,7 @@ public class CommandInitializer {
         adminModule.registerCommand(new AnnounceCommand("announce"));
         adminModule.registerCommand(new BotRestartCommand("botrestart"));
         adminModule.registerCommand(new DisableCommandsCommand("disable"));
+        adminModule.registerCommand(new DiscordPermissionCommand("discordpermissions", "disperms"));
         adminModule.registerCommand(new EnableCommandsCommand("enable"));
         adminModule.registerCommand(new EvalCommand("eval"));
         adminModule.registerCommand(new ExitCommand("exit"));
@@ -98,7 +100,7 @@ public class CommandInitializer {
         infoModule.registerCommand(new StatsCommand("stats", "uptime"));
         infoModule.registerCommand(new VersionCommand("version"));
         infoModule.registerCommand(new TextCommand("https://github.com/Frederikam", "github"));
-        infoModule.registerCommand(new TextCommand("https://github.com/Frederikam/FredBoat", "repo"));
+        infoModule.registerCommand(new TextCommand(BotConstants.GITHUB_URL, "repo"));
 
 
         // Configurational stuff - always on
@@ -127,6 +129,7 @@ public class CommandInitializer {
         utilityModule.registerCommand(new BrainfuckCommand("brainfuck"));
         utilityModule.registerCommand(new MALCommand("mal"));
         utilityModule.registerCommand(new MathCommand("math"));
+        utilityModule.registerCommand(new RoleInfoCommand("roleinfo"));
         utilityModule.registerCommand(new ServerInfoCommand("serverinfo", "guildinfo"));
         utilityModule.registerCommand(new UserInfoCommand("userinfo", "memberinfo"));
         utilityModule.registerCommand(new WeatherCommand(new OpenWeatherAPI(), "weather"));
@@ -180,6 +183,7 @@ public class CommandInitializer {
         funModule.registerCommand(new TextCommand("┬┴┬┴┤ ͜ʖ ͡°) ├┬┴┬┴", "peeking", "peekinglenny", "peek"));
         funModule.registerCommand(new TextCommand(AsciiArtConstant.EAGLE_OF_LENNY, "eagleoflenny", "eol", "lennyeagle"));
         funModule.registerCommand(new MagicCommand("magic", "magicallenny", "lennymagical"));
+        funModule.registerCommand(new TextCommand("( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)", "lennygang"));
 
         /* Random images / image collections */
         funModule.registerCommand(new CatgirlCommand("catgirl", "neko", "catgrill"));

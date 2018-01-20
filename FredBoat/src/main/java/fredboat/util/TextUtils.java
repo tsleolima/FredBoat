@@ -38,6 +38,8 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.text.CharacterPredicates;
+import org.apache.commons.text.RandomStringGenerator;
 import org.json.JSONException;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +91,7 @@ public class TextUtils {
     public static Message prefaceWithName(Member member, String msg) {
         msg = ensureSpace(msg);
         return CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(escapeMarkdown(member.getEffectiveName()))
+                .append(escapeAndDefuse(member.getEffectiveName()))
                 .append(": ")
                 .append(msg)
                 .build();
@@ -382,5 +384,27 @@ public class TextUtils {
     public static String defuseMentions(@Nonnull String input) {
         return input.replaceAll("@here", "@" + ZERO_WIDTH_CHAR + "here")
                 .replaceAll("@everyone", "@" + ZERO_WIDTH_CHAR + "everyone");
+    }
+
+    /**
+     * @return the input, with escaped markdown and defused mentions
+     * It is a good idea to use this on any user generated values that we reply in plain text.
+     */
+    @Nonnull
+    public static String escapeAndDefuse(@Nonnull String input) {
+        return defuseMentions(escapeMarkdown(input));
+    }
+
+    @Nonnull
+    private static RandomStringGenerator randomStringGenerator = new RandomStringGenerator.Builder()
+            .withinRange('0', 'z')
+            .filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS)
+            .build();
+
+    public static String randomAlphaNumericString(int length) {
+        if (length < 1) {
+            throw new IllegalArgumentException();
+        }
+        return randomStringGenerator.generate(length);
     }
 }
