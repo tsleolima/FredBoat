@@ -90,6 +90,7 @@ public class Config {
     private boolean vimeoAudio;
     private boolean mixerAudio;
     private boolean spotifyAudio;
+    private boolean localAudio;
     private boolean httpAudio;
 
     // temporary config values todo remove after merging main + music
@@ -201,6 +202,7 @@ public class Config {
             vimeoAudio = (Boolean) config.getOrDefault("enableVimeo", true);
             mixerAudio = (Boolean) config.getOrDefault("enableMixer", true);
             spotifyAudio = (Boolean) config.getOrDefault("enableSpotify", true);
+            localAudio = (Boolean) config.getOrDefault("enableLocal", false);
             httpAudio = (Boolean) config.getOrDefault("enableHttp", false);
 
             //temp configs
@@ -500,6 +502,10 @@ public class Config {
 
     public boolean isSpotifyEnabled() {
         return spotifyAudio;
+    }
+
+    public boolean isLocalEnabled() {
+        return localAudio;
     }
 
     public boolean isHttpEnabled() {

@@ -15,7 +15,8 @@ enableTwitch:      true        # Set to true to enable playing Twitch links
 enableVimeo:       true        # Set to true to enable playing Vimeo links
 enableMixer:       true        # Set to true to enable playing Mixer links
 enableSpotify:     true        # Set to true to enable playing Spotify links
-enableHttp:        true        # Set to true to enable playing direct links
+enableLocal:       false       # Set to true to enable playing local files
+enableHttp:        false       # Set to true to enable playing direct links
 
 # THIS IS TEMPORARY UNTIL COMMANDS ARE MODULARIZED
 tempUseVoiceChannelCleanup: true # This acts as an override if set to false no vcCleanupAgent will be run
