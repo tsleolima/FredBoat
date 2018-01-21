@@ -54,10 +54,12 @@ services:
       - ./logs:/opt/FredBoat/logs
       - ./music_persistence:/opt/FredBoat/music_persistence
       # Local audio files (dev branch only currently)
-      # If your music directory looks like this: /path/to/your/music/directory/rickroll.mp3,
-      # you will be able to play that file with this command: ;;play file://music/rickroll.mp3
-      #- /path/to/your/music/directory:/opt/FredBoat/music
-      #todo path example + testing for windows
+      # If your music directory looks like this: /home/user/music/directory/rickroll.mp3 or C:\Users\user\Music\rickroll.mp3
+      # you will be able to play that file with this command: <<play file://music/rickroll.mp3
+      # Linux example:
+      #- /home/your_user_name/music:/opt/FredBoat/music
+      # Windows example:
+      #- C:\Users\your_user_name\Music:/opt/FredBoat/music
 
     # Need a bigger memory size or any other custom JVM args? uncomment and edit the line below accordingly
     #entrypoint: java -jar -Xmx128m FredBoat.jar
