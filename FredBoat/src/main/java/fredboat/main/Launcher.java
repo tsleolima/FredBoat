@@ -310,7 +310,7 @@ public class Launcher {
                 ? new SessionControllerAdapter()
                 : new DikeSessionController();
 
-        return new DefaultShardManagerBuilder()
+        DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
                 .setToken(Config.CONFIG.getBotToken())
                 .setGame(Game.playing(Config.CONFIG.getGame()))
                 .setBulkDeleteSplittingEnabled(false)
@@ -323,8 +323,13 @@ public class Launcher {
                 .setHttpClientBuilder(new OkHttpClient.Builder()
                         .eventListener(new OkHttpEventMetrics("jda")))
                 .addEventListeners(BotController.INS.getMainEventListener(), Metrics.instance().jdaEventsMetricsListener)
-                .setShardsTotal(Config.getNumShards())
-                .build();
+                .setShardsTotal(Config.getNumShards());
+
+        if (LavalinkManager.ins.isEnabled()) {
+            builder.addEventListeners(LavalinkManager.ins.getLavalink());
+        }
+
+        return builder.build();
     }
 
 }
