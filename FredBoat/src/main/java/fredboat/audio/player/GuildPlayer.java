@@ -133,8 +133,9 @@ public class GuildPlayer extends AbstractPlayer {
         }
 
         LavalinkManager.ins.openConnection(targetChannel);
-        AudioManager manager = getGuild().getAudioManager();
-        manager.setConnectionListener(new DebugConnectionListener(guildId, shard.getJda().getShardInfo()));
+        if (!LavalinkManager.ins.isEnabled()) {
+            getGuild().getAudioManager().setConnectionListener(new DebugConnectionListener(guildId, shard.getJda().getShardInfo()));
+        }
 
         log.info("Connected to voice channel " + targetChannel);
     }
@@ -162,9 +163,7 @@ public class GuildPlayer extends AbstractPlayer {
     public void queue(String identifier, CommandContext context) {
         IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker);
 
-        if (context.invoker != null) {
-            joinChannel(context.invoker);
-        }
+        joinChannel(context.invoker);
 
         audioLoader.loadAsync(ic);
     }
