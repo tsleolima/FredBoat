@@ -30,6 +30,7 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
@@ -106,8 +107,21 @@ public class CommandsCommand extends Command implements IInfoCommand {
         context.reply(eb.build());
     }
 
-    private EmbedBuilder addModuleCommands(EmbedBuilder embedBuilder, CommandContext context, CommandRegistry module) {
-        List<Command> commands = module.getDeduplicatedCommands();
+    private EmbedBuilder addModuleCommands(@Nonnull EmbedBuilder embedBuilder, @Nonnull CommandContext context,
+                                           @Nonnull CommandRegistry module) {
+
+        List<Command> commands = module.getDeduplicatedCommands()
+                .stream()
+                //do not show BOT_ADMIN or BOT_OWNER commands to users lower than that
+                .filter(command -> {
+                    if (command instanceof ICommandRestricted) {
+                        if (((ICommandRestricted) command).getMinimumPerms().getLevel() >= PermissionLevel.BOT_ADMIN.getLevel()) {
+                            return PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker);
+                        }
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
 
         String prefix = context.getPrefix();
 
