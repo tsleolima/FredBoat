@@ -25,7 +25,6 @@
 
 package fredboat.command.moderation;
 
-import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IModerationCommand;
@@ -83,7 +82,7 @@ public class ClearCommand extends Command implements IModerationCommand {
                     }
 
                     if (toDelete.isEmpty()) {
-                        throw new MessagingException("No messages found.");
+                        context.reply("No messages found.");
                     } else if (toDelete.size() == 1) {
                         context.reply("Found one message, deleting.");
                         CentralMessaging.deleteMessage(toDelete.get(0));
