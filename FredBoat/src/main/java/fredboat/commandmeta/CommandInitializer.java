@@ -145,23 +145,26 @@ public class CommandInitializer {
 
         /* Other Anime Discord, Sergi memes or any other memes
            saved in this album https://imgur.com/a/wYvDu        */
+
+        /* antique FredBoat staff insiders */
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/j8VvjOT.png", "rude"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/oJL7m7m.png", "fuck"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/BrCCbfx.png", "idc"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/jjoz783.png", "beingraped"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/w7x1885.png", "wow"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/GNsAxkh.png", "what"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/sBfq3wM.png", "pun"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/pQiT26t.jpg", "cancer"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/YT1Bkhj.png", "stupidbot"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/QmI469j.png", "escape"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/mKdTGlg.png", "noods"));
+        funModule.registerCommand(new RestrictedRemoteFileCommand(PermissionLevel.BOT_ADMIN, "http://i.imgur.com/i65ss6p.png", "powerpoint"));
+
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/DYToB2e.jpg", "ram"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/utPRe0e.gif", "welcome"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/j8VvjOT.png", "rude"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/oJL7m7m.png", "fuck"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/BrCCbfx.png", "idc"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/jjoz783.png", "beingraped"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/93VahIh.png", "anime"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/w7x1885.png", "wow"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/GNsAxkh.png", "what"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/sBfq3wM.png", "pun"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/pQiT26t.jpg", "cancer"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/YT1Bkhj.png", "stupidbot"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/QmI469j.png", "escape"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/qz6g1vj.gif", "explosion"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/mKdTGlg.png", "noods"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/84nbpQe.png", "internetspeed"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/i65ss6p.png", "powerpoint"));
         
         /* Text Faces & Unicode 'Art' & ASCII 'Art' and Stuff */
         funModule.registerCommand(new TextCommand("¯\\_(ツ)_/¯", "shrug", "shr"));
