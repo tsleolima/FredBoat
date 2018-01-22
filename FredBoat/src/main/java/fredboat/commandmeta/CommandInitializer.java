@@ -159,7 +159,6 @@ public class CommandInitializer {
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/YT1Bkhj.png", "stupidbot"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/QmI469j.png", "escape"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/qz6g1vj.gif", "explosion"));
-        funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/eBUFNJq.gif", "gif"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/mKdTGlg.png", "noods"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/84nbpQe.png", "internetspeed"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/i65ss6p.png", "powerpoint"));

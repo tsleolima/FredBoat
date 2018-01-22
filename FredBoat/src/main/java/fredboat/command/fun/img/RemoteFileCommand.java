@@ -29,7 +29,6 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.messaging.internal.Context;
-import fredboat.util.rest.CacheUtil;
 
 import javax.annotation.Nonnull;
 
@@ -44,8 +43,7 @@ public class RemoteFileCommand extends Command implements IFunCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        //NOTE: moving this to Context#replyImage breaks the ;;gif one
-        context.replyFile(CacheUtil.getImageFromURL(url), null);
+        context.replyImage(url, null);
     }
 
     @Nonnull
