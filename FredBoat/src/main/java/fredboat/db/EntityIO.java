@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
+import space.npstr.sqlsauce.fp.types.EntityKey;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -163,6 +164,11 @@ public class EntityIO {
     @Nonnull
     public static GuildData getGuildData(@Nonnull Guild guild) {
         return doUserFriendly(onMainDb(wrapper -> wrapper.getOrCreate(GuildData.key(guild))));
+    }
+
+    @Nonnull
+    public static Aliases getAliases(@Nonnull EntityKey<Long, Aliases> key) {
+        return doUserFriendly(onMainDb(wrapper -> wrapper.getOrCreate(key)));
     }
 
 

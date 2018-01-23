@@ -73,6 +73,14 @@
         <persistence strategy="localTempSwap"/>
     </cache>
 
+    <cache name="user_aliases"
+           maxEntriesLocalHeap="0"
+           eternal="false"
+           timeToIdleSeconds="60"
+           timeToLiveSeconds="120">
+        <persistence strategy="localTempSwap"/>
+    </cache>
+
     <cache name="org.hibernate.cache.internal.StandardQueryCache"
            maxEntriesLocalHeap="5"
            eternal="false"

@@ -29,6 +29,7 @@ import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.db.EntityIO;
+import fredboat.db.entity.main.Aliases;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -122,17 +124,10 @@ public class CommandContext extends Context {
             }
         }
 
-        // the \p{javaSpaceChar} instead of the better known \s is used because it actually includes unicode whitespaces
-        String[] args = input.split("\\p{javaSpaceChar}+");
-        if (args.length < 1) {
-            return null; //while this shouldn't technically be possible due to the preprocessing of the input, better be safe than throw exceptions
-        }
+        ParsedCommand parsedCommand = parseInput(input, event.getMember(), false);
 
-        String commandTrigger = args[0];
-
-        Command command = CommandRegistry.findCommand(commandTrigger.toLowerCase());
-        if (command == null) {
-            log.info("Unknown command:\t{}", commandTrigger);
+        if (parsedCommand == null) {
+            log.info("Unknown command:\t{}", input);
             return null;
         } else {
             CommandContext context = new CommandContext(
@@ -142,11 +137,63 @@ public class CommandContext extends Context {
                     event.getMessage());
 
             context.isMention = isMention;
-            context.trigger = commandTrigger;
-            context.command = command;
-            context.args = Arrays.copyOfRange(args, 1, args.length);//exclude args[0] that contains the command trigger
-            context.rawArgs = input.replaceFirst(commandTrigger, "").trim();
+            context.trigger = parsedCommand.trigger;
+            context.command = parsedCommand.command;
+            context.args = Arrays.copyOfRange(parsedCommand.args, 1, parsedCommand.args.length);//exclude args[0] that contains the command trigger
+            context.rawArgs = parsedCommand.input.replaceFirst(Pattern.quote(parsedCommand.trigger), "").trim();
             return context;
+        }
+    }
+
+    //recursively tries to parse the input for aliases until it finds a command
+    @Nullable
+    private static ParsedCommand parseInput(@Nonnull String input, @Nonnull Member invoker, boolean guildOnly) {
+        // the \p{javaSpaceChar} instead of the better known \s is used because it actually includes unicode whitespaces
+        String[] arguments = input.split("\\p{javaSpaceChar}+");
+        if (arguments.length < 1) {
+            return null; //while this shouldn't technically be possible due to the preprocessing of the input, better be safe than throw exceptions
+        }
+        String commandTrigger = arguments[0];
+
+        //check for existing command
+        Command command = CommandRegistry.findCommand(commandTrigger.toLowerCase());
+        if (command != null) return new ParsedCommand(input, command, commandTrigger, arguments);
+
+        //check for guild alias
+        String aliasValue = EntityIO.getAliases(Aliases.key(invoker.getGuild())).getAlias(commandTrigger);
+        if (aliasValue != null) {
+            return parseInput(input.replaceFirst(Pattern.quote(commandTrigger), aliasValue), invoker, true);
+        }
+
+        // guild aliases may only trigger other guild aliases, do not go further to the user aliases once we hit a guild alias
+        if (guildOnly) return null;
+
+        //check for user alias
+        aliasValue = EntityIO.getAliases(Aliases.key(invoker)).getAlias(commandTrigger);
+        if (aliasValue != null) {
+            return parseInput(input.replaceFirst(Pattern.quote(commandTrigger), aliasValue), invoker, false);
+        }
+
+        //neither a command nor a guild or user alias
+        return null;
+    }
+
+    //return type for recursive command search
+    private static class ParsedCommand {
+        @Nonnull
+        public final String input;
+        @Nonnull
+        public final Command command;
+        @Nonnull
+        public final String trigger;
+        @Nonnull
+        public final String[] args;
+
+        public ParsedCommand(@Nonnull String input, @Nonnull Command command, @Nonnull String trigger, @Nonnull String[] args) {
+            this.input = input;
+            this.command = command;
+            this.trigger = trigger;
+            this.args = args;
         }
     }
 

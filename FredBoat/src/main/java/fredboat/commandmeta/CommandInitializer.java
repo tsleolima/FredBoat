@@ -129,6 +129,7 @@ public class CommandInitializer {
 
         // Utility Module - Like Fun commands but without the fun ¯\_(ツ)_/¯
         CommandRegistry utilityModule = new CommandRegistry(CommandRegistry.Module.UTIL);
+        utilityModule.registerCommand(new AliasCommand("alias", "aliases", "a"));
         utilityModule.registerCommand(new AvatarCommand("avatar", "ava"));
         utilityModule.registerCommand(new BrainfuckCommand("brainfuck"));
         utilityModule.registerCommand(new MALCommand("mal"));

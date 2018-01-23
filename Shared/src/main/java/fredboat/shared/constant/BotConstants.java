@@ -42,6 +42,7 @@ public class BotConstants {
     public static final String DOCS_URL = FREDBOAT_URL + "/docs";
     public static final String DOCS_PERMISSIONS_URL = DOCS_URL + "/permissions";
     public static final String DOCS_DONATE_URL = DOCS_URL + "/donate";
+    public static final String DOCS_ALIASES_URL = DOCS_URL + "/aliases"; //todo write this one
 
     public static final String GITHUB_URL = "https://github.com/Frederikam/FredBoat";
 
