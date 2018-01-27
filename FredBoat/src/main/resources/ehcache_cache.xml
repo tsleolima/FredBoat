@@ -42,10 +42,10 @@
     </defaultCache>
 
     <cache name="search_results"
-           maxElementsInMemory="1000"
+           maxEntriesLocalHeap="1000"
            maxEntriesLocalDisk="100000"
            eternal="true">
-        <persistence strategy="localtempswap"/>
+        <persistence strategy="localTempSwap"/>
     </cache>
 
     <cache name="org.hibernate.cache.internal.StandardQueryCache"
