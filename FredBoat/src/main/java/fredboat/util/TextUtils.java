@@ -50,10 +50,7 @@ import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,7 +61,8 @@ public class TextUtils {
 
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^(\\d?\\d)(?::([0-5]?\\d))?(?::([0-5]?\\d))?$");
 
-    private static final List<Character> markdownChars = Arrays.asList('*', '`', '~', '_');
+    private static final Collection<Character> BACKTICK = Collections.singleton('`');
+    private static final List<Character> MARKDOWN_CHARS = Arrays.asList('*', '`', '~', '_');
 
     public static final CharMatcher SPLIT_SELECT_SEPARATOR =
             CharMatcher.whitespace().or(CharMatcher.is(','))
@@ -272,15 +270,23 @@ public class TextUtils {
         return "```" + sty + "\n" + str + "\n```";
     }
 
-    public static String escapeMarkdown(String str) {
-        StringBuilder revisedString = new StringBuilder(str.length());
-        for (Character n : str.toCharArray()) {
-            if (markdownChars.contains(n)) {
+    public static String escape(@Nonnull String input, @Nonnull Collection<Character> toEscape) {
+        StringBuilder revisedString = new StringBuilder(input.length());
+        for (Character n : input.toCharArray()) {
+            if (toEscape.contains(n)) {
                 revisedString.append("\\");
             }
             revisedString.append(n);
         }
         return revisedString.toString();
+    }
+
+    public static String escapeMarkdown(@Nonnull String input) {
+        return escape(input, MARKDOWN_CHARS);
+    }
+
+    public static String escapeBackticks(@Nonnull String input) {
+        return escape(input, BACKTICK);
     }
 
 
