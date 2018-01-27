@@ -13,7 +13,7 @@ apply plugin: 'org.junit.platform.gradle.plugin'
 
 description = 'FredBoat Discord Music Bot'
 mainClassName = "fredboat.FredBoat"
-version '2.0'
+version '2.1'
 ext {
     moduleName = 'FredBoat'
 }
@@ -53,6 +53,7 @@ dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.19'
     compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.1.1'
     compile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.1'
+
     compile group: 'io.prometheus', name: 'simpleclient', version: '0.1.0'
     compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.1.0'
     compile group: 'io.prometheus', name: 'simpleclient_logback', version: '0.1.0'
@@ -60,7 +61,8 @@ dependencies {
     compile group: 'io.prometheus', name: 'simpleclient_guava', version: '0.1.0'
     compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.1.0'
 
-    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: 'a5c9afd96d1928d9a51e799249a6eb5b08b4f473'
+    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: '8a939c06651fd06877d705874834463373cfb596'
+    compile group: 'space.npstr.SqlSauce', name: 'discord-entities', version: '8a939c06651fd06877d705874834463373cfb596'
     compile group: 'org.hibernate', name: 'hibernate-ehcache', version: '5.2.12.Final'
     compile group: 'org.flywaydb', name: 'flyway-core', version: '5.0.3'
 

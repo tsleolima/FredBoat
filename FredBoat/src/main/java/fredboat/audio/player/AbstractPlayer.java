@@ -32,6 +32,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
@@ -51,6 +52,7 @@ import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
+import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
@@ -113,7 +115,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     public static AudioPlayerManager registerSourceManagers(AudioPlayerManager mng) {
         mng.registerSourceManager(new PlaylistImportSourceManager());
         //Determine which Source managers are enabled
-        //By default, all are enabled except HttpAudioSources
+        //By default, all are enabled except LocalAudioSources and HttpAudioSources, see config.yaml and Config class
         if (Config.CONFIG.isYouTubeEnabled()) {
             YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
             youtubeAudioSourceManager.configureRequests(config -> RequestConfig.copy(config)
@@ -138,6 +140,9 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
         }
         if (Config.CONFIG.isSpotifyEnabled()) {
             mng.registerSourceManager(new SpotifyPlaylistSourceManager());
+        }
+        if (Config.CONFIG.isLocalEnabled()) {
+            mng.registerSourceManager(new LocalAudioSourceManager());
         }
         if (Config.CONFIG.isHttpEnabled()) {
             //add new source managers above the HttpAudio one, because it will either eat your request or throw an exception
@@ -285,7 +290,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
             log.info("Track " + track.getIdentifier() + " was cleaned up");
         } else if (endReason == AudioTrackEndReason.LOAD_FAILED) {
             if (onErrorHook != null)
-                onErrorHook.accept(new MessagingException("Track `" + track.getInfo().title + "` failed to load. Skipping..."));
+                onErrorHook.accept(new MessagingException("Track `" + TextUtils.escapeAndDefuse(track.getInfo().title) + "` failed to load. Skipping..."));
             audioTrackProvider.skipped();
             loadAndPlay();
         } else {

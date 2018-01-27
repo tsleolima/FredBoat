@@ -28,6 +28,8 @@ package fredboat.db;
 import com.zaxxer.hikari.HikariConfig;
 import fredboat.Config;
 import fredboat.feature.metrics.Metrics;
+import fredboat.shared.constant.BotConstants;
+import fredboat.util.DiscordUtil;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
@@ -71,6 +73,12 @@ public class DatabaseManager {
         //we use flyway db now for migrations, hibernate shall only run validations
         hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
 
+        //dont run migrations or validate the db from the patron bot
+        if (DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID) {
+            flyway = null;
+            hibernateProps.put("hibernate.hbm2ddl.auto", "none");
+        }
+
         DatabaseConnection databaseConnection = new DatabaseConnection.Builder(MAIN_PERSISTENCE_UNIT_NAME, jdbc)
                 .setHikariConfig(hikariConfig)
                 .setHibernateProps(hibernateProps)
@@ -80,7 +88,7 @@ public class DatabaseManager {
                 .setSshDetails(Config.CONFIG.getMainSshTunnelConfig())
                 .setHikariStats(Metrics.instance().hikariStats)
                 .setHibernateStats(Metrics.instance().hibernateStats)
-                .setCheckConnection(false)
+                .setCheckConnection(false) //we run our own connection check for this with the DBConnectionWatchdogAgent
                 .setFlyway(flyway)
                 .build();
 
@@ -123,6 +131,12 @@ public class DatabaseManager {
         hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
         //we use flyway db now for migrations, hibernate shall only run validations
         hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
+
+        //dont run migrations or validate the db from the patron bot
+        if (DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID) {
+            flyway = null;
+            hibernateProps.put("hibernate.hbm2ddl.auto", "none");
+        }
 
         DatabaseConnection databaseConnection = new DatabaseConnection.Builder(CACHE_PERSISTENCE_UNIT_NAME, cacheJdbc)
                 .setHikariConfig(hikariConfig)

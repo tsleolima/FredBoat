@@ -38,6 +38,8 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.text.CharacterPredicates;
+import org.apache.commons.text.RandomStringGenerator;
 import org.json.JSONException;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +50,7 @@ import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +61,8 @@ public class TextUtils {
 
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^(\\d?\\d)(?::([0-5]?\\d))?(?::([0-5]?\\d))?$");
 
-    private static final List<Character> markdownChars = Arrays.asList('*', '`', '~', '_');
+    private static final Collection<Character> BACKTICK = Collections.singleton('`');
+    private static final List<Character> MARKDOWN_CHARS = Arrays.asList('*', '`', '~', '_');
 
     public static final CharMatcher SPLIT_SELECT_SEPARATOR =
             CharMatcher.whitespace().or(CharMatcher.is(','))
@@ -89,7 +89,7 @@ public class TextUtils {
     public static Message prefaceWithName(Member member, String msg) {
         msg = ensureSpace(msg);
         return CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(escapeMarkdown(member.getEffectiveName()))
+                .append(escapeAndDefuse(member.getEffectiveName()))
                 .append(": ")
                 .append(msg)
                 .build();
@@ -270,15 +270,23 @@ public class TextUtils {
         return "```" + sty + "\n" + str + "\n```";
     }
 
-    public static String escapeMarkdown(String str) {
-        StringBuilder revisedString = new StringBuilder(str.length());
-        for (Character n : str.toCharArray()) {
-            if (markdownChars.contains(n)) {
+    public static String escape(@Nonnull String input, @Nonnull Collection<Character> toEscape) {
+        StringBuilder revisedString = new StringBuilder(input.length());
+        for (Character n : input.toCharArray()) {
+            if (toEscape.contains(n)) {
                 revisedString.append("\\");
             }
             revisedString.append(n);
         }
         return revisedString.toString();
+    }
+
+    public static String escapeMarkdown(@Nonnull String input) {
+        return escape(input, MARKDOWN_CHARS);
+    }
+
+    public static String escapeBackticks(@Nonnull String input) {
+        return escape(input, BACKTICK);
     }
 
 
@@ -382,5 +390,27 @@ public class TextUtils {
     public static String defuseMentions(@Nonnull String input) {
         return input.replaceAll("@here", "@" + ZERO_WIDTH_CHAR + "here")
                 .replaceAll("@everyone", "@" + ZERO_WIDTH_CHAR + "everyone");
+    }
+
+    /**
+     * @return the input, with escaped markdown and defused mentions
+     * It is a good idea to use this on any user generated values that we reply in plain text.
+     */
+    @Nonnull
+    public static String escapeAndDefuse(@Nonnull String input) {
+        return defuseMentions(escapeMarkdown(input));
+    }
+
+    @Nonnull
+    private static RandomStringGenerator randomStringGenerator = new RandomStringGenerator.Builder()
+            .withinRange('0', 'z')
+            .filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS)
+            .build();
+
+    public static String randomAlphaNumericString(int length) {
+        if (length < 1) {
+            throw new IllegalArgumentException();
+        }
+        return randomStringGenerator.generate(length);
     }
 }

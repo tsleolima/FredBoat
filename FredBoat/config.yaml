@@ -3,7 +3,7 @@ patron:            false       # Set this to true for self hosting the music bot
 development:       true        # Set this to true for self hosting the full bot (including non music commands)
 prefix:            '<<'        # Default prefix used by the bot
 restServerEnabled: true        # Set this to false if you are running multiple FredBoat bots on the same machine
-admins:            []          # Add comma separated userIds and roleIds that should have access to bot admin commands
+admins:            []          # Add comma separated userIds and roleIds that should have access to bot admin commands. Find role ids with the ;;roleinfo command
 useAutoBlacklist:  true        # Set to true to automatically blacklist users who frequently hit the rate limits
 game:              ""          # Set the displayed game/status. Leave empty quote marks for the default status
 continuePlayback:  false        # Set to true to force the player to continue playback even if left alone
@@ -15,7 +15,8 @@ enableTwitch:      true        # Set to true to enable playing Twitch links
 enableVimeo:       true        # Set to true to enable playing Vimeo links
 enableMixer:       true        # Set to true to enable playing Mixer links
 enableSpotify:     true        # Set to true to enable playing Spotify links
-enableHttp:        true        # Set to true to enable playing direct links
+enableLocal:       false       # Set to true to enable playing local files
+enableHttp:        false       # Set to true to enable playing direct links
 
 # THIS IS TEMPORARY UNTIL COMMANDS ARE MODULARIZED
 tempUseVoiceChannelCleanup: true # This acts as an override if set to false no vcCleanupAgent will be run

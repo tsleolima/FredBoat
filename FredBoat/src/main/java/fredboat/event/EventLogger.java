@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -211,7 +211,7 @@ public class EventLogger extends ListenerAdapter {
         }
 
         EmbedBuilder eb = CentralMessaging.getColoredEmbedBuilder()
-                .setTimestamp(LocalDateTime.now())
+                .setTimestamp(OffsetDateTime.now())
                 .setTitle("Joins and Leaves since the last update")
                 .addField("Guilds joined", Integer.toString(guildsJoinedEvents.getAndSet(0)), true)
                 .addField("Guilds left", Integer.toString(guildsLeftEvents.getAndSet(0)), true);
