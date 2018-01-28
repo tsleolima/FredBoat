@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -20,35 +21,31 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package fredboat.command.fun.img;
 
-import fredboat.commandmeta.abs.Command;
-import fredboat.commandmeta.abs.CommandContext;
-import fredboat.commandmeta.abs.IFunCommand;
-import fredboat.messaging.internal.Context;
+import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.perms.PermissionLevel;
 
 import javax.annotation.Nonnull;
 
-public class RemoteFileCommand extends Command implements IFunCommand {
+/**
+ * Created by napster on 22.01.18.
+ */
+public class RestrictedRemoteFileCommand extends RemoteFileCommand implements ICommandRestricted {
 
-    public String url;
+    @Nonnull
+    private final PermissionLevel permissionLevel;
 
-    public RemoteFileCommand(String url, String name, String... aliases) {
-        super(name, aliases);
-        this.url = url;
-    }
-
-    @Override
-    public void onInvoke(@Nonnull CommandContext context) {
-        context.replyImage(url, null);
+    public RestrictedRemoteFileCommand(@Nonnull PermissionLevel permissionLevel, String url, String name, String... aliases) {
+        super(url, name, aliases);
+        this.permissionLevel = permissionLevel;
     }
 
     @Nonnull
     @Override
-    public String help(@Nonnull Context context) {
-        return "{0}{1}\n#Post a funny image or meme.";
+    public PermissionLevel getMinimumPerms() {
+        return permissionLevel;
     }
 }

@@ -47,7 +47,7 @@ public class FredBoatCollector extends Collector {
     public List<MetricFamilySamples> collect() {
 
         List<MetricFamilySamples> mfs = new ArrayList<>();
-        List<String> labelNames = Arrays.asList("shard", "entity"); //todo decide on 2nd label name
+        List<String> labelNames = Arrays.asList("shard", "entity");
 
         GaugeMetricFamily jdaEntities = new GaugeMetricFamily("fredboat_jda_entities",
                 "Amount of JDA entities", labelNames);

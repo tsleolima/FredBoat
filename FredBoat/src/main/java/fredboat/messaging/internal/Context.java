@@ -120,12 +120,21 @@ public abstract class Context {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyImage(@Nonnull String url, @Nullable String message) {
-        return CentralMessaging.sendMessage(getTextChannel(),
+    public MessageFuture replyImage(@Nonnull String url, @Nullable String message, @Nullable Consumer<Message> onSuccess) {
+        return CentralMessaging.sendMessage(
+                getTextChannel(),
                 CentralMessaging.getClearThreadLocalMessageBuilder()
                         .setEmbed(embedImage(url))
                         .append(message != null ? message : "")
-                        .build());
+                        .build(),
+                onSuccess
+        );
+    }
+
+
+    @SuppressWarnings("UnusedReturnValue")
+    public MessageFuture replyImage(@Nonnull String url, @Nullable String message) {
+        return replyImage(url, message, null);
     }
 
     @SuppressWarnings("UnusedReturnValue")

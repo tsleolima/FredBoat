@@ -35,7 +35,6 @@ import net.dv8tion.jda.core.entities.Member;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FuzzyUserSearchCommand extends Command implements IInfoCommand {
 
@@ -56,40 +55,9 @@ public class FuzzyUserSearchCommand extends Command implements IInfoCommand {
                 return;
             }
 
-            int idPadding = list.stream()
-                    .mapToInt(member -> member.getUser().getId().length())
-                    .max()
-                    .orElse(0);
-            int namePadding = list.stream()
-                    .mapToInt(member -> member.getUser().getName().length())
-                    .max()
-                    .orElse(0);
-            int nickPadding = list.stream()
-                    .mapToInt(member -> member.getNickname() != null ? member.getNickname().length() : 0)
-                    .max()
-                    .orElse(0);
-
-            List<String> lines = list.stream()
-                    .map(member -> TextUtils.padWithSpaces(member.getUser().getId(), idPadding, true)
-                            + " " + TextUtils.padWithSpaces(member.getUser().getName(), namePadding, false)
-                            + " " + TextUtils.padWithSpaces(member.getNickname(), nickPadding, false)
-                            + "\n")
-                    .collect(Collectors.toList());
-
-
-            StringBuilder sb = new StringBuilder(TextUtils.padWithSpaces("Id", idPadding + 1, false)
-                    + TextUtils.padWithSpaces("Name", namePadding + 1, false)
-                    + TextUtils.padWithSpaces("Nick", nickPadding + 1, false) + "\n");
-
-            for (String line : lines) {
-                if (sb.length() + line.length() + query.length() < 1900) { //respect max message size
-                    sb.append(line);
-                } else {
-                    sb.append("[...]");
-                    break;
-                }
-            }
-            context.replyWithName("Results for `" + query + "`: " + TextUtils.asCodeBlock(sb.toString()));
+            String escapedQuery = TextUtils.escapeAndDefuse(query);
+            String formatted = ArgumentUtil.formatFuzzyMemberResult(list, Integer.MAX_VALUE, 1900 - escapedQuery.length());
+            context.replyWithName("Results for `" + escapedQuery + "`:\n" + formatted);
         }
     }
 

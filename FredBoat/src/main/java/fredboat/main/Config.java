@@ -385,6 +385,9 @@ public class Config {
             log.error("Could not parse the credentials and/or config yaml files! They are probably misformatted. " +
                     "Try using an online yaml validator.", e);
             throw e;
+        } catch (Exception e) {
+            log.error("Could not init config", e);
+            throw e;
         }
     }
 
