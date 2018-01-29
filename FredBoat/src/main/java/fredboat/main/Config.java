@@ -23,7 +23,7 @@
  *
  */
 
-package fredboat;
+package fredboat.main;
 
 import com.google.common.base.CharMatcher;
 import fredboat.audio.player.PlayerLimitManager;
@@ -134,9 +134,9 @@ public class Config {
     private String testChannelId;
 
 
-    // unofficial creds
+    // Undocumented creds
     private String carbonKey;
-
+    private String dikeUrl;
 
     //Derived Config values
     private int hikariPoolSize;
@@ -349,8 +349,9 @@ public class Config {
             testChannelId = creds.getOrDefault("testChannelId", "") + "";
 
 
-            // unofficial creds
+            // Undocumented creds
             carbonKey = (String) creds.getOrDefault("carbonKey", "");
+            dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
 
 
             // Derived Config values
@@ -613,9 +614,8 @@ public class Config {
         return testChannelId;
     }
 
-
     // ********************************************************************************
-    //                       Derived and unofficial values
+    //                       Derived and undocumented values
     // ********************************************************************************
 
     //this static method works even when called from tests with invalid config files leading to a null config
@@ -633,5 +633,10 @@ public class Config {
 
     public String getCarbonKey() {
         return carbonKey;
+    }
+
+    @Nullable
+    public String getDikeUrl() {
+        return dikeUrl;
     }
 }

@@ -28,11 +28,11 @@ package fredboat.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import fredboat.Config;
-import fredboat.FredBoat;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
+import fredboat.main.Config;
+import fredboat.main.BotController;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
@@ -142,7 +142,7 @@ public class DiscordUtil {
     //token <-> botid
     @Nonnull
     public static final LoadingCache<String, Long> BOT_ID = CacheBuilder.newBuilder()
-            .build(CacheLoader.asyncReloading(CacheLoader.from(DiscordUtil::getUserId), FredBoat.executor));
+            .build(CacheLoader.asyncReloading(CacheLoader.from(DiscordUtil::getUserId), BotController.INS.getExecutor()));
 
 
     //uses our configured bot token to retrieve our own userid

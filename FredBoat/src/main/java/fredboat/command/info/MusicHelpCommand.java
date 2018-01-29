@@ -25,7 +25,6 @@
 
 package fredboat.command.info;
 
-import fredboat.FredBoat;
 import fredboat.command.music.control.*;
 import fredboat.command.music.info.*;
 import fredboat.command.music.seeking.ForwardCommand;
@@ -37,6 +36,7 @@ import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
+import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
@@ -115,7 +115,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
             return;
         }
 
-        TextChannel fbhMusicCommandsChannel = FredBoat.getTextChannelById(channelId);
+        TextChannel fbhMusicCommandsChannel = BotController.INS.getShardManager().getTextChannelById(channelId);
         if (fbhMusicCommandsChannel == null) {
             context.reply("Could not find the requested channel with id " + channelId);
             return;

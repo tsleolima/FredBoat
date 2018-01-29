@@ -12,7 +12,7 @@ plugins {
 apply plugin: 'org.junit.platform.gradle.plugin'
 
 description = 'FredBoat Discord Music Bot'
-mainClassName = "fredboat.FredBoat"
+mainClassName = "fredboat.main.Launcher"
 version '2.1'
 ext {
     moduleName = 'FredBoat'
@@ -31,7 +31,7 @@ shadowJar {
 
 dependencies {
     compile project(':Shared')
-    compile group: 'net.dv8tion', name: 'JDA', version: '3.3.1_308'
+    compile group: 'net.dv8tion', name: 'JDA', version: '3.5.0_331'
     compile group: 'com.sedmelluq', name: 'lavaplayer', version: '1.2.45'
     compile group: 'com.sedmelluq', name: 'jda-nas', version: '1.0.6'
 
@@ -39,7 +39,7 @@ dependencies {
         compile(group: 'lavalink', name: 'Lavalink-Client', version: '-SNAPSHOT')
     } else {
         //production
-        compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: '8fa6dd5d5013cbb2eb0d35be077048022f08c0eb')
+        compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: 'f8a85f33cb4e31253ce378ecade629c3550a1a30')
     }
 
     compile group: 'org.apache.commons', name: 'commons-text', version: '1.1'

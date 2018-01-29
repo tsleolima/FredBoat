@@ -25,7 +25,7 @@
 
 package fredboat.db;
 
-import fredboat.FredBoat;
+import fredboat.main.BotController;
 import fredboat.db.entity.IEntity;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.entity.main.GuildConfig;
@@ -56,7 +56,7 @@ public class EntityWriter {
     private static void merge(IEntity entity) {
         EntityManager em = null;
         try {
-            em = FredBoat.getMainDbConnection().getEntityManager();
+            em = BotController.INS.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             em.merge(entity);
             em.getTransaction().commit();
@@ -73,7 +73,7 @@ public class EntityWriter {
     public static void deleteBlacklistEntry(long id) {
         EntityManager em = null;
         try {
-            em = FredBoat.getMainDbConnection().getEntityManager();
+            em = BotController.INS.getMainDbConnection().getEntityManager();
             em.getTransaction().begin();
             BlacklistEntry ble = em.find(BlacklistEntry.class, id);
             em.getTransaction().commit();

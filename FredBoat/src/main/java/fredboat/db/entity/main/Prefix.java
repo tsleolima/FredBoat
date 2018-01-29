@@ -25,7 +25,7 @@
 
 package fredboat.db.entity.main;
 
-import fredboat.FredBoat;
+import fredboat.main.BotController;
 import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.entities.Guild;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
@@ -116,7 +116,7 @@ public class Prefix extends SaucedEntity<GuildBotComposite, Prefix> {
         Map<String, Object> params = new HashMap<>();
         params.put("id", new GuildBotComposite(guildId, botId));
 
-        List<String> result = FredBoat.getMainDbWrapper().selectJpqlQuery(query, params, String.class);
+        List<String> result = BotController.INS.getMainDbWrapper().selectJpqlQuery(query, params, String.class);
         if (result.isEmpty()) {
             return Optional.empty();
         } else {

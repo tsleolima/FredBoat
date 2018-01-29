@@ -26,7 +26,7 @@ package fredboat.event;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import fredboat.Config;
+import fredboat.main.Config;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.command.info.HelpCommand;
@@ -41,6 +41,7 @@ import fredboat.db.EntityReader;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
+import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
@@ -50,6 +51,8 @@ import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
 import io.prometheus.client.Histogram;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.ReadyEvent;
+import net.dv8tion.jda.core.events.ShutdownEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent;
@@ -101,12 +104,12 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         if (event.getPrivateChannel() != null) {
-            log.info("PRIVATE" + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getRawContent());
+            log.info("PRIVATE" + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getContentRaw());
             return;
         }
 
         if (event.getAuthor().equals(event.getJDA().getSelfUser())) {
-            log.info(event.getMessage().getRawContent());
+            log.info(event.getMessage().getContentRaw());
             return;
         }
 
@@ -119,7 +122,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //preliminary permission filter to avoid a ton of parsing
         //let messages pass on to parsing that contain "help" since we want to answer help requests even from channels
         // where we can't talk in
-        if (!channel.canTalk() && !event.getMessage().getRawContent().toLowerCase().contains(CommandInitializer.HELP_COMM_NAME)) {
+        if (!channel.canTalk() && !event.getMessage().getContentRaw().toLowerCase().contains(CommandInitializer.HELP_COMM_NAME)) {
             return;
         }
 
@@ -127,7 +130,7 @@ public class EventListenerBoat extends AbstractEventListener {
         if (context == null) {
             return;
         }
-        log.info(event.getMessage().getRawContent());
+        log.info(event.getMessage().getContentRaw());
 
         //ignore all commands in channels where we can't write, except for the help command
         if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
@@ -217,7 +220,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
-            String raw = event.getMessage().getRawContent().toLowerCase();
+            String raw = event.getMessage().getContentRaw().toLowerCase();
             if (raw.contains("shard")) {
                 for (Message message : ShardsCommand.getShardStatus(event.getMessage())) {
                     CentralMessaging.sendMessage(event.getChannel(), message);
@@ -322,5 +325,16 @@ public class EventListenerBoat extends AbstractEventListener {
             log.warn("Unsuccessful JDA HTTP Request:\n{}\nResponse:{}\n",
                     event.getRequestRaw(), event.getResponseRaw());
         }
+    }
+
+    /* Shard lifecycle */
+    @Override
+    public void onReady(ReadyEvent event) {
+        ShardContext.of(event.getJDA()).onReady(event);
+    }
+
+    @Override
+    public void onShutdown(ShutdownEvent event) {
+        ShardContext.of(event.getJDA()).onShutdown();
     }
 }

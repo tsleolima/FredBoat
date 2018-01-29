@@ -25,7 +25,7 @@
 
 package fredboat.perms;
 
-import fredboat.Config;
+import fredboat.main.Config;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.EntityReader;
 import fredboat.db.entity.main.GuildPermissions;

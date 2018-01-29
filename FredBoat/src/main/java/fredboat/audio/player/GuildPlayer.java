@@ -27,13 +27,7 @@ package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.FredBoat;
-import fredboat.audio.queue.AbstractTrackProvider;
-import fredboat.audio.queue.AudioLoader;
-import fredboat.audio.queue.AudioTrackContext;
-import fredboat.audio.queue.IdentifierContext;
-import fredboat.audio.queue.RepeatMode;
-import fredboat.audio.queue.SimpleTrackProvider;
+import fredboat.audio.queue.*;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.CommandContext;
@@ -44,6 +38,7 @@ import fredboat.feature.I18n;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
+import fredboat.main.ShardContext;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
@@ -69,7 +64,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(GuildPlayer.class);
 
-    private final FredBoat shard;
+    private final ShardContext shard;
     private final long guildId;
     private long currentTCId;
 
@@ -83,7 +78,7 @@ public class GuildPlayer extends AbstractPlayer {
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
-        this.shard = FredBoat.getShard(guild.getJDA());
+        this.shard = ShardContext.of(guild.getJDA());
         this.guildId = guild.getIdLong();
 
         if (!LavalinkManager.ins.isEnabled()) {
@@ -138,8 +133,9 @@ public class GuildPlayer extends AbstractPlayer {
         }
 
         LavalinkManager.ins.openConnection(targetChannel);
-        AudioManager manager = getGuild().getAudioManager();
-        manager.setConnectionListener(new DebugConnectionListener(guildId, shard.getShardInfo()));
+        if (!LavalinkManager.ins.isEnabled()) {
+            getGuild().getAudioManager().setConnectionListener(new DebugConnectionListener(guildId, shard.getJda().getShardInfo()));
+        }
 
         log.info("Connected to voice channel " + targetChannel);
     }
@@ -167,9 +163,7 @@ public class GuildPlayer extends AbstractPlayer {
     public void queue(String identifier, CommandContext context) {
         IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker);
 
-        if (context.invoker != null) {
-            joinChannel(context.invoker);
-        }
+        joinChannel(context.invoker);
 
         audioLoader.loadAsync(ic);
     }
