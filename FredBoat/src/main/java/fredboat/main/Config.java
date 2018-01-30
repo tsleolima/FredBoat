@@ -168,10 +168,10 @@ public class Config {
             //Load Config values
 
             // Determine distribution
-            if ((boolean) config.getOrDefault("patron", false)) {
-                distribution = DistributionEnum.PATRON;
-            } else if ((boolean) config.getOrDefault("development", false)) {
+            if ((boolean) config.getOrDefault("development", true)) {
                 distribution = DistributionEnum.DEVELOPMENT;
+            } else if ((boolean) config.getOrDefault("patron", true)) {
+                distribution = DistributionEnum.PATRON;
             } else {
                 distribution = DistributionEnum.MUSIC;
             }
