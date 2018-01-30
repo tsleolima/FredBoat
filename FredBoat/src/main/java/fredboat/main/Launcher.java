@@ -138,7 +138,7 @@ public class Launcher {
         CommandInitializer.initCommands();
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
-        if (!Config.CONFIG.isPatronDistribution() && Config.CONFIG.useVoiceChannelCleanup()) {
+        if (!Config.CONFIG.isPatronDistribution()) {
             log.info("Starting VoiceChannelCleanupAgent.");
             FredBoatAgent.start(new VoiceChannelCleanupAgent());
         } else {

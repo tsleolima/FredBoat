@@ -93,9 +93,6 @@ public class Config {
     private boolean localAudio;
     private boolean httpAudio;
 
-    // temporary config values todo remove after merging main + music
-    private boolean useVoiceChannelCleanup;
-
 
     //Credentials
 
@@ -204,9 +201,6 @@ public class Config {
             spotifyAudio = (Boolean) config.getOrDefault("enableSpotify", true);
             localAudio = (Boolean) config.getOrDefault("enableLocal", false);
             httpAudio = (Boolean) config.getOrDefault("enableHttp", false);
-
-            //temp configs
-            useVoiceChannelCleanup = (boolean) config.getOrDefault("tempUseVoiceChannelCleanup", true);
 
 
             //Load Credential values
@@ -515,10 +509,6 @@ public class Config {
         return httpAudio;
     }
 
-
-    public boolean useVoiceChannelCleanup() {
-        return useVoiceChannelCleanup;
-    }
 
     // ********************************************************************************
     //                           Credentials Getters
