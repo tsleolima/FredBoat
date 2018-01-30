@@ -31,18 +31,15 @@ import com.google.common.cache.LoadingCache;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.Config;
 import fredboat.main.BotController;
+import fredboat.main.Config;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.bot.entities.ApplicationInfo;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.requests.Requester;
 import okhttp3.Response;
 import org.json.JSONException;
@@ -70,24 +67,6 @@ public class DiscordUtil {
 
     public static long getOwnerId(@Nonnull JDA jda) {
         return getApplicationInfo(jda).ownerIdLong;
-    }
-
-    public static boolean isMainBotPresent(Guild guild) {
-        JDA jda = guild.getJDA();
-        User other = jda.getUserById(BotConstants.MAIN_BOT_ID);
-        return other != null && guild.getMember(other) != null;
-    }
-
-    public static boolean isMusicBotPresent(Guild guild) {
-        JDA jda = guild.getJDA();
-        User other = jda.getUserById(BotConstants.MUSIC_BOT_ID);
-        return other != null && guild.getMember(other) != null;
-    }
-
-    public static boolean isPatronBotPresentAndOnline(Guild guild) {
-        JDA jda = guild.getJDA();
-        User other = jda.getUserById(BotConstants.PATRON_BOT_ID);
-        return other != null && guild.getMember(other) != null && guild.getMember(other).getOnlineStatus() == OnlineStatus.ONLINE;
     }
 
     public static int getHighestRolePosition(Member member) {
