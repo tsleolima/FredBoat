@@ -204,11 +204,13 @@ public class Config {
 
 
             //Load Credential values
-
-            Map<String, String> token = (Map) creds.get("token");
-            if (token != null) {
-                botToken = token.getOrDefault(distribution.getId(), "");
-            } else botToken = "";
+            Object token = creds.get("token");
+            if (token instanceof String) {
+                botToken = (String) token;
+            } else {
+                Map<String, String> tokens = (Map) token;
+                botToken = tokens.getOrDefault(distribution.getId(), "");
+            }
             if (botToken == null || botToken.isEmpty()) {
                 throw new RuntimeException("No discord bot token provided for the started distribution " + distribution
                         + "\nMake sure to put a " + distribution.getId() + " token in your credentials file.");
