@@ -6,17 +6,23 @@ import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BotMetrics {
 
     private static final Logger log = LoggerFactory.getLogger(BotMetrics.class);
-    private static BotMetrics.JdaEntityCounts jdaEntityCountsTotal = BotController.INS.getJdaEntityCountsTotal();
+    private static BotMetrics.JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
+
+    @Nonnull
+    public static JdaEntityCounts getJdaEntityCountsTotal() {
+        return jdaEntityCountsTotal;
+    }
 
     //JDA total entity counts
     public static int getTotalUniqueUsersCount() {
-        return BotController.INS.getJdaEntityCountsTotal().uniqueUsersCount;
+        return jdaEntityCountsTotal.uniqueUsersCount;
     }
 
     public static int getTotalGuildsCount() {
@@ -86,10 +92,10 @@ public class BotMetrics {
         }
     }
 
-    protected static class FredBoatStatsCounter implements StatsAgent.Action {
-        private final StatsAgent.Action action;
+    protected static class JdaEntityStatsCounter implements StatsAgent.Action {
+        private final Runnable action;
 
-        FredBoatStatsCounter(StatsAgent.Action action) {
+        JdaEntityStatsCounter(Runnable action) {
             this.action = action;
         }
 
@@ -99,8 +105,8 @@ public class BotMetrics {
         }
 
         @Override
-        public void act() throws Exception {
-            action.act();
+        public void act() {
+            action.run();
         }
     }
 }

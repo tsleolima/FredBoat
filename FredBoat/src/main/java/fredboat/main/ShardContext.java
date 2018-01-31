@@ -57,7 +57,7 @@ public class ShardContext {
     }
 
     public void onReady(@Nonnull ReadyEvent readyEvent) {
-        BotController.INS.getJdaEntityCountAgent().addAction(new ShardStatsCounter(getJda().getShardInfo(),
+        BotController.INS.getStatsAgent().addAction(new ShardStatsCounter(getJda().getShardInfo(),
                 () -> jdaEntityCountsShard.count(Collections.singletonList(getJda()))));
 
         log.info("Received ready event for {}", readyEvent.getJDA().getShardInfo().toString());
@@ -104,21 +104,23 @@ public class ShardContext {
 
     private static class ShardStatsCounter implements StatsAgent.Action {
         private final JDA.ShardInfo shardInfo;
-        private final StatsAgent.Action action;
+        private final Runnable action;
 
-        ShardStatsCounter(JDA.ShardInfo shardInfo, StatsAgent.Action action) {
+        ShardStatsCounter(JDA.ShardInfo shardInfo, Runnable action) {
             this.shardInfo = shardInfo;
             this.action = action;
         }
 
 
+        @Override
         public String getName() {
             return "jda entity stats for shard " + shardInfo.getShardString();
         }
 
 
-        public void act() throws Exception {
-            action.act();
+        @Override
+        public void act() {
+            action.run();
         }
     }
 

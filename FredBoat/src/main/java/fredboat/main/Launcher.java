@@ -279,14 +279,16 @@ public class Launcher {
             Thread.sleep(1000);
         }
 
-        //force a count and then turn on metrics to be served
+        //force some metrics to be populated, then turn on metrics to be served
         List<JDA> shards = FBC.getShardManager().getShards();
-        StatsAgent jdaEntityCountAgent = FBC.getJdaEntityCountAgent();
-        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = FBC.getJdaEntityCountsTotal();
+
+        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = BotMetrics.getJdaEntityCountsTotal();
         jdaEntityCountsTotal.count(shards);
-        FBC.getJdaEntityCountAgent().addAction(new BotMetrics.FredBoatStatsCounter(
+
+        StatsAgent statsAgent = FBC.getStatsAgent();
+        statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
                 () -> jdaEntityCountsTotal.count(shards)));
-        FredBoatAgent.start(jdaEntityCountAgent);
+        FredBoatAgent.start(statsAgent);
         API.turnOnMetrics();
     }
 

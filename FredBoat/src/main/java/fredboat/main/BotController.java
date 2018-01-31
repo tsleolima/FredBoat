@@ -31,8 +31,7 @@ public class BotController {
 
     //central event listener that all events by all shards pass through
     private EventListenerBoat mainEventListener;
-    private final StatsAgent jdaEntityCountAgent = new StatsAgent("jda entity counter");
-    private final BotMetrics.JdaEntityCounts jdaEntityCountsTotal = new BotMetrics.JdaEntityCounts();
+    private final StatsAgent statsAgent = new StatsAgent("bot metrics");
     private DatabaseWrapper mainDbWrapper;
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
 
@@ -65,8 +64,8 @@ public class BotController {
     }
 
     @Nonnull
-    protected StatsAgent getJdaEntityCountAgent() {
-        return jdaEntityCountAgent;
+    protected StatsAgent getStatsAgent() {
+        return statsAgent;
     }
 
     // Can be null during init, but usually not
@@ -107,10 +106,6 @@ public class BotController {
         shutdownCode = code;
 
         System.exit(code);
-    }
-
-    public BotMetrics.JdaEntityCounts getJdaEntityCountsTotal() {
-        return jdaEntityCountsTotal;
     }
 
     //Shutdown hook
