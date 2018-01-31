@@ -280,24 +280,31 @@ public class Launcher {
             Thread.sleep(1000);
         }
 
-        //force some metrics to be populated, then turn on metrics to be served
-        List<JDA> shards = FBC.getShardManager().getShards();
-
-        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = BotMetrics.getJdaEntityCountsTotal();
-        jdaEntityCountsTotal.count(shards);
-
         StatsAgent statsAgent = FBC.getStatsAgent();
-        statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
-                () -> jdaEntityCountsTotal.count(shards)));
+        //force some metrics to be populated, then turn on metrics to be served
+        try {
+            List<JDA> shards = FBC.getShardManager().getShards();
+            BotMetrics.JdaEntityCounts jdaEntityCountsTotal = BotMetrics.getJdaEntityCountsTotal();
+            try {
+                jdaEntityCountsTotal.count(shards);
+            } catch (Exception ignored) {
+            }
 
-        if (DiscordUtil.isOfficialBot()) {
-            BotMetrics.DockerStats dockerStats = BotMetrics.getDockerStats();
-            dockerStats.fetch();
-            statsAgent.addAction(dockerStats::fetch);
+            statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
+                    () -> jdaEntityCountsTotal.count(shards)));
+
+            if (DiscordUtil.isOfficialBot()) {
+                BotMetrics.DockerStats dockerStats = BotMetrics.getDockerStats();
+                try {
+                    dockerStats.fetch();
+                } catch (Exception ignored) {
+                }
+                statsAgent.addAction(dockerStats::fetch);
+            }
+        } finally {
+            FredBoatAgent.start(statsAgent);
+            API.turnOnMetrics();
         }
-
-        FredBoatAgent.start(statsAgent);
-        API.turnOnMetrics();
     }
 
     private static String getVersionInfo() {
