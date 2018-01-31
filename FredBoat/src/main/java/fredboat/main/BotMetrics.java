@@ -2,11 +2,13 @@ package fredboat.main;
 
 import fredboat.agent.StatsAgent;
 import fredboat.util.JDAUtil;
+import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,10 +16,16 @@ public class BotMetrics {
 
     private static final Logger log = LoggerFactory.getLogger(BotMetrics.class);
     private static BotMetrics.JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
+    private static BotMetrics.DockerStats dockerStats = new DockerStats();
 
     @Nonnull
     public static JdaEntityCounts getJdaEntityCountsTotal() {
         return jdaEntityCountsTotal;
+    }
+
+    @Nonnull
+    public static DockerStats getDockerStats() {
+        return dockerStats;
     }
 
     //JDA total entity counts
@@ -108,5 +116,34 @@ public class BotMetrics {
         public void act() {
             action.run();
         }
+    }
+
+
+    protected static class DockerStats {
+        private static final String BOT_IMAGE_STATS_URL = "https://hub.docker.com/v2/repositories/fredboat/fredboat/";
+        private static final String DB_IMAGE_STATS_URL = "https://hub.docker.com/v2/repositories/fredboat/postgres/";
+
+        protected int dockerPullsBot;
+        protected int dockerPullsDb;
+
+        protected void fetch() {
+            try {
+                dockerPullsBot = Http.get(BOT_IMAGE_STATS_URL).asJson().getInt("pull_count");
+                dockerPullsDb = Http.get(DB_IMAGE_STATS_URL).asJson().getInt("pull_count");
+            } catch (IOException e) {
+                log.error("Failed to fetch docker stats", e);
+            }
+        }
+
+    }
+
+    //is 0 while uncalculated
+    public static int getDockerPullsBot() {
+        return dockerStats.dockerPullsBot;
+    }
+
+    //is 0 while uncalculated
+    public static int getDockerPullsDb() {
+        return dockerStats.dockerPullsDb;
     }
 }

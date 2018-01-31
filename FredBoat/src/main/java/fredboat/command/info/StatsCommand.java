@@ -39,6 +39,7 @@ import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.AppInfo;
+import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
@@ -103,6 +104,12 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "Lavaplayer version:             " + PlayerLibrary.VERSION + "\n";
 
         content += "\n----------\n\n";
+        if (DiscordUtil.isOfficialBot()) {
+            content += "Docker pulls:\n";
+            content += "    FredBoat image:             " + BotMetrics.getDockerPullsBot() + "\n";
+            content += "    Database image:             " + BotMetrics.getDockerPullsDb() + "\n";
+            content += "\n----------\n\n";
+        }
 
         content += "Last agent run times:\n";
         for (Map.Entry<Class<? extends FredBoatAgent>, Long> entry : FredBoatAgent.getLastRunTimes().entrySet()) {

@@ -29,6 +29,7 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
 import io.prometheus.client.Collector;
+import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
 import net.dv8tion.jda.core.JDA;
 
@@ -57,6 +58,10 @@ public class FredBoatCollector extends Collector {
                 "Currently playing music players", labelNames);
         mfs.add(playersPlaying);
 
+        CounterMetricFamily dockerPulls = new CounterMetricFamily("fredboat_docker_pulls",
+                "Total fredboat docker image pulls as reported by the docker hub.", labelNames);
+        mfs.add(dockerPulls);
+
         //global stats
         jdaEntities.addMetric(Arrays.asList("total", "User"), BotMetrics.getTotalUniqueUsersCount());
         jdaEntities.addMetric(Arrays.asList("total", "Guild"), BotMetrics.getTotalGuildsCount());
@@ -66,6 +71,17 @@ public class FredBoatCollector extends Collector {
         jdaEntities.addMetric(Arrays.asList("total", "Emote"), BotMetrics.getTotalEmotesCount());
         jdaEntities.addMetric(Arrays.asList("total", "Role"), BotMetrics.getTotalRolesCount());
         playersPlaying.addMetric(Arrays.asList("total", "Players"), PlayerRegistry.playingCount());
+
+        //docker stats
+        int dockerPullsBotCount = BotMetrics.getDockerPullsBot();
+        if (dockerPullsBotCount > 0) {
+            dockerPulls.addMetric(Arrays.asList("total", "Bot"), dockerPullsBotCount);
+        }
+        int dockerPullsDbCount = BotMetrics.getDockerPullsDb();
+        if (dockerPullsDbCount > 0) {
+            dockerPulls.addMetric(Arrays.asList("total", "Db"), dockerPullsDbCount);
+        }
+
 
         //per shard stats
         if(BotController.INS.getShardManager() == null) {

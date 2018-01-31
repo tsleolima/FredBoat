@@ -17,6 +17,7 @@ import fredboat.feature.metrics.OkHttpEventMetrics;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
+import fredboat.util.DiscordUtil;
 import fredboat.util.GitRepoState;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
@@ -288,6 +289,13 @@ public class Launcher {
         StatsAgent statsAgent = FBC.getStatsAgent();
         statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
                 () -> jdaEntityCountsTotal.count(shards)));
+
+        if (DiscordUtil.isOfficialBot()) {
+            BotMetrics.DockerStats dockerStats = BotMetrics.getDockerStats();
+            dockerStats.fetch();
+            statsAgent.addAction(dockerStats::fetch);
+        }
+
         FredBoatAgent.start(statsAgent);
         API.turnOnMetrics();
     }

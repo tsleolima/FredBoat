@@ -164,6 +164,19 @@ public class DiscordUtil {
         return botId;
     }
 
+    /**
+     * @return true if this bot account is an "official" fredboat (music, patron, CE, etc).
+     * This is useful to lock down features that we only need internally, like polling the docker hub for pull stats.
+     */
+    public static boolean isOfficialBot() {
+        long botId = getBotId();
+        return botId == BotConstants.MUSIC_BOT_ID
+                || botId == BotConstants.PATRON_BOT_ID
+                || botId == BotConstants.CUTTING_EDGE_BOT_ID
+                || botId == BotConstants.BETA_BOT_ID
+                || botId == BotConstants.MAIN_BOT_ID;
+    }
+
     // ########## Moderation related helper functions
     public static String getReasonForModAction(CommandContext context) {
         String r = null;
