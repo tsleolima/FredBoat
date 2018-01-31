@@ -1,5 +1,6 @@
 package fredboat.main;
 
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.*;
 import fredboat.api.API;
@@ -8,6 +9,7 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.db.DatabaseManager;
 import fredboat.event.EventListenerBoat;
+import fredboat.event.EventLogger;
 import fredboat.feature.DikeSessionController;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
@@ -28,7 +30,6 @@ import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.utils.SessionController;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.Credentials;
-import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -322,14 +323,28 @@ public class Launcher {
                 .setAutoReconnect(true)
                 .setSessionController(sessionController)
                 .setContextEnabled(false)
-                .setHttpClientBuilder(Http.defaultHttpClient.newBuilder())
-                .setHttpClientBuilder(new OkHttpClient.Builder()
+                .setHttpClientBuilder(Http.defaultHttpClient.newBuilder()
                         .eventListener(new OkHttpEventMetrics("jda")))
-                .addEventListeners(BotController.INS.getMainEventListener(), Metrics.instance().jdaEventsMetricsListener)
+                .addEventListeners(BotController.INS.getMainEventListener())
+                .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
                 .setShardsTotal(Config.getNumShards());
+
+        String eventLogWebhook = Config.CONFIG.getEventLogWebhook();
+        if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {
+            try {
+                builder.addEventListeners(new EventLogger());
+            } catch (Exception e) {
+                log.error("Failed to create Eventlogger, events will not be logged to discord via webhook", e);
+            }
+        }
 
         if (LavalinkManager.ins.isEnabled()) {
             builder.addEventListeners(LavalinkManager.ins.getLavalink());
+        }
+
+        if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
+                && !System.getProperty("os.arch").equalsIgnoreCase("arm-linux")) {
+            builder.setAudioSendFactory(new NativeAudioSendFactory(800));
         }
 
         return builder.build();
