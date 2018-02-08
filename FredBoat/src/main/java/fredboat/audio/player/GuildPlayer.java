@@ -34,10 +34,10 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.EntityIO;
 import fredboat.feature.I18n;
+import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
-import fredboat.main.ShardContext;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
@@ -129,6 +129,13 @@ public class GuildPlayer extends AbstractPlayer {
 
         if (!targetChannel.getGuild().getSelfMember().hasPermission(targetChannel, Permission.VOICE_SPEAK)) {
             throw new MessagingException(I18n.get(getGuild()).getString("playerJoinSpeakDenied"));
+        }
+
+        if (targetChannel.getUserLimit() <= targetChannel.getMembers().size()
+                && !targetChannel.getGuild().getSelfMember().hasPermission(Permission.VOICE_MOVE_OTHERS)) {
+            throw new MessagingException(String.format("The channel you want me to join is full!"
+                            + " Please free up some space, or give me the permission to **%s** to bypass the limit.",//todo i18n
+                    Permission.VOICE_MOVE_OTHERS.getName()));
         }
 
         LavalinkManager.ins.openConnection(targetChannel);
