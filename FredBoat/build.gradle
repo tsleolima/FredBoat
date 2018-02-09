@@ -5,7 +5,7 @@ buildscript {
 }
 plugins {
     id 'application'
-    id 'com.gorylenko.gradle-git-properties' version '1.4.20'
+    id 'com.gorylenko.gradle-git-properties' version '1.4.17' //do not upgrade to .20, fails builds on some machines
     id 'com.sedmelluq.jdaction' version '1.0.2' //check for unused RestActions
     id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
