@@ -131,7 +131,8 @@ public class GuildPlayer extends AbstractPlayer {
             throw new MessagingException(I18n.get(getGuild()).getString("playerJoinSpeakDenied"));
         }
 
-        if (targetChannel.getUserLimit() <= targetChannel.getMembers().size()
+        if (targetChannel.getUserLimit() > 0
+                && targetChannel.getUserLimit() <= targetChannel.getMembers().size()
                 && !targetChannel.getGuild().getSelfMember().hasPermission(Permission.VOICE_MOVE_OTHERS)) {
             throw new MessagingException(String.format("The channel you want me to join is full!"
                             + " Please free up some space, or give me the permission to **%s** to bypass the limit.",//todo i18n
