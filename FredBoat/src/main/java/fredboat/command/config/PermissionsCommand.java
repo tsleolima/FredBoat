@@ -29,9 +29,9 @@ import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
-import fredboat.db.EntityIO;
 import fredboat.db.entity.main.GuildPermissions;
 import fredboat.feature.togglz.FeatureFlags;
+import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermissionLevel;
@@ -136,9 +136,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             context.replyWithName(context.i18nFormat("permsRemoved", mentionableToName(selected), permissionLevel));
             return gp.setFromEnum(permissionLevel, newList);
         };
-        EntityIO.doUserFriendly(EntityIO.onMainDb(
-                wrapper -> wrapper.findApplyAndMerge(GuildPermissions.key(context.guild), transformation)
-        ));
+        BotController.INS.getEntityIO().transformGuildPerms(context.guild, transformation);
     }
 
     public void add(CommandContext context) {
@@ -168,15 +166,13 @@ public class PermissionsCommand extends Command implements IConfigCommand {
                     TextUtils.escapeMarkdown(mentionableToName(selected)), permissionLevel));
             return gp.setFromEnum(permissionLevel, newList);
         };
-        EntityIO.doUserFriendly(EntityIO.onMainDb(wrapper ->
-                wrapper.findApplyAndMerge(GuildPermissions.key(context.guild), transformation)
-        ));
+        BotController.INS.getEntityIO().transformGuildPerms(context.guild, transformation);
     }
 
     public void list(CommandContext context) {
         Guild guild = context.guild;
         Member invoker = context.invoker;
-        GuildPermissions gp = EntityIO.getGuildPermissions(guild);
+        GuildPermissions gp = BotController.INS.getEntityIO().fetchGuildPermissions(guild);
 
         List<IMentionable> mentionables = idsToMentionables(guild, gp.getFromEnum(permissionLevel));
 
