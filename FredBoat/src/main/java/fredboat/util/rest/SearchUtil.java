@@ -34,14 +34,13 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
+import fredboat.audio.player.AbstractPlayer;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.BotController;
 import fredboat.main.Config;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,11 +71,7 @@ public class SearchUtil {
 
     private static AudioPlayerManager initPlayerManager() {
         DefaultAudioPlayerManager manager = new DefaultAudioPlayerManager();
-        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
-        youtubeAudioSourceManager.configureRequests(config -> RequestConfig.copy(config)
-                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-                .build());
-        manager.registerSourceManager(youtubeAudioSourceManager);
+        manager.registerSourceManager(AbstractPlayer.produceYoutubeAudioSourceManager());
         manager.registerSourceManager(new SoundCloudAudioSourceManager());
         return manager;
     }

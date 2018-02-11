@@ -42,7 +42,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.TrackMarker;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
-import fredboat.main.Config;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.audio.queue.ITrackProvider;
 import fredboat.audio.queue.SplitAudioTrackContext;
@@ -51,6 +50,7 @@ import fredboat.audio.source.HttpSourceManager;
 import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
+import fredboat.main.Config;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
@@ -112,16 +112,21 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
         }
     }
 
+    public static YoutubeAudioSourceManager produceYoutubeAudioSourceManager() {
+        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
+        youtubeAudioSourceManager.configureRequests(config -> RequestConfig.copy(config)
+                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+                .build());
+        youtubeAudioSourceManager.setMixLoaderMaximumPoolSize(50);
+        return youtubeAudioSourceManager;
+    }
+
     public static AudioPlayerManager registerSourceManagers(AudioPlayerManager mng) {
         mng.registerSourceManager(new PlaylistImportSourceManager());
         //Determine which Source managers are enabled
         //By default, all are enabled except LocalAudioSources and HttpAudioSources, see config.yaml and Config class
         if (Config.CONFIG.isYouTubeEnabled()) {
-            YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
-            youtubeAudioSourceManager.configureRequests(config -> RequestConfig.copy(config)
-                    .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-                    .build());
-            mng.registerSourceManager(youtubeAudioSourceManager);
+            mng.registerSourceManager(produceYoutubeAudioSourceManager());
         }
         if (Config.CONFIG.isSoundCloudEnabled()) {
             mng.registerSourceManager(new SoundCloudAudioSourceManager());
