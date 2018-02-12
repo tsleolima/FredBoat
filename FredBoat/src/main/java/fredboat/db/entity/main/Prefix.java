@@ -58,7 +58,7 @@ public class Prefix extends SaucedEntity<GuildBotComposite, Prefix> {
     private String prefix;
 
     //for jpa & the database wrapper
-    public Prefix() {
+    Prefix() {
     }
 
     public Prefix(@Nonnull GuildBotComposite id, @Nullable String prefix) {

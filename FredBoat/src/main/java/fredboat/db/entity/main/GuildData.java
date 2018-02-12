@@ -57,8 +57,8 @@ public class GuildData extends SaucedEntity<Long, GuildData> {
     private long timestampHelloSent;
 
 
-    //for JPA / SaucedEntity
-    public GuildData() {
+    //for jpa / db wrapper
+    GuildData() {
     }
 
     @Nonnull

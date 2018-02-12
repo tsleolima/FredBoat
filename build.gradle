@@ -2,6 +2,7 @@ allprojects {
     repositories {
         mavenCentral()                     // main maven repo
         jcenter()                          // JDA and some other stuff
+        maven { url 'https://dl.bintray.com/napster/SqlSauce' }
         mavenLocal()                       // useful for developing
         maven { url "https://jitpack.io" } // build projects directly from github
     }

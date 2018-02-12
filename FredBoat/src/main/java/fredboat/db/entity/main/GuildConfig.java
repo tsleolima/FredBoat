@@ -54,7 +54,7 @@ public class GuildConfig extends SaucedEntity<String, GuildConfig> {
     private String lang = "en_US";
 
     //for jpa / db wrapper
-    public GuildConfig() {
+    GuildConfig() {
     }
 
     @Nonnull

@@ -100,7 +100,7 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
 
 
     //for jpa / database wrapper
-    public GuildModules() {
+    GuildModules() {
     }
 
     @Nonnull

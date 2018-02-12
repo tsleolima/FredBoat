@@ -70,8 +70,8 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
     @Column(name = "search_result")
     private byte[] serializedSearchResult;
 
-    //for JPA
-    public SearchResult() {
+    //for jpa / db wrapper
+    SearchResult() {
     }
 
     public SearchResult(AudioPlayerManager playerManager, SearchUtil.SearchProvider provider, String searchTerm,

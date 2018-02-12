@@ -92,7 +92,7 @@ public class BlacklistEntry extends SaucedEntity<Long, BlacklistEntry> {
     //Boilerplate code below
 
     //for jpa / db wrapper
-    public BlacklistEntry() {
+    BlacklistEntry() {
     }
 
     public int getLevel() {

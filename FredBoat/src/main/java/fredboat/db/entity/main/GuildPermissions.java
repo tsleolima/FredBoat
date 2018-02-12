@@ -59,7 +59,7 @@ public class GuildPermissions extends SaucedEntity<String, GuildPermissions> {
     private String userList = "";
 
     //for jpa / db wrapper
-    public GuildPermissions() {
+    GuildPermissions() {
     }
 
     @Nonnull
