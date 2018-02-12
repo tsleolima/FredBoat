@@ -28,14 +28,15 @@ package fredboat.util;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
-import fredboat.main.Config;
 import fredboat.commandmeta.MessagingException;
+import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.text.CharacterPredicates;
@@ -115,6 +116,11 @@ public class TextUtils {
         }
 
         log.error("Caught exception while executing a command", e);
+
+        if (e instanceof InsufficientPermissionException) { //log these (see line above, but handle them more user friendly)
+            CentralMessaging.handleInsufficientPermissionsException(context.getTextChannel(), (InsufficientPermissionException) e);
+            return;
+        }
 
         MessageBuilder builder = CentralMessaging.getClearThreadLocalMessageBuilder();
 
