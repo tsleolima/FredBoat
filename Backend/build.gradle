@@ -23,19 +23,19 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl;
+description = 'FredBoat backend mostly providing database services'
+version '1.0'
+ext {
+    moduleName = 'Backend'
+}
+dependencies {
+    compile project(':Shared')
 
-import fredboat.db.entity.main.GuildModules;
-import fredboat.db.repositories.api.IGuildModulesRepo;
-import space.npstr.sqlsauce.DatabaseWrapper;
+    compile group: 'net.dv8tion', name: 'JDA', version: jdaVersion
+    compile group: 'com.sedmelluq', name: 'lavaplayer', version: lavaplayerVersion
 
-/**
- * Created by napster on 05.02.18.
- */
-public class SqlSauceGuildModulesRepo extends SqlSauceRepo<Long, GuildModules> implements IGuildModulesRepo {
-
-    public SqlSauceGuildModulesRepo(DatabaseWrapper dbWrapper) {
-        super(dbWrapper, GuildModules.class);
-    }
-
+    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: sqlsauceVersion
+    compile group: 'space.npstr.SqlSauce', name: 'discord-entities', version: sqlsauceVersion
+    compile group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernateVersion
+    compile group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion
 }

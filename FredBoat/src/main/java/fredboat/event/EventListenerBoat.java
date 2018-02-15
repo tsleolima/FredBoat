@@ -35,7 +35,7 @@ import fredboat.command.info.StatsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
-import fredboat.commandmeta.CommandRegistry;
+import fredboat.definitions.Module;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.entity.main.GuildData;
 import fredboat.feature.I18n;
@@ -45,7 +45,7 @@ import fredboat.main.BotController;
 import fredboat.main.Config;
 import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
-import fredboat.perms.PermissionLevel;
+import fredboat.definitions.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
@@ -148,7 +148,7 @@ public class EventListenerBoat extends AbstractEventListener {
         if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, event.getMember())) {
 
             //ignore commands of disabled modules for plebs
-            CommandRegistry.Module module = context.command.getModule();
+            Module module = context.command.getModule();
             if (module != null && !context.getEnabledModules().contains(module)) {
                 log.debug("Ignoring command {} because its module {} is disabled in guild {}",
                         context.command.name, module.name(), event.getGuild().getIdLong());

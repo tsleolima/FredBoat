@@ -32,8 +32,8 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
+import fredboat.definitions.PermissionLevel;
 import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

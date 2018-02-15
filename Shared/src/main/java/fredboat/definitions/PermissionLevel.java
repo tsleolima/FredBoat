@@ -2,7 +2,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,36 +23,30 @@
  * SOFTWARE.
  */
 
-package fredboat.db.migrations.main;
+package fredboat.definitions;
 
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+public enum PermissionLevel {
 
-import java.sql.Connection;
-import java.sql.Statement;
+    BOT_OWNER(5, "Bot Owner"),
+    BOT_ADMIN(4, "Bot Admin"),
+    ADMIN(3, "Admin"),
+    DJ(2, "DJ"),
+    USER(1, "User"),
+    BASE(0, "Base");
 
-/**
- * Created by napster on 23.01.18.
- */
-public class V4__CreateGuildData implements JdbcMigration {
+    private int level;
+    private String name;
 
-    private static final String DROP
-            = "DROP TABLE IF EXISTS public.guild_data;";
+    PermissionLevel(int level, String name) {
+        this.level = level;
+        this.name = name;
+    }
 
-    private static final String CREATE
-            = "CREATE TABLE public.guild_data "
-            + "( "
-            + "    guild_id      BIGINT NOT NULL, "
-            + "    ts_hello_sent BIGINT NOT NULL, "
-            + "    CONSTRAINT guild_data_pkey PRIMARY KEY (guild_id) "
-            + ");";
+    public int getLevel() {
+        return level;
+    }
 
-    @Override
-    public void migrate(Connection connection) throws Exception {
-        try (Statement drop = connection.createStatement()) {
-            drop.execute(DROP);
-        }
-        try (Statement create = connection.createStatement()) {
-            create.execute(CREATE);
-        }
+    public String getName() {
+        return name;
     }
 }

@@ -24,6 +24,7 @@ shadowJar {
 
 dependencies {
     compile project(':Shared')
+    compile project(':Backend')
     compile group: 'net.dv8tion', name: 'JDA', version: jdaVersion
     compile group: 'com.sedmelluq', name: 'lavaplayer', version: lavaplayerVersion
     compile group: 'com.sedmelluq', name: 'jda-nas', version: jdaNasVersion
@@ -35,17 +36,12 @@ dependencies {
         compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: lavalinkVersion)
     }
 
-    compile group: 'org.apache.commons', name: 'commons-text', version: commonsTextVersion
-    compile group: 'commons-io', name: 'commons-io', version: commonsIOVersion
-    compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpComponentsVersion
     compile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     compile group: 'io.sentry', name: 'sentry-logback', version: sentryVersion
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
     compile group: 'com.sparkjava', name: 'spark-core', version: sparkVersion
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion
-    compile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
 
     compile group: 'io.prometheus', name: 'simpleclient', version: prometheusClientVersion
     compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: prometheusClientVersion
@@ -54,15 +50,9 @@ dependencies {
     compile group: 'io.prometheus', name: 'simpleclient_guava', version: prometheusClientVersion
     compile group: 'io.prometheus', name: 'simpleclient_servlet', version: prometheusClientVersion
 
-    compile group: 'space.npstr.SqlSauce', name: 'sqlsauce-core', version: sqlsauceVersion
-    compile group: 'space.npstr.SqlSauce', name: 'discord-entities', version: sqlsauceVersion
-    compile group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernateVersion
-    compile group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion
-
     compile group: 'org.togglz', name: 'togglz-core', version: togglzVersion
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
     compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: bucket4jVersion
-    compile group: 'space.npstr', name: 'annotations', version: napsterAnnotations
 
     //tests
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion

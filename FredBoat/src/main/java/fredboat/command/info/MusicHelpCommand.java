@@ -36,10 +36,11 @@ import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
+import fredboat.definitions.Module;
+import fredboat.definitions.PermissionLevel;
 import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
@@ -156,7 +157,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
     }
 
     private static List<String> getSortedMusicComms(Context context) {
-        List<Command> musicCommands = CommandRegistry.getCommandModule(CommandRegistry.Module.MUSIC).getDeduplicatedCommands();
+        List<Command> musicCommands = CommandRegistry.getCommandModule(Module.MUSIC).getDeduplicatedCommands();
 
         //dont explicitly show the youtube and soundcloud commands in this list, since they are just castrated versions
         // of the play command, which is "good enough" for this list

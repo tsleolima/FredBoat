@@ -28,6 +28,7 @@ package fredboat.commandmeta.abs;
 import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
+import fredboat.definitions.Module;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
 import fredboat.main.Config;
@@ -253,7 +254,7 @@ public class CommandContext extends Context {
     }
 
     @Nonnull
-    public Collection<CommandRegistry.Module> getEnabledModules() {
+    public Collection<Module> getEnabledModules() {
         return BotController.INS.getEntityIO().fetchGuildModules(this.guild).getEnabledModules();
     }
 

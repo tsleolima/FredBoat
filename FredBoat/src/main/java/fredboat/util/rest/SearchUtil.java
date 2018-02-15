@@ -37,6 +37,7 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.entity.cache.SearchResult;
+import fredboat.definitions.SearchProvider;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.BotController;
@@ -178,21 +179,6 @@ public class SearchUtil {
         } catch (DatabaseNotReadyException ignored) {
             log.warn("Could not retrieve cached search result from database.");
             return null;
-        }
-    }
-
-    public enum SearchProvider {
-        YOUTUBE("ytsearch:"),
-        SOUNDCLOUD("scsearch:");
-
-        private String prefix;
-
-        SearchProvider(String prefix) {
-            this.prefix = prefix;
-        }
-
-        public String getPrefix() {
-            return prefix;
         }
     }
 

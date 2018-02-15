@@ -34,6 +34,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.audio.queue.PlaylistInfo;
+import fredboat.definitions.SearchProvider;
 import fredboat.util.rest.SearchUtil;
 import fredboat.util.rest.SpotifyAPIWrapper;
 import org.slf4j.Logger;
@@ -75,8 +76,8 @@ public class SpotifyPlaylistSourceManager implements AudioSourceManager, Playlis
     // Upping the threads will also fire search requests more aggressively against Youtube which is probably better avoided.
     public static ScheduledExecutorService loader = Executors.newScheduledThreadPool(1);
 
-    private static final List<SearchUtil.SearchProvider> searchProviders
-            = Arrays.asList(SearchUtil.SearchProvider.YOUTUBE, SearchUtil.SearchProvider.SOUNDCLOUD);
+    private static final List<SearchProvider> searchProviders
+            = Arrays.asList(SearchProvider.YOUTUBE, SearchProvider.SOUNDCLOUD);
 
     @Override
     public String getSourceName() {

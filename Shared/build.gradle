@@ -5,4 +5,11 @@ ext {
 }
 dependencies {
     compile group: 'org.json', name: 'json', version: jsonOrgVersion
+    compile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
+    compile group: 'space.npstr', name: 'annotations', version: napsterAnnotations
+
+    compile group: 'org.apache.commons', name: 'commons-text', version: commonsTextVersion
+    compile group: 'commons-io', name: 'commons-io', version: commonsIOVersion
+    compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpComponentsVersion
 }

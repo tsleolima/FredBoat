@@ -1,7 +1,8 @@
 /*
+ *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +21,24 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.perms;
+package fredboat.definitions;
 
-public enum PermissionLevel {
+/**
+ * Created by napster on 15.02.18.
+ */
+public enum SearchProvider {
+    YOUTUBE("ytsearch:"),
+    SOUNDCLOUD("scsearch:");
 
-    BOT_OWNER(5, "Bot Owner"),
-    BOT_ADMIN(4, "Bot Admin"),
-    ADMIN(3, "Admin"),
-    DJ(2, "DJ"),
-    USER(1, "User"),
-    BASE(0, "Base");
+    private String prefix;
 
-    private int level;
-    private String name;
-
-    PermissionLevel(int level, String name) {
-        this.level = level;
-        this.name = name;
+    SearchProvider(String prefix) {
+        this.prefix = prefix;
     }
 
-    public int getLevel() {
-        return level;
-    }
-
-    public String getName() {
-        return name;
+    public String getPrefix() {
+        return prefix;
     }
 }

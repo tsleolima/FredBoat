@@ -25,13 +25,13 @@
 
 package fredboat.command.admin;
 
-import fredboat.main.BotController;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.definitions.PermissionLevel;
+import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
 import lavalink.client.io.LavalinkSocket;
 import net.dv8tion.jda.core.entities.Guild;
 

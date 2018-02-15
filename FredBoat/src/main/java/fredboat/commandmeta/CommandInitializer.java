@@ -40,7 +40,9 @@ import fredboat.command.music.seeking.RestartCommand;
 import fredboat.command.music.seeking.RewindCommand;
 import fredboat.command.music.seeking.SeekCommand;
 import fredboat.command.util.*;
-import fredboat.perms.PermissionLevel;
+import fredboat.definitions.Module;
+import fredboat.definitions.PermissionLevel;
+import fredboat.definitions.SearchProvider;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
 import fredboat.util.rest.OpenWeatherAPI;
@@ -67,7 +69,7 @@ public class CommandInitializer {
     public static void initCommands() {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
-        CommandRegistry adminModule = new CommandRegistry(CommandRegistry.Module.ADMIN);
+        CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
         adminModule.registerCommand(new AnnounceCommand("announce"));
         adminModule.registerCommand(new BotRestartCommand("botrestart"));
         adminModule.registerCommand(new DisableCommandsCommand("disable"));
@@ -87,7 +89,7 @@ public class CommandInitializer {
 
 
         // Informational / Debugging / Maintenance - always on
-        CommandRegistry infoModule = new CommandRegistry(CommandRegistry.Module.INFO);
+        CommandRegistry infoModule = new CommandRegistry(Module.INFO);
         infoModule.registerCommand(new AudioDebugCommand("adebug"));
         infoModule.registerCommand(new CommandsCommand(COMMANDS_COMM_NAME, "comms", "cmds"));
         infoModule.registerCommand(new DebugCommand("debug"));
@@ -107,7 +109,7 @@ public class CommandInitializer {
 
 
         // Configurational stuff - always on
-        CommandRegistry configModule = new CommandRegistry(CommandRegistry.Module.CONFIG);
+        CommandRegistry configModule = new CommandRegistry(Module.CONFIG);
         configModule.registerCommand(new ConfigCommand(CONFIG_COMM_NAME, "cfg"));
         configModule.registerCommand(new LanguageCommand(LANGUAGE_COMM_NAME, "lang"));
         configModule.registerCommand(new ModulesCommand("modules", "module", "mods"));
@@ -119,7 +121,7 @@ public class CommandInitializer {
 
 
         // Moderation Module - Anything related to managing Discord guilds
-        CommandRegistry moderationModule = new CommandRegistry(CommandRegistry.Module.MOD);
+        CommandRegistry moderationModule = new CommandRegistry(Module.MOD);
         moderationModule.registerCommand(new ClearCommand("clear"));
         moderationModule.registerCommand(new HardbanCommand("hardban", "hb"));
         moderationModule.registerCommand(new KickCommand("kick"));
@@ -127,7 +129,7 @@ public class CommandInitializer {
 
 
         // Utility Module - Like Fun commands but without the fun ¯\_(ツ)_/¯
-        CommandRegistry utilityModule = new CommandRegistry(CommandRegistry.Module.UTIL);
+        CommandRegistry utilityModule = new CommandRegistry(Module.UTIL);
         utilityModule.registerCommand(new AvatarCommand("avatar", "ava"));
         utilityModule.registerCommand(new BrainfuckCommand("brainfuck"));
         utilityModule.registerCommand(new MALCommand("mal"));
@@ -139,7 +141,7 @@ public class CommandInitializer {
 
 
         // Fun Module - mostly ascii, memes, pictures, games
-        CommandRegistry funModule = new CommandRegistry(CommandRegistry.Module.FUN);
+        CommandRegistry funModule = new CommandRegistry(Module.FUN);
         funModule.registerCommand(new AkinatorCommand("akinator", "aki"));
         funModule.registerCommand(new DanceCommand("dance"));
         funModule.registerCommand(new JokeCommand("joke", "jk"));
@@ -201,17 +203,17 @@ public class CommandInitializer {
 
         // Music Module
 
-        CommandRegistry musicModule = new CommandRegistry(CommandRegistry.Module.MUSIC);
+        CommandRegistry musicModule = new CommandRegistry(Module.MUSIC);
         /* Control */
         musicModule.registerCommand(new DestroyCommand("destroy"));
         musicModule.registerCommand(new JoinCommand("join", "summon", "jn", "j"));
         musicModule.registerCommand(new LeaveCommand("leave", "lv"));
         musicModule.registerCommand(new PauseCommand("pause", "pa", "ps"));
-        musicModule.registerCommand(new PlayCommand(Arrays.asList(SearchUtil.SearchProvider.YOUTUBE, SearchUtil.SearchProvider.SOUNDCLOUD),
+        musicModule.registerCommand(new PlayCommand(Arrays.asList(SearchProvider.YOUTUBE, SearchProvider.SOUNDCLOUD),
                 PLAY_COMM_NAME, "p"));
-        musicModule.registerCommand(new PlayCommand(Collections.singletonList(SearchUtil.SearchProvider.YOUTUBE),
+        musicModule.registerCommand(new PlayCommand(Collections.singletonList(SearchProvider.YOUTUBE),
                 YOUTUBE_COMM_NAME, "yt"));
-        musicModule.registerCommand(new PlayCommand(Collections.singletonList(SearchUtil.SearchProvider.SOUNDCLOUD),
+        musicModule.registerCommand(new PlayCommand(Collections.singletonList(SearchProvider.SOUNDCLOUD),
                 SOUNDCLOUD_COMM_NAME, "sc"));
         musicModule.registerCommand(new PlaySplitCommand("split"));
         musicModule.registerCommand(new RepeatCommand("repeat", "rep", "loop"));

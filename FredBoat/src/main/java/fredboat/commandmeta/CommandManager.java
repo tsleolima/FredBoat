@@ -27,12 +27,15 @@ package fredboat.commandmeta;
 
 
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.commandmeta.abs.*;
+import fredboat.commandmeta.abs.Command;
+import fredboat.commandmeta.abs.CommandContext;
+import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.commandmeta.abs.IMusicCommand;
+import fredboat.definitions.PermissionLevel;
 import fredboat.feature.PatronageChecker;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.messaging.CentralMessaging;
-import fredboat.perms.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.DiscordUtil;

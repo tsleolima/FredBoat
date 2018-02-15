@@ -2,7 +2,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
-import fredboat.util.rest.SearchUtil;
+import fredboat.definitions.SearchProvider;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -74,7 +74,7 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
     SearchResult() {
     }
 
-    public SearchResult(AudioPlayerManager playerManager, SearchUtil.SearchProvider provider, String searchTerm,
+    public SearchResult(AudioPlayerManager playerManager, SearchProvider provider, String searchTerm,
                         AudioPlaylist searchResult) {
         this.searchResultId = new SearchResultId(provider, searchTerm);
         this.timestamp = System.currentTimeMillis();
@@ -105,11 +105,11 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
         return searchResultId;
     }
 
-    public SearchUtil.SearchProvider getProvider() {
+    public SearchProvider getProvider() {
         return searchResultId.getProvider();
     }
 
-    public void setProvider(SearchUtil.SearchProvider provider) {
+    public void setProvider(SearchProvider provider) {
         searchResultId.provider = provider.name();
     }
 
@@ -157,16 +157,16 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
         public SearchResultId() {
         }
 
-        public SearchResultId(SearchUtil.SearchProvider provider, String searchTerm) {
+        public SearchResultId(SearchProvider provider, String searchTerm) {
             this.provider = provider.name();
             this.searchTerm = searchTerm;
         }
 
-        public SearchUtil.SearchProvider getProvider() {
-            return SearchUtil.SearchProvider.valueOf(provider);
+        public SearchProvider getProvider() {
+            return SearchProvider.valueOf(provider);
         }
 
-        public void setProvider(SearchUtil.SearchProvider provider) {
+        public void setProvider(SearchProvider provider) {
             this.provider = provider.name();
         }
 

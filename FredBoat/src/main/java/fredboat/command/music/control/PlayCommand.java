@@ -32,9 +32,10 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
+import fredboat.definitions.PermissionLevel;
+import fredboat.definitions.SearchProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.SearchUtil;
@@ -50,11 +51,11 @@ import java.util.List;
 public class PlayCommand extends Command implements IMusicCommand, ICommandRestricted {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlayCommand.class);
-    private final List<SearchUtil.SearchProvider> searchProviders;
+    private final List<SearchProvider> searchProviders;
     private static final JoinCommand JOIN_COMMAND = new JoinCommand("");
     private static final String FILE_PREFIX = "file://";
 
-    public PlayCommand(List<SearchUtil.SearchProvider> searchProviders, String name, String... aliases) {
+    public PlayCommand(List<SearchProvider> searchProviders, String name, String... aliases) {
         super(name, aliases);
         this.searchProviders = searchProviders;
     }

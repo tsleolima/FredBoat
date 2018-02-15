@@ -27,6 +27,7 @@ package fredboat.perms;
 
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.entity.main.GuildPermissions;
+import fredboat.definitions.PermissionLevel;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.BotController;
 import fredboat.main.Config;

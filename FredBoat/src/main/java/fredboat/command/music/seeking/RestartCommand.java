@@ -32,7 +32,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
+import fredboat.definitions.PermissionLevel;
 import fredboat.util.TextUtils;
 
 import javax.annotation.Nonnull;

@@ -28,9 +28,9 @@ import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
+import fredboat.definitions.PermissionLevel;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.messaging.internal.Context;
-import fredboat.perms.PermissionLevel;
 import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.entities.User;
 

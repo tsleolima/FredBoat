@@ -2,7 +2,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 
 package fredboat.db.entity.main;
 
-import fredboat.commandmeta.CommandRegistry;
+import fredboat.definitions.Module;
 import net.dv8tion.jda.core.entities.Guild;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -133,25 +133,25 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
 
     @Nonnull
     @CheckReturnValue
-    public GuildModules enableModule(@Nonnull CommandRegistry.Module module) {
+    public GuildModules enableModule(@Nonnull Module module) {
         return setModule(module, true);
     }
 
     @Nonnull
     @CheckReturnValue
-    public GuildModules disableModule(@Nonnull CommandRegistry.Module module) {
+    public GuildModules disableModule(@Nonnull Module module) {
         return setModule(module, false);
     }
 
     @Nonnull
     @CheckReturnValue
-    public GuildModules resetModule(@Nonnull CommandRegistry.Module module) {
+    public GuildModules resetModule(@Nonnull Module module) {
         return setModule(module, null);
     }
 
     @Nonnull
     @CheckReturnValue
-    private GuildModules setModule(@Nonnull CommandRegistry.Module module, @Nullable Boolean enabled) {
+    private GuildModules setModule(@Nonnull Module module, @Nullable Boolean enabled) {
         switch (module) {
             case ADMIN:
                 adminModule = enabled;
@@ -184,7 +184,7 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
      * @return true if the provided module is enabled, false if not, or null if no preference has been set.
      */
     @Nullable
-    public Boolean isModuleEnabled(@Nonnull CommandRegistry.Module module) {
+    public Boolean isModuleEnabled(@Nonnull Module module) {
         switch (module) {
             case ADMIN:
                 return adminModule;
@@ -209,7 +209,7 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
      * @return true if the provided module is enabled, false if not. If no value has been specified, return the provide
      * default value.
      */
-    public boolean isModuleEnabled(@Nonnull CommandRegistry.Module module, boolean def) {
+    public boolean isModuleEnabled(@Nonnull Module module, boolean def) {
         Boolean enabled = isModuleEnabled(module);
         if (enabled != null) {
             return enabled;
@@ -219,9 +219,9 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
     }
 
     @Nonnull
-    public List<CommandRegistry.Module> getEnabledModules() {
-        List<CommandRegistry.Module> enabledModules = new ArrayList<>();
-        for (CommandRegistry.Module module : CommandRegistry.Module.values()) {
+    public List<Module> getEnabledModules() {
+        List<Module> enabledModules = new ArrayList<>();
+        for (Module module : Module.values()) {
             if (isModuleEnabled(module, module.enabledByDefault)) {
                 enabledModules.add(module);
             }

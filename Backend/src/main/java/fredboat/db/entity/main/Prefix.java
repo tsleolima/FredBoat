@@ -2,7 +2,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 
 package fredboat.db.entity.main;
 
-import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.entities.Guild;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 import space.npstr.sqlsauce.entities.SaucedEntity;
@@ -100,7 +99,7 @@ public class Prefix extends SaucedEntity<GuildBotComposite, Prefix> {
     /**
      * Shortcut to creating an entity key for the provided guild and the running bot
      */
-    public static EntityKey<GuildBotComposite, Prefix> key(@Nonnull Guild guild) {
-        return EntityKey.of(new GuildBotComposite(guild, DiscordUtil.getBotId()), Prefix.class);
+    public static EntityKey<GuildBotComposite, Prefix> key(@Nonnull Guild guild, long botId) {
+        return EntityKey.of(new GuildBotComposite(guild, botId), Prefix.class);
     }
 }
