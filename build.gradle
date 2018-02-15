@@ -12,6 +12,19 @@ allprojects {
 }
 
 subprojects {
+    buildscript {
+        repositories {
+            maven {
+                url "https://plugins.gradle.org/m2/"
+            }
+        }
+        dependencies {
+            classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.17"
+            classpath "gradle.plugin.com.sedmelluq:jdaction:1.0.2"
+            classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
+            classpath "org.junit.platform:junit-platform-gradle-plugin:1.0.2"
+        }
+    }
     apply plugin: 'java'
 
     sourceCompatibility = 1.8
@@ -23,6 +36,60 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
+    }
+
+    ext {
+        //@formatter:off
+
+        //build plugins
+        shadowPluginVersion         = '2.0.2'
+        jdactionVersion             = '1.0.2'
+        gradleGitVersion            = '1.4.17'  //do not upgrade to .20, it fails builds randomly
+
+        //discord deps
+        jdaVersion                  = '3.5.1_339'
+
+        //audio deps
+        lavaplayerVersion           = '1.2.50'
+        jdaNasVersion               = '1.0.6'
+        lavalinkVersion             = '72bbfffe530816847325ec5b22f673a4e2b99df8'
+
+        //utility deps
+        jsonOrgVersion              = '20171018'
+        commonsTextVersion          = '1.1'
+        commonsIOVersion            = '2.6'
+        commonsCodecVersion         = '1.11'
+        snakeYamlVersion            = '1.19'
+        fastUtilVersion             = '8.1.1'
+        togglzVersion               = '2.5.0.Final'
+        guavaVersion                = '23.5-jre'
+        bucket4jVersion             = '3.0.2'
+
+        //logging / monitoring deps
+        logbackVersion              = '1.2.3'
+        sentryVersion               = '1.6.3'
+        prometheusClientVersion     = '0.1.0'
+
+        //http / web deps
+        httpComponentsVersion       = '4.5.3'
+        okhttpVersion               = '3.9.1'
+        sparkVersion                = '2.7.1'
+
+        //QA deps
+        spotbugsVersion             = '3.1.1'
+        napsterAnnotations          = '0.0.1'
+
+        //database deps
+        sqlsauceVersion             = '0.0.10'
+        hibernateVersion            = '5.2.12.Final'
+        flywayVersion               = '5.0.3'
+
+        //testing deps
+        junitVersion                = '5.0.2'
+        apiGuardianVersion          = '1.0.0'
+
+
+        //@formatter:on
     }
 }
 

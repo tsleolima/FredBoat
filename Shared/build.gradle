@@ -4,5 +4,5 @@ ext {
     moduleName = 'Shared'
 }
 dependencies {
-    compile group: 'org.json', name: 'json', version: '20171018'
+    compile group: 'org.json', name: 'json', version: jsonOrgVersion
 }
