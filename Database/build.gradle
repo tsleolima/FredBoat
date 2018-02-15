@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-description = 'FredBoat backend mostly providing database services'
+description = 'FredBoat database'
 version '1.0'
 ext {
-    moduleName = 'Backend'
+    moduleName = 'Database'
 }
 dependencies {
     compile project(':Shared')
