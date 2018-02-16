@@ -46,28 +46,27 @@ subprojects {
         jdaVersion                  = '3.5.1_339'
 
         //audio deps
-        lavaplayerVersion           = '1.2.50'
+        lavaplayerVersion           = '1.2.51'
         jdaNasVersion               = '1.0.6'
         lavalinkVersion             = '72bbfffe530816847325ec5b22f673a4e2b99df8'
 
         //utility deps
-        jsonOrgVersion              = '20171018'
-        commonsTextVersion          = '1.1'
+        jsonOrgVersion              = '20180130'
+        commonsTextVersion          = '1.2'
         commonsIOVersion            = '2.6'
         commonsCodecVersion         = '1.11'
         snakeYamlVersion            = '1.19'
         fastUtilVersion             = '8.1.1'
         togglzVersion               = '2.5.0.Final'
-        guavaVersion                = '23.5-jre'
-        bucket4jVersion             = '3.0.2'
+        guavaVersion                = '24.0-jre'
+        bucket4jVersion             = '3.1.1'
 
         //logging / monitoring deps
         logbackVersion              = '1.2.3'
-        sentryVersion               = '1.6.3'
-        prometheusClientVersion     = '0.1.0'
+        sentryVersion               = '1.6.8'
+        prometheusClientVersion     = '0.2.0'
 
         //http / web deps
-        httpComponentsVersion       = '4.5.3'
         okhttpVersion               = '3.9.1'
         sparkVersion                = '2.7.1'
 
@@ -76,12 +75,12 @@ subprojects {
         napsterAnnotations          = '0.0.1'
 
         //database deps
-        sqlsauceVersion             = '0.0.10'
-        hibernateVersion            = '5.2.12.Final'
-        flywayVersion               = '5.0.3'
+        sqlsauceVersion             = '3aa99222963e5f586d8f35695d0ff30ac47ebd53'
+        hibernateVersion            = '5.2.13.Final'
+        flywayVersion               = '5.0.7'
 
         //testing deps
-        junitVersion                = '5.0.2'
+        junitVersion                = '5.0.3'
         apiGuardianVersion          = '1.0.0'
 
 
