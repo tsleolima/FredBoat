@@ -121,63 +121,31 @@ public class DatabaseManager {
             synchronized (cacheDbWrapperInitLock) {
                 singleton = cacheDbWrapper;
                 if (singleton == null) {
-                    cacheDbWrapper = singleton = initCacheWrapper();
+                    cacheDbWrapper = singleton = initCacheWrapper(cacheJdbc);
                 }
             }
         }
         return singleton;
     }
 
-    private DatabaseWrapper initMainDbWrapper()
-            throws DatabaseException {
-        Flyway flyway = new Flyway();
-        flyway.setBaselineOnMigrate(true);
-        flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
-        flyway.setBaselineDescription("Base Migration");
-        flyway.setLocations("classpath:fredboat/db/migrations/main");
+    private DatabaseWrapper initMainDbWrapper() throws DatabaseException {
 
-        HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
-        hikariConfig.setMaximumPoolSize(poolsize);
-
-        Properties hibernateProps = DatabaseConnection.Builder.getDefaultHibernateProps();
-        hibernateProps.put("hibernate.cache.use_second_level_cache", "true");
-        hibernateProps.put("hibernate.cache.use_query_cache", "true");
-        hibernateProps.put("net.sf.ehcache.configurationResourceName", "/ehcache_main.xml");
-        hibernateProps.put("hibernate.cache.provider_configuration_file_resource_path", "ehcache_main.xml");
-        hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
-        //we use flyway db now for migrations, hibernate shall only run validations
-        hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
-
-        if (!migrateAndValidate) {
-            flyway = null;
-            hibernateProps.put("hibernate.hbm2ddl.auto", "none");
+        Flyway flyway = null;
+        if (migrateAndValidate) {
+            flyway = buildFlyway("classpath:fredboat/db/migrations/main");
         }
 
-        DatabaseConnection databaseConnection = new DatabaseConnection.Builder(MAIN_PERSISTENCE_UNIT_NAME, mainJdbc)
-                .setHikariConfig(hikariConfig)
-                .setHibernateProps(hibernateProps)
-                .setDialect("org.hibernate.dialect.PostgreSQL95Dialect")
+        DatabaseConnection databaseConnection = getBasicConnectionBuilder(MAIN_PERSISTENCE_UNIT_NAME, mainJdbc)
+                .setHibernateProps(buildHibernateProps("ehcache_main.xml"))
                 .addEntityPackage("fredboat.db.entity.main")
-                .setAppName("FredBoat_" + appName)
                 .setSshDetails(mainTunnel)
-                .setHikariStats(hikariStats)
-                .setHibernateStats(hibernateStats)
-                .setCheckConnection(false) //we run our own connection check for this with the DBConnectionWatchdogAgent
-                .setProxyDataSourceBuilder(new ProxyDataSourceBuilder()
-                        .logSlowQueryBySlf4j(10, TimeUnit.SECONDS, SLF4JLogLevel.WARN, "SlowQueryLog")
-                        .multiline()
-                )
                 .setFlyway(flyway)
                 .build();
 
         //adjusting the ehcache config
         if (mainTunnel == null && cacheTunnel == null) {
             //local database: turn off overflow to disk of the cache
-            CacheManager cacheManager = CacheManager.getCacheManager("MAIN_CACHEMANAGER");
-            for (String cacheName : cacheManager.getCacheNames()) {
-                CacheConfiguration cacheConfig = cacheManager.getCache(cacheName).getCacheConfiguration();
-                cacheConfig.getPersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE);
-            }
+            turnOffLocalStorageForEhcacheManager("MAIN_CACHEMANAGER");
         }
         log.debug(CacheManager.getCacheManager("MAIN_CACHEMANAGER").getActiveConfigurationText());
 
@@ -185,62 +153,81 @@ public class DatabaseManager {
     }
 
 
-    public DatabaseWrapper initCacheWrapper()
-            throws DatabaseException {
+    public DatabaseWrapper initCacheWrapper(String jdbc) throws DatabaseException {
 
-        Flyway flyway = new Flyway();
-        flyway.setBaselineOnMigrate(true);
-        flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
-        flyway.setBaselineDescription("Base Migration");
-        flyway.setLocations("classpath:fredboat/db/migrations/cache");
-
-        HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
-        hikariConfig.setMaximumPoolSize(poolsize);
-
-        Properties hibernateProps = DatabaseConnection.Builder.getDefaultHibernateProps();
-        hibernateProps.put("hibernate.cache.use_second_level_cache", "true");
-        hibernateProps.put("hibernate.cache.use_query_cache", "true");
-        hibernateProps.put("net.sf.ehcache.configurationResourceName", "/ehcache_cache.xml");
-        hibernateProps.put("hibernate.cache.provider_configuration_file_resource_path", "ehcache_cache.xml");
-        hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
-        //we use flyway db now for migrations, hibernate shall only run validations
-        hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
-
-        if (!migrateAndValidate) {
-            flyway = null;
-            hibernateProps.put("hibernate.hbm2ddl.auto", "none");
-        }
-        if (cacheJdbc == null) {
-            throw new IllegalStateException("Trying to build a cache db connectiong with a null cache jdbc url");
+        Flyway flyway = null;
+        if (migrateAndValidate) {
+            flyway = buildFlyway("classpath:fredboat/db/migrations/cache");
         }
 
-        DatabaseConnection databaseConnection = new DatabaseConnection.Builder(CACHE_PERSISTENCE_UNIT_NAME, cacheJdbc)
-                .setHikariConfig(hikariConfig)
-                .setHibernateProps(hibernateProps)
-                .setDialect("org.hibernate.dialect.PostgreSQL95Dialect")
+        DatabaseConnection databaseConnection = getBasicConnectionBuilder(CACHE_PERSISTENCE_UNIT_NAME, jdbc)
+                .setHibernateProps(buildHibernateProps("ehcache_cache.xml"))
                 .addEntityPackage("fredboat.db.entity.cache")
-                .setAppName("FredBoat_" + appName)
                 .setSshDetails(cacheTunnel)
-                .setHikariStats(hikariStats)
-                .setHibernateStats(hibernateStats)
-                .setProxyDataSourceBuilder(new ProxyDataSourceBuilder()
-                        .logSlowQueryBySlf4j(10, TimeUnit.SECONDS, SLF4JLogLevel.WARN, "SlowQueryLog")
-                        .multiline()
-                )
                 .setFlyway(flyway)
                 .build();
 
         //adjusting the ehcache config
         if (mainTunnel == null && cacheTunnel == null) {
             //local database: turn off overflow to disk of the cache
-            CacheManager cacheManager = CacheManager.getCacheManager("CACHE_CACHEMANAGER");
-            for (String cacheName : cacheManager.getCacheNames()) {
-                CacheConfiguration cacheConfig = cacheManager.getCache(cacheName).getCacheConfiguration();
-                cacheConfig.getPersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE);
-            }
+            turnOffLocalStorageForEhcacheManager("CACHE_CACHEMANAGER");
         }
         log.debug(CacheManager.getCacheManager("CACHE_CACHEMANAGER").getActiveConfigurationText());
 
         return new DatabaseWrapper(databaseConnection);
+    }
+
+    private DatabaseConnection.Builder getBasicConnectionBuilder(String connectionName, String jdbcUrl) {
+        return new DatabaseConnection.Builder(connectionName, jdbcUrl)
+                .setHikariConfig(buildHikariConfig())
+                .setDialect("org.hibernate.dialect.PostgreSQL95Dialect")
+                .setAppName("FredBoat_" + appName)
+                .setHikariStats(hikariStats)
+                .setHibernateStats(hibernateStats)
+                .setProxyDataSourceBuilder(new ProxyDataSourceBuilder()
+                        .logSlowQueryBySlf4j(10, TimeUnit.SECONDS, SLF4JLogLevel.WARN, "SlowQueryLog")
+                        .multiline()
+                );
+    }
+
+    private Flyway buildFlyway(String locations) {
+        Flyway flyway = new Flyway();
+        flyway.setBaselineOnMigrate(true);
+        flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
+        flyway.setBaselineDescription("Base Migration");
+        flyway.setLocations(locations);
+
+        return flyway;
+    }
+
+    private HikariConfig buildHikariConfig() {
+        HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
+        hikariConfig.setMaximumPoolSize(poolsize);
+        return hikariConfig;
+    }
+
+    private Properties buildHibernateProps(String ehcacheXmlFile) {
+        Properties hibernateProps = DatabaseConnection.Builder.getDefaultHibernateProps();
+        hibernateProps.put("hibernate.cache.use_second_level_cache", "true");
+        hibernateProps.put("hibernate.cache.use_query_cache", "true");
+        hibernateProps.put("net.sf.ehcache.configurationResourceName", ehcacheXmlFile);
+        hibernateProps.put("hibernate.cache.provider_configuration_file_resource_path", ehcacheXmlFile);
+        hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+
+        if (migrateAndValidate) {
+            hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
+        } else {
+            hibernateProps.put("hibernate.hbm2ddl.auto", "none");
+        }
+
+        return hibernateProps;
+    }
+
+    private void turnOffLocalStorageForEhcacheManager(String cacheManagerName) {
+        CacheManager cacheManager = CacheManager.getCacheManager(cacheManagerName);
+        for (String cacheName : cacheManager.getCacheNames()) {
+            CacheConfiguration cacheConfig = cacheManager.getCache(cacheName).getCacheConfiguration();
+            cacheConfig.getPersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE);
+        }
     }
 }
