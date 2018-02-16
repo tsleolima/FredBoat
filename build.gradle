@@ -78,6 +78,7 @@ subprojects {
         sqlsauceVersion             = '3aa99222963e5f586d8f35695d0ff30ac47ebd53'
         hibernateVersion            = '5.2.13.Final'
         flywayVersion               = '5.0.7'
+        dsProxyVersion              = '1.4.6'
 
         //testing deps
         junitVersion                = '5.0.3'

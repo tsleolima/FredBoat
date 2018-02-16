@@ -31,6 +31,8 @@ import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationVersion;
 import org.slf4j.Logger;
@@ -42,6 +44,7 @@ import space.npstr.sqlsauce.ssh.SshTunnel;
 
 import javax.annotation.Nullable;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseManager {
 
@@ -160,6 +163,10 @@ public class DatabaseManager {
                 .setHikariStats(hikariStats)
                 .setHibernateStats(hibernateStats)
                 .setCheckConnection(false) //we run our own connection check for this with the DBConnectionWatchdogAgent
+                .setProxyDataSourceBuilder(new ProxyDataSourceBuilder()
+                        .logSlowQueryBySlf4j(10, TimeUnit.SECONDS, SLF4JLogLevel.WARN, "SlowQueryLog")
+                        .multiline()
+                )
                 .setFlyway(flyway)
                 .build();
 
@@ -216,6 +223,10 @@ public class DatabaseManager {
                 .setSshDetails(cacheTunnel)
                 .setHikariStats(hikariStats)
                 .setHibernateStats(hibernateStats)
+                .setProxyDataSourceBuilder(new ProxyDataSourceBuilder()
+                        .logSlowQueryBySlf4j(10, TimeUnit.SECONDS, SLF4JLogLevel.WARN, "SlowQueryLog")
+                        .multiline()
+                )
                 .setFlyway(flyway)
                 .build();
 

@@ -13,4 +13,5 @@ dependencies {
     compile group: 'space.npstr.SqlSauce', name: 'discord-entities', version: sqlsauceVersion
     compile group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernateVersion
     compile group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion
+    compile group: 'net.ttddyy', name: 'datasource-proxy', version: dsProxyVersion
 }
