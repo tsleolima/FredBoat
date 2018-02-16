@@ -12,4 +12,11 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: commonsIOVersion
     compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpComponentsVersion
+
+    compile group: 'io.prometheus', name: 'simpleclient', version: prometheusClientVersion
+    compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: prometheusClientVersion
+    compile group: 'io.prometheus', name: 'simpleclient_logback', version: prometheusClientVersion
+    compile group: 'io.prometheus', name: 'simpleclient_hibernate', version: prometheusClientVersion
+    compile group: 'io.prometheus', name: 'simpleclient_guava', version: prometheusClientVersion
+    compile group: 'io.prometheus', name: 'simpleclient_servlet', version: prometheusClientVersion
 }

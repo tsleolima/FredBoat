@@ -43,13 +43,6 @@ dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion
 
-    compile group: 'io.prometheus', name: 'simpleclient', version: prometheusClientVersion
-    compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: prometheusClientVersion
-    compile group: 'io.prometheus', name: 'simpleclient_logback', version: prometheusClientVersion
-    compile group: 'io.prometheus', name: 'simpleclient_hibernate', version: prometheusClientVersion
-    compile group: 'io.prometheus', name: 'simpleclient_guava', version: prometheusClientVersion
-    compile group: 'io.prometheus', name: 'simpleclient_servlet', version: prometheusClientVersion
-
     compile group: 'org.togglz', name: 'togglz-core', version: togglzVersion
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
     compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: bucket4jVersion
