@@ -36,8 +36,6 @@ dependencies {
         compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: lavalinkVersion)
     }
 
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    compile group: 'io.sentry', name: 'sentry-logback', version: sentryVersion
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
     compile group: 'com.sparkjava', name: 'spark-core', version: sparkVersion
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
