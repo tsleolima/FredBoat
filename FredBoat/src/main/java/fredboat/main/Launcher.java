@@ -15,6 +15,7 @@ import fredboat.feature.DikeSessionController;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.OkHttpEventMetrics;
+import fredboat.shared.constant.BotConstants;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
@@ -36,7 +37,6 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
@@ -97,35 +97,42 @@ public class Launcher {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
 
+        //dont run migrations or validate the db from the patron bot
+        boolean migrateAndValidate = DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID;
+        DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
+                Config.CONFIG.getHikariPoolSize(), Config.CONFIG.getDistribution().name(), migrateAndValidate,
+                Config.CONFIG.getMainJdbcUrl(), Config.CONFIG.getMainSshTunnelConfig(),
+                Config.CONFIG.getCacheJdbcUrl(), Config.CONFIG.getCacheSshTunnelConfig());
+
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
         // container will be started before the fredboat one
         int dbConnectionAttempts = 0;
-        DatabaseConnection mainDbConn = null;
-        while ((mainDbConn == null || !mainDbConn.isAvailable()) && dbConnectionAttempts++ < 10) {
+        DatabaseWrapper mainDbWrapper = null;
+        while ((mainDbWrapper == null || !mainDbWrapper.unwrap().isAvailable()) && dbConnectionAttempts++ < 10) {
             try {
-                if (mainDbConn != null) {
-                    mainDbConn.shutdown();
+                if (mainDbWrapper != null) {
+                    mainDbWrapper.unwrap().shutdown();
                 }
-                mainDbConn = DatabaseManager.main();
+                mainDbWrapper = dbManager.getMainDbWrapper();
             } catch (Exception e) {
                 log.info("Could not connect to the database. Retrying in a moment...", e);
                 Thread.sleep(6000);
             }
         }
-        if (mainDbConn == null || !mainDbConn.isAvailable()) {
+        if (mainDbWrapper == null || !mainDbWrapper.unwrap().isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
             FBC.shutdown(ExitCodes.EXIT_CODE_ERROR);
             return;
         }
-        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
-        FBC.setMainDbWrapper(new DatabaseWrapper(mainDbConn));
+        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbWrapper.unwrap()));
+        FBC.setMainDbWrapper(mainDbWrapper);
 
-        DatabaseConnection cacheDbConn = null;
+        DatabaseWrapper cacheDbWrapper = null;
         try {
-            cacheDbConn = DatabaseManager.cache();
-            if (cacheDbConn != null) {
-                FBC.setCacheDbWrapper(new DatabaseWrapper(cacheDbConn));
+            cacheDbWrapper = dbManager.getCacheDbWrapper();
+            if (cacheDbWrapper != null) {
+                FBC.setCacheDbWrapper(cacheDbWrapper);
             }
         } catch (Exception e) {
             log.error("Exception when connecting to cache db", e);
@@ -133,7 +140,7 @@ public class Launcher {
         }
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
 
-        FBC.setEntityIO(new EntityIO(mainDbConn, cacheDbConn));
+        FBC.setEntityIO(new EntityIO(mainDbWrapper, cacheDbWrapper));
 
         //Initialise event listeners
         FBC.setMainEventListener(new EventListenerBoat());

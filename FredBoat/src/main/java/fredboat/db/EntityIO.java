@@ -35,10 +35,6 @@ import fredboat.util.func.NonnullSupplier;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import space.npstr.annotations.FieldsAreNonNullByDefault;
-import space.npstr.annotations.ParametersAreNonnullByDefault;
-import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
-import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
@@ -54,9 +50,6 @@ import java.util.function.Supplier;
  * to commonly used methods to read and write entities, as well as transform them.
  */
 @SuppressWarnings("UnusedReturnValue")
-@FieldsAreNonNullByDefault
-@ParametersAreNonnullByDefault
-@ReturnTypesAreNonNullByDefault
 public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGuildModulesIO, IGuildPermsIO, IPrefixIO,
         ISearchResultIO {
 
@@ -72,10 +65,7 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
     @Nullable
     private final ISearchResultRepo searchResultRepo;
 
-    public EntityIO(DatabaseConnection main, @Nullable DatabaseConnection cache) {
-        DatabaseWrapper mainWrapper = new DatabaseWrapper(main);
-        DatabaseWrapper cacheWrapper = cache != null ? new DatabaseWrapper(cache) : null;
-
+    public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper) {
         guildConfigRepo = new SqlSauceGuildConfigRepo(mainWrapper);
         guildDataRepo = new SqlSauceGuildDataRepo(mainWrapper);
         guildModulesRepo = new SqlSauceGuildModulesRepo(mainWrapper);

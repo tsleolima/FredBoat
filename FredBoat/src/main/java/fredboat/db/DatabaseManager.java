@@ -26,10 +26,8 @@
 package fredboat.db;
 
 import com.zaxxer.hikari.HikariConfig;
-import fredboat.feature.metrics.Metrics;
-import fredboat.main.Config;
-import fredboat.shared.constant.BotConstants;
-import fredboat.util.DiscordUtil;
+import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
+import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
@@ -39,8 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
+import space.npstr.sqlsauce.DatabaseWrapper;
+import space.npstr.sqlsauce.ssh.SshTunnel;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Properties;
 
@@ -51,10 +50,83 @@ public class DatabaseManager {
     private static final String MAIN_PERSISTENCE_UNIT_NAME = "fredboat.main";
     private static final String CACHE_PERSISTENCE_UNIT_NAME = "fredboat.cache";
 
-    @Nonnull
-    public static DatabaseConnection main() throws DatabaseException {
-        String jdbc = Config.CONFIG.getMainJdbcUrl();
+    @Nullable
+    private final HibernateStatisticsCollector hibernateStats;
+    @Nullable
+    private final PrometheusMetricsTrackerFactory hikariStats;
+    private final int poolsize;
+    private final String appName;
+    private final boolean migrateAndValidate;
+    private final String mainJdbc;
+    @Nullable
+    private final SshTunnel.SshDetails mainTunnel;
+    @Nullable
+    private final String cacheJdbc;
+    @Nullable
+    private final SshTunnel.SshDetails cacheTunnel;
 
+
+    @Nullable
+    private DatabaseWrapper mainDbWrapper;
+    private final Object mainDbWrapperInitLock = new Object();
+
+    @Nullable
+    private DatabaseWrapper cacheDbWrapper;
+    private final Object cacheDbWrapperInitLock = new Object();
+
+    public DatabaseManager(@Nullable HibernateStatisticsCollector hibernateStats,
+                           @Nullable PrometheusMetricsTrackerFactory hikariStats,
+                           int poolsize,
+                           String appName,
+                           boolean migrateAndValidate,
+                           String mainJdbc,
+                           @Nullable SshTunnel.SshDetails mainTunnel,
+                           @Nullable String cacheJdbc,
+                           @Nullable SshTunnel.SshDetails cacheTunnel) {
+        this.hibernateStats = hibernateStats;
+        this.hikariStats = hikariStats;
+        this.poolsize = poolsize;
+        this.appName = appName;
+        this.migrateAndValidate = migrateAndValidate;
+        this.mainJdbc = mainJdbc;
+        this.mainTunnel = mainTunnel;
+        this.cacheJdbc = cacheJdbc;
+        this.cacheTunnel = cacheTunnel;
+    }
+
+    public DatabaseWrapper getMainDbWrapper() {
+        DatabaseWrapper singleton = mainDbWrapper;
+        if (singleton == null) {
+            synchronized (mainDbWrapperInitLock) {
+                singleton = mainDbWrapper;
+                if (singleton == null) {
+                    mainDbWrapper = singleton = initMainDbWrapper();
+                }
+            }
+        }
+        return singleton;
+    }
+
+
+    @Nullable //may return null if no cache db is configured
+    public DatabaseWrapper getCacheDbWrapper() {
+        if (cacheJdbc == null) {
+            return null;
+        }
+        DatabaseWrapper singleton = cacheDbWrapper;
+        if (singleton == null) {
+            synchronized (cacheDbWrapperInitLock) {
+                singleton = cacheDbWrapper;
+                if (singleton == null) {
+                    cacheDbWrapper = singleton = initCacheWrapper();
+                }
+            }
+        }
+        return singleton;
+    }
+
+    private DatabaseWrapper initMainDbWrapper()
+            throws DatabaseException {
         Flyway flyway = new Flyway();
         flyway.setBaselineOnMigrate(true);
         flyway.setBaselineVersion(MigrationVersion.fromVersion("0"));
@@ -62,7 +134,7 @@ public class DatabaseManager {
         flyway.setLocations("classpath:fredboat/db/migrations/main");
 
         HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
-        hikariConfig.setMaximumPoolSize(Config.CONFIG.getHikariPoolSize());
+        hikariConfig.setMaximumPoolSize(poolsize);
 
         Properties hibernateProps = DatabaseConnection.Builder.getDefaultHibernateProps();
         hibernateProps.put("hibernate.cache.use_second_level_cache", "true");
@@ -73,27 +145,26 @@ public class DatabaseManager {
         //we use flyway db now for migrations, hibernate shall only run validations
         hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
 
-        //dont run migrations or validate the db from the patron bot
-        if (DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID) {
+        if (!migrateAndValidate) {
             flyway = null;
             hibernateProps.put("hibernate.hbm2ddl.auto", "none");
         }
 
-        DatabaseConnection databaseConnection = new DatabaseConnection.Builder(MAIN_PERSISTENCE_UNIT_NAME, jdbc)
+        DatabaseConnection databaseConnection = new DatabaseConnection.Builder(MAIN_PERSISTENCE_UNIT_NAME, mainJdbc)
                 .setHikariConfig(hikariConfig)
                 .setHibernateProps(hibernateProps)
                 .setDialect("org.hibernate.dialect.PostgreSQL95Dialect")
                 .addEntityPackage("fredboat.db.entity.main")
-                .setAppName("FredBoat_" + Config.CONFIG.getDistribution())
-                .setSshDetails(Config.CONFIG.getMainSshTunnelConfig())
-                .setHikariStats(Metrics.instance().hikariStats)
-                .setHibernateStats(Metrics.instance().hibernateStats)
+                .setAppName("FredBoat_" + appName)
+                .setSshDetails(mainTunnel)
+                .setHikariStats(hikariStats)
+                .setHibernateStats(hibernateStats)
                 .setCheckConnection(false) //we run our own connection check for this with the DBConnectionWatchdogAgent
                 .setFlyway(flyway)
                 .build();
 
         //adjusting the ehcache config
-        if (Config.CONFIG.getMainSshTunnelConfig() == null) {
+        if (mainTunnel == null && cacheTunnel == null) {
             //local database: turn off overflow to disk of the cache
             CacheManager cacheManager = CacheManager.getCacheManager("MAIN_CACHEMANAGER");
             for (String cacheName : cacheManager.getCacheNames()) {
@@ -103,16 +174,12 @@ public class DatabaseManager {
         }
         log.debug(CacheManager.getCacheManager("MAIN_CACHEMANAGER").getActiveConfigurationText());
 
-        return databaseConnection;
+        return new DatabaseWrapper(databaseConnection);
     }
 
 
-    @Nullable //may return null of no cache db has been configured
-    public static DatabaseConnection cache() throws DatabaseException {
-        String cacheJdbc = Config.CONFIG.getCacheJdbcUrl();
-        if (cacheJdbc == null) {
-            return null;
-        }
+    public DatabaseWrapper initCacheWrapper()
+            throws DatabaseException {
 
         Flyway flyway = new Flyway();
         flyway.setBaselineOnMigrate(true);
@@ -121,7 +188,7 @@ public class DatabaseManager {
         flyway.setLocations("classpath:fredboat/db/migrations/cache");
 
         HikariConfig hikariConfig = DatabaseConnection.Builder.getDefaultHikariConfig();
-        hikariConfig.setMaximumPoolSize(Config.CONFIG.getHikariPoolSize());
+        hikariConfig.setMaximumPoolSize(poolsize);
 
         Properties hibernateProps = DatabaseConnection.Builder.getDefaultHibernateProps();
         hibernateProps.put("hibernate.cache.use_second_level_cache", "true");
@@ -132,10 +199,12 @@ public class DatabaseManager {
         //we use flyway db now for migrations, hibernate shall only run validations
         hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
 
-        //dont run migrations or validate the db from the patron bot
-        if (DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID) {
+        if (!migrateAndValidate) {
             flyway = null;
             hibernateProps.put("hibernate.hbm2ddl.auto", "none");
+        }
+        if (cacheJdbc == null) {
+            throw new IllegalStateException("Trying to build a cache db connectiong with a null cache jdbc url");
         }
 
         DatabaseConnection databaseConnection = new DatabaseConnection.Builder(CACHE_PERSISTENCE_UNIT_NAME, cacheJdbc)
@@ -143,15 +212,15 @@ public class DatabaseManager {
                 .setHibernateProps(hibernateProps)
                 .setDialect("org.hibernate.dialect.PostgreSQL95Dialect")
                 .addEntityPackage("fredboat.db.entity.cache")
-                .setAppName("FredBoat_" + Config.CONFIG.getDistribution())
-                .setSshDetails(Config.CONFIG.getCacheSshTunnelConfig())
-                .setHikariStats(Metrics.instance().hikariStats)
-                .setHibernateStats(Metrics.instance().hibernateStats)
+                .setAppName("FredBoat_" + appName)
+                .setSshDetails(cacheTunnel)
+                .setHikariStats(hikariStats)
+                .setHibernateStats(hibernateStats)
                 .setFlyway(flyway)
                 .build();
 
         //adjusting the ehcache config
-        if (Config.CONFIG.getMainSshTunnelConfig() == null) {
+        if (mainTunnel == null && cacheTunnel == null) {
             //local database: turn off overflow to disk of the cache
             CacheManager cacheManager = CacheManager.getCacheManager("CACHE_CACHEMANAGER");
             for (String cacheName : cacheManager.getCacheNames()) {
@@ -161,6 +230,6 @@ public class DatabaseManager {
         }
         log.debug(CacheManager.getCacheManager("CACHE_CACHEMANAGER").getActiveConfigurationText());
 
-        return databaseConnection;
+        return new DatabaseWrapper(databaseConnection);
     }
 }
