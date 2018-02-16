@@ -213,6 +213,9 @@ public class DatabaseManager {
         hibernateProps.put("net.sf.ehcache.configurationResourceName", ehcacheXmlFile);
         hibernateProps.put("hibernate.cache.provider_configuration_file_resource_path", ehcacheXmlFile);
         hibernateProps.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+        //hide some exception spam on start, as postgres does not support CLOBs
+        // https://stackoverflow.com/questions/43905119/postgres-error-method-org-postgresql-jdbc-pgconnection-createclob-is-not-imple
+        hibernateProps.put("hibernate.jdbc.lob.non_contextual_creation", "true");
 
         if (migrateAndValidate) {
             hibernateProps.put("hibernate.hbm2ddl.auto", "validate");
