@@ -2,7 +2,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,7 @@
 
 package fredboat.util.rest;
 
-import fredboat.feature.metrics.OkHttpEventMetrics;
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -55,18 +48,23 @@ public class Http {
 
     private static final Logger log = LoggerFactory.getLogger(Http.class);
 
-    public final static OkHttpClient defaultHttpClient = new OkHttpClient.Builder()
+    //enhance with metrics before using
+    public static final OkHttpClient DEFAULT_BUILDER = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
-            .eventListener(new OkHttpEventMetrics("default"))
             .build();
 
+    private final OkHttpClient httpClient;
+
+    public Http(OkHttpClient okHttpClient) {
+        this.httpClient = okHttpClient;
+    }
 
     @Nonnull
     @CheckReturnValue
     //if content type is left null we will assume it is text/plain UTF-8
-    public static SimpleRequest post(@Nonnull String url, @Nonnull String body, @Nullable String contentType) {
+    public SimpleRequest post(@Nonnull String url, @Nonnull String body, @Nullable String contentType) {
         MediaType mediaType = contentType != null ? MediaType.parse(contentType) : MediaType.parse("text/plain");
         return new SimpleRequest(new Request.Builder()
                 .post(RequestBody.create(mediaType, body))
@@ -76,7 +74,7 @@ public class Http {
     @Nonnull
     @CheckReturnValue
     //post a simple form body made of string string key values
-    public static SimpleRequest post(@Nonnull String url, @Nonnull Params params) {
+    public SimpleRequest post(@Nonnull String url, @Nonnull Params params) {
         FormBody.Builder body = new FormBody.Builder();
         for (Map.Entry<String, String> param : params.params.entrySet()) {
             body.add(param.getKey(), param.getValue());
@@ -88,7 +86,7 @@ public class Http {
 
     @Nonnull
     @CheckReturnValue
-    public static SimpleRequest get(@Nonnull String url) {
+    public SimpleRequest get(@Nonnull String url) {
         return new SimpleRequest(new Request.Builder()
                 .get()
                 .url(url));
@@ -97,7 +95,7 @@ public class Http {
 
     @Nonnull
     @CheckReturnValue
-    public static SimpleRequest get(@Nonnull String url, @Nonnull Params params) {
+    public SimpleRequest get(@Nonnull String url, @Nonnull Params params) {
         return new SimpleRequest(new Request.Builder()
                 .get()
                 .url(paramUrl(url, params.params).build()));
@@ -117,9 +115,9 @@ public class Http {
     /**
      * A simplified request.
      */
-    public static class SimpleRequest {
+    public class SimpleRequest {
         private Request.Builder requestBuilder;
-        private OkHttpClient httpClient = defaultHttpClient;
+        private OkHttpClient httpClient = Http.this.httpClient;
 
         public SimpleRequest(Request.Builder requestBuilder) {
             this.requestBuilder = requestBuilder;

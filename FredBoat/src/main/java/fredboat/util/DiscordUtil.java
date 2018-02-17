@@ -86,7 +86,7 @@ public class DiscordUtil {
     }
 
     public static int getRecommendedShardCount(@Nonnull String token) throws IOException, JSONException {
-        Http.SimpleRequest request = Http.get(Requester.DISCORD_API_PREFIX + "gateway/bot")
+        Http.SimpleRequest request = BotController.HTTP.get(Requester.DISCORD_API_PREFIX + "gateway/bot")
                 .auth("Bot " + token)
                 .header("User-agent", USER_AGENT);
 
@@ -130,7 +130,7 @@ public class DiscordUtil {
     }
 
     private static long getUserId(@Nonnull String token) {
-        Http.SimpleRequest request = Http.get(Requester.DISCORD_API_PREFIX + "/users/@me")
+        Http.SimpleRequest request = BotController.HTTP.get(Requester.DISCORD_API_PREFIX + "/users/@me")
                 .auth("Bot " + token)
                 .header("User-agent", USER_AGENT);
 

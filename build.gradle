@@ -55,6 +55,7 @@ subprojects {
         commonsTextVersion          = '1.2'
         commonsIOVersion            = '2.6'
         commonsCodecVersion         = '1.11'
+        commonsCollectionsVersion   = '4.1'
         snakeYamlVersion            = '1.19'
         fastUtilVersion             = '8.1.1'
         togglzVersion               = '2.5.0.Final'

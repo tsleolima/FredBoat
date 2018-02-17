@@ -36,7 +36,6 @@ dependencies {
         compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: lavalinkVersion)
     }
 
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
     compile group: 'com.sparkjava', name: 'spark-core', version: sparkVersion
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion

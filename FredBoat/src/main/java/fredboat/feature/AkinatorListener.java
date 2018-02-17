@@ -75,7 +75,7 @@ public final class AkinatorListener extends UserListener {
         context.sendTyping();
 
         //Start new session
-        Http.SimpleRequest request = Http.get(NEW_SESSION_URL, Http.Params.of(
+        Http.SimpleRequest request = BotController.HTTP.get(NEW_SESSION_URL, Http.Params.of(
                 "player", userId
         ));
 
@@ -110,7 +110,7 @@ public final class AkinatorListener extends UserListener {
     }
 
     private void answerQuestion(byte answer) {
-        Http.SimpleRequest request = Http.get(ANSWER_URL, Http.Params.of(
+        Http.SimpleRequest request = BotController.HTTP.get(ANSWER_URL, Http.Params.of(
                 "session", session,
                 "signature", signature,
                 "step", String.valueOf(stepInfo.getStepNum()),
@@ -140,7 +140,7 @@ public final class AkinatorListener extends UserListener {
     private void answerGuess(byte answer) {
         try {
             if (answer == 0) {
-                Http.get(CHOICE_URL,
+                BotController.HTTP.get(CHOICE_URL,
                         Http.Params.of(
                                 "session", session,
                                 "signature", signature,
@@ -155,7 +155,7 @@ public final class AkinatorListener extends UserListener {
                         + "<http://akinator.com>");
                 BotController.INS.getMainEventListener().removeListener(userId);
             } else if (answer == 1) {
-                Http.get(EXCLUSION_URL,
+                BotController.HTTP.get(EXCLUSION_URL,
                         Http.Params.of(
                                 "session", session,
                                 "signature", signature,
@@ -297,7 +297,7 @@ public final class AkinatorListener extends UserListener {
         private final String imgPath;
 
         Guess() throws IOException, JSONException {
-            Http.SimpleRequest request = Http.get(GET_GUESS_URL, Http.Params.of(
+            Http.SimpleRequest request = BotController.HTTP.get(GET_GUESS_URL, Http.Params.of(
                     "session", session,
                     "signature", signature,
                     "step", Integer.toString(stepInfo.getStepNum())

@@ -30,7 +30,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
-import fredboat.util.rest.Http;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class CatgirlCommand extends Command implements IFunCommand {
     private void postCatgirl(CommandContext context) {
 
         try {
-            String nekoUrl = Http.get(BASE_URL).asJson().getString("neko");
+            String nekoUrl = BotController.HTTP.get(BASE_URL).asJson().getString("neko");
             context.replyImage(nekoUrl);
         } catch (IOException e) {
             context.reply(context.i18nFormat("catgirlFail", BASE_URL));

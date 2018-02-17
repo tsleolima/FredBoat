@@ -28,8 +28,8 @@ package fredboat.command.fun;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
+import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
-import fredboat.util.rest.Http;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class JokeCommand extends Command implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         try {
-            JSONObject object = Http.get("http://api.icndb.com/jokes/random").asJson();
+            JSONObject object = BotController.HTTP.get("http://api.icndb.com/jokes/random").asJson();
 
             if (!"success".equals(object.getString("type"))) {
                 throw new RuntimeException("Couldn't gather joke ;|");

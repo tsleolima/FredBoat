@@ -14,7 +14,7 @@ import fredboat.event.EventLogger;
 import fredboat.feature.DikeSessionController;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
-import fredboat.feature.metrics.OkHttpEventMetrics;
+import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.shared.constant.BotConstants;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
@@ -196,7 +196,7 @@ public class Launcher {
             return false;
         }
 
-        Http.SimpleRequest request = Http.get("https://myanimelist.net/api/account/verify_credentials.xml")
+        Http.SimpleRequest request = BotController.HTTP.get("https://myanimelist.net/api/account/verify_credentials.xml")
                 .auth(Credentials.basic(malUser, malPassWord));
 
         try (Response response = request.execute()) {
@@ -219,7 +219,7 @@ public class Launcher {
             log.info("Imgur credentials not found. Commands relying on Imgur will not work properly.");
             return false;
         }
-        Http.SimpleRequest request = Http.get("https://api.imgur.com/3/credits")
+        Http.SimpleRequest request = BotController.HTTP.get("https://api.imgur.com/3/credits")
                 .auth("Client-ID " + imgurClientId);
         try (Response response = request.execute()) {
             //noinspection ConstantConditions
@@ -349,8 +349,8 @@ public class Launcher {
                 .setAutoReconnect(true)
                 .setSessionController(sessionController)
                 .setContextEnabled(false)
-                .setHttpClientBuilder(Http.defaultHttpClient.newBuilder()
-                        .eventListener(new OkHttpEventMetrics("jda")))
+                .setHttpClientBuilder(Http.DEFAULT_BUILDER.newBuilder()
+                        .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(BotController.INS.getMainEventListener())
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
                 .setShardsTotal(Config.getNumShards());

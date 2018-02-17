@@ -29,10 +29,10 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import fredboat.commandmeta.MessagingException;
+import fredboat.main.BotController;
 import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -156,13 +156,13 @@ public class TextUtils {
     }
 
     private static String postToHastebin(String body) throws IOException {
-        return Http.post("https://hastebin.com/documents", body, "text/plain")
+        return BotController.HTTP.post("https://hastebin.com/documents", body, "text/plain")
                 .asJson()
                 .getString("key");
     }
 
     private static String postToWastebin(String body) throws IOException {
-        return Http.post("https://wastebin.party/documents", body, "text/plain")
+        return BotController.HTTP.post("https://wastebin.party/documents", body, "text/plain")
                 .asJson()
                 .getString("key");
     }

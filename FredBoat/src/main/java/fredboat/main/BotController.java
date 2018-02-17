@@ -5,6 +5,9 @@ import fredboat.agent.StatsAgent;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
+import fredboat.feature.metrics.Metrics;
+import fredboat.metrics.OkHttpEventMetrics;
+import fredboat.util.rest.Http;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,11 @@ import java.util.concurrent.Executors;
 public class BotController {
 
     public static final BotController INS = new BotController();
+
+    public static final Http HTTP = new Http(Http.DEFAULT_BUILDER.newBuilder()
+            .eventListener(new OkHttpEventMetrics("default", Metrics.httpEventCounter))
+            .build());
+
     private static final Logger log = LoggerFactory.getLogger(BotController.class);
     private ShardManager shardManager = null;
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;

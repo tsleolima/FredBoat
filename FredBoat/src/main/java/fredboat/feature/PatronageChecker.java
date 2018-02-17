@@ -28,11 +28,11 @@ package fredboat.feature;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import fredboat.main.Config;
 import fredboat.feature.metrics.Metrics;
+import fredboat.main.BotController;
+import fredboat.main.Config;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.rest.CacheUtil;
-import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.entities.Guild;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -114,7 +114,7 @@ public class PatronageChecker {
             //TODO prevent selfhosters from running this?
             try {
                 return new Status(
-                        Http.get(Config.CONFIG.getDistribution() == DistributionEnum.PATRON
+                        BotController.HTTP.get(Config.CONFIG.getDistribution() == DistributionEnum.PATRON
                                 ? "https://patronapi.fredboat.com/api/drm/" + key
                                 : "http://localhost:4500/api/drm/" + key)
                                 .asJson()

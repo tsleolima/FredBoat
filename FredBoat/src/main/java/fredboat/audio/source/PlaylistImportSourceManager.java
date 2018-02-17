@@ -33,7 +33,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.queue.PlaylistInfo;
-import fredboat.util.rest.Http;
+import fredboat.main.BotController;
 import org.slf4j.LoggerFactory;
 
 import java.io.DataInput;
@@ -153,7 +153,7 @@ public class PlaylistImportSourceManager implements AudioSourceManager, Playlist
     private List<String> loadAndParseTrackIds(String serviceName, String pasteId) {
         String response;
         try {
-            response = Http.get(PasteServiceConstants.PASTE_SERVICE_URLS.get(serviceName) + pasteId).asString();
+            response = BotController.HTTP.get(PasteServiceConstants.PASTE_SERVICE_URLS.get(serviceName) + pasteId).asString();
         } catch (IOException ex) {
             throw new FriendlyException(
                     "Couldn't load playlist. Either " + serviceName + " is down or the playlist does not exist.",

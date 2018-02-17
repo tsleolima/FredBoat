@@ -25,6 +25,7 @@
 
 package fredboat.util.rest;
 
+import fredboat.main.BotController;
 import fredboat.main.Config;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +127,7 @@ public class YoutubeVideo {
     }
 
     public String getChannelThumbUrl() {
-        Http.SimpleRequest request = Http.get(YoutubeAPI.YOUTUBE_CHANNEL,
+        Http.SimpleRequest request = BotController.HTTP.get(YoutubeAPI.YOUTUBE_CHANNEL,
                 Http.Params.of(
                         "id", channelId,
                         "key", Config.CONFIG.getRandomGoogleKey()

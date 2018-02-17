@@ -2,7 +2,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,10 @@
  * SOFTWARE.
  */
 
-package fredboat.feature.metrics;
+package fredboat.metrics;
 
-import okhttp3.Call;
-import okhttp3.Connection;
-import okhttp3.EventListener;
-import okhttp3.Handshake;
-import okhttp3.Protocol;
-import okhttp3.Request;
-import okhttp3.Response;
+import io.prometheus.client.Counter;
+import okhttp3.*;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -49,110 +44,112 @@ import java.util.List;
 public class OkHttpEventMetrics extends EventListener {
 
     //a recognizable name of the instance of the okhttp client. should not be changed between releases to keep metrics
-    private String instanceLabel;
+    private final String instanceLabel;
+    private final Counter httpEventCounter;
 
-    public OkHttpEventMetrics(String instanceLabel) {
+    public OkHttpEventMetrics(String instanceLabel, Counter httpEventCounter) {
         this.instanceLabel = instanceLabel;
+        this.httpEventCounter = httpEventCounter;
     }
 
     @Override
     public void callStart(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "callStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "callStart").inc();
     }
 
     @Override
     public void dnsStart(Call call, String domainName) {
-        Metrics.httpEventCounter.labels(instanceLabel, "dnsStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "dnsStart").inc();
     }
 
     @Override
     public void dnsEnd(Call call, String domainName, @Nullable List<InetAddress> inetAddressList) {
-        Metrics.httpEventCounter.labels(instanceLabel, "dnsEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "dnsEnd").inc();
     }
 
     @Override
     public void connectStart(Call call, InetSocketAddress inetSocketAddress, Proxy proxy) {
-        Metrics.httpEventCounter.labels(instanceLabel, "connectStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "connectStart").inc();
     }
 
     @Override
     public void secureConnectStart(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "secureConnectStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "secureConnectStart").inc();
     }
 
     @Override
     public void secureConnectEnd(Call call, @Nullable Handshake handshake) {
-        Metrics.httpEventCounter.labels(instanceLabel, "secureConnectEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "secureConnectEnd").inc();
     }
 
     @Override
     public void connectEnd(Call call, InetSocketAddress inetSocketAddress, @Nullable Proxy proxy, @Nullable Protocol protocol) {
-        Metrics.httpEventCounter.labels(instanceLabel, "connectEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "connectEnd").inc();
     }
 
     @Override
     public void connectFailed(Call call, InetSocketAddress inetSocketAddress, @Nullable Proxy proxy, @Nullable Protocol protocol, @Nullable IOException ioe) {
-        Metrics.httpEventCounter.labels(instanceLabel, "connectFailed").inc();
+        this.httpEventCounter.labels(instanceLabel, "connectFailed").inc();
     }
 
     @Override
     public void connectionAcquired(Call call, Connection connection) {
-        Metrics.httpEventCounter.labels(instanceLabel, "connectionAcquired").inc();
+        this.httpEventCounter.labels(instanceLabel, "connectionAcquired").inc();
     }
 
     @Override
     public void connectionReleased(Call call, Connection connection) {
-        Metrics.httpEventCounter.labels(instanceLabel, "connectionReleased").inc();
+        this.httpEventCounter.labels(instanceLabel, "connectionReleased").inc();
     }
 
     @Override
     public void requestHeadersStart(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "requestHeadersStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "requestHeadersStart").inc();
     }
 
     @Override
     public void requestHeadersEnd(Call call, Request request) {
-        Metrics.httpEventCounter.labels(instanceLabel, "requestHeadersEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "requestHeadersEnd").inc();
     }
 
     @Override
     public void requestBodyStart(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "requestBodyStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "requestBodyStart").inc();
     }
 
     @Override
     public void requestBodyEnd(Call call, long byteCount) {
-        Metrics.httpEventCounter.labels(instanceLabel, "requestBodyEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "requestBodyEnd").inc();
     }
 
     @Override
     public void responseHeadersStart(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "responseHeadersStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "responseHeadersStart").inc();
     }
 
     @Override
     public void responseHeadersEnd(Call call, Response response) {
-        Metrics.httpEventCounter.labels(instanceLabel, "responseHeadersEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "responseHeadersEnd").inc();
     }
 
     @Override
     public void responseBodyStart(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "responseBodyStart").inc();
+        this.httpEventCounter.labels(instanceLabel, "responseBodyStart").inc();
     }
 
     @Override
     public void responseBodyEnd(Call call, long byteCount) {
-        Metrics.httpEventCounter.labels(instanceLabel, "responseBodyEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "responseBodyEnd").inc();
     }
 
     @Override
     public void callEnd(Call call) {
-        Metrics.httpEventCounter.labels(instanceLabel, "callEnd").inc();
+        this.httpEventCounter.labels(instanceLabel, "callEnd").inc();
     }
 
     @Override
     public void callFailed(Call call, IOException ioe) {
-        Metrics.httpEventCounter.labels(instanceLabel, "callFailed").inc();
+        this.httpEventCounter.labels(instanceLabel, "callFailed").inc();
     }
 }
 

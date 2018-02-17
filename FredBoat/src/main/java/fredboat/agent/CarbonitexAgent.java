@@ -69,7 +69,7 @@ public class CarbonitexAgent extends FredBoatAgent {
             return;
         }
 
-        try (Response response = Http.post("https://www.carbonitex.net/discord/data/botdata.php",
+        try (Response response = BotController.HTTP.post("https://www.carbonitex.net/discord/data/botdata.php",
                 Http.Params.of(
                         "key", key,
                         "servercount", Integer.toString(BotMetrics.getTotalGuildsCount())

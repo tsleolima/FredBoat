@@ -9,6 +9,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.metrics.Metrics;
+import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.rest.Http;
@@ -126,7 +127,7 @@ public class SetAvatarCommand extends Command implements ICommandRestricted {
     }
 
     private static Icon fetchRemote(URI uri) {
-        try (Response response = Http.get(uri.toString()).execute()) {
+        try (Response response = BotController.HTTP.get(uri.toString()).execute()) {
             if (Http.isImage(response)) {
                 //noinspection ConstantConditions
                 InputStream avatarData = response.body().byteStream();

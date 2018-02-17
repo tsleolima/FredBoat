@@ -25,8 +25,9 @@
 
 package fredboat.util.rest;
 
-import fredboat.main.Config;
 import fredboat.audio.queue.PlaylistInfo;
+import fredboat.main.BotController;
+import fredboat.main.Config;
 import okhttp3.Credentials;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,7 +89,7 @@ public class SpotifyAPIWrapper {
      */
     private void refreshAccessToken() {
         try {
-            JSONObject jsonClientCredentials = Http.post(URL_SPOTIFY_AUTHENTICATION_HOST + "/api/token",
+            JSONObject jsonClientCredentials = BotController.HTTP.post(URL_SPOTIFY_AUTHENTICATION_HOST + "/api/token",
                     Http.Params.of(
                             "grant_type", "client_credentials"
                     ))
@@ -125,7 +126,7 @@ public class SpotifyAPIWrapper {
     public PlaylistInfo getPlaylistDataBlocking(String userId, String playlistId) throws IOException, JSONException {
         refreshTokenIfNecessary();
 
-        JSONObject jsonPlaylist = Http.get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId)
+        JSONObject jsonPlaylist = BotController.HTTP.get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId)
                 .auth("Bearer " + accessToken)
                 .asJson();
 
@@ -171,7 +172,7 @@ public class SpotifyAPIWrapper {
             }
 
             //request a page of tracks
-            jsonPage = Http.get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
+            jsonPage = BotController.HTTP.get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
                     Http.Params.of(
                             "offset", offset,
                             "limit", limit

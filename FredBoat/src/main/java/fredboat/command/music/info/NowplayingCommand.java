@@ -38,10 +38,10 @@ import fredboat.audio.queue.AudioTrackContext;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMusicCommand;
+import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
-import fredboat.util.rest.Http;
 import fredboat.util.rest.YoutubeAPI;
 import fredboat.util.rest.YoutubeVideo;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -161,7 +161,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     private EmbedBuilder getBeamEmbed(AudioTrackContext atc, BeamAudioTrack at) {
         try {
-            JSONObject json = Http.get("https://beam.pro/api/v1/channels/" + at.getInfo().author).asJson();
+            JSONObject json = BotController.HTTP.get("https://beam.pro/api/v1/channels/" + at.getInfo().author).asJson();
 
             return CentralMessaging.getClearThreadLocalEmbedBuilder()
                     .setAuthor(at.getInfo().author, "https://beam.pro/" + at.getInfo().author, json.getJSONObject("user").getString("avatarUrl"))
@@ -177,7 +177,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     static EmbedBuilder getGensokyoRadioEmbed(Context context) {
         try {
-            JSONObject data = XML.toJSONObject(Http.get("https://gensokyoradio.net/xml/").asString()).getJSONObject("GENSOKYORADIODATA");
+            JSONObject data = XML.toJSONObject(BotController.HTTP.get("https://gensokyoradio.net/xml/").asString()).getJSONObject("GENSOKYORADIODATA");
 
             String rating = data.getJSONObject("MISC").getInt("TIMESRATED") == 0 ?
                     context.i18n("noneYet") :
