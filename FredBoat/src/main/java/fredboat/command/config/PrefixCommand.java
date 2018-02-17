@@ -114,11 +114,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
         // as being the single source of truth for prefixes
         CUSTOM_PREFIXES.invalidate(context.guild.getIdLong());
 
-        if (newPrefix == null) {//was reset
-            showPrefix(context, Config.CONFIG.getPrefix());
-        } else {
-            showPrefix(context, newPrefix);
-        }
+        showPrefix(context, giefPrefix(context.guild));
     }
 
     public static void showPrefix(@Nonnull Context context, @Nonnull String prefix) {
