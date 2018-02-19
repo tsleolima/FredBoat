@@ -30,7 +30,6 @@ import fredboat.db.entity.main.GuildPermissions;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
@@ -91,7 +90,7 @@ public class PermsUtil {
      */
     private static boolean isBotAdmin(Member member) {
         boolean botAdmin = false;
-        for (String id : Config.get().getAdminIds()) {
+        for (String id : BotController.INS.getAppConfig().getAdminIds()) {
             Role r = member.getGuild().getRoleById(id);
             if (member.getUser().getId().equals(id)
                     || (r != null && member.getRoles().contains(r))) {

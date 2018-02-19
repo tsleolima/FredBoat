@@ -50,7 +50,8 @@ import fredboat.audio.source.HttpSourceManager;
 import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
-import fredboat.main.Config;
+import fredboat.config.Config;
+import fredboat.main.BotController;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -99,8 +100,10 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
             //Patrons and development get higher quality
             AudioConfiguration.ResamplingQuality quality = AudioConfiguration.ResamplingQuality.LOW;
-            if (Config.get().isPatronDistribution() || Config.get().isDevDistribution())
+            if (BotController.INS.getAppConfig().isPatronDistribution()
+                    || BotController.INS.getAppConfig().isDevDistribution()) {
                 quality = AudioConfiguration.ResamplingQuality.MEDIUM;
+            }
 
             playerManager.getConfiguration().setResamplingQuality(quality);
             if (!LavalinkManager.ins.isEnabled()) {

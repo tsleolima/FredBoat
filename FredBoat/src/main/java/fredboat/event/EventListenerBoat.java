@@ -43,7 +43,6 @@ import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -220,7 +219,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //quick n dirty bot admin / owner check
-        if (Config.get().getAdminIds().contains(event.getAuthor().getId())
+        if (BotController.INS.getAppConfig().getAdminIds().contains(event.getAuthor().getId())
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
@@ -285,7 +284,7 @@ public class EventListenerBoat extends AbstractEventListener {
     }
 
     private void checkForAutoPause(VoiceChannel channelLeft) {
-        if (Config.get().getContinuePlayback())
+        if (BotController.INS.getAppConfig().getContinuePlayback())
             return;
 
         Guild guild = channelLeft.getGuild();

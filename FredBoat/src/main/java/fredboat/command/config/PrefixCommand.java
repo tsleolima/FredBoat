@@ -33,7 +33,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.definitions.PermissionLevel;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
@@ -73,13 +72,13 @@ public class PrefixCommand extends Command implements IConfigCommand {
     @Nonnull
     private static String giefPrefix(long guildId) {
         return CacheUtil.getUncheckedUnwrapped(CUSTOM_PREFIXES, guildId)
-                .orElse(Config.get().getPrefix());
+                .orElse(BotController.INS.getAppConfig().getPrefix());
     }
 
     @Nonnull
     public static String giefPrefix(@Nullable Guild guild) {
         if (guild == null) {
-            return Config.get().getPrefix();
+            return BotController.INS.getAppConfig().getPrefix();
         }
 
         return giefPrefix(guild.getIdLong());

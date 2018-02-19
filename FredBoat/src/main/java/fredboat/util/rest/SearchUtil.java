@@ -41,7 +41,6 @@ import fredboat.definitions.SearchProvider;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +138,8 @@ public class SearchUtil {
 
             //3. optional: youtube api
             if (provider == SearchProvider.YOUTUBE &&
-                    (Config.get().isPatronDistribution() || Config.get().isDevDistribution())) {
+                    (BotController.INS.getAppConfig().isPatronDistribution()
+                            || BotController.INS.getAppConfig().isDevDistribution())) {
                 try {
                     AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, PLAYER_MANAGER.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {

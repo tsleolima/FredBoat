@@ -31,7 +31,6 @@ import fredboat.commandmeta.CommandRegistry;
 import fredboat.definitions.Module;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.Permission;
@@ -95,19 +94,20 @@ public class CommandContext extends Context {
         // or starts with a custom/default prefix
         else {
             String prefix = PrefixCommand.giefPrefix(event.getGuild());
+            String defaultPrefix = BotController.INS.getAppConfig().getPrefix();
             if (raw.startsWith(prefix)) {
                 input = raw.substring(prefix.length());
-                if (prefix.equals(Config.get().getPrefix())) {
+                if (prefix.equals(defaultPrefix)) {
                     Metrics.prefixParsed.labels("default").inc();
                 } else {
                     Metrics.prefixParsed.labels("custom").inc();
                 }
             } else {
                 //hardcoded check for the help or prefix command that is always displayed as FredBoat status
-                if (raw.startsWith(Config.get().getPrefix() + CommandInitializer.HELP_COMM_NAME)
-                        || raw.startsWith(Config.get().getPrefix() + CommandInitializer.PREFIX_COMM_NAME)) {
+                if (raw.startsWith(defaultPrefix + CommandInitializer.HELP_COMM_NAME)
+                        || raw.startsWith(defaultPrefix + CommandInitializer.PREFIX_COMM_NAME)) {
                     Metrics.prefixParsed.labels("default").inc();
-                    input = raw.substring(Config.get().getPrefix().length());
+                    input = raw.substring(defaultPrefix.length());
                 } else {
                     //no match neither mention nor custom/default prefix
                     return null;

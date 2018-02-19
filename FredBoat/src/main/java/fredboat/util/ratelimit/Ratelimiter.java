@@ -31,7 +31,6 @@ import fredboat.command.util.WeatherCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.messaging.internal.Context;
 import fredboat.util.DiscordUtil;
 import fredboat.util.Tuple2;
@@ -83,14 +82,14 @@ public class Ratelimiter {
         whitelist.add(DiscordUtil.getOwnerId(jda));
         whitelist.add(jda.getSelfUser().getIdLong());
         //only works for those admins who are added with their userId and not through a roleId
-        for (String admin : Config.get().getAdminIds())
+        for (String admin : BotController.INS.getAppConfig().getAdminIds())
             whitelist.add(Long.valueOf(admin));
 
 
         //Create all the rate limiters we want
         ratelimits = new ArrayList<>();
 
-        if (Config.get().useAutoBlacklist())
+        if (BotController.INS.getAppConfig().useAutoBlacklist())
             autoBlacklist = new Blacklist(whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
 
         //sort these by harsher limits coming first

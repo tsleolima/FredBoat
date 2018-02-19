@@ -149,7 +149,7 @@ public class Launcher {
         CommandInitializer.initCommands();
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
-        if (!Config.get().isPatronDistribution()) {
+        if (!FBC.getAppConfig().isPatronDistribution()) {
             log.info("Starting VoiceChannelCleanupAgent.");
             FredBoatAgent.start(new VoiceChannelCleanupAgent());
         } else {
@@ -341,7 +341,7 @@ public class Launcher {
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
                 .setToken(Config.get().getBotToken())
-                .setGame(Game.playing(Config.get().getGame()))
+                .setGame(Game.playing(FBC.getAppConfig().getGame()))
                 .setBulkDeleteSplittingEnabled(false)
                 .setEnableShutdownHook(false)
                 .setAudioEnabled(true)

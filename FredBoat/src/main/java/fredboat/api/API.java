@@ -29,7 +29,6 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
-import fredboat.main.Config;
 import net.dv8tion.jda.core.JDA;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONArray;
@@ -48,7 +47,7 @@ public class API {
     private API() {}
 
     public static void start() {
-        if (!Config.get().isRestServerEnabled()) {
+        if (!BotController.INS.getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
         }
@@ -83,7 +82,7 @@ public class API {
             JSONObject g = new JSONObject();
             g.put("playingPlayers", PlayerRegistry.getPlayingPlayers().size())
                     .put("totalPlayers", PlayerRegistry.getRegistry().size())
-                    .put("distribution", Config.get().getDistribution())
+                    .put("distribution", BotController.INS.getAppConfig().getDistribution())
                     .put("guilds", BotMetrics.getTotalGuildsCount())
                     .put("users", BotMetrics.getTotalUniqueUsersCount());
 
@@ -104,7 +103,7 @@ public class API {
     }
 
     public static void turnOnMetrics() {
-        if (!Config.get().isRestServerEnabled()) {
+        if (!BotController.INS.getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
         }
