@@ -13,8 +13,8 @@ ext {
     moduleName = 'FredBoat'
 }
 
-    archiveName = "FredBoat.jar"
 bootJar {
+    archiveName = "FredBoat.jar"
     doLast {
         //copies the jar into a place where the Dockerfile can find it easily (and users maybe too)
         copy {
