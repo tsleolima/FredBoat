@@ -31,7 +31,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.messaging.internal.Context;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.TextUtils;
@@ -95,7 +94,8 @@ public class MALCommand extends Command implements IUtilCommand {
                 Http.Params.of(
                         "q", term
                 ))
-                .auth(Credentials.basic(Config.get().getMalUser(), Config.get().getMalPassword()))
+                .auth(Credentials.basic(BotController.INS.getCredentials().getMalUser(),
+                        BotController.INS.getCredentials().getMalPassword()))
                 .client(malHttpClient);
 
         try {

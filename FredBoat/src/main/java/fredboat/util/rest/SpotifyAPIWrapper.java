@@ -27,7 +27,6 @@ package fredboat.util.rest;
 
 import fredboat.audio.queue.PlaylistInfo;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import okhttp3.Credentials;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -93,7 +92,8 @@ public class SpotifyAPIWrapper {
                     Http.Params.of(
                             "grant_type", "client_credentials"
                     ))
-                    .auth(Credentials.basic(Config.get().getSpotifyId(), Config.get().getSpotifySecret()))
+                    .auth(Credentials.basic(BotController.INS.getCredentials().getSpotifyId(),
+                            BotController.INS.getCredentials().getSpotifySecret()))
                     .asJson();
 
             accessToken = jsonClientCredentials.getString("access_token");

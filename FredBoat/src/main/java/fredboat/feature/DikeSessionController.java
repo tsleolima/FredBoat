@@ -1,6 +1,6 @@
 package fredboat.feature;
 
-import fredboat.main.Config;
+import fredboat.main.BotController;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import net.dv8tion.jda.core.utils.tuple.ImmutablePair;
@@ -24,14 +24,14 @@ public class DikeSessionController extends SessionControllerAdapter {
 
     @Override
     public String getGateway(JDA api) {
-        return Config.get().getDikeUrl();
+        return BotController.INS.getCredentials().getDikeUrl();
     }
 
     @Override
     public Pair<String, Integer> getGatewayBot(JDA api) {
         Pair<String, Integer> pair = super.getGatewayBot(api);
 
-        return new ImmutablePair<>(Config.get().getDikeUrl(), pair.getRight());
+        return new ImmutablePair<>(BotController.INS.getCredentials().getDikeUrl(), pair.getRight());
     }
 
 }

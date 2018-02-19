@@ -26,7 +26,6 @@
 package fredboat.util.rest;
 
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -130,7 +129,7 @@ public class YoutubeVideo {
         Http.SimpleRequest request = BotController.HTTP.get(YoutubeAPI.YOUTUBE_CHANNEL,
                 Http.Params.of(
                         "id", channelId,
-                        "key", Config.get().getRandomGoogleKey()
+                        "key", BotController.INS.getCredentials().getRandomGoogleKey()
                 ));
         try {
             JSONObject json = request.asJson();

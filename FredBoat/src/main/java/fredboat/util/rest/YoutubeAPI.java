@@ -30,7 +30,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,7 +55,7 @@ public class YoutubeAPI {
     private static YoutubeVideo getVideoFromID(String id) {
         Http.SimpleRequest simpleRequest = BotController.HTTP.get(YOUTUBE_VIDEO, Http.Params.of(
                 "id", id,
-                "key", Config.get().getRandomGoogleKey()
+                "key", BotController.INS.getCredentials().getRandomGoogleKey()
         ));
 
         JSONObject data = null;
@@ -78,7 +77,7 @@ public class YoutubeAPI {
 
     public static YoutubeVideo getVideoFromID(String id, boolean verbose) {
         if(verbose){
-            String gkey = Config.get().getRandomGoogleKey();
+            String gkey = BotController.INS.getCredentials().getRandomGoogleKey();
             Http.SimpleRequest request = BotController.HTTP.get(YOUTUBE_VIDEO_VERBOSE, Http.Params.of(
                     "id", id,
                     "key", gkey
@@ -122,7 +121,7 @@ public class YoutubeAPI {
     public static AudioPlaylist search(String query, int maxResults, YoutubeAudioSourceManager sourceManager)
             throws SearchUtil.SearchingException {
         JSONObject data;
-        String gkey = Config.get().getRandomGoogleKey();
+        String gkey = BotController.INS.getCredentials().getRandomGoogleKey();
 
         Http.SimpleRequest request = BotController.HTTP.get(YOUTUBE_SEARCH, Http.Params.of(
                 "key", gkey,

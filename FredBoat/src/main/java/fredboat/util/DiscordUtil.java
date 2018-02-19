@@ -33,7 +33,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
@@ -89,7 +88,7 @@ public class DiscordUtil {
 
     //will be calculated (=fetched from Discord) exactly once
     public static final Supplier<Integer> shardCount = Suppliers.memoize(() -> {
-        int count = getRecommendedShardCount(Config.get().getBotToken());
+        int count = getRecommendedShardCount(BotController.INS.getCredentials().getBotToken());
         log.info("Discord recommends " + count + " shard(s)");
         return count;
     });
@@ -137,7 +136,7 @@ public class DiscordUtil {
 
     //uses our configured bot token to retrieve our own userid
     public static long getBotId() {
-        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Config.get().getBotToken());
+        return CacheUtil.getUncheckedUnwrapped(BOT_ID, BotController.INS.getCredentials().getBotToken());
     }
 
     private static long getUserId(@Nonnull String token) {

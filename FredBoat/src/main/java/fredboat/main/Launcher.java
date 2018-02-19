@@ -5,8 +5,10 @@ import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.*;
 import fredboat.api.API;
 import fredboat.audio.player.LavalinkManager;
+import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
+import fredboat.config.DatabaseConfig;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
@@ -66,6 +68,14 @@ public class Launcher {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(FBC.shutdownHook, "FredBoat main shutdownhook"));
+        //create the sentry appender as early as possible
+        String sentryDsn = FBC.getCredentials().getSentryDsn();
+        if (!sentryDsn.isEmpty()) {
+            SentryDsnCommand.turnOn(sentryDsn);
+        } else {
+            SentryDsnCommand.turnOff();
+        }
+
         log.info(getVersionInfo());
 
         String javaVersionMinor = null;
@@ -169,8 +179,8 @@ public class Launcher {
         //Check OpenWeather key
         executor.submit(Launcher::hasValidOpenWeatherKey);
 
-        String carbonKey = Config.get().getCarbonKey();
-        if (Config.get().isMusicDistribution() && carbonKey != null && !carbonKey.isEmpty()) {
+        String carbonKey = FBC.getCredentials().getCarbonKey();
+        if (FBC.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
             FredBoatAgent.start(new CarbonitexAgent(carbonKey));
         }
 
@@ -189,9 +199,9 @@ public class Launcher {
     // ################################################################################
 
     private static boolean hasValidMALLogin() {
-        String malUser = Config.get().getMalUser();
-        String malPassWord = Config.get().getMalPassword();
-        if (malUser == null || malUser.isEmpty() || malPassWord == null || malPassWord.isEmpty()) {
+        String malUser = FBC.getCredentials().getMalUser();
+        String malPassWord = FBC.getCredentials().getMalPassword();
+        if (malUser.isEmpty() || malPassWord.isEmpty()) {
             log.info("MAL credentials not found. MAL related commands will not be available.");
             return false;
         }
@@ -214,8 +224,8 @@ public class Launcher {
     }
 
     private static boolean hasValidImgurCredentials() {
-        String imgurClientId = Config.get().getImgurClientId();
-        if (imgurClientId == null || imgurClientId.isEmpty()) {
+        String imgurClientId = FBC.getCredentials().getImgurClientId();
+        if (imgurClientId.isEmpty()) {
             log.info("Imgur credentials not found. Commands relying on Imgur will not work properly.");
             return false;
         }
@@ -255,7 +265,7 @@ public class Launcher {
      * @return True if it can retrieve data, else return false.
      */
     private static boolean hasValidOpenWeatherKey() {
-        if ("".equals(Config.get().getOpenWeatherKey())) {
+        if ("".equals(FBC.getCredentials().getOpenWeatherKey())) {
             log.warn("Open Weather API credentials not found. Weather related commands will not work properly.");
             return false;
         }
@@ -336,12 +346,12 @@ public class Launcher {
     }
 
     private static ShardManager buildShardManager() throws LoginException {
-        SessionController sessionController = Config.get().getDikeUrl() == null
+        SessionController sessionController = FBC.getCredentials().getDikeUrl().isEmpty()
                 ? new SessionControllerAdapter()
                 : new DikeSessionController();
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
-                .setToken(Config.get().getBotToken())
+                .setToken(FBC.getCredentials().getBotToken())
                 .setGame(Game.playing(FBC.getAppConfig().getGame()))
                 .setBulkDeleteSplittingEnabled(false)
                 .setEnableShutdownHook(false)
