@@ -130,7 +130,7 @@ public class YoutubeVideo {
         Http.SimpleRequest request = BotController.HTTP.get(YoutubeAPI.YOUTUBE_CHANNEL,
                 Http.Params.of(
                         "id", channelId,
-                        "key", Config.CONFIG.getRandomGoogleKey()
+                        "key", Config.get().getRandomGoogleKey()
                 ));
         try {
             JSONObject json = request.asJson();

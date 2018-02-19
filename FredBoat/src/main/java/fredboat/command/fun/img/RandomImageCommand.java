@@ -112,7 +112,7 @@ public class RandomImageCommand extends Command implements IFunCommand {
 
         String albumId = m.group(1);
         Http.SimpleRequest request = BotController.HTTP.get("https://api.imgur.com/3/album/" + albumId)
-                .auth("Client-ID " + Config.CONFIG.getImgurClientId())
+                .auth("Client-ID " + Config.get().getImgurClientId())
                 .header("If-None-Match", etag);
 
         try (Response response = request.execute()) {

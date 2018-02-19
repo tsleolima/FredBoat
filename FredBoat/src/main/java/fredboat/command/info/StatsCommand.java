@@ -97,7 +97,7 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "Players playing:                " + PlayerRegistry.getPlayingPlayers().size() + "\n";
         content += "Known servers:                  " + BotMetrics.getTotalGuildsCount() + "\n";
         content += "Known users in servers:         " + BotMetrics.getTotalUniqueUsersCount() + "\n";
-        content += "Distribution:                   " + Config.CONFIG.getDistribution() + "\n";
+        content += "Distribution:                   " + Config.get().getDistribution() + "\n";
         content += "JDA responses total:            " + jda.getResponseTotal() + "\n";
         content += "JDA version:                    " + JDAInfo.VERSION + "\n";
         content += "FredBoat version:               " + AppInfo.getAppInfo().getVersionBuild() + "\n";

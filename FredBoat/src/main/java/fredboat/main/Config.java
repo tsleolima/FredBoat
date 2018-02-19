@@ -26,12 +26,12 @@
 package fredboat.main;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Suppliers;
 import fredboat.audio.player.PlayerLimitManager;
 import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
-import fredboat.util.DiscordUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 public class Config {
 
@@ -57,20 +59,38 @@ public class Config {
 
     public static String DEFAULT_PREFIX = ";;";
 
-    public static final Config CONFIG;
 
-    static {
+    private static final Supplier<Config> configSupplier = Suppliers.memoizeWithExpiration(Config::loadConfig,
+            1, TimeUnit.MINUTES);
+
+    //todo: trace down all callers of this and make sure they take advantage of a reloading config like
+    //todo  not storing the values once retrieved and recreating objects on value changes where possible/feasible
+    public static Config get() {
+        return configSupplier.get();
+    }
+
+    //a fallback reference to the last sucessfulyy loaded config, in case editing the config files breaks them
+    @Nullable
+    private static Config lastSuccessfulLoaded;
+
+    private static Config loadConfig() {
+        long nanoTime = System.nanoTime();
         Config c;
         try {
             c = new Config(
                     loadConfigFile("credentials"),
                     loadConfigFile("config")
             );
-        } catch (final IOException e) {
-            c = null;
-            log.error("Could not load config files!", e);
+        } catch (Exception e) {
+            if (lastSuccessfulLoaded != null) {
+                log.error("Reloading config file failed! Serving last successfully loaded one.", e);
+                return lastSuccessfulLoaded;
+            }
+            throw new RuntimeException("Could not load config files!", e);
         }
-        CONFIG = c;
+        log.debug("Loading config took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - nanoTime));
+        lastSuccessfulLoaded = c;
+        return c;
     }
 
     //Config
@@ -139,6 +159,9 @@ public class Config {
     //Derived Config values
     private int hikariPoolSize;
 
+    /**
+     * The config is regularly reloaded, it should not be doing any blocking calls.
+     */
     @SuppressWarnings("unchecked")
     public Config(File credentialsFile, File configFile) {
         try {
@@ -453,6 +476,10 @@ public class Config {
 
     public boolean isDevDistribution() {
         return distribution == DistributionEnum.DEVELOPMENT;
+    }
+
+    public boolean isMusicDistribution() {
+        return distribution == DistributionEnum.MUSIC;
     }
 
     public String getPrefix() {

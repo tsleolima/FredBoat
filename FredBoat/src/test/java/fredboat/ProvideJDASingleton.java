@@ -142,12 +142,15 @@ public abstract class ProvideJDASingleton {
         try {
             startTime = System.currentTimeMillis();
             log.info("Setting up live testing environment");
-            if (Config.CONFIG == null) {
-                log.info("Credentials and/or config files not found, live tests won't be available");
+            Config conf;
+            try {
+                conf = Config.get();
+            } catch (Exception e) {
+                log.info("Credentials and/or config files not found, live tests won't be available", e);
                 return;
             }
             //TODO after moving this to integration tests, remove those catches and let it fail
-            String testToken = Config.CONFIG.getTestBotToken();
+            String testToken = conf.getTestBotToken();
             if (testToken == null || "".equals(testToken)) {
                 log.info("No testing token found, live tests won't be available");
                 return;
@@ -157,7 +160,7 @@ public abstract class ProvideJDASingleton {
                     .setEnableShutdownHook(false); //we're setting our own
             jda = builder.buildBlocking();
 
-            testChannel = jda.getTextChannelById(Config.CONFIG.getTestChannelId());
+            testChannel = jda.getTextChannelById(conf.getTestChannelId());
             testGuild = testChannel.getGuild();
             testSelfMember = testGuild.getSelfMember();
 

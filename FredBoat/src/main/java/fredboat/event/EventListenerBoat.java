@@ -35,9 +35,10 @@ import fredboat.command.info.StatsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
-import fredboat.definitions.Module;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.entity.main.GuildData;
+import fredboat.definitions.Module;
+import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
@@ -45,7 +46,6 @@ import fredboat.main.BotController;
 import fredboat.main.Config;
 import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
-import fredboat.definitions.PermissionLevel;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
@@ -220,7 +220,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //quick n dirty bot admin / owner check
-        if (Config.CONFIG.getAdminIds().contains(event.getAuthor().getId())
+        if (Config.get().getAdminIds().contains(event.getAuthor().getId())
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
@@ -285,7 +285,7 @@ public class EventListenerBoat extends AbstractEventListener {
     }
 
     private void checkForAutoPause(VoiceChannel channelLeft) {
-        if (Config.CONFIG.getContinuePlayback())
+        if (Config.get().getContinuePlayback())
             return;
 
         Guild guild = channelLeft.getGuild();

@@ -16,7 +16,6 @@ import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.shared.constant.BotConstants;
-import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
 import fredboat.util.DiscordUtil;
@@ -100,9 +99,9 @@ public class Launcher {
         //dont run migrations or validate the db from the patron bot
         boolean migrateAndValidate = DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID;
         DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
-                Config.CONFIG.getHikariPoolSize(), Config.CONFIG.getDistribution().name(), migrateAndValidate,
-                Config.CONFIG.getMainJdbcUrl(), Config.CONFIG.getMainSshTunnelConfig(),
-                Config.CONFIG.getCacheJdbcUrl(), Config.CONFIG.getCacheSshTunnelConfig());
+                Config.get().getHikariPoolSize(), Config.get().getDistribution().name(), migrateAndValidate,
+                Config.get().getMainJdbcUrl(), Config.get().getMainSshTunnelConfig(),
+                Config.get().getCacheJdbcUrl(), Config.get().getCacheSshTunnelConfig());
 
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
@@ -150,7 +149,7 @@ public class Launcher {
         CommandInitializer.initCommands();
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
-        if (!Config.CONFIG.isPatronDistribution()) {
+        if (!Config.get().isPatronDistribution()) {
             log.info("Starting VoiceChannelCleanupAgent.");
             FredBoatAgent.start(new VoiceChannelCleanupAgent());
         } else {
@@ -169,8 +168,8 @@ public class Launcher {
         //Check OpenWeather key
         executor.submit(Launcher::hasValidOpenWeatherKey);
 
-        String carbonKey = Config.CONFIG.getCarbonKey();
-        if (Config.CONFIG.getDistribution() == DistributionEnum.MUSIC && carbonKey != null && !carbonKey.isEmpty()) {
+        String carbonKey = Config.get().getCarbonKey();
+        if (Config.get().isMusicDistribution() && carbonKey != null && !carbonKey.isEmpty()) {
             FredBoatAgent.start(new CarbonitexAgent(carbonKey));
         }
 
@@ -189,8 +188,8 @@ public class Launcher {
     // ################################################################################
 
     private static boolean hasValidMALLogin() {
-        String malUser = Config.CONFIG.getMalUser();
-        String malPassWord = Config.CONFIG.getMalPassword();
+        String malUser = Config.get().getMalUser();
+        String malPassWord = Config.get().getMalPassword();
         if (malUser == null || malUser.isEmpty() || malPassWord == null || malPassWord.isEmpty()) {
             log.info("MAL credentials not found. MAL related commands will not be available.");
             return false;
@@ -214,7 +213,7 @@ public class Launcher {
     }
 
     private static boolean hasValidImgurCredentials() {
-        String imgurClientId = Config.CONFIG.getImgurClientId();
+        String imgurClientId = Config.get().getImgurClientId();
         if (imgurClientId == null || imgurClientId.isEmpty()) {
             log.info("Imgur credentials not found. Commands relying on Imgur will not work properly.");
             return false;
@@ -255,7 +254,7 @@ public class Launcher {
      * @return True if it can retrieve data, else return false.
      */
     private static boolean hasValidOpenWeatherKey() {
-        if ("".equals(Config.CONFIG.getOpenWeatherKey())) {
+        if ("".equals(Config.get().getOpenWeatherKey())) {
             log.warn("Open Weather API credentials not found. Weather related commands will not work properly.");
             return false;
         }
@@ -336,13 +335,13 @@ public class Launcher {
     }
 
     private static ShardManager buildShardManager() throws LoginException {
-        SessionController sessionController = Config.CONFIG.getDikeUrl() == null
+        SessionController sessionController = Config.get().getDikeUrl() == null
                 ? new SessionControllerAdapter()
                 : new DikeSessionController();
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
-                .setToken(Config.CONFIG.getBotToken())
-                .setGame(Game.playing(Config.CONFIG.getGame()))
+                .setToken(Config.get().getBotToken())
+                .setGame(Game.playing(Config.get().getGame()))
                 .setBulkDeleteSplittingEnabled(false)
                 .setEnableShutdownHook(false)
                 .setAudioEnabled(true)
@@ -355,7 +354,7 @@ public class Launcher {
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
                 .setShardsTotal(DiscordUtil.shardCount.get());
 
-        String eventLogWebhook = Config.CONFIG.getEventLogWebhook();
+        String eventLogWebhook = Config.get().getEventLogWebhook();
         if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {
             try {
                 builder.addEventListeners(new EventLogger());

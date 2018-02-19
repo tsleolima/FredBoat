@@ -73,13 +73,13 @@ public class PrefixCommand extends Command implements IConfigCommand {
     @Nonnull
     private static String giefPrefix(long guildId) {
         return CacheUtil.getUncheckedUnwrapped(CUSTOM_PREFIXES, guildId)
-                .orElse(Config.CONFIG.getPrefix());
+                .orElse(Config.get().getPrefix());
     }
 
     @Nonnull
     public static String giefPrefix(@Nullable Guild guild) {
         if (guild == null) {
-            return Config.CONFIG.getPrefix();
+            return Config.get().getPrefix();
         }
 
         return giefPrefix(guild.getIdLong());

@@ -91,7 +91,7 @@ public class PermsUtil {
      */
     private static boolean isBotAdmin(Member member) {
         boolean botAdmin = false;
-        for (String id : Config.CONFIG.getAdminIds()) {
+        for (String id : Config.get().getAdminIds()) {
             Role r = member.getGuild().getRoleById(id);
             if (member.getUser().getId().equals(id)
                     || (r != null && member.getRoles().contains(r))) {

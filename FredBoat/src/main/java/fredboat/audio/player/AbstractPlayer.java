@@ -51,7 +51,6 @@ import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
 import fredboat.main.Config;
-import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -100,7 +99,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
             //Patrons and development get higher quality
             AudioConfiguration.ResamplingQuality quality = AudioConfiguration.ResamplingQuality.LOW;
-            if (Config.CONFIG.getDistribution() == DistributionEnum.PATRON || Config.CONFIG.getDistribution() == DistributionEnum.DEVELOPMENT)
+            if (Config.get().isPatronDistribution() || Config.get().isDevDistribution())
                 quality = AudioConfiguration.ResamplingQuality.MEDIUM;
 
             playerManager.getConfiguration().setResamplingQuality(quality);
@@ -125,31 +124,31 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
         mng.registerSourceManager(new PlaylistImportSourceManager());
         //Determine which Source managers are enabled
         //By default, all are enabled except LocalAudioSources and HttpAudioSources, see config.yaml and Config class
-        if (Config.CONFIG.isYouTubeEnabled()) {
+        if (Config.get().isYouTubeEnabled()) {
             mng.registerSourceManager(produceYoutubeAudioSourceManager());
         }
-        if (Config.CONFIG.isSoundCloudEnabled()) {
+        if (Config.get().isSoundCloudEnabled()) {
             mng.registerSourceManager(new SoundCloudAudioSourceManager());
         }
-        if (Config.CONFIG.isBandCampEnabled()) {
+        if (Config.get().isBandCampEnabled()) {
             mng.registerSourceManager(new BandcampAudioSourceManager());
         }
-        if (Config.CONFIG.isTwitchEnabled()) {
+        if (Config.get().isTwitchEnabled()) {
             mng.registerSourceManager(new TwitchStreamAudioSourceManager());
         }
-        if (Config.CONFIG.isVimeoEnabled()) {
+        if (Config.get().isVimeoEnabled()) {
             mng.registerSourceManager(new VimeoAudioSourceManager());
         }
-        if (Config.CONFIG.isMixerEnabled()) {
+        if (Config.get().isMixerEnabled()) {
             mng.registerSourceManager(new BeamAudioSourceManager());
         }
-        if (Config.CONFIG.isSpotifyEnabled()) {
+        if (Config.get().isSpotifyEnabled()) {
             mng.registerSourceManager(new SpotifyPlaylistSourceManager());
         }
-        if (Config.CONFIG.isLocalEnabled()) {
+        if (Config.get().isLocalEnabled()) {
             mng.registerSourceManager(new LocalAudioSourceManager());
         }
-        if (Config.CONFIG.isHttpEnabled()) {
+        if (Config.get().isHttpEnabled()) {
             //add new source managers above the HttpAudio one, because it will either eat your request or throw an exception
             //so you will never reach a source manager below it
             mng.registerSourceManager(new HttpSourceManager());

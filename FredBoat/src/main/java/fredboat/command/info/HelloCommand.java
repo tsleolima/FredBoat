@@ -75,7 +75,7 @@ public class HelloCommand extends Command implements IInfoCommand {
 
     @Nonnull
     public static String getHello(@Nonnull Guild guild) {
-        String prefix = Config.CONFIG.getPrefix();
+        String prefix = Config.get().getPrefix();
         try {
             prefix = PrefixCommand.giefPrefix(guild);
         } catch (Exception ignored) {

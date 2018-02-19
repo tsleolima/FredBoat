@@ -93,7 +93,7 @@ public class SpotifyAPIWrapper {
                     Http.Params.of(
                             "grant_type", "client_credentials"
                     ))
-                    .auth(Credentials.basic(Config.CONFIG.getSpotifyId(), Config.CONFIG.getSpotifySecret()))
+                    .auth(Credentials.basic(Config.get().getSpotifyId(), Config.get().getSpotifySecret()))
                     .asJson();
 
             accessToken = jsonClientCredentials.getString("access_token");

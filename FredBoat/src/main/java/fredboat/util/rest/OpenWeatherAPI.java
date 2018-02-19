@@ -109,7 +109,7 @@ public class OpenWeatherAPI implements Weather {
                 HttpUrl.Builder urlBuilder = currentWeatherBaseUrl.newBuilder();
 
                 urlBuilder.addQueryParameter("q", query);
-                urlBuilder.addQueryParameter("appid", Config.CONFIG.getOpenWeatherKey());
+                urlBuilder.addQueryParameter("appid", Config.get().getOpenWeatherKey());
 
                 HttpUrl url = urlBuilder.build();
                 Request request = new Request.Builder()

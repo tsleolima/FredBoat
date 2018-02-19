@@ -56,7 +56,7 @@ public class YoutubeAPI {
     private static YoutubeVideo getVideoFromID(String id) {
         Http.SimpleRequest simpleRequest = BotController.HTTP.get(YOUTUBE_VIDEO, Http.Params.of(
                 "id", id,
-                "key", Config.CONFIG.getRandomGoogleKey()
+                "key", Config.get().getRandomGoogleKey()
         ));
 
         JSONObject data = null;
@@ -78,7 +78,7 @@ public class YoutubeAPI {
 
     public static YoutubeVideo getVideoFromID(String id, boolean verbose) {
         if(verbose){
-            String gkey = Config.CONFIG.getRandomGoogleKey();
+            String gkey = Config.get().getRandomGoogleKey();
             Http.SimpleRequest request = BotController.HTTP.get(YOUTUBE_VIDEO_VERBOSE, Http.Params.of(
                     "id", id,
                     "key", gkey
@@ -122,7 +122,7 @@ public class YoutubeAPI {
     public static AudioPlaylist search(String query, int maxResults, YoutubeAudioSourceManager sourceManager)
             throws SearchUtil.SearchingException {
         JSONObject data;
-        String gkey = Config.CONFIG.getRandomGoogleKey();
+        String gkey = Config.get().getRandomGoogleKey();
 
         Http.SimpleRequest request = BotController.HTTP.get(YOUTUBE_SEARCH, Http.Params.of(
                 "key", gkey,

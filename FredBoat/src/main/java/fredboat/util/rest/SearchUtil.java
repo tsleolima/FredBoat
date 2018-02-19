@@ -139,7 +139,7 @@ public class SearchUtil {
 
             //3. optional: youtube api
             if (provider == SearchProvider.YOUTUBE &&
-                    (Config.CONFIG.isPatronDistribution() || Config.CONFIG.isDevDistribution())) {
+                    (Config.get().isPatronDistribution() || Config.get().isDevDistribution())) {
                 try {
                     AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, PLAYER_MANAGER.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {

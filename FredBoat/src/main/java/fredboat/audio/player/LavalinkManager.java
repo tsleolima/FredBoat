@@ -56,7 +56,7 @@ public class LavalinkManager {
                 shardId -> BotController.INS.getShardManager().getShardById(shardId)
         );
 
-        List<Config.LavalinkHost> hosts = Config.CONFIG.getLavalinkHosts();
+        List<Config.LavalinkHost> hosts = Config.get().getLavalinkHosts();
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getName(), lavalinkHost.getUri(),
                 lavalinkHost.getPassword()));
 
@@ -64,7 +64,7 @@ public class LavalinkManager {
     }
 
     public boolean isEnabled() {
-        return !Config.CONFIG.getLavalinkHosts().isEmpty();
+        return !Config.get().getLavalinkHosts().isEmpty();
     }
 
     IPlayer createPlayer(String guildId) {

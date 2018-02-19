@@ -81,8 +81,8 @@ public class EventLogger extends ListenerAdapter {
     private final AtomicInteger guildsLeftEvents = new AtomicInteger(0);
 
     public EventLogger() {
-        this(new WebhookClientBuilder(Config.CONFIG.getEventLogWebhook()).build(),
-                new WebhookClientBuilder(Config.CONFIG.getGuildStatsWebhook()).build());
+        this(new WebhookClientBuilder(Config.get().getEventLogWebhook()).build(),
+                new WebhookClientBuilder(Config.get().getGuildStatsWebhook()).build());
     }
 
 
@@ -177,7 +177,7 @@ public class EventLogger extends ListenerAdapter {
                 } catch (Exception e) {
                     log.error("Failed to send shard status summary to event log webhook", e);
                 }
-            }, 0, Math.max(Config.CONFIG.getEventLogInterval(), 1), TimeUnit.MINUTES);
+            }, 0, Math.max(Config.get().getEventLogInterval(), 1), TimeUnit.MINUTES);
         }
 
         workingWebhook = null;
@@ -195,7 +195,7 @@ public class EventLogger extends ListenerAdapter {
         }
         this.guildStatsWebhook = workingWebhook;
 
-        int interval = Math.max(Config.CONFIG.getGuildStatsInterval(), 1);
+        int interval = Math.max(Config.get().getGuildStatsInterval(), 1);
         if (this.guildStatsWebhook != null) {
             scheduler.scheduleAtFixedRate(() -> {
                 try {

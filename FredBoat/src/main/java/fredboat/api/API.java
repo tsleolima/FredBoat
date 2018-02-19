@@ -48,7 +48,7 @@ public class API {
     private API() {}
 
     public static void start() {
-        if(!Config.CONFIG.isRestServerEnabled()) {
+        if (!Config.get().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
         }
@@ -83,7 +83,7 @@ public class API {
             JSONObject g = new JSONObject();
             g.put("playingPlayers", PlayerRegistry.getPlayingPlayers().size())
                     .put("totalPlayers", PlayerRegistry.getRegistry().size())
-                    .put("distribution", Config.CONFIG.getDistribution())
+                    .put("distribution", Config.get().getDistribution())
                     .put("guilds", BotMetrics.getTotalGuildsCount())
                     .put("users", BotMetrics.getTotalUniqueUsersCount());
 
@@ -104,7 +104,7 @@ public class API {
     }
 
     public static void turnOnMetrics() {
-        if (!Config.CONFIG.isRestServerEnabled()) {
+        if (!Config.get().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
         }

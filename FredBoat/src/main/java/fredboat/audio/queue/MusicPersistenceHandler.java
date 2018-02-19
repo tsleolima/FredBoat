@@ -34,7 +34,6 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.I18n;
 import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
-import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -156,7 +155,7 @@ public class MusicPersistenceHandler {
     public static void reloadPlaylists(JDA jda) {
         File dir = new File("music_persistence");
 
-        if(Config.CONFIG.getDistribution() == DistributionEnum.MUSIC) {
+        if (Config.get().isMusicDistribution()) {
             log.warn("Music persistence loading is disabled on the MUSIC distribution! Use PATRON or DEVELOPMENT instead"
                     + "How did this call end up in here anyways?");
             return;
@@ -198,7 +197,7 @@ public class MusicPersistenceHandler {
                 if (tc != null) {
                     player.setCurrentTC(tc);
                 }
-                if(Config.CONFIG.getDistribution().volumeSupported()) {
+                if (Config.get().getDistribution().volumeSupported()) {
                     player.setVolume(volume);
                 }
                 player.setRepeatMode(repeatMode);

@@ -129,7 +129,7 @@ public class TextUtils {
         }
 
         String filtered = context.i18nFormat("utilErrorOccurred", e.toString());
-        for (String str : Config.CONFIG.getGoogleKeys()) {
+        for (String str : Config.get().getGoogleKeys()) {
             filtered = filtered.replace(str, "GOOGLE_SERVER_KEY");
         }
         builder.append(filtered);

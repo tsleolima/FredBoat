@@ -95,7 +95,7 @@ public class MALCommand extends Command implements IUtilCommand {
                 Http.Params.of(
                         "q", term
                 ))
-                .auth(Credentials.basic(Config.CONFIG.getMalUser(), Config.CONFIG.getMalPassword()))
+                .auth(Credentials.basic(Config.get().getMalUser(), Config.get().getMalPassword()))
                 .client(malHttpClient);
 
         try {

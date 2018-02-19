@@ -89,7 +89,7 @@ public class DiscordUtil {
 
     //will be calculated (=fetched from Discord) exactly once
     public static final Supplier<Integer> shardCount = Suppliers.memoize(() -> {
-        int count = getRecommendedShardCount(Config.CONFIG.getBotToken());
+        int count = getRecommendedShardCount(Config.get().getBotToken());
         log.info("Discord recommends " + count + " shard(s)");
         return count;
     });
@@ -137,7 +137,7 @@ public class DiscordUtil {
 
     //uses our configured bot token to retrieve our own userid
     public static long getBotId() {
-        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Config.CONFIG.getBotToken());
+        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Config.get().getBotToken());
     }
 
     private static long getUserId(@Nonnull String token) {
