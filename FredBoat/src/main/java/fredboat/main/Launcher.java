@@ -98,10 +98,11 @@ public class Launcher {
 
         //dont run migrations or validate the db from the patron bot
         boolean migrateAndValidate = DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID;
+        DatabaseConfig dbConf = FBC.getDatabaseConfig();
         DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
-                Config.get().getHikariPoolSize(), Config.get().getDistribution().name(), migrateAndValidate,
-                Config.get().getMainJdbcUrl(), Config.get().getMainSshTunnelConfig(),
-                Config.get().getCacheJdbcUrl(), Config.get().getCacheSshTunnelConfig());
+                dbConf.getHikariPoolSize(), FBC.getAppConfig().getDistribution().name(), migrateAndValidate,
+                dbConf.getMainJdbcUrl(), dbConf.getMainSshTunnelConfig(),
+                dbConf.getCacheJdbcUrl(), dbConf.getCacheSshTunnelConfig());
 
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
