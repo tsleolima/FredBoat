@@ -30,6 +30,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.config.AppConfig;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
@@ -86,7 +87,10 @@ public class DiscordUtil {
         return top.getPosition();
     }
 
-    //will be calculated (=fetched from Discord) exactly once
+    /**
+     * Will be calculated (=fetched from Discord) exactly once
+     * access this through {@link AppConfig#getRecommendedShardCount()}
+     */
     public static final Supplier<Integer> shardCount = Suppliers.memoize(() -> {
         int count = getRecommendedShardCount(BotController.INS.getCredentials().getBotToken());
         log.info("Discord recommends " + count + " shard(s)");

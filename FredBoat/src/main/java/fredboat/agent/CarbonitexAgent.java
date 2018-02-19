@@ -27,7 +27,6 @@ package fredboat.agent;
 
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
-import fredboat.util.DiscordUtil;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.JDA;
 import okhttp3.Response;
@@ -64,7 +63,7 @@ public class CarbonitexAgent extends FredBoatAgent {
             }
         }
 
-        if (shards.size() < DiscordUtil.shardCount.get()) {
+        if (shards.size() < BotController.INS.getAppConfig().getRecommendedShardCount()) {
             log.warn("Skipping posting stats because not all shards initialized!");
             return;
         }

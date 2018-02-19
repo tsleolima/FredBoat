@@ -363,7 +363,7 @@ public class Launcher {
                         .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(BotController.INS.getMainEventListener())
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
-                .setShardsTotal(DiscordUtil.shardCount.get());
+                .setShardsTotal(BotController.INS.getAppConfig().getRecommendedShardCount());
 
         try {
             builder.addEventListeners(new EventLogger(FBC.getEventLoggerConfig()));

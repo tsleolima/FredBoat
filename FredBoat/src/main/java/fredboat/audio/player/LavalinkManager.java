@@ -52,7 +52,7 @@ public class LavalinkManager {
 
         lavalink = new Lavalink(
                 Long.toString(DiscordUtil.getBotId()),
-                DiscordUtil.shardCount.get(),
+                BotController.INS.getAppConfig().getRecommendedShardCount(),
                 shardId -> BotController.INS.getShardManager().getShardById(shardId)
         );
 
