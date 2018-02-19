@@ -5,6 +5,8 @@ allprojects {
         maven { url 'https://dl.bintray.com/napster/SqlSauce' }
         mavenLocal()                       // useful for developing
         maven { url "https://jitpack.io" } // build projects directly from github
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
     }
 
     apply plugin: 'idea'
@@ -13,17 +15,33 @@ allprojects {
 
 subprojects {
     buildscript {
+        ext {
+            //@formatter:off
+
+            //plugin versions
+            gradleGitVersion        = '1.4.17'          //do not upgrade to 1.4.20, it fails builds randomly
+            jdactionVersion         = '1.0.2'
+            shadowVersion           = '2.0.2'
+            springBootVersion       = '2.0.0.RC1'
+            jUnitPluginVersion      = '1.0.2'
+            propDepsVersion         = '0.0.9.RELEASE'
+
+            //@formatter:on
+        }
         repositories {
-            maven {
-                url "https://plugins.gradle.org/m2/"
-            }
+            maven { url "https://plugins.gradle.org/m2/" }
+            maven { url 'http://repo.spring.io/plugins-release' }
+            maven { url "https://repo.spring.io/snapshot" }
+            maven { url "https://repo.spring.io/milestone" }
+            mavenCentral()
         }
         dependencies {
-            //do not upgrade to 1.4.20, it fails builds randomly
-            classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.17"
-            classpath "gradle.plugin.com.sedmelluq:jdaction:1.0.2"
-            classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
-            classpath "org.junit.platform:junit-platform-gradle-plugin:1.0.2"
+            classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${gradleGitVersion}"
+            classpath "gradle.plugin.com.sedmelluq:jdaction:${jdactionVersion}"
+            classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
+            classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+            classpath "org.junit.platform:junit-platform-gradle-plugin:${jUnitPluginVersion}"
+            classpath "io.spring.gradle:propdeps-plugin:${propDepsVersion}"
         }
     }
     apply plugin: 'java'
@@ -42,6 +60,7 @@ subprojects {
     ext {
         //@formatter:off
 
+        springBootVersion           = "${springBootVersion}"
         //discord deps
         jdaVersion                  = '3.5.1_339'
 
