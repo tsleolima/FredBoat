@@ -138,7 +138,6 @@ public class Config {
 
     //Derived Config values
     private int hikariPoolSize;
-    private int numShards;
 
     @SuppressWarnings("unchecked")
     public Config(File credentialsFile, File configFile) {
@@ -370,21 +369,6 @@ public class Config {
 
             // Derived Config values
             // these are calculated in some way and don't necessarily correspond to values from the config/credentials files
-
-            //this is the first request on start
-            //it sometimes fails cause network isn't set up yet. wait 10 sec and try one more time in that case
-            int recommendedShardCount;
-            try {
-                recommendedShardCount = DiscordUtil.getRecommendedShardCount(getBotToken());
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException ignored) {
-                }
-                recommendedShardCount = DiscordUtil.getRecommendedShardCount(getBotToken());
-            }
-            numShards = recommendedShardCount;
-            log.info("Discord recommends " + numShards + " shard(s)");
 
             //more database connections don't help with performance, so use a value based on available cores, but not too low
             //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
@@ -633,15 +617,6 @@ public class Config {
     // ********************************************************************************
     //                       Derived and undocumented values
     // ********************************************************************************
-
-    //this static method works even when called from tests with invalid config files leading to a null config
-    public static int getNumShards() {
-        if (CONFIG != null) {
-            return CONFIG.numShards;
-        } else {
-            return 1;
-        }
-    }
 
     public int getHikariPoolSize() {
         return hikariPoolSize;

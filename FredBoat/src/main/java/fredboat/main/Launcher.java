@@ -353,7 +353,7 @@ public class Launcher {
                         .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(BotController.INS.getMainEventListener())
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
-                .setShardsTotal(Config.getNumShards());
+                .setShardsTotal(DiscordUtil.shardCount.get());
 
         String eventLogWebhook = Config.CONFIG.getEventLogWebhook();
         if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {

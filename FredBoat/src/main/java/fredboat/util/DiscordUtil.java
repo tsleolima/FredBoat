@@ -25,6 +25,7 @@
 
 package fredboat.util;
 
+import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DiscordUtil {
 
@@ -85,7 +87,14 @@ public class DiscordUtil {
         return top.getPosition();
     }
 
-    public static int getRecommendedShardCount(@Nonnull String token) throws IOException, JSONException {
+    //will be calculated (=fetched from Discord) exactly once
+    public static final Supplier<Integer> shardCount = Suppliers.memoize(() -> {
+        int count = getRecommendedShardCount(Config.CONFIG.getBotToken());
+        log.info("Discord recommends " + count + " shard(s)");
+        return count;
+    });
+
+    private static int getRecommendedShardCount(@Nonnull String token) {
         Http.SimpleRequest request = BotController.HTTP.get(Requester.DISCORD_API_PREFIX + "gateway/bot")
                 .auth("Bot " + token)
                 .header("User-agent", USER_AGENT);
@@ -98,6 +107,8 @@ public class DiscordUtil {
             }
             //noinspection ConstantConditions
             return new JSONObject(response.body().string()).getInt("shards");
+        } catch (IOException | JSONException e) {
+            throw new RuntimeException("Something went wrong fetching the shard count from Discord", e);
         }
     }
 

@@ -29,9 +29,9 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
+import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -105,7 +105,7 @@ public class ShardsCommand extends Command implements IInfoCommand {
         //healthy shards summary, contains sensible data only if we aren't doing a full report
         if (!full) {
             String content = String.format("+ %s of %s shards are %s -- Guilds: %s -- Users: %s", (shards.size() - borkenShards),
-                    Config.getNumShards(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
+                    DiscordUtil.shardCount.get(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
             messages.add(0, CentralMessaging.getClearThreadLocalMessageBuilder().append(TextUtils.asCodeBlock(content, "diff")).build());
         }
 
