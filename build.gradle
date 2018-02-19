@@ -5,6 +5,8 @@ allprojects {
         maven { url 'https://dl.bintray.com/napster/SqlSauce' }
         mavenLocal()                       // useful for developing
         maven { url "https://jitpack.io" } // build projects directly from github
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
     }
 
     apply plugin: 'idea'
@@ -13,10 +15,15 @@ allprojects {
 
 subprojects {
     buildscript {
+        ext {
+            springBootVersion = '2.0.0.RC1'
+        }
         repositories {
-            maven {
-                url "https://plugins.gradle.org/m2/"
-            }
+            maven { url "https://plugins.gradle.org/m2/" }
+            maven { url 'http://repo.spring.io/plugins-release' }
+            maven { url "https://repo.spring.io/snapshot" }
+            maven { url "https://repo.spring.io/milestone" }
+            mavenCentral()
         }
         dependencies {
             //do not upgrade to 1.4.20, it fails builds randomly
@@ -24,6 +31,8 @@ subprojects {
             classpath "gradle.plugin.com.sedmelluq:jdaction:1.0.2"
             classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
             classpath "org.junit.platform:junit-platform-gradle-plugin:1.0.2"
+            classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+            classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
         }
     }
     apply plugin: 'java'
