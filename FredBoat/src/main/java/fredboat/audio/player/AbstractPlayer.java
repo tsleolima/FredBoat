@@ -50,7 +50,7 @@ import fredboat.audio.source.HttpSourceManager;
 import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
-import fredboat.config.Config;
+import fredboat.config.AudioSourcesConfig;
 import fredboat.main.BotController;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
@@ -125,33 +125,34 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     public static AudioPlayerManager registerSourceManagers(AudioPlayerManager mng) {
         mng.registerSourceManager(new PlaylistImportSourceManager());
+        AudioSourcesConfig audioSourcesConfig = BotController.INS.getAudioSourcesConfig();
         //Determine which Source managers are enabled
         //By default, all are enabled except LocalAudioSources and HttpAudioSources, see config.yaml and Config class
-        if (Config.get().isYouTubeEnabled()) {
+        if (audioSourcesConfig.isYouTubeEnabled()) {
             mng.registerSourceManager(produceYoutubeAudioSourceManager());
         }
-        if (Config.get().isSoundCloudEnabled()) {
+        if (audioSourcesConfig.isSoundCloudEnabled()) {
             mng.registerSourceManager(new SoundCloudAudioSourceManager());
         }
-        if (Config.get().isBandCampEnabled()) {
+        if (audioSourcesConfig.isBandCampEnabled()) {
             mng.registerSourceManager(new BandcampAudioSourceManager());
         }
-        if (Config.get().isTwitchEnabled()) {
+        if (audioSourcesConfig.isTwitchEnabled()) {
             mng.registerSourceManager(new TwitchStreamAudioSourceManager());
         }
-        if (Config.get().isVimeoEnabled()) {
+        if (audioSourcesConfig.isVimeoEnabled()) {
             mng.registerSourceManager(new VimeoAudioSourceManager());
         }
-        if (Config.get().isMixerEnabled()) {
+        if (audioSourcesConfig.isMixerEnabled()) {
             mng.registerSourceManager(new BeamAudioSourceManager());
         }
-        if (Config.get().isSpotifyEnabled()) {
+        if (audioSourcesConfig.isSpotifyEnabled()) {
             mng.registerSourceManager(new SpotifyPlaylistSourceManager());
         }
-        if (Config.get().isLocalEnabled()) {
+        if (audioSourcesConfig.isLocalEnabled()) {
             mng.registerSourceManager(new LocalAudioSourceManager());
         }
-        if (Config.get().isHttpEnabled()) {
+        if (audioSourcesConfig.isHttpEnabled()) {
             //add new source managers above the HttpAudio one, because it will either eat your request or throw an exception
             //so you will never reach a source manager below it
             mng.registerSourceManager(new HttpSourceManager());
