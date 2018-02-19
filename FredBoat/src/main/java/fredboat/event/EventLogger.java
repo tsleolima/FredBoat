@@ -132,6 +132,7 @@ public class EventLogger extends ListenerAdapter {
 
     @SuppressWarnings("FieldCanBeLocal")
     private final Runnable ON_SHUTDOWN = () -> {
+        scheduler.shutdownNow();
         String message;
         if (BotController.INS.getShutdownCode() != BotController.UNKNOWN_SHUTDOWN_CODE) {
             message = Emojis.DOOR + "Exiting with code " + BotController.INS.getShutdownCode() + ".";
@@ -144,9 +145,9 @@ public class EventLogger extends ListenerAdapter {
         if (eventLogWebhook != null) elw = eventLogWebhook.send(message);
         if (guildStatsWebhook != null) gsw = guildStatsWebhook.send(message);
         try {
-            if (elw != null) elw.get();
-            if (gsw != null) gsw.get();
-        } catch (ExecutionException | InterruptedException ignored) {
+            if (elw != null) elw.get(30, TimeUnit.SECONDS);
+            if (gsw != null) gsw.get(30, TimeUnit.SECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException ignored) {
         }
     };
 
