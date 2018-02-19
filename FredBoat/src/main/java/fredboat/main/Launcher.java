@@ -38,10 +38,6 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
@@ -53,8 +49,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * The class responsible for launching FredBoat
  */
-@SpringBootApplication
-public class Launcher implements ApplicationRunner {
+public class Launcher {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
@@ -71,11 +66,7 @@ public class Launcher implements ApplicationRunner {
             System.out.println("Version info printed, exiting.");
             return;
         }
-        SpringApplication.run(Launcher.class, args);
-    }
 
-    @Override
-    public void run(ApplicationArguments args) throws InterruptedException {
         Runtime.getRuntime().addShutdownHook(new Thread(FBC.shutdownHook, "FredBoat main shutdownhook"));
         //create the sentry appender as early as possible
         String sentryDsn = FBC.getCredentials().getSentryDsn();
