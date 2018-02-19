@@ -25,8 +25,8 @@
 
 package fredboat.event;
 
+import fredboat.config.EventLoggerConfig;
 import fredboat.main.BotController;
-import fredboat.main.Config;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
@@ -42,6 +42,9 @@ import net.dv8tion.jda.webhook.WebhookClient;
 import net.dv8tion.jda.webhook.WebhookClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.annotations.FieldsAreNonNullByDefault;
+import space.npstr.annotations.ParametersAreNonnullByDefault;
+import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,6 +64,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * used to try to not drop occasionally failed messages, since the reporting of status events is especially important
  * during ongoing connection issues. If the amount of status events is too damn high, summaries are posted.
  */
+@FieldsAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ReturnTypesAreNonNullByDefault
 public class EventLogger extends ListenerAdapter {
 
     public static final Logger log = LoggerFactory.getLogger(EventLogger.class);
@@ -80,32 +86,40 @@ public class EventLogger extends ListenerAdapter {
     private final AtomicInteger guildsJoinedEvents = new AtomicInteger(0);
     private final AtomicInteger guildsLeftEvents = new AtomicInteger(0);
 
-    public EventLogger() {
-        this(new WebhookClientBuilder(Config.get().getEventLogWebhook()).build(),
-                new WebhookClientBuilder(Config.get().getGuildStatsWebhook()).build());
-    }
 
 
     @Override
     public void onReady(ReadyEvent event) {
+        if (eventLogWebhook == null) {
+            return;
+        }
         statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
                 ShardStatusEvent.StatusEvent.READY, ""));
     }
 
     @Override
     public void onResume(ResumedEvent event) {
+        if (eventLogWebhook == null) {
+            return;
+        }
         statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
                 ShardStatusEvent.StatusEvent.RESUME, ""));
     }
 
     @Override
     public void onReconnect(ReconnectedEvent event) {
+        if (eventLogWebhook == null) {
+            return;
+        }
         statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
                 ShardStatusEvent.StatusEvent.RECONNECT, ""));
     }
 
     @Override
     public void onDisconnect(DisconnectEvent event) {
+        if (eventLogWebhook == null) {
+            return;
+        }
         String closeCodeStr = "close code " + (event.getCloseCode() == null ? "null" : event.getCloseCode().getCode());
         statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
                 ShardStatusEvent.StatusEvent.DISCONNECT, "with " + closeCodeStr));
@@ -113,6 +127,9 @@ public class EventLogger extends ListenerAdapter {
 
     @Override
     public void onShutdown(ShutdownEvent event) {
+        if (eventLogWebhook == null) {
+            return;
+        }
         String closeCodeStr = "close code " + (event.getCloseCode() == null ? "null" : event.getCloseCode().getCode());
         statusStats.add(new ShardStatusEvent(event.getJDA().getShardInfo().getShardId(),
                 ShardStatusEvent.StatusEvent.SHUTDOWN, "with " + closeCodeStr));
@@ -120,12 +137,18 @@ public class EventLogger extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
+        if (guildStatsWebhook == null) {
+            return;
+        }
         guildsJoinedEvents.incrementAndGet();
         log.info("Joined guild {} with {} users", event.getGuild(), event.getGuild().getMemberCache().size());
     }
 
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
+        if (guildStatsWebhook == null) {
+            return;
+        }
         guildsLeftEvents.incrementAndGet();
         log.info("Left guild {} with {} users", event.getGuild(), event.getGuild().getMemberCache().size());
     }
@@ -152,22 +175,34 @@ public class EventLogger extends ListenerAdapter {
     };
 
     //actual constructor
-    private EventLogger(@Nonnull WebhookClient eventLoggerWebhook, @Nonnull WebhookClient guildStatsWebhook) {
+    public EventLogger(EventLoggerConfig config) {
         Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, EventLogger.class.getSimpleName() + " shutdownhook"));
+
+        String eventLoggerWebhookUrl = config.getEventLogWebhook();
+        WebhookClient eventLoggerWebhook = null;
+        if (!eventLoggerWebhookUrl.isEmpty()) {
+            try {
+                eventLoggerWebhook = new WebhookClientBuilder(eventLoggerWebhookUrl).build();
+            } catch (IllegalArgumentException e) {
+                log.error("Eventlogger webhook url could not be parsed: {}", eventLoggerWebhookUrl, e);
+            }
+        }
 
         //test the provided webhooks before assigning them, otherwise they will spam our logs with exceptions
         WebhookClient workingWebhook = null;
-        if (eventLoggerWebhook.getIdLong() > 0) { //id is 0 when there is no webhookid configured in the config; skip this in that case
-            try {
-                eventLoggerWebhook.send(Emojis.PENCIL + "Event logger started.")
-                        .get();
-                workingWebhook = eventLoggerWebhook; //webhook test was successful; FIXME occasionally this might fail during the start due to connection issues, while the provided values are actually valid
-            } catch (Exception e) {
-                log.error("Failed to create event log webhook. Event logs will not be available. Doublecheck your configuration values.");
+        if (eventLoggerWebhook != null) {
+            if (eventLoggerWebhook.getIdLong() > 0) { //id is 0 when there is no webhookid configured in the config; skip this in that case
+                try {
+                    eventLoggerWebhook.send(Emojis.PENCIL + "Event logger started.")
+                            .get();
+                    workingWebhook = eventLoggerWebhook; //webhook test was successful; FIXME occasionally this might fail during the start due to connection issues, while the provided values are actually valid
+                } catch (Exception e) {
+                    log.error("Failed to create event log webhook. Event logs will not be available. Doublecheck your configuration values.");
+                    eventLoggerWebhook.close();
+                }
+            } else {
                 eventLoggerWebhook.close();
             }
-        } else {
-            eventLoggerWebhook.close();
         }
         this.eventLogWebhook = workingWebhook;
 
@@ -178,25 +213,38 @@ public class EventLogger extends ListenerAdapter {
                 } catch (Exception e) {
                     log.error("Failed to send shard status summary to event log webhook", e);
                 }
-            }, 0, Math.max(Config.get().getEventLogInterval(), 1), TimeUnit.MINUTES);
+            }, 0, Math.max(config.getEventLogInterval(), 1), TimeUnit.MINUTES);
+        }
+
+
+        String guildStatsWebhookUrl = config.getGuildStatsWebhook();
+        WebhookClient guildStatsWebhook = null;
+        if (!guildStatsWebhookUrl.isEmpty()) {
+            try {
+                guildStatsWebhook = new WebhookClientBuilder(guildStatsWebhookUrl).build();
+            } catch (IllegalArgumentException e) {
+                log.error("Guildstats webhook url could not be parsed: {}", guildStatsWebhookUrl, e);
+            }
         }
 
         workingWebhook = null;
-        if (guildStatsWebhook.getIdLong() > 0) { //id is 0 when there is no webhookid configured in the config; skip this in that case
-            try {
-                guildStatsWebhook.send(Emojis.PENCIL + "Guild stats logger started.")
-                        .get();
-                workingWebhook = guildStatsWebhook; //webhook test was successful; FIXME occasionally this might fail during the start due to connection issues, while the provided values are actually valid
-            } catch (Exception e) {
-                log.error("Failed to create guild stats webhook. Guild stats will not be available. Doublecheck your configuration values.");
+        if (guildStatsWebhook != null) {
+            if (guildStatsWebhook.getIdLong() > 0) { //id is 0 when there is no webhookid configured in the config; skip this in that case
+                try {
+                    guildStatsWebhook.send(Emojis.PENCIL + "Guild stats logger started.")
+                            .get();
+                    workingWebhook = guildStatsWebhook; //webhook test was successful; FIXME occasionally this might fail during the start due to connection issues, while the provided values are actually valid
+                } catch (Exception e) {
+                    log.error("Failed to create guild stats webhook. Guild stats will not be available. Doublecheck your configuration values.");
+                    guildStatsWebhook.close();
+                }
+            } else {
                 guildStatsWebhook.close();
             }
-        } else {
-            guildStatsWebhook.close();
         }
         this.guildStatsWebhook = workingWebhook;
 
-        int interval = Math.max(Config.get().getGuildStatsInterval(), 1);
+        int interval = Math.max(config.getGuildStatsInterval(), 1);
         if (this.guildStatsWebhook != null) {
             scheduler.scheduleAtFixedRate(() -> {
                 try {

@@ -354,13 +354,10 @@ public class Launcher {
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
                 .setShardsTotal(DiscordUtil.shardCount.get());
 
-        String eventLogWebhook = Config.get().getEventLogWebhook();
-        if (eventLogWebhook != null && !eventLogWebhook.isEmpty()) {
-            try {
-                builder.addEventListeners(new EventLogger());
-            } catch (Exception e) {
-                log.error("Failed to create Eventlogger, events will not be logged to discord via webhook", e);
-            }
+        try {
+            builder.addEventListeners(new EventLogger(FBC.getEventLoggerConfig()));
+        } catch (Exception e) {
+            log.error("Failed to create Eventlogger, events / guild stats will not be logged to discord via webhook", e);
         }
 
         if (LavalinkManager.ins.isEnabled()) {
