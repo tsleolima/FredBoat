@@ -1,8 +1,7 @@
 /*
- *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,47 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat;
-
-import fredboat.messaging.internal.Context;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
-
-/**
- * Created by napster on 02.10.17.
- */
-public class FakeContext extends Context {
-
-    private final TextChannel channel;
-    private final Member member;
-    private final Guild guild;
-
-    public FakeContext(TextChannel channel, Member member, Guild guild) {
-        this.channel = channel;
-        this.member = member;
-        this.guild = guild;
-    }
-
-    @Override
-    public TextChannel getTextChannel() {
-        return channel;
-    }
-
-    @Override
-    public Guild getGuild() {
-        return guild;
-    }
-
-    @Override
-    public Member getMember() {
-        return member;
-    }
-
-    @Override
-    public User getUser() {
-        return getMember().getUser();
-    }
-    
-}
+@space.npstr.annotations.FieldsAreNonNullByDefault
+@space.npstr.annotations.ParametersAreNonnullByDefault
+@space.npstr.annotations.ReturnTypesAreNonNullByDefault
+package fredboat.test;

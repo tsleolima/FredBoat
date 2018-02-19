@@ -1,5 +1,6 @@
 package fredboat.main;
 
+import com.google.common.annotations.VisibleForTesting;
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.queue.MusicPersistenceHandler;
@@ -19,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 /**
  * Class responsible for controlling FredBoat at large
@@ -49,28 +51,47 @@ public class BotController {
     @Nullable //will be null if no cache database has been configured
     private DatabaseWrapper cacheDbWrapper;
 
+
+    private Supplier<AppConfig> appConfigSupplier = FileConfig::get;
+    private Supplier<AudioSourcesConfig> audioSourcesConfigSupplier = FileConfig::get;
+    private Supplier<Credentials> credentialsSupplier = FileConfig::get;
+    private Supplier<DatabaseConfig> databaseConfigSupplier = FileConfig::get;
+    private Supplier<EventLoggerConfig> eventLoggerConfigSupplier = FileConfig::get;
+    private Supplier<LavalinkConfig> lavalinkConfigSupplier = FileConfig::get;
+
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    public void setConfigSuppliers(Supplier allConfigsSupplier) {
+        appConfigSupplier = allConfigsSupplier;
+        audioSourcesConfigSupplier = allConfigsSupplier;
+        credentialsSupplier = allConfigsSupplier;
+        databaseConfigSupplier = allConfigsSupplier;
+        eventLoggerConfigSupplier = allConfigsSupplier;
+        lavalinkConfigSupplier = allConfigsSupplier;
+    }
+
     public AppConfig getAppConfig() {
-        return FileConfig.get();
+        return appConfigSupplier.get();
     }
 
     public AudioSourcesConfig getAudioSourcesConfig() {
-        return FileConfig.get();
+        return audioSourcesConfigSupplier.get();
     }
 
     public Credentials getCredentials() {
-        return FileConfig.get();
+        return credentialsSupplier.get();
     }
 
     public DatabaseConfig getDatabaseConfig() {
-        return FileConfig.get();
+        return databaseConfigSupplier.get();
     }
 
     public EventLoggerConfig getEventLoggerConfig() {
-        return FileConfig.get();
+        return eventLoggerConfigSupplier.get();
     }
 
     public LavalinkConfig getLavalinkConfig() {
-        return FileConfig.get();
+        return lavalinkConfigSupplier.get();
     }
 
     /**

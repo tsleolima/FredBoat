@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,37 +20,47 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.feature;
+package fredboat.test.commandmeta;
 
-import fredboat.ProvideJDASingleton;
+import fredboat.commandmeta.CommandInitializer;
+import fredboat.commandmeta.CommandRegistry;
+import fredboat.commandmeta.abs.Command;
+import fredboat.test.FakeContext;
+import fredboat.test.ProvideJDASingleton;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ResourceBundle;
-
-public class I18nTest extends ProvideJDASingleton {
-
-    private static final Logger log = LoggerFactory.getLogger(I18nTest.class);
+/**
+ * Created by napster on 22.03.17.
+ * <p>
+ * Tests for command initialization
+ */
+public class CommandInitializerTest extends ProvideJDASingleton {
 
     @AfterAll
-    public static void postStats() {
-        saveClassStats(I18nTest.class.getSimpleName());
+    public static void saveStats() {
+        saveClassStats(CommandInitializerTest.class.getSimpleName());
     }
 
+    /**
+     * Make sure all commands initialized in the bot provide help
+     */
     @Test
-    public void testTranslatedStrings() {
-        I18n.start();
+    public void testHelpStrings() {
 
-        ResourceBundle id_ID = I18n.LANGS.get("id_ID").getProps();
-        for(String key :  I18n.DEFAULT.getProps().keySet()){
-            Assertions.assertNotNull(id_ID.getString(key), () -> key + " prop missing in language files");
+        CommandInitializer.initCommands();
+
+        for (String c : CommandRegistry.getAllRegisteredCommandsAndAliases()) {
+            Command com = CommandRegistry.findCommand(c);
+            Assertions.assertNotNull(com, "Command looked up by " + c + " is null");
+            String help = com.help(new FakeContext(testChannel, testSelfMember, testGuild));
+            Assertions.assertNotNull(help, () -> com.getClass().getName() + ".help() returns null");
+            Assertions.assertNotEquals("", help, () -> com.getClass().getName() + ".help() returns an empty string");
         }
+
         bumpPassedTests();
     }
 }

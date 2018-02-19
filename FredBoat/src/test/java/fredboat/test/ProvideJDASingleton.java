@@ -1,6 +1,30 @@
-package fredboat;
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-import fredboat.main.Config;
+package fredboat.test;
+
+import fredboat.main.BotController;
 import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
@@ -14,9 +38,8 @@ import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.io.IOException;
@@ -49,13 +72,15 @@ import java.util.concurrent.TimeoutException;
  * <p>
  * This class doesn't need i18n as it's aimed at developers, not users
  */
-public abstract class ProvideJDASingleton {
+public abstract class ProvideJDASingleton extends BaseTest {
 
-    private static final Logger log = LoggerFactory.getLogger(ProvideJDASingleton.class);
-
+    @Nullable
     protected static JDA jda = null;
+    @Nullable
     protected static Guild testGuild = null;
+    @Nullable
     protected static TextChannel testChannel = null;
+    @Nullable
     protected static Member testSelfMember = null;
 
     protected static int passedTests = 0;
@@ -108,19 +133,19 @@ public abstract class ProvideJDASingleton {
 
 
             //the summary of our run tests
-            String summary = "";
+            StringBuilder summary = new StringBuilder();
             String fieldTitle = "Test classes run";
             for (String classTestResultString : classStats) {
 
                 //split into several fields if needed
                 if (summary.length() + classTestResultString.length() + 1 > MessageEmbed.VALUE_MAX_LENGTH) {
-                    eb.addField(fieldTitle, summary, false);
+                    eb.addField(fieldTitle, summary.toString(), false);
                     fieldTitle = "";//empty title for following fields
-                    summary = ""; //reset the summary string
+                    summary = new StringBuilder(); //reset the summary string
                 }
-                summary += classTestResultString + "\n";
+                summary.append(classTestResultString).append("\n");
             }
-            eb.addField(fieldTitle, summary, false);
+            eb.addField(fieldTitle, summary.toString(), false);
 
             eb.setFooter(jda.getSelfUser().getName(), jda.getSelfUser().getAvatarUrl());
             eb.setTimestamp(Instant.now());
@@ -142,24 +167,20 @@ public abstract class ProvideJDASingleton {
         try {
             startTime = System.currentTimeMillis();
             log.info("Setting up live testing environment");
-            Config conf;
-            try {
-                conf = Config.get();
-            } catch (Exception e) {
-                log.info("Credentials and/or config files not found, live tests won't be available", e);
-                return;
-            }
+            MockConfig conf = new MockConfig();
+            BotController.INS.setConfigSuppliers(() -> conf); //drop in our mock config
             //TODO after moving this to integration tests, remove those catches and let it fail
             String testToken = conf.getTestBotToken();
-            if (testToken == null || "".equals(testToken)) {
+            if ("".equals(testToken)) {
                 log.info("No testing token found, live tests won't be available");
                 return;
             }
             JDABuilder builder = new JDABuilder(AccountType.BOT)
                     .setToken(testToken)
                     .setEnableShutdownHook(false); //we're setting our own
-            jda = builder.buildBlocking();
+            JDA jda = builder.buildBlocking();
 
+            ProvideJDASingleton.jda = jda;
             testChannel = jda.getTextChannelById(conf.getTestChannelId());
             testGuild = testChannel.getGuild();
             testSelfMember = testGuild.getSelfMember();
@@ -167,8 +188,8 @@ public abstract class ProvideJDASingleton {
             String out = " < " + DateFormat.getDateTimeInstance().format(new Date()) +
                     "> testing started on machine <" + InetAddress.getLocalHost().getHostName() +
                     "> by user <" + System.getProperty("user.name") + "> ";
-            String spacer = "";
-            for (int i = 0; i < out.length(); i++) spacer += "#";
+            StringBuilder spacer = new StringBuilder();
+            for (int i = 0; i < out.length(); i++) spacer.append("#");
             out = spacer + "\n" + out + "\n" + spacer;
             out = TextUtils.asCodeBlock(out, "md");
             CentralMessaging.sendMessage(testChannel, out).getWithDefaultTimeout();
@@ -207,8 +228,8 @@ public abstract class ProvideJDASingleton {
         int spaces = 66 - testsResults.length() - className.length();
         if (spaces < 1) spaces = 1;
 
-        String sp = "";
-        for (int i = 0; i < spaces; i++) sp += " ";
+        StringBuilder sp = new StringBuilder();
+        for (int i = 0; i < spaces; i++) sp.append(" ");
         String out = "`" + className + sp + testsResults + "`";
 
         //fancy it up a bit :>
