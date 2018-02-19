@@ -3,6 +3,7 @@ package fredboat.main;
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.queue.MusicPersistenceHandler;
+import fredboat.config.*;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.Metrics;
@@ -47,6 +48,30 @@ public class BotController {
 
     @Nullable //will be null if no cache database has been configured
     private DatabaseWrapper cacheDbWrapper;
+
+    public AppConfig getAppConfig() {
+        return FileConfig.get();
+    }
+
+    public AudioSourcesConfig getAudioSourcesConfig() {
+        return FileConfig.get();
+    }
+
+    public Credentials getCredentials() {
+        return FileConfig.get();
+    }
+
+    public DatabaseConfig getDatabaseConfig() {
+        return FileConfig.get();
+    }
+
+    public EventLoggerConfig getEventLoggerConfig() {
+        return FileConfig.get();
+    }
+
+    public LavalinkConfig getLavalinkConfig() {
+        return FileConfig.get();
+    }
 
     /**
      * Initialises the event listener. This can't be done during construction,

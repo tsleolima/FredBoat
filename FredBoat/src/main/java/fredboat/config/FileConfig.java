@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +20,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.main;
+package fredboat.config;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Suppliers;
 import fredboat.audio.player.PlayerLimitManager;
-import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
-import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -53,31 +50,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-public class Config {
+public class FileConfig implements AppConfig, AudioSourcesConfig, Credentials, EventLoggerConfig, DatabaseConfig, LavalinkConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private static final Logger log = LoggerFactory.getLogger(FileConfig.class);
 
-    public static String DEFAULT_PREFIX = ";;";
-
-
-    private static final Supplier<Config> configSupplier = Suppliers.memoizeWithExpiration(Config::loadConfig,
+    private static final Supplier<FileConfig> configSupplier = Suppliers.memoizeWithExpiration(FileConfig::loadConfig,
             1, TimeUnit.MINUTES);
-
-    //todo: trace down all callers of this and make sure they take advantage of a reloading config like
-    //todo  not storing the values once retrieved and recreating objects on value changes where possible/feasible
-    public static Config get() {
-        return configSupplier.get();
-    }
 
     //a fallback reference to the last sucessfulyy loaded config, in case editing the config files breaks them
     @Nullable
-    private static Config lastSuccessfulLoaded;
+    private static FileConfig lastSuccessfulLoaded;
 
-    private static Config loadConfig() {
+    //todo: trace down all callers of this and make sure they take advantage of a reloading config like
+    //todo  not storing the values once retrieved and recreating objects on value changes where possible/feasible
+    public static FileConfig get() {
+        return FileConfig.configSupplier.get();
+    }
+
+
+    private static FileConfig loadConfig() {
         long nanoTime = System.nanoTime();
-        Config c;
+        FileConfig c;
         try {
-            c = new Config(
+            c = new FileConfig(
                     loadConfigFile("credentials"),
                     loadConfigFile("config")
             );
@@ -93,7 +88,7 @@ public class Config {
         return c;
     }
 
-    //Config
+    //FileConfig
 
     private DistributionEnum distribution;
     private String prefix;
@@ -143,27 +138,23 @@ public class Config {
 
     // misc
     private String sentryDsn;
-    private List<LavalinkHost> lavalinkHosts = new ArrayList<>();
+    private List<LavalinkConfig.LavalinkHost> lavalinkHosts = new ArrayList<>();
     private String eventLogWebhook;
     private int eventLogInterval;
     private String guildStatsWebhook;
     private int guildStatsInterval;
-    private String testBotToken;
-    private String testChannelId;
 
 
     // Undocumented creds
     private String carbonKey;
     private String dikeUrl;
 
-    //Derived Config values
-    private int hikariPoolSize;
 
     /**
      * The config is regularly reloaded, it should not be doing any blocking calls.
      */
     @SuppressWarnings("unchecked")
-    public Config(File credentialsFile, File configFile) {
+    public FileConfig(File credentialsFile, File configFile) {
         try {
             Yaml yaml = new Yaml();
             String credsFileStr = FileUtils.readFileToString(credentialsFile, "UTF-8");
@@ -179,16 +170,8 @@ public class Config {
             creds.keySet().forEach((String key) -> creds.putIfAbsent(key, ""));
             config.keySet().forEach((String key) -> config.putIfAbsent(key, ""));
 
-            //create the sentry appender as early as possible
-            sentryDsn = (String) creds.getOrDefault("sentryDsn", "");
-            if (!sentryDsn.isEmpty()) {
-                SentryDsnCommand.turnOn(sentryDsn);
-            } else {
-                SentryDsnCommand.turnOff();
-            }
 
-
-            //Load Config values
+            //Load FileConfig values
 
             // Determine distribution
             if ((boolean) config.getOrDefault("development", true)) {
@@ -258,6 +241,7 @@ public class Config {
             spotifySecret = (String) creds.getOrDefault("spotifySecret", "");
 
             openWeatherKey = (String) creds.getOrDefault("openWeatherKey", "");
+            sentryDsn = (String) creds.getOrDefault("sentryDsn", "");
 
 
             // main database
@@ -356,7 +340,7 @@ public class Config {
                         try {
                             String name = "Lavalink-Node#" + nodeCounter.getAndIncrement();
                             URI uri = new URI(host);
-                            lavalinkHosts.add(new LavalinkHost(name, uri, pass));
+                            lavalinkHosts.add(new LavalinkConfig.LavalinkHost(name, uri, pass));
                             log.info("Lavalink node added: {} {}", name, uri);
                         } catch (URISyntaxException e) {
                             throw new RuntimeException("Failed parsing lavalink URI", e);
@@ -368,7 +352,7 @@ public class Config {
                         try {
                             String name = node.get("name");
                             URI uri = new URI(node.get("host"));
-                            lavalinkHosts.add(new LavalinkHost(name, uri, node.get("pass")));
+                            lavalinkHosts.add(new LavalinkConfig.LavalinkHost(name, uri, node.get("pass")));
                         } catch (URISyntaxException e) {
                             throw new RuntimeException("Failed parsing lavalink URI", e);
                         }
@@ -381,22 +365,11 @@ public class Config {
             guildStatsWebhook = (String) creds.getOrDefault("guildStatsWebhook", "");
             guildStatsInterval = (int) creds.getOrDefault("guildStatsInterval", 60); //minutes
 
-            testBotToken = (String) creds.getOrDefault("testToken", "");
-            testChannelId = creds.getOrDefault("testChannelId", "") + "";
-
 
             // Undocumented creds
             carbonKey = (String) creds.getOrDefault("carbonKey", "");
-            dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
+            dikeUrl = (String) creds.getOrDefault("dikeUrl", "");
 
-
-            // Derived Config values
-            // these are calculated in some way and don't necessarily correspond to values from the config/credentials files
-
-            //more database connections don't help with performance, so use a value based on available cores, but not too low
-            //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
-            hikariPoolSize = Math.max(4, Runtime.getRuntime().availableProcessors());
-            log.info("Hikari max pool size set to " + hikariPoolSize);
 
             PlayerLimitManager.setLimit((Integer) config.getOrDefault("playerLimit", -1));
         } catch (IOException e) {
@@ -436,112 +409,90 @@ public class Config {
     }
 
 
-    public static class LavalinkHost {
-
-        private final String name;
-        private final URI uri;
-        private final String password;
-
-        public LavalinkHost(String name, URI uri, String password) {
-            this.name = name;
-            this.uri = uri;
-            this.password = password;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public URI getUri() {
-            return uri;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-    }
-
-
     // ********************************************************************************
     //                           Config Getters
     // ********************************************************************************
 
+    @Override
     public DistributionEnum getDistribution() {
         return distribution;
     }
 
-    public boolean isPatronDistribution() {
-        return distribution == DistributionEnum.PATRON;
-    }
-
-    public boolean isDevDistribution() {
-        return distribution == DistributionEnum.DEVELOPMENT;
-    }
-
-    public boolean isMusicDistribution() {
-        return distribution == DistributionEnum.MUSIC;
-    }
-
+    @Override
     public String getPrefix() {
         return prefix;
     }
 
+    @Override
     public boolean isRestServerEnabled() {
         return restServerEnabled;
     }
 
+    @Override
     public List<String> getAdminIds() {
         return adminIds;
     }
 
+    @Override
     public boolean useAutoBlacklist() {
         return useAutoBlacklist;
     }
 
+    @Override
     public String getGame() {
-        if (game == null || game.isEmpty()) {
+        if (game.isEmpty()) {
             return "Say " + getPrefix() + CommandInitializer.HELP_COMM_NAME;
         } else {
             return game;
         }
     }
 
+    @Override
     public boolean getContinuePlayback() {
         return continuePlayback;
     }
 
+    @Override
     public boolean isYouTubeEnabled() {
         return youtubeAudio;
     }
 
+    @Override
     public boolean isSoundCloudEnabled() {
         return soundcloudAudio;
     }
 
+    @Override
     public boolean isBandCampEnabled() {
         return bandcampAudio;
     }
 
+    @Override
     public boolean isTwitchEnabled() {
         return twitchAudio;
     }
 
+    @Override
     public boolean isVimeoEnabled() {
         return vimeoAudio;
     }
 
+    @Override
     public boolean isMixerEnabled() {
         return mixerAudio;
     }
 
+    @Override
     public boolean isSpotifyEnabled() {
         return spotifyAudio;
     }
 
+    @Override
     public boolean isLocalEnabled() {
         return localAudio;
     }
 
+    @Override
     public boolean isHttpEnabled() {
         return httpAudio;
     }
@@ -551,109 +502,114 @@ public class Config {
     //                           Credentials Getters
     // ********************************************************************************
 
+    @Override
     public String getBotToken() {
         return botToken;
     }
 
+    @Override
     public List<String> getGoogleKeys() {
         return googleKeys;
     }
 
-    public String getRandomGoogleKey() {
-        if (googleKeys.isEmpty()) {
-            throw new MessagingException("No Youtube API key detected. Please read the documentation of the credentials file on how to obtain one.");
-        }
-        return googleKeys.get((int) Math.floor(Math.random() * getGoogleKeys().size()));
-    }
-
+    @Override
     public String getMalUser() {
         return malUser;
     }
 
+    @Override
     public String getMalPassword() {
         return malPassword;
     }
 
+    @Override
     public String getImgurClientId() {
         return imgurClientId;
     }
 
+    @Override
     public String getSpotifyId() {
         return spotifyId;
     }
 
+    @Override
     public String getSpotifySecret() {
         return spotifySecret;
     }
 
+    @Override
     public String getOpenWeatherKey() {
         return openWeatherKey;
     }
 
+    @Override
+    public String getSentryDsn() {
+        return sentryDsn;
+    }
+
+    @Override
     @Nonnull
     public String getMainJdbcUrl() {
         return jdbcUrl;
     }
 
+    @Override
     @Nullable
     public SshTunnel.SshDetails getMainSshTunnelConfig() {
         return mainSshTunnelConfig;
     }
 
+    @Override
     @Nullable
     //may return null if no cache database was provided.
     public String getCacheJdbcUrl() {
         return cacheJdbcUrl;
     }
 
+    @Override
     @Nullable
     public SshTunnel.SshDetails getCacheSshTunnelConfig() {
         return cacheSshTunnelConfig;
     }
 
-    public List<LavalinkHost> getLavalinkHosts() {
+    @Override
+    public List<LavalinkConfig.LavalinkHost> getLavalinkHosts() {
         return lavalinkHosts;
     }
 
+    @Override
     public String getEventLogWebhook() {
         return eventLogWebhook;
     }
 
     //minutes
+    @Override
     public int getEventLogInterval() {
         return eventLogInterval;
     }
 
+    @Override
     public String getGuildStatsWebhook() {
         return guildStatsWebhook;
     }
 
     //minutes
+    @Override
     public int getGuildStatsInterval() {
         return guildStatsInterval;
     }
 
-    public String getTestBotToken() {
-        return testBotToken;
-    }
-
-    public String getTestChannelId() {
-        return testChannelId;
-    }
 
     // ********************************************************************************
     //                       Derived and undocumented values
     // ********************************************************************************
 
-    public int getHikariPoolSize() {
-        return hikariPoolSize;
-    }
-
+    @Override
     public String getCarbonKey() {
         return carbonKey;
     }
 
-    @Nullable
+    @Override
     public String getDikeUrl() {
         return dikeUrl;
     }
