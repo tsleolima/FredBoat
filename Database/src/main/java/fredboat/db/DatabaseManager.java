@@ -70,11 +70,11 @@ public class DatabaseManager {
 
 
     @Nullable
-    private DatabaseWrapper mainDbWrapper;
+    private volatile DatabaseWrapper mainDbWrapper;
     private final Object mainDbWrapperInitLock = new Object();
 
     @Nullable
-    private DatabaseWrapper cacheDbWrapper;
+    private volatile DatabaseWrapper cacheDbWrapper;
     private final Object cacheDbWrapperInitLock = new Object();
 
     public DatabaseManager(@Nullable HibernateStatisticsCollector hibernateStats,
