@@ -39,6 +39,7 @@ dependencies {
     }
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
     compile group: 'com.sparkjava', name: 'spark-core', version: sparkVersion
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion

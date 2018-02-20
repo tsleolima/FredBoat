@@ -67,12 +67,21 @@ public class DatabaseManager {
     private final String cacheJdbc;
     @Nullable
     private final SshTunnel.SshDetails cacheTunnel;
+    @Nullable
+    private final DatabaseConnection.EntityManagerFactoryBuilder entityManagerFactoryBuilder;
 
-
+    @Nullable
+    private DatabaseConnection mainDbConn;
+    private final Object mainDbConnInitLock = new Object();
+    private boolean mainConnBuilt = false;
     @Nullable
     private volatile DatabaseWrapper mainDbWrapper;
     private final Object mainDbWrapperInitLock = new Object();
 
+    @Nullable
+    private DatabaseConnection cacheDbConn;
+    private final Object cacheDbConnInitLock = new Object();
+    private boolean cacheConnBuilt = false;
     @Nullable
     private volatile DatabaseWrapper cacheDbWrapper;
     private final Object cacheDbWrapperInitLock = new Object();
@@ -85,7 +94,8 @@ public class DatabaseManager {
                            String mainJdbc,
                            @Nullable SshTunnel.SshDetails mainTunnel,
                            @Nullable String cacheJdbc,
-                           @Nullable SshTunnel.SshDetails cacheTunnel) {
+                           @Nullable SshTunnel.SshDetails cacheTunnel,
+                           @Nullable DatabaseConnection.EntityManagerFactoryBuilder entityManagerFactoryBuilder) {
         this.hibernateStats = hibernateStats;
         this.hikariStats = hikariStats;
         this.poolsize = poolsize;
@@ -95,6 +105,21 @@ public class DatabaseManager {
         this.mainTunnel = mainTunnel;
         this.cacheJdbc = cacheJdbc;
         this.cacheTunnel = cacheTunnel;
+        this.entityManagerFactoryBuilder = entityManagerFactoryBuilder;
+    }
+
+    public DatabaseConnection getMainDbConn() {
+        DatabaseConnection singleton = mainDbConn;
+        if (singleton == null) {
+            synchronized (mainDbConnInitLock) {
+                singleton = mainDbConn;
+                if (singleton == null) {
+                    mainDbConn = singleton = initMainDbConn();
+                    mainConnBuilt = true;
+                }
+            }
+        }
+        return singleton;
     }
 
     public DatabaseWrapper getMainDbWrapper() {
@@ -103,13 +128,31 @@ public class DatabaseManager {
             synchronized (mainDbWrapperInitLock) {
                 singleton = mainDbWrapper;
                 if (singleton == null) {
-                    mainDbWrapper = singleton = initMainDbWrapper();
+                    mainDbWrapper = singleton = new DatabaseWrapper(getMainDbConn());
                 }
             }
         }
         return singleton;
     }
 
+
+    @Nullable //may return null if no cache db is configured
+    public DatabaseConnection getCacheDbConn() {
+        if (cacheJdbc == null) {
+            return null;
+        }
+        DatabaseConnection singleton = cacheDbConn;
+        if (singleton == null) {
+            synchronized (cacheDbConnInitLock) {
+                singleton = cacheDbConn;
+                if (singleton == null) {
+                    cacheDbConn = singleton = initCacheConn(cacheJdbc);
+                    cacheConnBuilt = true;
+                }
+            }
+        }
+        return singleton;
+    }
 
     @Nullable //may return null if no cache db is configured
     public DatabaseWrapper getCacheDbWrapper() {
@@ -121,14 +164,25 @@ public class DatabaseManager {
             synchronized (cacheDbWrapperInitLock) {
                 singleton = cacheDbWrapper;
                 if (singleton == null) {
-                    cacheDbWrapper = singleton = initCacheWrapper(cacheJdbc);
+                    DatabaseConnection cacheDbConn = getCacheDbConn();
+                    if (cacheDbConn != null) {
+                        cacheDbWrapper = singleton = new DatabaseWrapper(cacheDbConn);
+                    }
                 }
             }
         }
         return singleton;
     }
 
-    private DatabaseWrapper initMainDbWrapper() throws DatabaseException {
+    public boolean isMainConnBuilt() {
+        return mainConnBuilt;
+    }
+
+    public boolean isCacheConnBuilt() {
+        return cacheConnBuilt;
+    }
+
+    private DatabaseConnection initMainDbConn() throws DatabaseException {
 
         Flyway flyway = null;
         if (migrateAndValidate) {
@@ -149,11 +203,11 @@ public class DatabaseManager {
         }
         log.debug(CacheManager.getCacheManager("MAIN_CACHEMANAGER").getActiveConfigurationText());
 
-        return new DatabaseWrapper(databaseConnection);
+        return databaseConnection;
     }
 
 
-    public DatabaseWrapper initCacheWrapper(String jdbc) throws DatabaseException {
+    public DatabaseConnection initCacheConn(String jdbc) throws DatabaseException {
 
         Flyway flyway = null;
         if (migrateAndValidate) {
@@ -174,11 +228,11 @@ public class DatabaseManager {
         }
         log.debug(CacheManager.getCacheManager("CACHE_CACHEMANAGER").getActiveConfigurationText());
 
-        return new DatabaseWrapper(databaseConnection);
+        return databaseConnection;
     }
 
     private DatabaseConnection.Builder getBasicConnectionBuilder(String connectionName, String jdbcUrl) {
-        return new DatabaseConnection.Builder(connectionName, jdbcUrl)
+        DatabaseConnection.Builder builder = new DatabaseConnection.Builder(connectionName, jdbcUrl)
                 .setHikariConfig(buildHikariConfig())
                 .setDialect("org.hibernate.dialect.PostgreSQL95Dialect")
                 .setAppName("FredBoat_" + appName)
@@ -188,6 +242,10 @@ public class DatabaseManager {
                         .logSlowQueryBySlf4j(10, TimeUnit.SECONDS, SLF4JLogLevel.WARN, "SlowQueryLog")
                         .multiline()
                 );
+        if (entityManagerFactoryBuilder != null) {
+            builder = builder.setEntityManagerFactoryBuilder(entityManagerFactoryBuilder);
+        }
+        return builder;
     }
 
     private Flyway buildFlyway(String locations) {

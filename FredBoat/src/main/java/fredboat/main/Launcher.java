@@ -41,9 +41,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
-import space.npstr.sqlsauce.DatabaseWrapper;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -54,13 +62,19 @@ import java.util.concurrent.ExecutorService;
  * The class responsible for launching FredBoat
  */
 @SpringBootApplication
+@EnableAutoConfiguration(exclude = { //we handle these ourselves
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class,
+        FlywayAutoConfiguration.class
+})
 public class Launcher implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
     private static final BotController FBC = BotController.INS;
 
-    public static void main(String[] args) throws IllegalArgumentException, InterruptedException, DatabaseException {
+    public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
         if (args.length > 0 &&
                 (args[0].equalsIgnoreCase("-v")
@@ -121,45 +135,52 @@ public class Launcher implements ApplicationRunner {
         DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
                 dbConf.getHikariPoolSize(), FBC.getAppConfig().getDistribution().name(), migrateAndValidate,
                 dbConf.getMainJdbcUrl(), dbConf.getMainSshTunnelConfig(),
-                dbConf.getCacheJdbcUrl(), dbConf.getCacheSshTunnelConfig());
+                dbConf.getCacheJdbcUrl(), dbConf.getCacheSshTunnelConfig(),
+                (puName, dataSource, properties, entityPackages) -> {
+                    LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
+                    emfb.setDataSource(dataSource);
+                    emfb.setPackagesToScan(entityPackages.toArray(new String[entityPackages.size()]));
+
+                    JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+                    emfb.setJpaVendorAdapter(vendorAdapter);
+                    emfb.setJpaProperties(properties);
+
+                    emfb.afterPropertiesSet(); //initiate creation of the native emf
+                    return emfb.getNativeEntityManagerFactory();
+                });
 
         //attempt to connect to the database a few times
         // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
         // container will be started before the fredboat one
         int dbConnectionAttempts = 0;
-        DatabaseWrapper mainDbWrapper = null;
-        while ((mainDbWrapper == null || !mainDbWrapper.unwrap().isAvailable()) && dbConnectionAttempts++ < 10) {
+        DatabaseConnection mainDbConn = null;
+        while ((mainDbConn == null || !mainDbConn.isAvailable()) && dbConnectionAttempts++ < 10) {
             try {
-                if (mainDbWrapper != null) {
-                    mainDbWrapper.unwrap().shutdown();
+                if (mainDbConn != null) {
+                    mainDbConn.shutdown();
                 }
-                mainDbWrapper = dbManager.getMainDbWrapper();
+                mainDbConn = dbManager.getMainDbConn();
             } catch (Exception e) {
                 log.info("Could not connect to the database. Retrying in a moment...", e);
                 Thread.sleep(6000);
             }
         }
-        if (mainDbWrapper == null || !mainDbWrapper.unwrap().isAvailable()) {
+        if (mainDbConn == null || !mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
             FBC.shutdown(ExitCodes.EXIT_CODE_ERROR);
             return;
         }
-        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbWrapper.unwrap()));
-        FBC.setMainDbWrapper(mainDbWrapper);
+        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
 
-        DatabaseWrapper cacheDbWrapper = null;
         try {
-            cacheDbWrapper = dbManager.getCacheDbWrapper();
-            if (cacheDbWrapper != null) {
-                FBC.setCacheDbWrapper(cacheDbWrapper);
-            }
+            dbManager.getCacheDbConn();
         } catch (Exception e) {
             log.error("Exception when connecting to cache db", e);
             FBC.shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
-
-        FBC.setEntityIO(new EntityIO(mainDbWrapper, cacheDbWrapper));
+        FBC.setDatabaseManager(dbManager);
+        FBC.setEntityIO(new EntityIO(dbManager.getMainDbWrapper(), dbManager.getCacheDbWrapper()));
 
         //Initialise event listeners
         FBC.setMainEventListener(new EventListenerBoat());

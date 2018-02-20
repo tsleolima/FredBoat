@@ -5,6 +5,7 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.config.*;
+import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.Metrics;
@@ -45,11 +46,8 @@ public class BotController {
     private EventListenerBoat mainEventListener;
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
     private EntityIO entityIO;
-    private DatabaseWrapper mainDbWrapper;
+    private DatabaseManager databaseManager;
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
-
-    @Nullable //will be null if no cache database has been configured
-    private DatabaseWrapper cacheDbWrapper;
 
 
     private Supplier<AppConfig> appConfigSupplier = FileConfig::get;
@@ -140,30 +138,26 @@ public class BotController {
 
     @Nonnull
     public DatabaseConnection getMainDbConnection() {
-        return mainDbWrapper.unwrap();
+        return databaseManager.getMainDbConn();
     }
 
     @Nonnull
     public DatabaseWrapper getMainDbWrapper() {
-        return mainDbWrapper;
+        return databaseManager.getMainDbWrapper();
     }
 
     @Nullable
     public DatabaseConnection getCacheDbConnection() {
-        return cacheDbWrapper != null ? cacheDbWrapper.unwrap() : null;
+        return databaseManager.getCacheDbConn();
     }
 
     @Nullable
     public DatabaseWrapper getCacheDbWrapper() {
-        return cacheDbWrapper;
+        return databaseManager.getCacheDbWrapper();
     }
 
-    public void setMainDbWrapper(@Nonnull DatabaseWrapper mainDbWrapper) {
-        this.mainDbWrapper = mainDbWrapper;
-    }
-
-    public void setCacheDbWrapper(@Nullable DatabaseWrapper cacheDbWrapper) {
-        this.cacheDbWrapper = cacheDbWrapper;
+    public void setDatabaseManager(@Nonnull DatabaseManager databaseManager) {
+        this.databaseManager = databaseManager;
     }
 
     public void shutdown(int code) {
@@ -185,14 +179,21 @@ public class BotController {
             log.error("Critical error while handling music persistence.", e);
         }
 
-        shardManager.shutdown();
+        if (shardManager != null) {
+            shardManager.shutdown();
+        }
 
         executor.shutdown();
-        if (cacheDbWrapper != null) {
-            cacheDbWrapper.unwrap().shutdown();
-        }
-        if (mainDbWrapper != null) {
-            mainDbWrapper.unwrap().shutdown();
+        if (databaseManager != null) {
+            if (databaseManager.isCacheConnBuilt()) {
+                DatabaseConnection cacheDbConn = databaseManager.getCacheDbConn();
+                if (cacheDbConn != null) {
+                    cacheDbConn.shutdown();
+                }
+            }
+            if (databaseManager.isMainConnBuilt()) {
+                databaseManager.getMainDbConn().shutdown();
+            }
         }
     };
 
