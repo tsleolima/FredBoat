@@ -109,7 +109,7 @@ subprojects {
     }
 }
 
-version = '1.0'
+version = '2.3'
 ext {
     moduleName = 'FredBoat-Root'
 }
@@ -120,3 +120,10 @@ task wrapper(type: Wrapper) {
     gradleVersion = '4.4.1'
     distributionType = DistributionType.ALL
 }
+
+//create a simple version file that we will be reading to create appropriate docker tags
+void versionTxt() {
+    new File("$projectDir/VERSION.txt").text = "$rootProject.version\n"
+}
+
+versionTxt()
