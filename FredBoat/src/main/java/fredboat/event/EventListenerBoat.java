@@ -33,6 +33,7 @@ import fredboat.command.info.HelpCommand;
 import fredboat.command.info.ShardsCommand;
 import fredboat.command.info.StatsCommand;
 import fredboat.command.music.control.SkipCommand;
+import fredboat.commandmeta.CommandContextParser;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
@@ -81,6 +82,7 @@ public class EventListenerBoat extends AbstractEventListener {
             .expireAfterWrite(6, TimeUnit.HOURS)
             .build();
 
+    private final CommandContextParser commandContextParser = new CommandContextParser();
 
     public EventListenerBoat() {
         Metrics.instance().cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
@@ -129,7 +131,7 @@ public class EventListenerBoat extends AbstractEventListener {
             return;
         }
 
-        CommandContext context = CommandContext.parse(event);
+        CommandContext context = commandContextParser.parse(event);
         if (context == null) {
             return;
         }
