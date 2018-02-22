@@ -38,8 +38,11 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.npstr.annotations.FieldsAreNonNullByDefault;
+import space.npstr.annotations.ParametersAreNonnullByDefault;
+import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,6 +57,9 @@ import java.util.regex.Pattern;
  * <p>
  * Don't save these anywhere as they hold references to JDA objects, just pass them down through (short-lived) command execution
  */
+@FieldsAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ReturnTypesAreNonNullByDefault
 public class CommandContext extends Context {
 
     private static final Logger log = LoggerFactory.getLogger(CommandContext.class);
@@ -62,24 +68,22 @@ public class CommandContext extends Context {
     //group 1 is the mention, group 2 is the id of the mention, group 3 is the rest of the input including new lines
     public static final Pattern MENTION_PREFIX = Pattern.compile("^(<@!?([0-9]+)>)(.*)$", Pattern.DOTALL);
 
-    //@formatter:off
-    @Nonnull public final Guild guild;
-    @Nonnull public final TextChannel channel;
-    @Nonnull public final Member invoker;
-    @Nonnull public final Message msg;
+    public final Guild guild;
+    public final TextChannel channel;
+    public final Member invoker;
+    public final Message msg;
 
-             public boolean isMention = false;                  // whether a mention was used to trigger this command
-    @Nonnull public String trigger = "";                        // the command trigger, e.g. "play", or "p", or "pLaY", whatever the user typed
-    @Nonnull public String[] args = new String[0];              // the arguments split by whitespace, excluding prefix and trigger
-    @Nonnull public String rawArgs = "";                        // raw arguments excluding prefix and trigger, trimmed
-    @SuppressWarnings("ConstantConditions")//the parsing code handles setting this to a nonnull value
-    @Nonnull public Command command = null;
-    //@formatter:on
+    public final boolean isMention;          // whether a mention was used to trigger this command
+    public final String trigger;             // the command trigger, e.g. "play", or "p", or "pLaY", whatever the user typed
+    public final String[] args;              // the arguments split by whitespace, excluding prefix and trigger
+    public final String rawArgs;             // raw arguments excluding prefix and trigger, trimmed
+    public final Command command;
 
     /**
      * @param event the event to be parsed
      * @return The full context for the triggered command, or null if it's not a command that we know.
      */
+    @Nullable
     public static CommandContext parse(MessageReceivedEvent event) {
         String raw = event.getMessage().getContentRaw();
 
@@ -136,26 +140,30 @@ public class CommandContext extends Context {
             log.info("Unknown command:\t{}", commandTrigger);
             return null;
         } else {
-            CommandContext context = new CommandContext(
+            return new CommandContext(
                     event.getGuild(),
                     event.getTextChannel(),
                     event.getMember(),
-                    event.getMessage());
-
-            context.isMention = isMention;
-            context.trigger = commandTrigger;
-            context.command = command;
-            context.args = Arrays.copyOfRange(args, 1, args.length);//exclude args[0] that contains the command trigger
-            context.rawArgs = input.replaceFirst(commandTrigger, "").trim();
-            return context;
+                    event.getMessage(),
+                    isMention,
+                    commandTrigger,
+                    Arrays.copyOfRange(args, 1, args.length),//exclude args[0] that contains the command trigger
+                    input.replaceFirst(commandTrigger, "").trim(),
+                    command);
         }
     }
 
-    private CommandContext(@Nonnull Guild guild, @Nonnull TextChannel channel, @Nonnull Member invoker, @Nonnull Message message) {
+    private CommandContext(Guild guild, TextChannel channel, Member invoker, Message message,
+                           boolean isMention, String trigger, String[] args, String rawArgs, Command command) {
         this.guild = guild;
         this.channel = channel;
         this.invoker = invoker;
         this.msg = message;
+        this.isMention = isMention;
+        this.trigger = trigger;
+        this.args = args;
+        this.rawArgs = rawArgs;
+        this.command = command;
     }
 
     /**
@@ -193,30 +201,25 @@ public class CommandContext extends Context {
         return args.length > 0 && !rawArgs.isEmpty();
     }
 
-    @Nonnull
     public Collection<Module> getEnabledModules() {
         return BotController.INS.getEntityIO().fetchGuildModules(this.guild).getEnabledModules();
     }
 
-    @Nonnull
     @Override
     public TextChannel getTextChannel() {
         return channel;
     }
 
-    @Nonnull
     @Override
     public Guild getGuild() {
         return guild;
     }
 
-    @Nonnull
     @Override
     public Member getMember() {
         return invoker;
     }
 
-    @Nonnull
     @Override
     public User getUser() {
         return invoker.getUser();
