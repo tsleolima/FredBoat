@@ -15,11 +15,8 @@ import net.dv8tion.jda.bot.sharding.ShardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import space.npstr.sqlsauce.DatabaseConnection;
-import space.npstr.sqlsauce.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -42,6 +39,7 @@ public class BotController {
     //central event listener that all events by all shards pass through
     private final EventListenerBoat mainEventListener;
     private final ShutdownHandler shutdownHandler;
+    private final DatabaseManager databaseManager;
 
     //unlimited threads = http://i.imgur.com/H3b7H1S.gif
     //use this executor for various small async tasks
@@ -49,16 +47,16 @@ public class BotController {
 
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
     private EntityIO entityIO;
-    private DatabaseManager databaseManager;
 
 
     public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
-                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler) {
+                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
+        this.databaseManager = databaseManager;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), "FredBoat main shutdownhook"));
         Metrics.instance().threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
@@ -96,6 +94,10 @@ public class BotController {
         return shutdownHandler;
     }
 
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
     @Nonnull
     public ExecutorService getExecutor() {
         return executor;
@@ -124,30 +126,6 @@ public class BotController {
         this.entityIO = entityIO;
     }
 
-    @Nonnull
-    public DatabaseConnection getMainDbConnection() {
-        return databaseManager.getMainDbConn();
-    }
-
-    @Nonnull
-    public DatabaseWrapper getMainDbWrapper() {
-        return databaseManager.getMainDbWrapper();
-    }
-
-    @Nullable
-    public DatabaseConnection getCacheDbConnection() {
-        return databaseManager.getCacheDbConn();
-    }
-
-    @Nullable
-    public DatabaseWrapper getCacheDbWrapper() {
-        return databaseManager.getCacheDbWrapper();
-    }
-
-    public void setDatabaseManager(@Nonnull DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
-    }
-
     //Shutdown hook
     private Runnable createShutdownHook(ShutdownHandler shutdownHandler) {
         return () -> {
@@ -163,17 +141,6 @@ public class BotController {
             }
 
             executor.shutdown();
-            if (databaseManager != null) {
-                if (databaseManager.isCacheConnBuilt()) {
-                    DatabaseConnection cacheDbConn = databaseManager.getCacheDbConn();
-                    if (cacheDbConn != null) {
-                        cacheDbConn.shutdown();
-                    }
-                }
-                if (databaseManager.isMainConnBuilt()) {
-                    databaseManager.getMainDbConn().shutdown();
-                }
-            }
         };
     }
 }

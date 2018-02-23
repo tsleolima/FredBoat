@@ -1,19 +1,18 @@
 package fredboat.main;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
-import fredboat.agent.*;
+import fredboat.agent.CarbonitexAgent;
+import fredboat.agent.FredBoatAgent;
+import fredboat.agent.StatsAgent;
+import fredboat.agent.VoiceChannelCleanupAgent;
 import fredboat.api.API;
 import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
-import fredboat.config.property.DatabaseConfig;
 import fredboat.config.property.PropertyConfigProvider;
-import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
-import fredboat.shared.constant.BotConstants;
-import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
 import fredboat.util.DiscordUtil;
 import fredboat.util.GitRepoState;
@@ -38,10 +37,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 
 import java.io.IOException;
@@ -129,58 +124,9 @@ public class Launcher implements ApplicationRunner {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
 
-        //dont run migrations or validate the db from the patron bot
-        boolean migrateAndValidate = DiscordUtil.getBotId(configProvider.getCredentials()) == BotConstants.PATRON_BOT_ID;
-        DatabaseConfig dbConf = configProvider.getDatabaseConfig();
-        DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
-                dbConf.getHikariPoolSize(), configProvider.getAppConfig().getDistribution().name(), migrateAndValidate,
-                dbConf.getMainJdbcUrl(), dbConf.getMainSshTunnelConfig(),
-                dbConf.getCacheJdbcUrl(), dbConf.getCacheSshTunnelConfig(),
-                (puName, dataSource, properties, entityPackages) -> {
-                    LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
-                    emfb.setDataSource(dataSource);
-                    emfb.setPackagesToScan(entityPackages.toArray(new String[entityPackages.size()]));
 
-                    JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-                    emfb.setJpaVendorAdapter(vendorAdapter);
-                    emfb.setJpaProperties(properties);
-
-                    emfb.afterPropertiesSet(); //initiate creation of the native emf
-                    return emfb.getNativeEntityManagerFactory();
-                });
-
-        //attempt to connect to the database a few times
-        // this is relevant in a dockerized environment because after a reboot there is no guarantee that the db
-        // container will be started before the fredboat one
-        int dbConnectionAttempts = 0;
-        DatabaseConnection mainDbConn = null;
-        while ((mainDbConn == null || !mainDbConn.isAvailable()) && dbConnectionAttempts++ < 10) {
-            try {
-                if (mainDbConn != null) {
-                    mainDbConn.shutdown();
-                }
-                mainDbConn = dbManager.getMainDbConn();
-            } catch (Exception e) {
-                log.info("Could not connect to the database. Retrying in a moment...", e);
-                Thread.sleep(6000);
-            }
-        }
-        if (mainDbConn == null || !mainDbConn.isAvailable()) {
-            log.error("Could not establish database connection. Exiting...");
-            botController.getShutdownHandler().shutdown(ExitCodes.EXIT_CODE_ERROR);
-            return;
-        }
-        FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
-
-        try {
-            dbManager.getCacheDbConn();
-        } catch (Exception e) {
-            log.error("Exception when connecting to cache db", e);
-            botController.getShutdownHandler().shutdown(ExitCodes.EXIT_CODE_ERROR);
-        }
+        botController.setEntityIO(new EntityIO(botController.getDatabaseManager().getMainDbWrapper(), botController.getDatabaseManager().getCacheDbWrapper(), configProvider));
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
-        botController.setDatabaseManager(dbManager);
-        botController.setEntityIO(new EntityIO(dbManager.getMainDbWrapper(), dbManager.getCacheDbWrapper(), configProvider));
 
         //Commands
         CommandInitializer.initCommands();
