@@ -84,7 +84,7 @@ public class FredBoatCollector extends Collector {
 
 
         //per shard stats
-        if (Launcher.getBotController().getShardManager() == null) {
+        if (Launcher.getBotController() == null || Launcher.getBotController().getShardManager() == null) {
             return mfs; // This collector is invoked when we begin building the shard manager
         }
         for (JDA shard : Launcher.getBotController().getShardManager().getShards()) {

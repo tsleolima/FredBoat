@@ -32,6 +32,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.definitions.PermissionLevel;
+import fredboat.feature.metrics.Metrics;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
@@ -53,6 +54,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
 
     public PrefixCommand(@Nonnull String name, String... aliases) {
         super(name, aliases);
+        Metrics.instance().cacheMetrics.addCache("customPrefixes", CUSTOM_PREFIXES);
     }
 
     @SuppressWarnings("ConstantConditions")

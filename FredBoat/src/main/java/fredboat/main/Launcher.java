@@ -1,6 +1,5 @@
 package fredboat.main;
 
-import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.*;
 import fredboat.api.API;
@@ -9,16 +8,11 @@ import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.config.DatabaseConfig;
-import fredboat.config.FileConfig;
 import fredboat.config.PropertyConfigProvider;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
-import fredboat.event.EventListenerBoat;
-import fredboat.event.EventLogger;
-import fredboat.feature.DikeSessionController;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
-import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.shared.constant.BotConstants;
 import fredboat.shared.constant.ExitCodes;
 import fredboat.util.AppInfo;
@@ -28,19 +22,13 @@ import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
-import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
-import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.utils.SessionController;
-import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -50,16 +38,13 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Scope;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 
-import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -74,7 +59,7 @@ import java.util.concurrent.ExecutorService;
         HibernateJpaAutoConfiguration.class,
         FlywayAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"fredboat.main", "fredboat.config", "fredboat.audio.player"})
+@ComponentScan(basePackages = {"fredboat.main", "fredboat.config", "fredboat.audio.player", "fredboat.event"})
 public class Launcher implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
@@ -137,8 +122,6 @@ public class Launcher implements ApplicationRunner {
                     "\t\t                                      ");
             log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
         }
-
-        botController.postInit();
 
         Metrics.setup();
 
@@ -203,9 +186,6 @@ public class Launcher implements ApplicationRunner {
         botController.setDatabaseManager(dbManager);
         botController.setEntityIO(new EntityIO(dbManager.getMainDbWrapper(), dbManager.getCacheDbWrapper(), configProvider));
 
-        //Initialise event listeners
-        botController.setMainEventListener(new EventListenerBoat());
-
         //Commands
         CommandInitializer.initCommands();
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
@@ -232,13 +212,6 @@ public class Launcher implements ApplicationRunner {
         String carbonKey = configProvider.getCredentials().getCarbonKey();
         if (configProvider.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
             FredBoatAgent.start(new CarbonitexAgent(carbonKey));
-        }
-
-        // Log into Discord
-        try {
-            botController.setShardManager(buildShardManager());
-        } catch (LoginException e) {
-            throw new RuntimeException("Failed to log in to Discord! Is your token invalid?", e);
         }
 
         enableMetrics();
@@ -393,50 +366,5 @@ public class Launcher implements ApplicationRunner {
                 + "\n\tJDA:           " + JDAInfo.VERSION
                 + "\n\tLavaplayer     " + PlayerLibrary.VERSION
                 + "\n";
-    }
-
-    private ShardManager buildShardManager() throws LoginException {
-        SessionController sessionController = configProvider.getCredentials().getDikeUrl().isEmpty()
-                ? new SessionControllerAdapter()
-                : new DikeSessionController();
-
-        DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
-                .setToken(configProvider.getCredentials().getBotToken())
-                .setGame(Game.playing(configProvider.getAppConfig().getGame()))
-                .setBulkDeleteSplittingEnabled(false)
-                .setEnableShutdownHook(false)
-                .setAudioEnabled(true)
-                .setAutoReconnect(true)
-                .setSessionController(sessionController)
-                .setContextEnabled(false)
-                .setHttpClientBuilder(Http.DEFAULT_BUILDER.newBuilder()
-                        .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
-                .addEventListeners(botController.getMainEventListener())
-                .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
-                .setShardsTotal(configProvider.getCredentials().getRecommendedShardCount());
-
-        try {
-            builder.addEventListeners(new EventLogger(configProvider.getEventLoggerConfig()));
-        } catch (Exception e) {
-            log.error("Failed to create Eventlogger, events / guild stats will not be logged to discord via webhook", e);
-        }
-
-        if (lavalinkManager.isEnabled()) {
-            builder.addEventListeners(lavalinkManager.getLavalink());
-        }
-
-        if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
-                && !System.getProperty("os.arch").equalsIgnoreCase("arm-linux")) {
-            builder.setAudioSendFactory(new NativeAudioSendFactory(800));
-        }
-
-        return builder.build();
-    }
-
-
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public FileConfig getFileConfig() {
-        return FileConfig.get();
     }
 }

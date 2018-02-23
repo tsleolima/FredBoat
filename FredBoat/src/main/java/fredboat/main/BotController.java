@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Class responsible for controlling FredBoat at large
@@ -32,28 +33,34 @@ public class BotController {
     public static final Http HTTP = new Http(Http.DEFAULT_BUILDER.newBuilder()
             .eventListener(new OkHttpEventMetrics("default", Metrics.httpEventCounter))
             .build());
+    public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
 
     private static final Logger log = LoggerFactory.getLogger(BotController.class);
+
     private final PropertyConfigProvider configProvider;
     private final LavalinkManager lavalinkManager;
-    private ShardManager shardManager = null;
-    public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
+    private final ShardManager shardManager;
+    //central event listener that all events by all shards pass through
+    private final EventListenerBoat mainEventListener;
 
     //unlimited threads = http://i.imgur.com/H3b7H1S.gif
     //use this executor for various small async tasks
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    //central event listener that all events by all shards pass through
-    private EventListenerBoat mainEventListener;
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
     private EntityIO entityIO;
     private DatabaseManager databaseManager;
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
 
 
-    public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager) {
+    public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
+                         EventListenerBoat eventListenerBoat) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
+        this.shardManager = shardManager;
+        this.mainEventListener = eventListenerBoat;
+
+        Metrics.instance().threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
     }
 
     public AppConfig getAppConfig() {
@@ -84,18 +91,6 @@ public class BotController {
         return lavalinkManager;
     }
 
-    /**
-     * Initialises the event listener. This can't be done during construction,
-     *   since that causes an NPE as ins is null during that time
-     */
-    void postInit() {
-        mainEventListener = new EventListenerBoat();
-    }
-
-    void setShardManager(@Nonnull ShardManager shardManager) {
-        this.shardManager = shardManager;
-    }
-
     @Nonnull
     public ExecutorService getExecutor() {
         return executor;
@@ -103,10 +98,6 @@ public class BotController {
 
     public EventListenerBoat getMainEventListener() {
         return mainEventListener;
-    }
-
-    protected void setMainEventListener(@Nonnull EventListenerBoat mainEventListener) {
-        this.mainEventListener = mainEventListener;
     }
 
     @Nonnull
@@ -171,8 +162,9 @@ public class BotController {
             log.error("Critical error while handling music persistence.", e);
         }
 
-        if (shardManager != null) {
-            shardManager.shutdown();
+        ShardManager sm = getShardManager();
+        if (sm != null) {
+            sm.shutdown();
         }
 
         executor.shutdown();

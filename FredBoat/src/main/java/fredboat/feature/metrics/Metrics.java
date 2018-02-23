@@ -29,11 +29,9 @@ import ch.qos.logback.classic.LoggerContext;
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
 import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.VideoSelection;
-import fredboat.command.config.PrefixCommand;
 import fredboat.command.info.HelpCommand;
 import fredboat.feature.metrics.collectors.FredBoatCollector;
 import fredboat.feature.metrics.collectors.ThreadPoolCollector;
-import fredboat.main.Launcher;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
@@ -101,7 +99,6 @@ public class Metrics {
         //add one of our guava caches that is only statically reachable
         cacheMetrics.addCache("videoSelections", VideoSelection.SELECTIONS);
         cacheMetrics.addCache("HELP_RECEIVED_RECENTLY", HelpCommand.HELP_RECEIVED_RECENTLY);
-        cacheMetrics.addCache("customPrefixes", PrefixCommand.CUSTOM_PREFIXES);
 
         try {
             fredBoatCollector.register();
@@ -111,7 +108,6 @@ public class Metrics {
         }
 
         //register some of our "important" thread pools
-        threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) Launcher.getBotController().getExecutor());
         threadPoolCollector.addPool("agents-scheduler", (ThreadPoolExecutor) FredBoatAgent.getScheduler());
     }
 

@@ -67,10 +67,12 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class EventListenerBoat extends AbstractEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(EventListenerBoat.class);
