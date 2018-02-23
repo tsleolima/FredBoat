@@ -35,6 +35,7 @@ import fredboat.definitions.PermissionLevel;
 import fredboat.feature.PatronageChecker;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.shared.constant.BotConstants;
@@ -82,7 +83,7 @@ public class CommandManager {
         }
 
         //Hardcode music commands in FredBoatHangout. Blacklist any channel that isn't #spam_and_music or #staff, but whitelist Admins
-        if (guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID && DiscordUtil.isOfficialBot()) {
+        if (guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID && DiscordUtil.isOfficialBot(Launcher.getBotController().getCredentials())) {
             if (!channel.getId().equals("174821093633294338") // #spam_and_music
                     && !channel.getId().equals("217526705298866177") // #staff
                     && !PermsUtil.checkPerms(PermissionLevel.ADMIN, invoker)) {

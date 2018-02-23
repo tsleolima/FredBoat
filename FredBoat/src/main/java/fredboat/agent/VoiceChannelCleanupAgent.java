@@ -26,7 +26,6 @@
 package fredboat.agent;
 
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.feature.metrics.Metrics;
@@ -82,7 +81,7 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
                     if (getHumanMembersInVC(vc).size() == 0) {
                         closedVcs.incrementAndGet();
                         VoteSkipCommand.guildSkipVotes.remove(guild.getIdLong());
-                        LavalinkManager.ins.closeConnection(guild);
+                        Launcher.getBotController().getLavalinkManager().closeConnection(guild);
                         VC_LAST_USED.remove(vc.getId());
                     } else if (isBeingUsed(vc)) {
                         VC_LAST_USED.put(vc.getId(), System.currentTimeMillis());
@@ -97,7 +96,7 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
 
                         if (System.currentTimeMillis() - lastUsed > UNUSED_CLEANUP_THRESHOLD) {
                             closedVcs.incrementAndGet();
-                            LavalinkManager.ins.closeConnection(guild);
+                            Launcher.getBotController().getLavalinkManager().closeConnection(guild);
                             VC_LAST_USED.remove(vc.getId());
                         }
                     }

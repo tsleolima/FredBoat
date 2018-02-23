@@ -27,11 +27,11 @@ package fredboat.command.info;
 
 import fredboat.audio.player.AudioLossCounter;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
 
@@ -46,7 +46,7 @@ public class AudioDebugCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (LavalinkManager.ins.isEnabled()) {
+        if (Launcher.getBotController().getLavalinkManager().isEnabled()) {
             handleLavalink(context);
         } else {
             handleLavaplayer(context);

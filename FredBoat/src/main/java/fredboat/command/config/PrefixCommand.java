@@ -66,7 +66,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
             .expireAfterAccess(1, TimeUnit.MINUTES) //evict inactive guilds
             .concurrencyLevel(Launcher.getBotController().getCredentials().getRecommendedShardCount())  //each shard has a thread (main JDA thread) accessing this cache many times
             .build(CacheLoader.asyncReloading(CacheLoader.from(
-                    guildId -> Launcher.getBotController().getEntityIO().getPrefix(new GuildBotComposite(guildId, DiscordUtil.getBotId()))),
+                    guildId -> Launcher.getBotController().getEntityIO().getPrefix(new GuildBotComposite(guildId, DiscordUtil.getBotId(Launcher.getBotController().getCredentials())))),
                     Launcher.getBotController().getExecutor()));
 
     @Nonnull

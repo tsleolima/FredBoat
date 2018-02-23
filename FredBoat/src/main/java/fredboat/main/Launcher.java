@@ -74,7 +74,7 @@ import java.util.concurrent.ExecutorService;
         HibernateJpaAutoConfiguration.class,
         FlywayAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"fredboat.main", "fredboat.config"})
+@ComponentScan(basePackages = {"fredboat.main", "fredboat.config", "fredboat.audio.player"})
 public class Launcher implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
@@ -82,6 +82,7 @@ public class Launcher implements ApplicationRunner {
     private static BotController BC; //temporary hack access to the bot context
     private final PropertyConfigProvider configProvider;
     private final BotController botController;
+    private final LavalinkManager lavalinkManager;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
@@ -101,10 +102,11 @@ public class Launcher implements ApplicationRunner {
         return BC;
     }
 
-    public Launcher(BotController botController, PropertyConfigProvider configProvider) {
+    public Launcher(BotController botController, PropertyConfigProvider configProvider, LavalinkManager lavalinkManager) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
+        this.lavalinkManager = lavalinkManager;
     }
 
     @Override
@@ -149,7 +151,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //dont run migrations or validate the db from the patron bot
-        boolean migrateAndValidate = DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID;
+        boolean migrateAndValidate = DiscordUtil.getBotId(configProvider.getCredentials()) == BotConstants.PATRON_BOT_ID;
         DatabaseConfig dbConf = configProvider.getDatabaseConfig();
         DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
                 dbConf.getHikariPoolSize(), configProvider.getAppConfig().getDistribution().name(), migrateAndValidate,
@@ -199,11 +201,10 @@ public class Launcher implements ApplicationRunner {
         }
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
         botController.setDatabaseManager(dbManager);
-        botController.setEntityIO(new EntityIO(dbManager.getMainDbWrapper(), dbManager.getCacheDbWrapper()));
+        botController.setEntityIO(new EntityIO(dbManager.getMainDbWrapper(), dbManager.getCacheDbWrapper(), configProvider));
 
         //Initialise event listeners
         botController.setMainEventListener(new EventListenerBoat());
-        LavalinkManager.ins.start();
 
         //Commands
         CommandInitializer.initCommands();
@@ -361,7 +362,7 @@ public class Launcher implements ApplicationRunner {
             statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
                     () -> jdaEntityCountsTotal.count(() -> botController.getShardManager().getShards())));
 
-            if (DiscordUtil.isOfficialBot()) {
+            if (DiscordUtil.isOfficialBot(configProvider.getCredentials())) {
                 BotMetrics.DockerStats dockerStats = BotMetrics.getDockerStats();
                 try {
                     dockerStats.fetch();
@@ -420,8 +421,8 @@ public class Launcher implements ApplicationRunner {
             log.error("Failed to create Eventlogger, events / guild stats will not be logged to discord via webhook", e);
         }
 
-        if (LavalinkManager.ins.isEnabled()) {
-            builder.addEventListeners(LavalinkManager.ins.getLavalink());
+        if (lavalinkManager.isEnabled()) {
+            builder.addEventListeners(lavalinkManager.getLavalink());
         }
 
         if (!System.getProperty("os.arch").equalsIgnoreCase("arm")

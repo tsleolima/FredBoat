@@ -25,12 +25,12 @@
 
 package fredboat.command.admin;
 
-import fredboat.audio.player.LavalinkManager;
 import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
@@ -54,7 +54,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (!LavalinkManager.ins.isEnabled()) {
+        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
             context.reply("Lavalink is disabled");
             return;
         }
@@ -97,7 +97,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
 
     private void remove(@Nonnull CommandContext context) {
         String name = context.args[1];
-        List<LavalinkSocket> nodes = LavalinkManager.ins.getLavalink().getNodes();
+        List<LavalinkSocket> nodes = Launcher.getBotController().getLavalinkManager().getLavalink().getNodes();
         int key = -1;
         for (int i = 0; i < nodes.size(); i++) {
             LavalinkSocket node = nodes.get(i);
@@ -110,7 +110,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
             return;
         }
 
-        LavalinkManager.ins.getLavalink().removeNode(key);
+        Launcher.getBotController().getLavalinkManager().getLavalink().removeNode(key);
         context.reply("Removed node " + name);
     }
 
@@ -125,13 +125,13 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
         }
 
         String password = context.args[3];
-        LavalinkManager.ins.getLavalink().addNode(name, uri, password);
+        Launcher.getBotController().getLavalinkManager().getLavalink().addNode(name, uri, password);
         context.reply("Added node: " + name + " @ " + uri.toString());
     }
 
     private void show(@Nonnull CommandContext context) {
         String name = context.args[1];
-        List<LavalinkSocket> nodes = LavalinkManager.ins.getLavalink().getNodes().stream()
+        List<LavalinkSocket> nodes = Launcher.getBotController().getLavalinkManager().getLavalink().getNodes().stream()
                 .filter(ll -> ll.getName().equals(name))
                 .collect(Collectors.toList());
 
@@ -151,7 +151,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
     }
 
     private void list(@Nonnull CommandContext context) {
-        Lavalink lavalink = LavalinkManager.ins.getLavalink();
+        Lavalink lavalink = Launcher.getBotController().getLavalinkManager().getLavalink();
 
 
         boolean showHosts = false;

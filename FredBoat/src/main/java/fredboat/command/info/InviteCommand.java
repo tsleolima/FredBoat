@@ -28,6 +28,7 @@ package fredboat.command.info;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.DiscordUtil;
@@ -45,7 +46,7 @@ public class InviteCommand extends Command implements IInfoCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        long botId = DiscordUtil.getBotId();
+        long botId = DiscordUtil.getBotId(Launcher.getBotController().getCredentials());
         String invite;
         if (botId == BotConstants.MUSIC_BOT_ID) {
             invite = BotConstants.botInvite;

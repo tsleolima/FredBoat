@@ -2,6 +2,7 @@ package fredboat.main;
 
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
+import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.config.*;
 import fredboat.db.DatabaseManager;
@@ -34,6 +35,7 @@ public class BotController {
 
     private static final Logger log = LoggerFactory.getLogger(BotController.class);
     private final PropertyConfigProvider configProvider;
+    private final LavalinkManager lavalinkManager;
     private ShardManager shardManager = null;
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
 
@@ -49,8 +51,9 @@ public class BotController {
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
 
 
-    public BotController(PropertyConfigProvider configProvider) {
+    public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager) {
         this.configProvider = configProvider;
+        this.lavalinkManager = lavalinkManager;
     }
 
     public AppConfig getAppConfig() {
@@ -75,6 +78,10 @@ public class BotController {
 
     public LavalinkConfig getLavalinkConfig() {
         return configProvider.getLavalinkConfig();
+    }
+
+    public LavalinkManager getLavalinkManager() {
+        return lavalinkManager;
     }
 
     /**

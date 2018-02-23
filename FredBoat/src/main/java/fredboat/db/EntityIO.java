@@ -25,6 +25,7 @@
 
 package fredboat.db;
 
+import fredboat.config.PropertyConfigProvider;
 import fredboat.db.api.*;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.db.entity.main.*;
@@ -62,16 +63,19 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
     private final IPrefixRepo prefixRepo;
     private final IBlacklistRepo blacklistRepo;
 
+    private final PropertyConfigProvider configProvider;
+
     @Nullable
     private final ISearchResultRepo searchResultRepo;
 
-    public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper) {
+    public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper, PropertyConfigProvider configProvider) {
         guildConfigRepo = new SqlSauceGuildConfigRepo(mainWrapper);
         guildDataRepo = new SqlSauceGuildDataRepo(mainWrapper);
         guildModulesRepo = new SqlSauceGuildModulesRepo(mainWrapper);
         guildPermsRepo = new SqlSauceGuildPermsRepo(mainWrapper);
         prefixRepo = new SqlSaucePrefixRepo(mainWrapper);
         blacklistRepo = new SqlSauceBlacklistRepo(mainWrapper);
+        this.configProvider = configProvider;
 
         if (cacheWrapper != null) {
             searchResultRepo = new SqlSauceSearchResultRepo(cacheWrapper);
@@ -203,7 +207,7 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
 
     @Override
     public Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation) {
-        Prefix prefix = fetchUserFriendly(() -> prefixRepo.fetch(new GuildBotComposite(guild, DiscordUtil.getBotId())));
+        Prefix prefix = fetchUserFriendly(() -> prefixRepo.fetch(new GuildBotComposite(guild, DiscordUtil.getBotId(configProvider.getCredentials()))));
         return fetchUserFriendly(() -> prefixRepo.merge(transformation.apply(prefix)));
     }
 

@@ -103,7 +103,7 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "Lavaplayer version:             " + PlayerLibrary.VERSION + "\n";
 
         content += "\n----------\n\n";
-        if (DiscordUtil.isOfficialBot()) {
+        if (DiscordUtil.isOfficialBot(Launcher.getBotController().getCredentials())) {
             content += "Docker pulls:\n";
             content += "    FredBoat image:             " + BotMetrics.getDockerPullsBot() + "\n";
             content += "    Database image:             " + BotMetrics.getDockerPullsDb() + "\n";

@@ -32,7 +32,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.main.Launcher;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
@@ -136,8 +135,8 @@ public class DiscordUtil {
 
 
     //uses our configured bot token to retrieve our own userid
-    public static long getBotId() {
-        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Launcher.getBotController().getCredentials().getBotToken());
+    public static long getBotId(fredboat.config.Credentials credentials) {
+        return CacheUtil.getUncheckedUnwrapped(BOT_ID, credentials.getBotToken());
     }
 
     private static long getUserId(@Nonnull String token) {
@@ -179,8 +178,8 @@ public class DiscordUtil {
      * @return true if this bot account is an "official" fredboat (music, patron, CE, etc).
      * This is useful to lock down features that we only need internally, like polling the docker hub for pull stats.
      */
-    public static boolean isOfficialBot() {
-        long botId = getBotId();
+    public static boolean isOfficialBot(fredboat.config.Credentials credentials) {
+        long botId = getBotId(credentials);
         return botId == BotConstants.MUSIC_BOT_ID
                 || botId == BotConstants.PATRON_BOT_ID
                 || botId == BotConstants.CUTTING_EDGE_BOT_ID

@@ -26,13 +26,13 @@
 package fredboat.command.music.control;
 
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.entities.Guild;
 
@@ -54,12 +54,12 @@ public class UnpauseCommand extends Command implements IMusicCommand, ICommandRe
             context.reply(context.i18n("unpauseQueueEmpty"));
         } else if (!player.isPaused()) {
             context.reply(context.i18n("unpausePlayerNotPaused"));
-        } else if (player.getHumanUsersInCurrentVC().isEmpty() && player.isPaused() && LavalinkManager.ins.getConnectedChannel(guild) != null) {
+        } else if (player.getHumanUsersInCurrentVC().isEmpty() && player.isPaused() && Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
             context.reply(context.i18n("unpauseNoUsers"));
-        } else if (LavalinkManager.ins.getConnectedChannel(context.guild) == null) {
+        } else if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(context.guild) == null) {
             // When we just want to continue playing, but the user is not in a VC
             JOIN_COMMAND.onInvoke(context);
-            if(LavalinkManager.ins.getConnectedChannel(guild) != null) {
+            if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
                 player.play();
                 context.reply(context.i18n("unpauseSuccess"));
             }

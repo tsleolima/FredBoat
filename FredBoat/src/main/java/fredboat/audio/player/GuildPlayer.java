@@ -80,7 +80,7 @@ public class GuildPlayer extends AbstractPlayer {
         this.shard = ShardContext.of(guild.getJDA());
         this.guildId = guild.getIdLong();
 
-        if (!LavalinkManager.ins.isEnabled()) {
+        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
             AudioManager manager = guild.getAudioManager();
             manager.setSendingHandler(this);
         }
@@ -139,8 +139,8 @@ public class GuildPlayer extends AbstractPlayer {
                     Permission.VOICE_MOVE_OTHERS.getName()));
         }
 
-        LavalinkManager.ins.openConnection(targetChannel);
-        if (!LavalinkManager.ins.isEnabled()) {
+        Launcher.getBotController().getLavalinkManager().openConnection(targetChannel);
+        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
             getGuild().getAudioManager().setConnectionListener(new DebugConnectionListener(guildId, shard.getJda().getShardInfo()));
         }
 
@@ -149,14 +149,14 @@ public class GuildPlayer extends AbstractPlayer {
 
     public void leaveVoiceChannelRequest(CommandContext commandContext, boolean silent) {
         if (!silent) {
-            VoiceChannel currentVc = LavalinkManager.ins.getConnectedChannel(commandContext.guild);
+            VoiceChannel currentVc = Launcher.getBotController().getLavalinkManager().getConnectedChannel(commandContext.guild);
             if (currentVc == null) {
                 commandContext.reply(commandContext.i18n("playerNotInChannel"));
             } else {
                 commandContext.reply(commandContext.i18nFormat("playerLeftChannel", currentVc.getName()));
             }
         }
-        LavalinkManager.ins.closeConnection(getGuild());
+        Launcher.getBotController().getLavalinkManager().closeConnection(getGuild());
     }
 
     /**
@@ -261,7 +261,7 @@ public class GuildPlayer extends AbstractPlayer {
         }
         Guild guild = j.getGuildById(guildId);
         if (guild != null)
-            return LavalinkManager.ins.getConnectedChannel(guild);
+            return Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild);
         else
             return null;
     }

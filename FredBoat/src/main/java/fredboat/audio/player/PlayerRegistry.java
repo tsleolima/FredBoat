@@ -25,6 +25,7 @@
 
 package fredboat.audio.player;
 
+import fredboat.main.Launcher;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 
@@ -69,7 +70,7 @@ public class PlayerRegistry {
         }
 
         // Attempt to set the player as a sending handler. Important after a shard revive
-        if (!LavalinkManager.ins.isEnabled() && jda.getGuildById(guildId) != null) {
+        if (!Launcher.getBotController().getLavalinkManager().isEnabled() && jda.getGuildById(guildId) != null) {
             jda.getGuildById(guildId).getAudioManager().setSendingHandler(player);
         }
 

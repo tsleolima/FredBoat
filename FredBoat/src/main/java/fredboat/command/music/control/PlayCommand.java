@@ -27,13 +27,17 @@ package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.audio.player.*;
+import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.PlayerLimitManager;
+import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.player.VideoSelection;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
 import fredboat.definitions.SearchProvider;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
@@ -116,12 +120,12 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             context.reply(context.i18n("playQueueEmpty"));
         } else if (player.isPlaying()) {
             context.reply(context.i18n("playAlreadyPlaying"));
-        } else if (player.getHumanUsersInCurrentVC().isEmpty() && LavalinkManager.ins.getConnectedChannel(guild) != null) {
+        } else if (player.getHumanUsersInCurrentVC().isEmpty() && Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
             context.reply(context.i18n("playVCEmpty"));
-        } else if(LavalinkManager.ins.getConnectedChannel(guild) == null) {
+        } else if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) == null) {
             // When we just want to continue playing, but the user is not in a VC
             JOIN_COMMAND.onInvoke(context);
-            if(LavalinkManager.ins.getConnectedChannel(guild) != null) {
+            if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
                 player.play();
                 context.reply(context.i18n("playWillNowPlay"));
             }

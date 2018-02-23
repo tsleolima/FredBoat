@@ -26,6 +26,7 @@
 package fredboat.audio.player;
 
 import fredboat.config.LavalinkConfig;
+import fredboat.config.PropertyConfigProvider;
 import fredboat.main.Launcher;
 import fredboat.util.DiscordUtil;
 import lavalink.client.io.Lavalink;
@@ -34,29 +35,34 @@ import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
+@Component
 public class LavalinkManager {
-
-    public static final LavalinkManager ins = new LavalinkManager();
-
-    private LavalinkManager() {
-    }
 
     private Lavalink lavalink = null;
 
-    public void start() {
+    private final PropertyConfigProvider configProvider;
+
+    public LavalinkManager(PropertyConfigProvider configProvider) {
+        this.configProvider = configProvider;
+
+        start();
+    }
+
+    private void start() {
         if (!isEnabled()) return;
 
         lavalink = new Lavalink(
-                Long.toString(DiscordUtil.getBotId()),
-                Launcher.getBotController().getCredentials().getRecommendedShardCount(),
+                Long.toString(DiscordUtil.getBotId(configProvider.getCredentials())),
+                configProvider.getCredentials().getRecommendedShardCount(),
                 shardId -> Launcher.getBotController().getShardManager().getShardById(shardId)
         );
 
-        List<LavalinkConfig.LavalinkHost> hosts = Launcher.getBotController().getLavalinkConfig().getLavalinkHosts();
+        List<LavalinkConfig.LavalinkHost> hosts = configProvider.getLavalinkConfig().getLavalinkHosts();
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getName(), lavalinkHost.getUri(),
                 lavalinkHost.getPassword()));
 
@@ -64,7 +70,7 @@ public class LavalinkManager {
     }
 
     public boolean isEnabled() {
-        return !Launcher.getBotController().getLavalinkConfig().getLavalinkHosts().isEmpty();
+        return !configProvider.getLavalinkConfig().getLavalinkHosts().isEmpty();
     }
 
     IPlayer createPlayer(String guildId) {

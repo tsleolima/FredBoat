@@ -2,7 +2,6 @@ package fredboat.main;
 
 import fredboat.agent.StatsAgent;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import net.dv8tion.jda.core.JDA;
@@ -75,9 +74,9 @@ public class ShardContext {
             if (channel == null) return;
             GuildPlayer player = PlayerRegistry.getOrCreate(channel.getGuild());
 
-            LavalinkManager.ins.openConnection(channel);
+            Launcher.getBotController().getLavalinkManager().openConnection(channel);
 
-            if (!LavalinkManager.ins.isEnabled()) {
+            if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
                 AudioManager am = channel.getGuild().getAudioManager();
                 am.setSendingHandler(player);
             }
