@@ -33,7 +33,7 @@ import fredboat.command.config.PrefixCommand;
 import fredboat.command.info.HelpCommand;
 import fredboat.feature.metrics.collectors.FredBoatCollector;
 import fredboat.feature.metrics.collectors.ThreadPoolCollector;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
@@ -111,7 +111,7 @@ public class Metrics {
         }
 
         //register some of our "important" thread pools
-        threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) BotController.INS.getExecutor());
+        threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) Launcher.getBotController().getExecutor());
         threadPoolCollector.addPool("agents-scheduler", (ThreadPoolExecutor) FredBoatAgent.getScheduler());
     }
 

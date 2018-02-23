@@ -154,7 +154,7 @@ public class FileConfig implements AppConfig, AudioSourcesConfig, Credentials, E
      * The config is regularly reloaded, it should not be doing any blocking calls.
      */
     @SuppressWarnings("unchecked")
-    public FileConfig(File credentialsFile, File configFile) {
+    private FileConfig(File credentialsFile, File configFile) {
         try {
             Yaml yaml = new Yaml();
             String credsFileStr = FileUtils.readFileToString(credentialsFile, "UTF-8");

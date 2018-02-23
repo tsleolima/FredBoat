@@ -43,7 +43,7 @@ import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -221,7 +221,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //quick n dirty bot admin / owner check
-        if (BotController.INS.getAppConfig().getAdminIds().contains(event.getAuthor().getId())
+        if (Launcher.getBotController().getAppConfig().getAdminIds().contains(event.getAuthor().getId())
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
@@ -275,7 +275,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 && player.getPlayingTrack() != null
                 && joinedChannel.getMembers().contains(guild.getSelfMember())
                 && player.getHumanUsersInCurrentVC().size() > 0
-                && BotController.INS.getEntityIO().fetchGuildConfig(guild).isAutoResume()
+                && Launcher.getBotController().getEntityIO().fetchGuildConfig(guild).isAutoResume()
                 ) {
             player.setPause(false);
             TextChannel activeTextChannel = player.getActiveTextChannel();
@@ -286,7 +286,7 @@ public class EventListenerBoat extends AbstractEventListener {
     }
 
     private void checkForAutoPause(VoiceChannel channelLeft) {
-        if (BotController.INS.getAppConfig().getContinuePlayback())
+        if (Launcher.getBotController().getAppConfig().getContinuePlayback())
             return;
 
         Guild guild = channelLeft.getGuild();
@@ -324,7 +324,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //wait a few seconds to allow permissions to be set and applied and propagated
         CentralMessaging.restService.schedule(() -> {
             //retrieve the guild again - many things may have happened in 10 seconds!
-            Guild g = BotController.INS.getShardManager().getGuildById(event.getGuild().getIdLong());
+            Guild g = Launcher.getBotController().getShardManager().getGuildById(event.getGuild().getIdLong());
             if (g != null) {
                 sendHelloOnJoin(g);
             }
@@ -360,7 +360,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //filter guilds that already received a hello message
         // useful for when discord trolls us with fake guild joins
         // or to prevent it send repeatedly due to kick and reinvite
-        GuildData gd = BotController.INS.getEntityIO().fetchGuildData(guild);
+        GuildData gd = Launcher.getBotController().getEntityIO().fetchGuildData(guild);
         if (gd.getTimestampHelloSent() > 0) {
             return;
         }
@@ -382,6 +382,6 @@ public class EventListenerBoat extends AbstractEventListener {
 
         //send actual hello message and persist on success
         CentralMessaging.sendMessage(channel, HelloCommand.getHello(guild),
-                __ -> BotController.INS.getEntityIO().transformGuildData(guild, GuildData::helloSent));
+                __ -> Launcher.getBotController().getEntityIO().transformGuildData(guild, GuildData::helloSent));
     }
 }

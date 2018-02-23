@@ -29,6 +29,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
@@ -111,7 +112,7 @@ public class RandomImageCommand extends Command implements IFunCommand {
 
         String albumId = m.group(1);
         Http.SimpleRequest request = BotController.HTTP.get("https://api.imgur.com/3/album/" + albumId)
-                .auth("Client-ID " + BotController.INS.getCredentials().getImgurClientId())
+                .auth("Client-ID " + Launcher.getBotController().getCredentials().getImgurClientId())
                 .header("If-None-Match", etag);
 
         try (Response response = request.execute()) {

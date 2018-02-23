@@ -32,7 +32,7 @@ public class ShardContext {
     private ShardContext(int id) {
         this.id = id;
 
-        if (BotController.INS.getShardManager().getShardById(id) == null) {
+        if (Launcher.getBotController().getShardManager().getShardById(id) == null) {
             throw new IllegalArgumentException("Shard " + id + " does not exist!");
         }
     }
@@ -53,18 +53,18 @@ public class ShardContext {
 
     @Nonnull
     public JDA getJda() {
-        return BotController.INS.getShardManager().getShardById(id);
+        return Launcher.getBotController().getShardManager().getShardById(id);
     }
 
     public void onReady(@Nonnull ReadyEvent readyEvent) {
-        BotController.INS.getStatsAgent().addAction(new ShardStatsCounter(getJda().getShardInfo(),
+        Launcher.getBotController().getStatsAgent().addAction(new ShardStatsCounter(getJda().getShardInfo(),
                 () -> jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()))));
 
         log.info("Received ready event for {}", readyEvent.getJDA().getShardInfo().toString());
         jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()), true);//jda finished loading, do a single count to init values
 
 
-        if (BotController.INS.getAppConfig().getRecommendedShardCount() <= 10) {
+        if (Launcher.getBotController().getAppConfig().getRecommendedShardCount() <= 10) {
             //the current implementation of music persistence is not a good idea on big bots
             MusicPersistenceHandler.reloadPlaylists(getJda());
         }

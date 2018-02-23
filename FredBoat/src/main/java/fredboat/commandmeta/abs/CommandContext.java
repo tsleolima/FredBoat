@@ -26,7 +26,7 @@
 package fredboat.commandmeta.abs;
 
 import fredboat.definitions.Module;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.Permission;
@@ -113,7 +113,7 @@ public class CommandContext extends Context {
     }
 
     public Collection<Module> getEnabledModules() {
-        return BotController.INS.getEntityIO().fetchGuildModules(this.guild).getEnabledModules();
+        return Launcher.getBotController().getEntityIO().fetchGuildModules(this.guild).getEnabledModules();
     }
 
     @Override

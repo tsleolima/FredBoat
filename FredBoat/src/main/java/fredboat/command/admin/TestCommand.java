@@ -30,7 +30,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class TestCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        BotController.INS.getExecutor().submit(() -> invoke(BotController.INS.getMainDbConnection(), context, context.args));
+        Launcher.getBotController().getExecutor().submit(() -> invoke(Launcher.getBotController().getMainDbConnection(), context, context.args));
     }
 
     boolean invoke(DatabaseConnection dbConn, Context context, String args[]) {

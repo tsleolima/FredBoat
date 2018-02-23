@@ -28,7 +28,7 @@ package fredboat.command.info;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
@@ -66,7 +66,7 @@ public class ShardsCommand extends Command implements IInfoCommand {
             full = true;
         }
 
-        List<JDA> shards = BotController.INS.getShardManager().getShards();
+        List<JDA> shards = Launcher.getBotController().getShardManager().getShards();
         int borkenShards = 0;
         int healthyGuilds = 0;
         int healthyUsers = 0;
@@ -104,7 +104,7 @@ public class ShardsCommand extends Command implements IInfoCommand {
         //healthy shards summary, contains sensible data only if we aren't doing a full report
         if (!full) {
             String content = String.format("+ %s of %s shards are %s -- Guilds: %s -- Users: %s", (shards.size() - borkenShards),
-                    BotController.INS.getAppConfig().getRecommendedShardCount(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
+                    Launcher.getBotController().getAppConfig().getRecommendedShardCount(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
             messages.add(0, CentralMessaging.getClearThreadLocalMessageBuilder().append(TextUtils.asCodeBlock(content, "diff")).build());
         }
 

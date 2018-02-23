@@ -30,7 +30,7 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
 import net.dv8tion.jda.core.entities.Guild;
@@ -75,7 +75,7 @@ public class HelloCommand extends Command implements IInfoCommand {
 
     @Nonnull
     public static String getHello(@Nonnull Guild guild) {
-        String prefix = BotController.INS.getAppConfig().getPrefix();
+        String prefix = Launcher.getBotController().getAppConfig().getPrefix();
         try {
             prefix = PrefixCommand.giefPrefix(guild);
         } catch (Exception ignored) {

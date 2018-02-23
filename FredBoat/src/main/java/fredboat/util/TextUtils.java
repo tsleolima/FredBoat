@@ -30,6 +30,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import fredboat.commandmeta.MessagingException;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -128,7 +129,7 @@ public class TextUtils {
         }
 
         String filtered = context.i18nFormat("utilErrorOccurred", e.toString());
-        for (String str : BotController.INS.getCredentials().getGoogleKeys()) {
+        for (String str : Launcher.getBotController().getCredentials().getGoogleKeys()) {
             filtered = filtered.replace(str, "GOOGLE_SERVER_KEY");
         }
         builder.append(filtered);

@@ -35,7 +35,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
@@ -119,7 +119,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                 }
 
                 VideoSelection.remove(invoker);
-                TextChannel tc = BotController.INS.getShardManager().getTextChannelById(selection.channelId);
+                TextChannel tc = Launcher.getBotController().getShardManager().getTextChannelById(selection.channelId);
                 if (tc != null) {
                     CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(outputMsgBuilder.toString()));
                 }

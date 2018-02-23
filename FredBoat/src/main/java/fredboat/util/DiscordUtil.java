@@ -34,6 +34,7 @@ import fredboat.config.AppConfig;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
@@ -92,7 +93,7 @@ public class DiscordUtil {
      * access this through {@link AppConfig#getRecommendedShardCount()}
      */
     public static final Supplier<Integer> shardCount = Suppliers.memoize(() -> {
-        int count = getRecommendedShardCount(BotController.INS.getCredentials().getBotToken());
+        int count = getRecommendedShardCount(Launcher.getBotController().getCredentials().getBotToken());
         log.info("Discord recommends " + count + " shard(s)");
         return count;
     });
@@ -135,12 +136,12 @@ public class DiscordUtil {
     //token <-> botid
     @Nonnull
     public static final LoadingCache<String, Long> BOT_ID = CacheBuilder.newBuilder()
-            .build(CacheLoader.asyncReloading(CacheLoader.from(DiscordUtil::getUserId), BotController.INS.getExecutor()));
+            .build(CacheLoader.asyncReloading(CacheLoader.from(DiscordUtil::getUserId), Launcher.getBotController().getExecutor()));
 
 
     //uses our configured bot token to retrieve our own userid
     public static long getBotId() {
-        return CacheUtil.getUncheckedUnwrapped(BOT_ID, BotController.INS.getCredentials().getBotToken());
+        return CacheUtil.getUncheckedUnwrapped(BOT_ID, Launcher.getBotController().getCredentials().getBotToken());
     }
 
     private static long getUserId(@Nonnull String token) {

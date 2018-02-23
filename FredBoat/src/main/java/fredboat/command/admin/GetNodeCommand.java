@@ -30,7 +30,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import lavalink.client.io.LavalinkSocket;
 import net.dv8tion.jda.core.entities.Guild;
@@ -54,7 +54,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         if (context.hasArguments()) {
             try {
                 long guildId = Long.parseUnsignedLong(context.args[0]);
-                guild = BotController.INS.getShardManager().getGuildById(guildId);
+                guild = Launcher.getBotController().getShardManager().getGuildById(guildId);
             } catch (NumberFormatException ignored) {
             }
             if (guild == null) {

@@ -34,7 +34,7 @@ import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.db.entity.main.GuildModules;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
@@ -108,12 +108,12 @@ public class ModulesCommand extends Command implements IConfigCommand {
             output = context.i18nFormat("moduleDisable", "**" + context.i18n(module.translationKey) + "**");
         }
 
-        BotController.INS.getEntityIO().transformGuildModules(context.guild, transform);
+        Launcher.getBotController().getEntityIO().transformGuildModules(context.guild, transform);
         context.reply(output);//if the transaction right above this line fails, it won't be reached, which is intended
     }
 
     private static void displayModuleStatus(@Nonnull CommandContext context) {
-        GuildModules gm = BotController.INS.getEntityIO().fetchGuildModules(context.guild);
+        GuildModules gm = Launcher.getBotController().getEntityIO().fetchGuildModules(context.guild);
         Function<Module, String> moduleStatusFormatter = moduleStatusLine(gm, context);
         String moduleStatus = "";
 

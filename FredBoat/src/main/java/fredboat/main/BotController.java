@@ -14,6 +14,7 @@ import fredboat.util.rest.Http;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
@@ -26,9 +27,8 @@ import java.util.function.Supplier;
 /**
  * Class responsible for controlling FredBoat at large
  */
+@Component
 public class BotController {
-
-    public static final BotController INS = new BotController();
 
     public static final Http HTTP = new Http(Http.DEFAULT_BUILDER.newBuilder()
             .eventListener(new OkHttpEventMetrics("default", Metrics.httpEventCounter))

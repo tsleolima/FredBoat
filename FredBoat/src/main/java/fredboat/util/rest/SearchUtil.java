@@ -40,7 +40,7 @@ import fredboat.db.entity.cache.SearchResult;
 import fredboat.definitions.SearchProvider;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +120,7 @@ public class SearchUtil {
                     if (!lavaplayerResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from lavaplayer", provider, query);
                         // got a search result? cache and return it
-                        BotController.INS.getExecutor().execute(() -> BotController.INS.getEntityIO()
+                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getEntityIO()
                                 .merge(new SearchResult(PLAYER_MANAGER, provider, query, lavaplayerResult)));
                         Metrics.searchHits.labels("lavaplayer-" + provider.name().toLowerCase()).inc();
                         return lavaplayerResult;
@@ -138,14 +138,14 @@ public class SearchUtil {
 
             //3. optional: youtube api
             if (provider == SearchProvider.YOUTUBE &&
-                    (BotController.INS.getAppConfig().isPatronDistribution()
-                            || BotController.INS.getAppConfig().isDevDistribution())) {
+                    (Launcher.getBotController().getAppConfig().isPatronDistribution()
+                            || Launcher.getBotController().getAppConfig().isDevDistribution())) {
                 try {
                     AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, PLAYER_MANAGER.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it
-                        BotController.INS.getExecutor().execute(() -> BotController.INS.getEntityIO()
+                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getEntityIO()
                                 .merge(new SearchResult(PLAYER_MANAGER, provider, query, youtubeApiResult)));
                         Metrics.searchHits.labels("youtube-api").inc();
                         return youtubeApiResult;
@@ -174,7 +174,7 @@ public class SearchUtil {
     private static AudioPlaylist fromCache(SearchProvider provider, String searchTerm, long cacheMaxAge) {
         try {
             SearchResult.SearchResultId id = new SearchResult.SearchResultId(provider, searchTerm);
-            SearchResult searchResult = BotController.INS.getEntityIO().getSearchResult(id, cacheMaxAge);
+            SearchResult searchResult = Launcher.getBotController().getEntityIO().getSearchResult(id, cacheMaxAge);
             return searchResult != null ? searchResult.getSearchResult(PLAYER_MANAGER) : null;
         } catch (DatabaseNotReadyException ignored) {
             log.warn("Could not retrieve cached search result from database.");

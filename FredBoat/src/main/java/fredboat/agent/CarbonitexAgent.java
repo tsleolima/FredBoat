@@ -27,6 +27,7 @@ package fredboat.agent;
 
 import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
+import fredboat.main.Launcher;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.JDA;
 import okhttp3.Response;
@@ -54,7 +55,7 @@ public class CarbonitexAgent extends FredBoatAgent {
     }
 
     private void sendStats() {
-        List<JDA> shards = BotController.INS.getShardManager().getShards();
+        List<JDA> shards = Launcher.getBotController().getShardManager().getShards();
 
         for (JDA jda : shards) {
             if (jda.getStatus() != JDA.Status.CONNECTED) {
@@ -63,7 +64,7 @@ public class CarbonitexAgent extends FredBoatAgent {
             }
         }
 
-        if (shards.size() < BotController.INS.getAppConfig().getRecommendedShardCount()) {
+        if (shards.size() < Launcher.getBotController().getAppConfig().getRecommendedShardCount()) {
             log.warn("Skipping posting stats because not all shards initialized!");
             return;
         }

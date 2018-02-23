@@ -7,7 +7,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.models.weather.OpenWeatherCurrent;
 import fredboat.util.rest.models.weather.RetrievedWeather;
@@ -109,7 +109,7 @@ public class OpenWeatherAPI implements Weather {
                 HttpUrl.Builder urlBuilder = currentWeatherBaseUrl.newBuilder();
 
                 urlBuilder.addQueryParameter("q", query);
-                urlBuilder.addQueryParameter("appid", BotController.INS.getCredentials().getOpenWeatherKey());
+                urlBuilder.addQueryParameter("appid", Launcher.getBotController().getCredentials().getOpenWeatherKey());
 
                 HttpUrl url = urlBuilder.build();
                 Request request = new Request.Builder()

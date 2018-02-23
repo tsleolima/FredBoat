@@ -29,6 +29,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 
 import javax.annotation.Nonnull;
@@ -45,7 +46,7 @@ public class CatgirlCommand extends Command implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         context.sendTyping();
-        BotController.INS.getExecutor().submit(() -> postCatgirl(context));
+        Launcher.getBotController().getExecutor().submit(() -> postCatgirl(context));
     }
 
     private void postCatgirl(CommandContext context) {

@@ -28,7 +28,7 @@ package fredboat.command.util;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IUtilCommand;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.ArgumentUtil;
@@ -62,7 +62,7 @@ public class UserInfoCommand extends Command implements IUtilCommand {
             target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.rawArgs, true);
         }
         if (target == null) return;
-        BotController.INS.getShardManager().getGuilds().forEach(guild -> {
+        Launcher.getBotController().getShardManager().getGuilds().forEach(guild -> {
             if (guild.getMemberById(target.getUser().getId()) != null) {
                 matchedGuildNames.add(guild.getName());
             }

@@ -33,7 +33,6 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.feature.I18n;
-import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
@@ -97,7 +96,7 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "Players playing:                " + PlayerRegistry.getPlayingPlayers().size() + "\n";
         content += "Known servers:                  " + BotMetrics.getTotalGuildsCount() + "\n";
         content += "Known users in servers:         " + BotMetrics.getTotalUniqueUsersCount() + "\n";
-        content += "Distribution:                   " + BotController.INS.getAppConfig().getDistribution() + "\n";
+        content += "Distribution:                   " + Launcher.getBotController().getAppConfig().getDistribution() + "\n";
         content += "JDA responses total:            " + jda.getResponseTotal() + "\n";
         content += "JDA version:                    " + JDAInfo.VERSION + "\n";
         content += "FredBoat version:               " + AppInfo.getAppInfo().getVersionBuild() + "\n";

@@ -28,7 +28,7 @@ import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,7 @@ public class CommandContextParser {
         // or starts with a custom/default prefix
         else {
             String prefix = PrefixCommand.giefPrefix(event.getGuild());
-            String defaultPrefix = BotController.INS.getAppConfig().getPrefix();
+            String defaultPrefix = Launcher.getBotController().getAppConfig().getPrefix();
             if (raw.startsWith(prefix)) {
                 input = raw.substring(prefix.length());
                 if (prefix.equals(defaultPrefix)) {

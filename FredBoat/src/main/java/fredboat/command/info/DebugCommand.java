@@ -33,7 +33,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
@@ -63,7 +63,7 @@ public class DebugCommand extends Command implements IInfoCommand, ICommandRestr
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                     return;
                 }
-                guild = BotController.INS.getShardManager().getGuildById(Long.parseLong(context.args[0]));
+                guild = Launcher.getBotController().getShardManager().getGuildById(Long.parseLong(context.args[0]));
             } catch (NumberFormatException ignored) {
                 guild = null;
             }

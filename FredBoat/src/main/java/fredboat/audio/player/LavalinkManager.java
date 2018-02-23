@@ -26,7 +26,7 @@
 package fredboat.audio.player;
 
 import fredboat.config.LavalinkConfig;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.util.DiscordUtil;
 import lavalink.client.io.Lavalink;
 import lavalink.client.io.metrics.LavalinkCollector;
@@ -52,11 +52,11 @@ public class LavalinkManager {
 
         lavalink = new Lavalink(
                 Long.toString(DiscordUtil.getBotId()),
-                BotController.INS.getAppConfig().getRecommendedShardCount(),
-                shardId -> BotController.INS.getShardManager().getShardById(shardId)
+                Launcher.getBotController().getAppConfig().getRecommendedShardCount(),
+                shardId -> Launcher.getBotController().getShardManager().getShardById(shardId)
         );
 
-        List<LavalinkConfig.LavalinkHost> hosts = BotController.INS.getLavalinkConfig().getLavalinkHosts();
+        List<LavalinkConfig.LavalinkHost> hosts = Launcher.getBotController().getLavalinkConfig().getLavalinkHosts();
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getName(), lavalinkHost.getUri(),
                 lavalinkHost.getPassword()));
 
@@ -64,7 +64,7 @@ public class LavalinkManager {
     }
 
     public boolean isEnabled() {
-        return !BotController.INS.getLavalinkConfig().getLavalinkHosts().isEmpty();
+        return !Launcher.getBotController().getLavalinkConfig().getLavalinkHosts().isEmpty();
     }
 
     IPlayer createPlayer(String guildId) {

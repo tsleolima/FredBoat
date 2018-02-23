@@ -30,7 +30,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 
 import javax.annotation.Nonnull;
@@ -59,7 +59,7 @@ public class ReviveCommand extends Command implements ICommandRestricted {
             if (context.args.length > 1 && context.args[0].equals("guild")) {
                 long guildId = Long.valueOf(context.args[1]);
                 //https://discordapp.com/developers/docs/topics/gateway#sharding
-                shardId = (int) ((guildId >> 22) % BotController.INS.getAppConfig().getRecommendedShardCount());
+                shardId = (int) ((guildId >> 22) % Launcher.getBotController().getAppConfig().getRecommendedShardCount());
             } else {
                 shardId = Integer.parseInt(context.args[0]);
             }
@@ -69,7 +69,7 @@ public class ReviveCommand extends Command implements ICommandRestricted {
         }
 
         context.replyWithName("Queued shard revive for shard " + shardId);
-        BotController.INS.getShardManager().restart(shardId); // If not found it will just function like #start()
+        Launcher.getBotController().getShardManager().restart(shardId); // If not found it will just function like #start()
     }
 
     @Nonnull

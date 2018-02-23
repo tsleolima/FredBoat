@@ -33,7 +33,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
@@ -50,7 +50,7 @@ public class VolumeCommand extends Command implements IMusicCommand, ICommandRes
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (BotController.INS.getAppConfig().getDistribution().volumeSupported()) {
+        if (Launcher.getBotController().getAppConfig().getDistribution().volumeSupported()) {
 
             GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
             try {

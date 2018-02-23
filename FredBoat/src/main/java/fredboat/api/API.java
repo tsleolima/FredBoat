@@ -27,8 +27,8 @@ package fredboat.api;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
+import fredboat.main.Launcher;
 import net.dv8tion.jda.core.JDA;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONArray;
@@ -47,7 +47,7 @@ public class API {
     private API() {}
 
     public static void start() {
-        if (!BotController.INS.getAppConfig().isRestServerEnabled()) {
+        if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
         }
@@ -69,7 +69,7 @@ public class API {
             JSONObject root = new JSONObject();
             JSONArray a = new JSONArray();
 
-            for (JDA shard : BotController.INS.getShardManager().getShards()) {
+            for (JDA shard : Launcher.getBotController().getShardManager().getShards()) {
                 JSONObject fbStats = new JSONObject();
                 fbStats.put("id", shard.getShardInfo().getShardId())
                         .put("guilds", shard.getGuildCache().size())
@@ -82,7 +82,7 @@ public class API {
             JSONObject g = new JSONObject();
             g.put("playingPlayers", PlayerRegistry.getPlayingPlayers().size())
                     .put("totalPlayers", PlayerRegistry.getRegistry().size())
-                    .put("distribution", BotController.INS.getAppConfig().getDistribution())
+                    .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
                     .put("guilds", BotMetrics.getTotalGuildsCount())
                     .put("users", BotMetrics.getTotalUniqueUsersCount());
 
@@ -103,7 +103,7 @@ public class API {
     }
 
     public static void turnOnMetrics() {
-        if (!BotController.INS.getAppConfig().isRestServerEnabled()) {
+        if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
         }

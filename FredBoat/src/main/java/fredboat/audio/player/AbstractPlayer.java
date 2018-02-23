@@ -51,7 +51,7 @@ import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
 import fredboat.config.AudioSourcesConfig;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -100,8 +100,8 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
             //Patrons and development get higher quality
             AudioConfiguration.ResamplingQuality quality = AudioConfiguration.ResamplingQuality.LOW;
-            if (BotController.INS.getAppConfig().isPatronDistribution()
-                    || BotController.INS.getAppConfig().isDevDistribution()) {
+            if (Launcher.getBotController().getAppConfig().isPatronDistribution()
+                    || Launcher.getBotController().getAppConfig().isDevDistribution()) {
                 quality = AudioConfiguration.ResamplingQuality.MEDIUM;
             }
 
@@ -125,7 +125,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     public static AudioPlayerManager registerSourceManagers(AudioPlayerManager mng) {
         mng.registerSourceManager(new PlaylistImportSourceManager());
-        AudioSourcesConfig audioSourcesConfig = BotController.INS.getAudioSourcesConfig();
+        AudioSourcesConfig audioSourcesConfig = Launcher.getBotController().getAudioSourcesConfig();
         //Determine which Source managers are enabled
         //By default, all are enabled except LocalAudioSources and HttpAudioSources, see config.yaml and Config class
         if (audioSourcesConfig.isYouTubeEnabled()) {

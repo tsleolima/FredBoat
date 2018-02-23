@@ -29,7 +29,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
@@ -77,7 +77,7 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
         } else if (context.hasArguments()) {
             try {
                 long channelId = Long.parseUnsignedLong(context.args[0]);
-                TextChannel textChannel = BotController.INS.getShardManager().getTextChannelById(channelId);
+                TextChannel textChannel = Launcher.getBotController().getShardManager().getTextChannelById(channelId);
                 if (textChannel == null) {
                     context.reply(String.format("No text channel with id `%s` found.", channelId));
                     return;

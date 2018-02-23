@@ -27,6 +27,7 @@ package fredboat.event;
 
 import fredboat.config.EventLoggerConfig;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
@@ -157,8 +158,8 @@ public class EventLogger extends ListenerAdapter {
     private final Runnable ON_SHUTDOWN = () -> {
         scheduler.shutdownNow();
         String message;
-        if (BotController.INS.getShutdownCode() != BotController.UNKNOWN_SHUTDOWN_CODE) {
-            message = Emojis.DOOR + "Exiting with code " + BotController.INS.getShutdownCode() + ".";
+        if (Launcher.getBotController().getShutdownCode() != BotController.UNKNOWN_SHUTDOWN_CODE) {
+            message = Emojis.DOOR + "Exiting with code " + Launcher.getBotController().getShutdownCode() + ".";
         } else {
             message = Emojis.DOOR + "Exiting with unknown code.";
         }
@@ -267,7 +268,7 @@ public class EventLogger extends ListenerAdapter {
                 .addField("Guilds joined", Integer.toString(guildsJoinedEvents.getAndSet(0)), true)
                 .addField("Guilds left", Integer.toString(guildsLeftEvents.getAndSet(0)), true);
 
-        List<JDA> shards = BotController.INS.getShardManager().getShards();
+        List<JDA> shards = Launcher.getBotController().getShardManager().getShards();
 
         if (!shards.isEmpty()) {
             JDA anyShard = shards.get(0);

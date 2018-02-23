@@ -30,7 +30,7 @@ import fredboat.command.music.control.SkipCommand;
 import fredboat.command.util.WeatherCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.DiscordUtil;
 import fredboat.util.Tuple2;
@@ -78,18 +78,18 @@ public class Ratelimiter {
         Set<Long> whitelist = ConcurrentHashMap.newKeySet();
 
         //it is ok to use the jda of any shard as long as we aren't using it for guild specific stuff
-        JDA jda = BotController.INS.getShardManager().getShardById(0);
+        JDA jda = Launcher.getBotController().getShardManager().getShardById(0);
         whitelist.add(DiscordUtil.getOwnerId(jda));
         whitelist.add(jda.getSelfUser().getIdLong());
         //only works for those admins who are added with their userId and not through a roleId
-        for (String admin : BotController.INS.getAppConfig().getAdminIds())
+        for (String admin : Launcher.getBotController().getAppConfig().getAdminIds())
             whitelist.add(Long.valueOf(admin));
 
 
         //Create all the rate limiters we want
         ratelimits = new ArrayList<>();
 
-        if (BotController.INS.getAppConfig().useAutoBlacklist())
+        if (Launcher.getBotController().getAppConfig().useAutoBlacklist())
             autoBlacklist = new Blacklist(whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
 
         //sort these by harsher limits coming first

@@ -31,6 +31,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.TextUtils;
@@ -85,7 +86,7 @@ public class MALCommand extends Command implements IUtilCommand {
         String term = context.rawArgs.replace(' ', '+').trim();
         log.debug("TERM:" + term);
 
-        BotController.INS.getExecutor().submit(() -> requestAsync(term, context));
+        Launcher.getBotController().getExecutor().submit(() -> requestAsync(term, context));
     }
 
     //attempts to find an anime with the provided search term, and if that's not possible looks for a user
@@ -94,8 +95,8 @@ public class MALCommand extends Command implements IUtilCommand {
                 Http.Params.of(
                         "q", term
                 ))
-                .auth(Credentials.basic(BotController.INS.getCredentials().getMalUser(),
-                        BotController.INS.getCredentials().getMalPassword()))
+                .auth(Credentials.basic(Launcher.getBotController().getCredentials().getMalUser(),
+                        Launcher.getBotController().getCredentials().getMalPassword()))
                 .client(malHttpClient);
 
         try {

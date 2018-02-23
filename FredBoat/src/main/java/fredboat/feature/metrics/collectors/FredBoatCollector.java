@@ -26,8 +26,8 @@
 package fredboat.feature.metrics.collectors;
 
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.main.BotController;
 import fredboat.main.BotMetrics;
+import fredboat.main.Launcher;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
@@ -84,10 +84,10 @@ public class FredBoatCollector extends Collector {
 
 
         //per shard stats
-        if(BotController.INS.getShardManager() == null) {
+        if (Launcher.getBotController().getShardManager() == null) {
             return mfs; // This collector is invoked when we begin building the shard manager
         }
-        for (JDA shard : BotController.INS.getShardManager().getShards()) {
+        for (JDA shard : Launcher.getBotController().getShardManager().getShards()) {
             String shardId = Integer.toString(shard.getShardInfo().getShardId());
             jdaEntities.addMetric(Arrays.asList(shardId, "User"), shard.getUserCache().size());
             jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), shard.getGuildCache().size());

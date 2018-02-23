@@ -34,7 +34,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
-import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -442,7 +442,7 @@ public class GuildPlayer extends AbstractPlayer {
         try {
             Guild guild = getGuild();
             if (guild != null) {
-                enabled = BotController.INS.getEntityIO().fetchGuildConfig(guild).isTrackAnnounce();
+                enabled = Launcher.getBotController().getEntityIO().fetchGuildConfig(guild).isTrackAnnounce();
             }
         } catch (DatabaseNotReadyException ignored) {}
 

@@ -27,6 +27,7 @@ package fredboat.feature;
 
 import fredboat.event.UserListener;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.messaging.internal.LeakSafeContext;
 import fredboat.util.TextUtils;
@@ -89,7 +90,7 @@ public final class AkinatorListener extends UserListener {
 
     private void checkTimeout() {
         if (System.currentTimeMillis() - lastActionReceived > TimeUnit.MINUTES.toMillis(5)) {
-            BotController.INS.getMainEventListener().removeListener(userId);
+            Launcher.getBotController().getMainEventListener().removeListener(userId);
             timeoutTask.cancel(false);
         }
     }
@@ -123,7 +124,7 @@ public final class AkinatorListener extends UserListener {
                 context.reply("Bravo !\n"
                         + "You have defeated me !\n"
                         + "<http://akinator.com>");
-                BotController.INS.getMainEventListener().removeListener(userId);
+                Launcher.getBotController().getMainEventListener().removeListener(userId);
                 return;
             }
 
@@ -153,7 +154,7 @@ public final class AkinatorListener extends UserListener {
                 context.reply("Great! Guessed right one more time.\n"
                         + "I love playing with you!\n"
                         + "<http://akinator.com>");
-                BotController.INS.getMainEventListener().removeListener(userId);
+                Launcher.getBotController().getMainEventListener().removeListener(userId);
             } else if (answer == 1) {
                 BotController.HTTP.get(EXCLUSION_URL,
                         Http.Params.of(
