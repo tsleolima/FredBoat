@@ -80,6 +80,23 @@ public class Launcher implements ApplicationRunner {
             System.out.println("Version info printed, exiting.");
             return;
         }
+        log.info(getVersionInfo());
+        String javaVersionMinor = null;
+        try {
+            javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
+        } catch (Exception e) {
+            log.error("Exception while checking if java 8", e);
+        }
+
+        if (!Objects.equals(javaVersionMinor, "8")) {
+            log.warn("\n\t\t __      ___   ___ _  _ ___ _  _  ___ \n" +
+                    "\t\t \\ \\    / /_\\ | _ \\ \\| |_ _| \\| |/ __|\n" +
+                    "\t\t  \\ \\/\\/ / _ \\|   / .` || || .` | (_ |\n" +
+                    "\t\t   \\_/\\_/_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\n" +
+                    "\t\t                                      ");
+            log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
+        }
+
         SpringApplication.run(Launcher.class, args);
     }
 
@@ -103,24 +120,6 @@ public class Launcher implements ApplicationRunner {
             SentryDsnCommand.turnOn(sentryDsn);
         } else {
             SentryDsnCommand.turnOff();
-        }
-
-        log.info(getVersionInfo());
-
-        String javaVersionMinor = null;
-        try {
-            javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
-        } catch (Exception e) {
-            log.error("Exception while checking if java 8", e);
-        }
-
-        if (!Objects.equals(javaVersionMinor, "8")) {
-            log.warn("\n\t\t __      ___   ___ _  _ ___ _  _  ___ \n" +
-                    "\t\t \\ \\    / /_\\ | _ \\ \\| |_ _| \\| |/ __|\n" +
-                    "\t\t  \\ \\/\\/ / _ \\|   / .` || || .` | (_ |\n" +
-                    "\t\t   \\_/\\_/_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\n" +
-                    "\t\t                                      ");
-            log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
         }
 
         Metrics.setup();
