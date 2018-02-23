@@ -111,7 +111,6 @@ public class Launcher implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
-        Runtime.getRuntime().addShutdownHook(new Thread(botController.shutdownHook, "FredBoat main shutdownhook"));
         //create the sentry appender as early as possible
         String sentryDsn = configProvider.getCredentials().getSentryDsn();
         if (!sentryDsn.isEmpty()) {
@@ -168,7 +167,7 @@ public class Launcher implements ApplicationRunner {
         }
         if (mainDbConn == null || !mainDbConn.isAvailable()) {
             log.error("Could not establish database connection. Exiting...");
-            botController.shutdown(ExitCodes.EXIT_CODE_ERROR);
+            botController.getShutdownHandler().shutdown(ExitCodes.EXIT_CODE_ERROR);
             return;
         }
         FredBoatAgent.start(new DBConnectionWatchdogAgent(mainDbConn));
@@ -177,7 +176,7 @@ public class Launcher implements ApplicationRunner {
             dbManager.getCacheDbConn();
         } catch (Exception e) {
             log.error("Exception when connecting to cache db", e);
-            botController.shutdown(ExitCodes.EXIT_CODE_ERROR);
+            botController.getShutdownHandler().shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
         botController.setDatabaseManager(dbManager);

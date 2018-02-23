@@ -59,7 +59,7 @@ public class ExitCommand extends Command implements ICommandRestricted {
                     context.replyWithName(":wave:").getWithDefaultTimeout();
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
                 }
-                Launcher.getBotController().shutdown(ExitCodes.EXIT_CODE_NORMAL);
+                Launcher.getBotController().getShutdownHandler().shutdown(ExitCodes.EXIT_CODE_NORMAL);
                 return;
             } else {
                 context.reply(String.format("Your input `%s` did not fit the required code `%s`. A new code will be issued.",

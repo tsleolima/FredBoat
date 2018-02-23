@@ -27,8 +27,8 @@ package fredboat.event;
 
 import fredboat.config.EventLoggerConfig;
 import fredboat.config.PropertyConfigProvider;
-import fredboat.main.BotController;
 import fredboat.main.Launcher;
+import fredboat.main.ShutdownHandler;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
@@ -157,31 +157,34 @@ public class EventLogger extends ListenerAdapter {
         log.info("Left guild {} with {} users", event.getGuild(), event.getGuild().getMemberCache().size());
     }
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Runnable ON_SHUTDOWN = () -> {
-        scheduler.shutdownNow();
-        String message;
-        if (Launcher.getBotController().getShutdownCode() != BotController.UNKNOWN_SHUTDOWN_CODE) {
-            message = Emojis.DOOR + "Exiting with code " + Launcher.getBotController().getShutdownCode() + ".";
-        } else {
-            message = Emojis.DOOR + "Exiting with unknown code.";
-        }
-        log.info(message);
-        Future elw = null;
-        Future gsw = null;
-        if (eventLogWebhook != null) elw = eventLogWebhook.send(message);
-        if (guildStatsWebhook != null) gsw = guildStatsWebhook.send(message);
-        try {
-            if (elw != null) elw.get(30, TimeUnit.SECONDS);
-            if (gsw != null) gsw.get(30, TimeUnit.SECONDS);
-        } catch (ExecutionException | InterruptedException | TimeoutException ignored) {
-        }
-    };
+
+    private Runnable createShutdownHook(ShutdownHandler shutdownHandler) {
+        return () -> {
+            scheduler.shutdownNow();
+            String message;
+            int shutdownCode = shutdownHandler.getShutdownCode();
+            if (shutdownCode != ShutdownHandler.UNKNOWN_SHUTDOWN_CODE) {
+                message = Emojis.DOOR + "Exiting with code " + shutdownCode + ".";
+            } else {
+                message = Emojis.DOOR + "Exiting with unknown code.";
+            }
+            log.info(message);
+            Future elw = null;
+            Future gsw = null;
+            if (eventLogWebhook != null) elw = eventLogWebhook.send(message);
+            if (guildStatsWebhook != null) gsw = guildStatsWebhook.send(message);
+            try {
+                if (elw != null) elw.get(30, TimeUnit.SECONDS);
+                if (gsw != null) gsw.get(30, TimeUnit.SECONDS);
+            } catch (ExecutionException | InterruptedException | TimeoutException ignored) {
+            }
+        };
+    }
 
     //actual constructor
-    public EventLogger(PropertyConfigProvider configProvider) {
+    public EventLogger(PropertyConfigProvider configProvider, ShutdownHandler shutdownHandler) {
         EventLoggerConfig config = configProvider.getEventLoggerConfig();
-        Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, EventLogger.class.getSimpleName() + " shutdownhook"));
+        Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), EventLogger.class.getSimpleName() + " shutdownhook"));
 
         String eventLoggerWebhookUrl = config.getEventLogWebhook();
         WebhookClient eventLoggerWebhook = null;

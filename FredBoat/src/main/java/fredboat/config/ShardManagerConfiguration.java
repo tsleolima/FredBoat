@@ -87,10 +87,14 @@ public class ShardManagerConfiguration {
             builder.setAudioSendFactory(new NativeAudioSendFactory(800));
         }
 
+        ShardManager shardManager;
         try {
-            return builder.build();
+            shardManager = builder.build();
         } catch (LoginException e) {
             throw new RuntimeException("Failed to log in to Discord! Is your token invalid?", e);
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(shardManager::shutdown, "shardmanager-shutdown-hook"));
+        return shardManager;
     }
 }

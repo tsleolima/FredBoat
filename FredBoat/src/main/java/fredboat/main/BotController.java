@@ -33,7 +33,6 @@ public class BotController {
     public static final Http HTTP = new Http(Http.DEFAULT_BUILDER.newBuilder()
             .eventListener(new OkHttpEventMetrics("default", Metrics.httpEventCounter))
             .build());
-    public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
 
     private static final Logger log = LoggerFactory.getLogger(BotController.class);
 
@@ -42,6 +41,7 @@ public class BotController {
     private final ShardManager shardManager;
     //central event listener that all events by all shards pass through
     private final EventListenerBoat mainEventListener;
+    private final ShutdownHandler shutdownHandler;
 
     //unlimited threads = http://i.imgur.com/H3b7H1S.gif
     //use this executor for various small async tasks
@@ -50,16 +50,17 @@ public class BotController {
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
     private EntityIO entityIO;
     private DatabaseManager databaseManager;
-    private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
 
 
     public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
-                         EventListenerBoat eventListenerBoat) {
+                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
+        this.shutdownHandler = shutdownHandler;
 
+        Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), "FredBoat main shutdownhook"));
         Metrics.instance().threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
     }
 
@@ -89,6 +90,10 @@ public class BotController {
 
     public LavalinkManager getLavalinkManager() {
         return lavalinkManager;
+    }
+
+    public ShutdownHandler getShutdownHandler() {
+        return shutdownHandler;
     }
 
     @Nonnull
@@ -143,46 +148,32 @@ public class BotController {
         this.databaseManager = databaseManager;
     }
 
-    public void shutdown(int code) {
-        log.info("Shutting down with exit code " + code);
-        shutdownCode = code;
-
-        System.exit(code);
-    }
-
     //Shutdown hook
-    protected final Runnable shutdownHook = () -> {
-        int code = shutdownCode != UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
+    private Runnable createShutdownHook(ShutdownHandler shutdownHandler) {
+        return () -> {
+            int shutdownCode = shutdownHandler.getShutdownCode();
+            int code = shutdownCode != ShutdownHandler.UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
 
-        FredBoatAgent.shutdown();
+            FredBoatAgent.shutdown();
 
-        try {
-            MusicPersistenceHandler.handlePreShutdown(code);
-        } catch (Exception e) {
-            log.error("Critical error while handling music persistence.", e);
-        }
+            try {
+                MusicPersistenceHandler.handlePreShutdown(code);
+            } catch (Exception e) {
+                log.error("Critical error while handling music persistence.", e);
+            }
 
-        ShardManager sm = getShardManager();
-        if (sm != null) {
-            sm.shutdown();
-        }
-
-        executor.shutdown();
-        if (databaseManager != null) {
-            if (databaseManager.isCacheConnBuilt()) {
-                DatabaseConnection cacheDbConn = databaseManager.getCacheDbConn();
-                if (cacheDbConn != null) {
-                    cacheDbConn.shutdown();
+            executor.shutdown();
+            if (databaseManager != null) {
+                if (databaseManager.isCacheConnBuilt()) {
+                    DatabaseConnection cacheDbConn = databaseManager.getCacheDbConn();
+                    if (cacheDbConn != null) {
+                        cacheDbConn.shutdown();
+                    }
+                }
+                if (databaseManager.isMainConnBuilt()) {
+                    databaseManager.getMainDbConn().shutdown();
                 }
             }
-            if (databaseManager.isMainConnBuilt()) {
-                databaseManager.getMainDbConn().shutdown();
-            }
-        }
-    };
-
-    public int getShutdownCode() {
-        return shutdownCode;
+        };
     }
-
 }
