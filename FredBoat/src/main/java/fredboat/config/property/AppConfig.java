@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
+package fredboat.config.property;
 
 import fredboat.shared.constant.DistributionEnum;
 

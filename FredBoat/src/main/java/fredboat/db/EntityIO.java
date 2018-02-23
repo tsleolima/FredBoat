@@ -25,7 +25,7 @@
 
 package fredboat.db;
 
-import fredboat.config.PropertyConfigProvider;
+import fredboat.config.property.PropertyConfigProvider;
 import fredboat.db.api.*;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.db.entity.main.*;

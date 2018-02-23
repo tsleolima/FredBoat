@@ -29,6 +29,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.config.property.Credentials;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
@@ -86,7 +87,7 @@ public class DiscordUtil {
 
     /**
      * Will be calculated (=fetched from Discord) exactly once
-     * access this through {@link fredboat.config.Credentials#getRecommendedShardCount()}
+     * access this through {@link Credentials#getRecommendedShardCount()}
      */
     public static final LoadingCache<String, Integer> shardCount = CacheBuilder.newBuilder()
             .build(CacheLoader.from(DiscordUtil::getRecommendedShardCount));
@@ -135,7 +136,7 @@ public class DiscordUtil {
 
 
     //uses our configured bot token to retrieve our own userid
-    public static long getBotId(fredboat.config.Credentials credentials) {
+    public static long getBotId(Credentials credentials) {
         return CacheUtil.getUncheckedUnwrapped(BOT_ID, credentials.getBotToken());
     }
 
@@ -178,7 +179,7 @@ public class DiscordUtil {
      * @return true if this bot account is an "official" fredboat (music, patron, CE, etc).
      * This is useful to lock down features that we only need internally, like polling the docker hub for pull stats.
      */
-    public static boolean isOfficialBot(fredboat.config.Credentials credentials) {
+    public static boolean isOfficialBot(Credentials credentials) {
         long botId = getBotId(credentials);
         return botId == BotConstants.MUSIC_BOT_ID
                 || botId == BotConstants.PATRON_BOT_ID

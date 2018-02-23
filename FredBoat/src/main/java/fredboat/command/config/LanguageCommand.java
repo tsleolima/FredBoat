@@ -28,7 +28,7 @@ package fredboat.command.config;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
-import fredboat.config.AppConfig;
+import fredboat.config.property.AppConfig;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.messaging.CentralMessaging;

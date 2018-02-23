@@ -22,24 +22,43 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
+package fredboat.config.property;
+
+import java.net.URI;
+import java.util.List;
 
 /**
- * Created by napster on 23.02.18.
- * <p>
- * Provide access to our property based configs
+ * Created by napster on 19.02.18.
  */
-public interface PropertyConfigProvider {
+public interface LavalinkConfig {
 
-    AppConfig getAppConfig();
+    /**
+     * @return Lavalink nodes
+     */
+    List<LavalinkConfig.LavalinkHost> getLavalinkHosts();
 
-    AudioSourcesConfig getAudioSourcesConfig();
+    class LavalinkHost {
 
-    Credentials getCredentials();
+        private final String name;
+        private final URI uri;
+        private final String password;
 
-    DatabaseConfig getDatabaseConfig();
+        public LavalinkHost(String name, URI uri, String password) {
+            this.name = name;
+            this.uri = uri;
+            this.password = password;
+        }
 
-    EventLoggerConfig getEventLoggerConfig();
+        public String getName() {
+            return name;
+        }
 
-    LavalinkConfig getLavalinkConfig();
+        public URI getUri() {
+            return uri;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
 }

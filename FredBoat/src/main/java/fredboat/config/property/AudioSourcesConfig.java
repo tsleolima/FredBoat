@@ -22,46 +22,28 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
-
-import space.npstr.sqlsauce.ssh.SshTunnel;
-
-import javax.annotation.Nullable;
+package fredboat.config.property;
 
 /**
  * Created by napster on 19.02.18.
  */
-public interface DatabaseConfig {
+public interface AudioSourcesConfig {
 
-    /**
-     * JdbcUrl of the main database
-     */
-    String getMainJdbcUrl();
+    boolean isYouTubeEnabled();
 
-    /**
-     * @return may return null if no tunnel shall be created for the main database connection
-     */
-    @Nullable
-    SshTunnel.SshDetails getMainSshTunnelConfig();
+    boolean isSoundCloudEnabled();
 
-    /**
-     * @return JdbcUrl of the cache database, may return null if no cache database was provided.
-     */
-    @Nullable
-    String getCacheJdbcUrl();
+    boolean isBandCampEnabled();
 
-    /**
-     * @return may return null if no tunnel shall be created for the cache database connection
-     */
-    @Nullable
-    SshTunnel.SshDetails getCacheSshTunnelConfig();
+    boolean isTwitchEnabled();
 
-    /**
-     * @return database connection poolsize
-     */
-    default int getHikariPoolSize() {
-        //more database connections don't help with performance, so use a value based on available cores, but not too low
-        //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
-        return Math.max(4, Runtime.getRuntime().availableProcessors());
-    }
+    boolean isVimeoEnabled();
+
+    boolean isMixerEnabled();
+
+    boolean isSpotifyEnabled();
+
+    boolean isLocalEnabled();
+
+    boolean isHttpEnabled();
 }

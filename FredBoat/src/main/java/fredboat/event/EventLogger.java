@@ -25,8 +25,8 @@
 
 package fredboat.event;
 
-import fredboat.config.EventLoggerConfig;
-import fredboat.config.PropertyConfigProvider;
+import fredboat.config.property.EventLoggerConfig;
+import fredboat.config.property.PropertyConfigProvider;
 import fredboat.main.Launcher;
 import fredboat.main.ShutdownHandler;
 import fredboat.messaging.CentralMessaging;

@@ -26,6 +26,8 @@ package fredboat.config;
 
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import fredboat.audio.player.LavalinkManager;
+import fredboat.config.property.Credentials;
+import fredboat.config.property.PropertyConfigProvider;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.EventLogger;
 import fredboat.feature.DikeSessionController;

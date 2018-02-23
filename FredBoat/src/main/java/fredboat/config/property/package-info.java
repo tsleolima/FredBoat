@@ -22,43 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
-
-import java.net.URI;
-import java.util.List;
-
-/**
- * Created by napster on 19.02.18.
- */
-public interface LavalinkConfig {
-
-    /**
-     * @return Lavalink nodes
-     */
-    List<LavalinkConfig.LavalinkHost> getLavalinkHosts();
-
-    class LavalinkHost {
-
-        private final String name;
-        private final URI uri;
-        private final String password;
-
-        public LavalinkHost(String name, URI uri, String password) {
-            this.name = name;
-            this.uri = uri;
-            this.password = password;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public URI getUri() {
-            return uri;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-    }
-}
+@space.npstr.annotations.FieldsAreNonNullByDefault
+@space.npstr.annotations.ParametersAreNonnullByDefault
+@space.npstr.annotations.ReturnTypesAreNonNullByDefault
+package fredboat.config.property;

@@ -24,7 +24,7 @@
 
 package fredboat.test;
 
-import fredboat.config.*;
+import fredboat.config.property.*;
 import fredboat.shared.constant.DistributionEnum;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

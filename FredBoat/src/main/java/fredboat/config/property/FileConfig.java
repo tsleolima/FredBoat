@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
+package fredboat.config.property;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Suppliers;

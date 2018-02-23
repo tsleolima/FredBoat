@@ -4,7 +4,7 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.queue.MusicPersistenceHandler;
-import fredboat.config.*;
+import fredboat.config.property.*;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;

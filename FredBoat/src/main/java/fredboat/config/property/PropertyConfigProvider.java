@@ -22,28 +22,24 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
+package fredboat.config.property;
 
 /**
- * Created by napster on 19.02.18.
+ * Created by napster on 23.02.18.
+ * <p>
+ * Provide access to our property based configs
  */
-public interface AudioSourcesConfig {
+public interface PropertyConfigProvider {
 
-    boolean isYouTubeEnabled();
+    AppConfig getAppConfig();
 
-    boolean isSoundCloudEnabled();
+    AudioSourcesConfig getAudioSourcesConfig();
 
-    boolean isBandCampEnabled();
+    Credentials getCredentials();
 
-    boolean isTwitchEnabled();
+    DatabaseConfig getDatabaseConfig();
 
-    boolean isVimeoEnabled();
+    EventLoggerConfig getEventLoggerConfig();
 
-    boolean isMixerEnabled();
-
-    boolean isSpotifyEnabled();
-
-    boolean isLocalEnabled();
-
-    boolean isHttpEnabled();
+    LavalinkConfig getLavalinkConfig();
 }

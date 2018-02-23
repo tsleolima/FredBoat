@@ -22,48 +22,30 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
-
-import org.springframework.stereotype.Component;
+package fredboat.config.property;
 
 /**
- * Created by napster on 23.02.18.
- * <p>
- * Proxy calls to our reloading property configs
+ * Created by napster on 19.02.18.
  */
-@Component
-public class FilePropertyConfigProvider implements PropertyConfigProvider {
+public interface EventLoggerConfig {
 
-    public FilePropertyConfigProvider() {
-    }
+    /**
+     * @return Discord webhook to post shard lifecycle events
+     */
+    String getEventLogWebhook();
 
-    @Override
-    public AppConfig getAppConfig() {
-        return FileConfig.get();
-    }
+    /**
+     * @return interval to post shard lifecycle events in minutes
+     */
+    int getEventLogInterval();
 
-    @Override
-    public AudioSourcesConfig getAudioSourcesConfig() {
-        return FileConfig.get();
-    }
+    /**
+     * @return Discord webhook to post guild stats
+     */
+    String getGuildStatsWebhook();
 
-    @Override
-    public Credentials getCredentials() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public DatabaseConfig getDatabaseConfig() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public EventLoggerConfig getEventLoggerConfig() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public LavalinkConfig getLavalinkConfig() {
-        return FileConfig.get();
-    }
+    /**
+     * @return interval to post guild stats in minutes
+     */
+    int getGuildStatsInterval();
 }

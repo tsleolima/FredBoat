@@ -24,6 +24,7 @@
 
 package fredboat.config;
 
+import fredboat.config.property.*;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

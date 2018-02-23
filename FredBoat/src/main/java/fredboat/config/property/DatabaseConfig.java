@@ -22,30 +22,46 @@
  * SOFTWARE.
  */
 
-package fredboat.config;
+package fredboat.config.property;
+
+import space.npstr.sqlsauce.ssh.SshTunnel;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by napster on 19.02.18.
  */
-public interface EventLoggerConfig {
+public interface DatabaseConfig {
 
     /**
-     * @return Discord webhook to post shard lifecycle events
+     * JdbcUrl of the main database
      */
-    String getEventLogWebhook();
+    String getMainJdbcUrl();
 
     /**
-     * @return interval to post shard lifecycle events in minutes
+     * @return may return null if no tunnel shall be created for the main database connection
      */
-    int getEventLogInterval();
+    @Nullable
+    SshTunnel.SshDetails getMainSshTunnelConfig();
 
     /**
-     * @return Discord webhook to post guild stats
+     * @return JdbcUrl of the cache database, may return null if no cache database was provided.
      */
-    String getGuildStatsWebhook();
+    @Nullable
+    String getCacheJdbcUrl();
 
     /**
-     * @return interval to post guild stats in minutes
+     * @return may return null if no tunnel shall be created for the cache database connection
      */
-    int getGuildStatsInterval();
+    @Nullable
+    SshTunnel.SshDetails getCacheSshTunnelConfig();
+
+    /**
+     * @return database connection poolsize
+     */
+    default int getHikariPoolSize() {
+        //more database connections don't help with performance, so use a value based on available cores, but not too low
+        //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
+        return Math.max(4, Runtime.getRuntime().availableProcessors());
+    }
 }

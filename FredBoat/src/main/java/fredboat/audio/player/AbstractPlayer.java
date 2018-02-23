@@ -50,7 +50,7 @@ import fredboat.audio.source.HttpSourceManager;
 import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.commandmeta.MessagingException;
-import fredboat.config.AudioSourcesConfig;
+import fredboat.config.property.AudioSourcesConfig;
 import fredboat.main.Launcher;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
