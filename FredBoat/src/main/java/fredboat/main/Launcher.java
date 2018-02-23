@@ -9,6 +9,7 @@ import fredboat.api.API;
 import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
+import fredboat.config.property.FileConfig;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
@@ -65,6 +66,7 @@ public class Launcher implements ApplicationRunner {
     public static final long START_TIME = System.currentTimeMillis();
     private static BotController BC; //temporary hack access to the bot context
     private final PropertyConfigProvider configProvider;
+    private final ExecutorService executor;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -111,10 +113,11 @@ public class Launcher implements ApplicationRunner {
         return BC;
     }
 
-    public Launcher(BotController botController, PropertyConfigProvider configProvider) {
+    public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
+        this.executor = executor;
     }
 
     @Override
@@ -141,8 +144,6 @@ public class Launcher implements ApplicationRunner {
             log.info("Skipped setting up the VoiceChannelCleanupAgent, " +
                     "either running Patron distro or overridden by temp config");
         }
-
-        ExecutorService executor = botController.getExecutor();
 
         //Check MAL creds
         executor.submit(this::hasValidMALLogin);

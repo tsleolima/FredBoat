@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Class responsible for controlling FredBoat at large
@@ -41,16 +39,14 @@ public class BotController {
     private final ShutdownHandler shutdownHandler;
     private final DatabaseManager databaseManager;
     private final EntityIO entityIO;
+    private final ExecutorService executor;
 
-    //unlimited threads = http://i.imgur.com/H3b7H1S.gif
-    //use this executor for various small async tasks
-    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
 
     public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
-                         EntityIO entityIO) {
+                         EntityIO entityIO, ExecutorService executor) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
         this.shardManager = shardManager;
@@ -59,9 +55,9 @@ public class BotController {
         this.databaseManager = databaseManager;
         this.entityIO = entityIO;
         Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
+        this.executor = executor;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), "FredBoat main shutdownhook"));
-        Metrics.instance().threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
     }
 
     public AppConfig getAppConfig() {
@@ -137,8 +133,6 @@ public class BotController {
             } catch (Exception e) {
                 log.error("Critical error while handling music persistence.", e);
             }
-
-            executor.shutdown();
         };
     }
 }
