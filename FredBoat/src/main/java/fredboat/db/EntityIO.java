@@ -51,22 +51,22 @@ import java.util.function.Supplier;
  * to commonly used methods to read and write entities, as well as transform them.
  */
 @SuppressWarnings("UnusedReturnValue")
-public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGuildModulesIO, IGuildPermsIO, IPrefixIO,
-        ISearchResultIO {
+public class EntityIO implements BlacklistIO, GuildConfigIO, GuildDataIO, GuildModulesIO, GuildPermsIO, PrefixIO,
+        SearchResultIO {
 
     private static final Logger log = LoggerFactory.getLogger(EntityIO.class);
 
-    private final IGuildConfigRepo guildConfigRepo;
-    private final IGuildDataRepo guildDataRepo;
-    private final IGuildModulesRepo guildModulesRepo;
-    private final IGuildPermsRepo guildPermsRepo;
-    private final IPrefixRepo prefixRepo;
-    private final IBlacklistRepo blacklistRepo;
+    private final GuildConfigRepo guildConfigRepo;
+    private final GuildDataRepo guildDataRepo;
+    private final GuildModulesRepo guildModulesRepo;
+    private final GuildPermsRepo guildPermsRepo;
+    private final PrefixRepo prefixRepo;
+    private final BlacklistRepo blacklistRepo;
 
     private final PropertyConfigProvider configProvider;
 
     @Nullable
-    private final ISearchResultRepo searchResultRepo;
+    private final SearchResultRepo searchResultRepo;
 
     public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper, PropertyConfigProvider configProvider) {
         guildConfigRepo = new SqlSauceGuildConfigRepo(mainWrapper);

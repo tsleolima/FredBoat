@@ -23,19 +23,39 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
+package fredboat.db.repositories.api;
 
-import fredboat.db.entity.main.GuildPermissions;
 import net.dv8tion.jda.core.entities.Guild;
 
-import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
- * Created by napster on 07.02.18.
+ * Created by napster on 05.02.18.
+ * <p>
+ * As soon as the db backend is released, entities using this should be migrated to use long ids instead of strings
  */
-public interface IGuildPermsIO {
+@Deprecated
+public interface LegacyGuildBasedRepo<E> extends Repo<String, E> {
 
-    GuildPermissions fetchGuildPermissions(Guild guild);
+    /**
+     * Type safety on top of {@link Repo#get(Object)} for entities based on guilds.
+     */
+    @Nullable
+    default E get(Guild guild) {
+        return get(guild.getId());
+    }
 
-    GuildPermissions transformGuildPerms(Guild guild, Function<GuildPermissions, GuildPermissions> transformation);
+    /**
+     * Type safety on top of {@link Repo#get(Object)} for entities based on guilds.
+     */
+    default void delete(Guild guild) {
+        delete(guild.getId());
+    }
+
+    /**
+     * Type safety on top of {@link Repo#get(Object)} for entities based on guilds.
+     */
+    default E fetch(Guild guild) {
+        return fetch(guild.getId());
+    }
 }

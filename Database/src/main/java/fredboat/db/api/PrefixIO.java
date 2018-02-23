@@ -23,24 +23,21 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
+package fredboat.db.api;
 
 import fredboat.db.entity.main.Prefix;
+import net.dv8tion.jda.core.entities.Guild;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
- * Created by napster on 05.02.18.
+ * Created by napster on 07.02.18.
  */
-public interface IPrefixRepo extends IRepo<GuildBotComposite, Prefix> {
+public interface PrefixIO {
 
-    /**
-     * @param id if of the requested prefix
-     * @return prefix (the actual string) of the prefix entity with the requested id, or null if no prefix has been set.
-     * Basically a shortcut to loading the whole entity and then getting the prefix property, because prefixes are in
-     * high demand, and we want to avoid the cruft of loading an entity object when all we are interested in is a String.
-     */
-    @Nullable
-    String getPrefix(GuildBotComposite id);
+    Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation);
+
+    Optional<String> getPrefix(GuildBotComposite id);
 }

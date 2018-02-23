@@ -26,7 +26,7 @@
 package fredboat.db.repositories.impl;
 
 import fredboat.db.entity.main.BlacklistEntry;
-import fredboat.db.repositories.api.IBlacklistRepo;
+import fredboat.db.repositories.api.BlacklistRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Created by napster on 05.02.18.
  */
-public class SqlSauceBlacklistRepo extends SqlSauceRepo<Long, BlacklistEntry> implements IBlacklistRepo {
+public class SqlSauceBlacklistRepo extends SqlSauceRepo<Long, BlacklistEntry> implements BlacklistRepo {
 
     public SqlSauceBlacklistRepo(DatabaseWrapper dbWrapper) {
         super(dbWrapper, BlacklistEntry.class);

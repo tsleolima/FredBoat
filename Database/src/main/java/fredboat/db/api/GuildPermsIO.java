@@ -25,7 +25,7 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.GuildConfig;
+import fredboat.db.entity.main.GuildPermissions;
 import net.dv8tion.jda.core.entities.Guild;
 
 import java.util.function.Function;
@@ -33,9 +33,9 @@ import java.util.function.Function;
 /**
  * Created by napster on 07.02.18.
  */
-public interface IGuildConfigIO {
+public interface GuildPermsIO {
 
-    GuildConfig fetchGuildConfig(Guild guild);
+    GuildPermissions fetchGuildPermissions(Guild guild);
 
-    GuildConfig transformGuildConfig(Guild guild, Function<GuildConfig, GuildConfig> transformation);
+    GuildPermissions transformGuildPerms(Guild guild, Function<GuildPermissions, GuildPermissions> transformation);
 }

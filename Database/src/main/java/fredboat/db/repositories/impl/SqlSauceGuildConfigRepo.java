@@ -26,13 +26,13 @@
 package fredboat.db.repositories.impl;
 
 import fredboat.db.entity.main.GuildConfig;
-import fredboat.db.repositories.api.IGuildConfigRepo;
+import fredboat.db.repositories.api.GuildConfigRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
 /**
  * Created by napster on 05.02.18.
  */
-public class SqlSauceGuildConfigRepo extends SqlSauceRepo<String, GuildConfig> implements IGuildConfigRepo {
+public class SqlSauceGuildConfigRepo extends SqlSauceRepo<String, GuildConfig> implements GuildConfigRepo {
 
     public SqlSauceGuildConfigRepo(DatabaseWrapper dbWrapper) {
         super(dbWrapper, GuildConfig.class);

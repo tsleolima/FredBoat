@@ -25,18 +25,10 @@
 
 package fredboat.db.repositories.api;
 
-import fredboat.db.entity.main.BlacklistEntry;
-
-import java.util.List;
+import fredboat.db.entity.main.GuildPermissions;
 
 /**
  * Created by napster on 05.02.18.
  */
-public interface IBlacklistRepo extends IRepo<Long, BlacklistEntry> {
-
-    /**
-     * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
-     * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
-     */
-    List<BlacklistEntry> loadBlacklist();
+public interface GuildPermsRepo extends LegacyGuildBasedRepo<GuildPermissions> {
 }

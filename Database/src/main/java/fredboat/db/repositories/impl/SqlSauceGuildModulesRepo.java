@@ -25,14 +25,14 @@
 
 package fredboat.db.repositories.impl;
 
-import fredboat.db.repositories.api.IGuildModulesRepo;
 import fredboat.db.entity.main.GuildModules;
+import fredboat.db.repositories.api.GuildModulesRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
 /**
  * Created by napster on 05.02.18.
  */
-public class SqlSauceGuildModulesRepo extends SqlSauceRepo<Long, GuildModules> implements IGuildModulesRepo {
+public class SqlSauceGuildModulesRepo extends SqlSauceRepo<Long, GuildModules> implements GuildModulesRepo {
 
     public SqlSauceGuildModulesRepo(DatabaseWrapper dbWrapper) {
         super(dbWrapper, GuildModules.class);

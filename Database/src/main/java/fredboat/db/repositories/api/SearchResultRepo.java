@@ -25,10 +25,21 @@
 
 package fredboat.db.repositories.api;
 
-import fredboat.db.entity.main.GuildData;
+import fredboat.db.entity.cache.SearchResult;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by napster on 05.02.18.
  */
-public interface IGuildDataRepo extends IGuildBasedRepo<GuildData> {
+public interface SearchResultRepo extends Repo<SearchResult.SearchResultId, SearchResult> {
+
+    /**
+     * @param id           id of the search result to be returned
+     * @param maxAgeMillis do not return search results which are older than the max age
+     * @return the search result of the provided id  younge than the requested maximum age, null if there is either no
+     * search result for the provided is, or only an older than the requested maximum age one.
+     */
+    @Nullable
+    SearchResult getMaxAged(SearchResult.SearchResultId id, long maxAgeMillis);
 }

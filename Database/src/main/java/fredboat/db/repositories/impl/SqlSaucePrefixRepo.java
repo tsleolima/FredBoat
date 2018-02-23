@@ -26,7 +26,7 @@
 package fredboat.db.repositories.impl;
 
 import fredboat.db.entity.main.Prefix;
-import fredboat.db.repositories.api.IPrefixRepo;
+import fredboat.db.repositories.api.PrefixRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 
@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Created by napster on 05.02.18.
  */
-public class SqlSaucePrefixRepo extends SqlSauceRepo<GuildBotComposite, Prefix> implements IPrefixRepo {
+public class SqlSaucePrefixRepo extends SqlSauceRepo<GuildBotComposite, Prefix> implements PrefixRepo {
 
     public SqlSaucePrefixRepo(DatabaseWrapper dbWrapper) {
         super(dbWrapper, Prefix.class);

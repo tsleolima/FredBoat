@@ -23,20 +23,37 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
+package fredboat.db.repositories.api;
 
-import fredboat.db.entity.main.GuildData;
-import net.dv8tion.jda.core.entities.Guild;
-
-import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
- * Created by napster on 07.02.18.
+ * Created by napster on 05.02.18.
  */
-public interface IGuildDataIO {
+public interface Repo<I, E> {
 
-    GuildData fetchGuildData(Guild guild);
+    /**
+     * @param id id of the entity that shall be returned
+     * @return the entity of the provided id, if such an entity exists in the database, null otherwise
+     */
+    @Nullable
+    E get(I id);
 
-    GuildData transformGuildData(Guild guild, Function<GuildData, GuildData> transformation);
+    /**
+     * @param id of the entity that shall be deleted
+     */
+    void delete(I id);
 
+    /**
+     * @param id id of the entity that shall be returned
+     * @return the entity of the provided id, if such an entity exists in the database, a default entity otherwise.
+     * Expect this to return a entity constructed through its default constructor, with setId(id) called on it.
+     */
+    E fetch(I id);
+
+    /**
+     * @param entity entity to be merged into the database
+     * @return the merged entity
+     */
+    E merge(E entity);
 }

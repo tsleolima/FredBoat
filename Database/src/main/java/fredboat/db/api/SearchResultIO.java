@@ -25,19 +25,29 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.Prefix;
-import net.dv8tion.jda.core.entities.Guild;
-import space.npstr.sqlsauce.entities.GuildBotComposite;
+import fredboat.db.entity.cache.SearchResult;
 
-import java.util.Optional;
-import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface IPrefixIO {
+public interface SearchResultIO {
 
-    Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation);
+    /**
+     * Merge a search result into the database.
+     *
+     * @return the merged SearchResult object, or null when there is no cache database
+     */
+    @Nullable
+    SearchResult merge(SearchResult searchResult);
 
-    Optional<String> getPrefix(GuildBotComposite id);
+    /**
+     * @param maxAgeMillis the maximum age of the cached search result; provide a negative value for eternal cache
+     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
+     * cache database
+     */
+    @Nullable
+    SearchResult getSearchResult(SearchResult.SearchResultId id, long maxAgeMillis);
+
 }

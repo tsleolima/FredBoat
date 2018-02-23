@@ -25,7 +25,7 @@
 
 package fredboat.db.repositories.impl;
 
-import fredboat.db.repositories.api.IRepo;
+import fredboat.db.repositories.api.Repo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 import space.npstr.sqlsauce.entities.SaucedEntity;
 import space.npstr.sqlsauce.fp.types.EntityKey;
@@ -36,7 +36,7 @@ import java.io.Serializable;
 /**
  * Created by napster on 05.02.18.
  */
-public abstract class SqlSauceRepo<I extends Serializable, E extends SaucedEntity<I, E>> implements IRepo<I, E> {
+public abstract class SqlSauceRepo<I extends Serializable, E extends SaucedEntity<I, E>> implements Repo<I, E> {
 
     protected final DatabaseWrapper dbWrapper;
     protected final Class<E> entityClass;

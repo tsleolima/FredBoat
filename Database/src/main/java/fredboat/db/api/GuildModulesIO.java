@@ -23,12 +23,20 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
+package fredboat.db.api;
 
-import fredboat.db.entity.main.GuildConfig;
+import fredboat.db.entity.main.GuildModules;
+import net.dv8tion.jda.core.entities.Guild;
+
+import java.util.function.Function;
 
 /**
- * Created by napster on 05.02.18.
+ * Created by napster on 07.02.18.
  */
-public interface IGuildConfigRepo extends ILegacyGuildBasedRepo<GuildConfig> {
+public interface GuildModulesIO {
+
+    GuildModules fetchGuildModules(Guild guild);
+
+    GuildModules transformGuildModules(Guild guild, Function<GuildModules, GuildModules> transformation);
+
 }

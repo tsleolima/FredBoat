@@ -26,7 +26,7 @@
 package fredboat.db.repositories.impl;
 
 import fredboat.db.entity.cache.SearchResult;
-import fredboat.db.repositories.api.ISearchResultRepo;
+import fredboat.db.repositories.api.SearchResultRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
 import javax.annotation.Nullable;
@@ -38,7 +38,7 @@ import java.util.Map;
  * Created by napster on 05.02.18.
  */
 public class SqlSauceSearchResultRepo extends SqlSauceRepo<SearchResult.SearchResultId, SearchResult>
-        implements ISearchResultRepo {
+        implements SearchResultRepo {
 
     public SqlSauceSearchResultRepo(DatabaseWrapper dbWrapper) {
         super(dbWrapper, SearchResult.class);

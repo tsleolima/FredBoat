@@ -25,37 +25,10 @@
 
 package fredboat.db.repositories.api;
 
-import net.dv8tion.jda.core.entities.Guild;
-
-import javax.annotation.Nullable;
+import fredboat.db.entity.main.GuildModules;
 
 /**
  * Created by napster on 05.02.18.
- * <p>
- * As soon as the db backend is released, entities using this should be migrated to use long ids instead of strings
  */
-@Deprecated
-public interface ILegacyGuildBasedRepo<E> extends IRepo<String, E> {
-
-    /**
-     * Type safety on top of {@link IRepo#get(Object)} for entities based on guilds.
-     */
-    @Nullable
-    default E get(Guild guild) {
-        return get(guild.getId());
-    }
-
-    /**
-     * Type safety on top of {@link IRepo#get(Object)} for entities based on guilds.
-     */
-    default void delete(Guild guild) {
-        delete(guild.getId());
-    }
-
-    /**
-     * Type safety on top of {@link IRepo#get(Object)} for entities based on guilds.
-     */
-    default E fetch(Guild guild) {
-        return fetch(guild.getId());
-    }
+public interface GuildModulesRepo extends GuildBasedRepo<GuildModules> {
 }

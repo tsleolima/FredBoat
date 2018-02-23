@@ -23,37 +23,19 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
+package fredboat.db.api;
 
-import javax.annotation.Nullable;
+import fredboat.db.entity.main.GuildConfig;
+import net.dv8tion.jda.core.entities.Guild;
+
+import java.util.function.Function;
 
 /**
- * Created by napster on 05.02.18.
+ * Created by napster on 07.02.18.
  */
-public interface IRepo<I, E> {
+public interface GuildConfigIO {
 
-    /**
-     * @param id id of the entity that shall be returned
-     * @return the entity of the provided id, if such an entity exists in the database, null otherwise
-     */
-    @Nullable
-    E get(I id);
+    GuildConfig fetchGuildConfig(Guild guild);
 
-    /**
-     * @param id of the entity that shall be deleted
-     */
-    void delete(I id);
-
-    /**
-     * @param id id of the entity that shall be returned
-     * @return the entity of the provided id, if such an entity exists in the database, a default entity otherwise.
-     * Expect this to return a entity constructed through its default constructor, with setId(id) called on it.
-     */
-    E fetch(I id);
-
-    /**
-     * @param entity entity to be merged into the database
-     * @return the merged entity
-     */
-    E merge(E entity);
+    GuildConfig transformGuildConfig(Guild guild, Function<GuildConfig, GuildConfig> transformation);
 }

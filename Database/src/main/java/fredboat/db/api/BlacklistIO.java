@@ -25,18 +25,23 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.GuildModules;
-import net.dv8tion.jda.core.entities.Guild;
+import fredboat.db.entity.main.BlacklistEntry;
 
-import java.util.function.Function;
+import java.util.List;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface IGuildModulesIO {
+public interface BlacklistIO {
 
-    GuildModules fetchGuildModules(Guild guild);
+    /**
+     * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
+     * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
+     */
+    List<BlacklistEntry> loadBlacklist();
 
-    GuildModules transformGuildModules(Guild guild, Function<GuildModules, GuildModules> transformation);
+    BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry);
+
+    void deleteBlacklistEntry(long id);
 
 }

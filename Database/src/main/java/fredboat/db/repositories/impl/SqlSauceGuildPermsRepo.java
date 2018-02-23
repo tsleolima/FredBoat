@@ -26,13 +26,13 @@
 package fredboat.db.repositories.impl;
 
 import fredboat.db.entity.main.GuildPermissions;
-import fredboat.db.repositories.api.IGuildPermsRepo;
+import fredboat.db.repositories.api.GuildPermsRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
 
 /**
  * Created by napster on 05.02.18.
  */
-public class SqlSauceGuildPermsRepo extends SqlSauceRepo<String, GuildPermissions> implements IGuildPermsRepo {
+public class SqlSauceGuildPermsRepo extends SqlSauceRepo<String, GuildPermissions> implements GuildPermsRepo {
 
     public SqlSauceGuildPermsRepo(DatabaseWrapper dbWrapper) {
         super(dbWrapper, GuildPermissions.class);
