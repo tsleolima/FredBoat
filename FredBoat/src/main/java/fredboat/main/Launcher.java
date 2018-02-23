@@ -79,13 +79,21 @@ public class Launcher implements ApplicationRunner {
             return;
         }
         log.info(getVersionInfo());
+
+        //create the sentry appender as early as possible
+        String sentryDsn = FileConfig.get().getSentryDsn();
+        if (!sentryDsn.isEmpty()) {
+            SentryDsnCommand.turnOn(sentryDsn);
+        } else {
+            SentryDsnCommand.turnOff();
+        }
+
         String javaVersionMinor = null;
         try {
             javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
         } catch (Exception e) {
             log.error("Exception while checking if java 8", e);
         }
-
         if (!Objects.equals(javaVersionMinor, "8")) {
             log.warn("\n\t\t __      ___   ___ _  _ ___ _  _  ___ \n" +
                     "\t\t \\ \\    / /_\\ | _ \\ \\| |_ _| \\| |/ __|\n" +
@@ -111,13 +119,6 @@ public class Launcher implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
-        //create the sentry appender as early as possible
-        String sentryDsn = configProvider.getCredentials().getSentryDsn();
-        if (!sentryDsn.isEmpty()) {
-            SentryDsnCommand.turnOn(sentryDsn);
-        } else {
-            SentryDsnCommand.turnOff();
-        }
 
         Metrics.setup();
 
