@@ -37,8 +37,6 @@ import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.utils.SessionController;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,8 +50,6 @@ import javax.security.auth.login.LoginException;
 @Configuration
 public class ShardManagerConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(ShardManagerConfiguration.class);
-
     @Bean
     public SessionController getSessionController(Credentials credentials) {
         return credentials.getDikeUrl().isEmpty()
@@ -63,7 +59,8 @@ public class ShardManagerConfiguration {
 
     @Bean
     public ShardManager buildShardManager(PropertyConfigProvider configProvider, EventListenerBoat mainEventListener,
-                                          LavalinkManager lavalinkManager, SessionController sessionController) {
+                                          LavalinkManager lavalinkManager, SessionController sessionController,
+                                          EventLogger eventLogger) {
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
                 .setToken(configProvider.getCredentials().getBotToken())
@@ -78,13 +75,8 @@ public class ShardManagerConfiguration {
                         .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(mainEventListener)
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
+                .addEventListeners(eventLogger)
                 .setShardsTotal(configProvider.getCredentials().getRecommendedShardCount());
-
-        try {
-            builder.addEventListeners(new EventLogger(configProvider.getEventLoggerConfig()));
-        } catch (Exception e) {
-            log.error("Failed to create Eventlogger, events / guild stats will not be logged to discord via webhook", e);
-        }
 
         if (lavalinkManager.isEnabled()) {
             builder.addEventListeners(lavalinkManager.getLavalink());

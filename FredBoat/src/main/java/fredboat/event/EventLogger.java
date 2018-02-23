@@ -26,6 +26,7 @@
 package fredboat.event;
 
 import fredboat.config.EventLoggerConfig;
+import fredboat.config.PropertyConfigProvider;
 import fredboat.main.BotController;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
@@ -43,6 +44,7 @@ import net.dv8tion.jda.webhook.WebhookClient;
 import net.dv8tion.jda.webhook.WebhookClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import space.npstr.annotations.FieldsAreNonNullByDefault;
 import space.npstr.annotations.ParametersAreNonnullByDefault;
 import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
@@ -68,6 +70,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @FieldsAreNonNullByDefault
 @ParametersAreNonnullByDefault
 @ReturnTypesAreNonNullByDefault
+@Component
 public class EventLogger extends ListenerAdapter {
 
     public static final Logger log = LoggerFactory.getLogger(EventLogger.class);
@@ -176,7 +179,8 @@ public class EventLogger extends ListenerAdapter {
     };
 
     //actual constructor
-    public EventLogger(EventLoggerConfig config) {
+    public EventLogger(PropertyConfigProvider configProvider) {
+        EventLoggerConfig config = configProvider.getEventLoggerConfig();
         Runtime.getRuntime().addShutdownHook(new Thread(ON_SHUTDOWN, EventLogger.class.getSimpleName() + " shutdownhook"));
 
         String eventLoggerWebhookUrl = config.getEventLogWebhook();

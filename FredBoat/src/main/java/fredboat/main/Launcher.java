@@ -3,7 +3,6 @@ package fredboat.main;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.*;
 import fredboat.api.API;
-import fredboat.audio.player.LavalinkManager;
 import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
@@ -67,7 +66,6 @@ public class Launcher implements ApplicationRunner {
     private static BotController BC; //temporary hack access to the bot context
     private final PropertyConfigProvider configProvider;
     private final BotController botController;
-    private final LavalinkManager lavalinkManager;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
@@ -105,11 +103,10 @@ public class Launcher implements ApplicationRunner {
         return BC;
     }
 
-    public Launcher(BotController botController, PropertyConfigProvider configProvider, LavalinkManager lavalinkManager) {
+    public Launcher(BotController botController, PropertyConfigProvider configProvider) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
-        this.lavalinkManager = lavalinkManager;
     }
 
     @Override
