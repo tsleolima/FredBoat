@@ -97,6 +97,7 @@ public class Launcher implements ApplicationRunner {
             log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
         }
 
+        System.setProperty("spring.main.web-application-type", "none"); //todo enable again after spark API is migrated
         SpringApplication.run(Launcher.class, args);
     }
 
