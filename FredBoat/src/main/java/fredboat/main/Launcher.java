@@ -10,7 +10,6 @@ import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.config.property.PropertyConfigProvider;
-import fredboat.db.EntityIO;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.util.AppInfo;
@@ -53,7 +52,13 @@ import java.util.concurrent.ExecutorService;
         HibernateJpaAutoConfiguration.class,
         FlywayAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"fredboat.main", "fredboat.config", "fredboat.audio.player", "fredboat.event"})
+@ComponentScan(basePackages = {
+        "fredboat.audio.player",
+        "fredboat.config",
+        "fredboat.db",
+        "fredboat.event",
+        "fredboat.main",
+})
 public class Launcher implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
@@ -123,10 +128,6 @@ public class Launcher implements ApplicationRunner {
         } catch (Exception e) {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
-
-
-        botController.setEntityIO(new EntityIO(botController.getDatabaseManager().getMainDbWrapper(), botController.getDatabaseManager().getCacheDbWrapper(), configProvider));
-        Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
 
         //Commands
         CommandInitializer.initCommands();

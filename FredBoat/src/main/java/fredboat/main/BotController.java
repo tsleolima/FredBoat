@@ -40,23 +40,25 @@ public class BotController {
     private final EventListenerBoat mainEventListener;
     private final ShutdownHandler shutdownHandler;
     private final DatabaseManager databaseManager;
+    private final EntityIO entityIO;
 
     //unlimited threads = http://i.imgur.com/H3b7H1S.gif
     //use this executor for various small async tasks
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
-    private EntityIO entityIO;
-
 
     public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
-                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager) {
+                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
+                         EntityIO entityIO) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
         this.databaseManager = databaseManager;
+        this.entityIO = entityIO;
+        Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), "FredBoat main shutdownhook"));
         Metrics.instance().threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
@@ -120,10 +122,6 @@ public class BotController {
     @Nonnull
     public EntityIO getEntityIO() {
         return entityIO;
-    }
-
-    public void setEntityIO(@Nonnull EntityIO entityIO) {
-        this.entityIO = entityIO;
     }
 
     //Shutdown hook

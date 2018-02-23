@@ -30,14 +30,13 @@ import fredboat.db.api.*;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.db.entity.main.*;
 import fredboat.db.repositories.api.*;
-import fredboat.db.repositories.impl.*;
 import fredboat.util.DiscordUtil;
 import fredboat.util.func.NonnullSupplier;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import space.npstr.sqlsauce.DatabaseException;
-import space.npstr.sqlsauce.DatabaseWrapper;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 
 import javax.annotation.Nullable;
@@ -51,10 +50,13 @@ import java.util.function.Supplier;
  * to commonly used methods to read and write entities, as well as transform them.
  */
 @SuppressWarnings("UnusedReturnValue")
+@Component
 public class EntityIO implements BlacklistIO, GuildConfigIO, GuildDataIO, GuildModulesIO, GuildPermsIO, PrefixIO,
         SearchResultIO {
 
     private static final Logger log = LoggerFactory.getLogger(EntityIO.class);
+
+    private final PropertyConfigProvider configProvider;
 
     private final GuildConfigRepo guildConfigRepo;
     private final GuildDataRepo guildDataRepo;
@@ -63,25 +65,20 @@ public class EntityIO implements BlacklistIO, GuildConfigIO, GuildDataIO, GuildM
     private final PrefixRepo prefixRepo;
     private final BlacklistRepo blacklistRepo;
 
-    private final PropertyConfigProvider configProvider;
-
     @Nullable
     private final SearchResultRepo searchResultRepo;
 
-    public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper, PropertyConfigProvider configProvider) {
-        guildConfigRepo = new SqlSauceGuildConfigRepo(mainWrapper);
-        guildDataRepo = new SqlSauceGuildDataRepo(mainWrapper);
-        guildModulesRepo = new SqlSauceGuildModulesRepo(mainWrapper);
-        guildPermsRepo = new SqlSauceGuildPermsRepo(mainWrapper);
-        prefixRepo = new SqlSaucePrefixRepo(mainWrapper);
-        blacklistRepo = new SqlSauceBlacklistRepo(mainWrapper);
+    public EntityIO(PropertyConfigProvider configProvider, BlacklistRepo blacklistRepo, GuildConfigRepo guildConfigRepo,
+                    GuildDataRepo guildDataRepo, GuildModulesRepo guildModulesRepo, GuildPermsRepo guildPermsRepo,
+                    PrefixRepo prefixRepo, @Nullable SearchResultRepo searchResultRepo) {
         this.configProvider = configProvider;
-
-        if (cacheWrapper != null) {
-            searchResultRepo = new SqlSauceSearchResultRepo(cacheWrapper);
-        } else {
-            searchResultRepo = null; //todo noop repo for cache entities?
-        }
+        this.blacklistRepo = blacklistRepo;
+        this.guildConfigRepo = guildConfigRepo;
+        this.guildDataRepo = guildDataRepo;
+        this.guildModulesRepo = guildModulesRepo;
+        this.guildPermsRepo = guildPermsRepo;
+        this.prefixRepo = prefixRepo;
+        this.searchResultRepo = searchResultRepo;
     }
 
     /**
