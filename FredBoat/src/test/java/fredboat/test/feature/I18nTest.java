@@ -25,19 +25,13 @@
 package fredboat.test.feature;
 
 import fredboat.feature.I18n;
-import fredboat.test.ProvideJDASingleton;
-import org.junit.jupiter.api.AfterAll;
+import fredboat.test.BaseTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ResourceBundle;
 
-public class I18nTest extends ProvideJDASingleton {
-
-    @AfterAll
-    public static void postStats() {
-        saveClassStats(I18nTest.class.getSimpleName());
-    }
+public class I18nTest extends BaseTest {
 
     @Test
     public void testTranslatedStrings() {
@@ -47,6 +41,5 @@ public class I18nTest extends ProvideJDASingleton {
         for(String key :  I18n.DEFAULT.getProps().keySet()){
             Assertions.assertNotNull(id_ID.getString(key), () -> key + " prop missing in language files");
         }
-        bumpPassedTests();
     }
 }
