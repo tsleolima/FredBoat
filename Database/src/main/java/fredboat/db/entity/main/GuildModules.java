@@ -70,33 +70,54 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
     @Column(name = "guild_id")
     private long guildId;
 
+    /**
+     * Column corresponding to {@link Module#ADMIN}.
+     */
     @Nullable
     @Column(name = "admin", nullable = true)
-    private Boolean adminModule; //corresponding to CommandRegistry.Module.ADMIN
+    private Boolean adminModule;
 
+    /**
+     * Column corresponding to {@link Module#INFO}.
+     */
     @Nullable
     @Column(name = "info", nullable = true)
-    private Boolean infoModule; //corresponding to CommandRegistry.Module.INFO
+    private Boolean infoModule;
 
+    /**
+     * Column corresponding to {@link Module#CONFIG}.
+     */
     @Nullable
     @Column(name = "config", nullable = true)
-    private Boolean configModule; //corresponding to CommandRegistry.Module.CONFIG
+    private Boolean configModule;
 
+    /**
+     * Column corresponding to {@link Module#MUSIC}.
+     */
     @Nullable
     @Column(name = "music", nullable = true)
-    private Boolean musicModule; //corresponding to CommandRegistry.Module.MUSIC
+    private Boolean musicModule;
 
+    /**
+     * Column corresponding to {@link Module#MOD}.
+     */
     @Nullable
     @Column(name = "mod", nullable = true)
-    private Boolean modModule; //corresponding to CommandRegistry.Module.MOD
+    private Boolean modModule;
 
+    /**
+     * Column corresponding to {@link Module#UTIL}.
+     */
     @Nullable
     @Column(name = "util", nullable = true)
-    private Boolean utilModule; //corresponding to CommandRegistry.Module.UTIL
+    private Boolean utilModule;
 
+    /**
+     * Column corresponding to {@link Module#FUN}.
+     */
     @Nullable
     @Column(name = "fun", nullable = true)
-    private Boolean funModule; //corresponding to CommandRegistry.Module.FUN
+    private Boolean funModule;
 
 
     //for jpa / database wrapper
