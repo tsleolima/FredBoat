@@ -64,7 +64,7 @@ public class ShardContext {
         jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()), true);//jda finished loading, do a single count to init values
 
 
-        if (Launcher.getBotController().getAppConfig().getRecommendedShardCount() <= 10) {
+        if (Launcher.getBotController().getCredentials().getRecommendedShardCount() <= 10) {
             //the current implementation of music persistence is not a good idea on big bots
             MusicPersistenceHandler.reloadPlaylists(getJda());
         }

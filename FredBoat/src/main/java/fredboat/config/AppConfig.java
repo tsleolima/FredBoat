@@ -25,7 +25,6 @@
 package fredboat.config;
 
 import fredboat.shared.constant.DistributionEnum;
-import fredboat.util.DiscordUtil;
 
 import java.util.List;
 
@@ -63,8 +62,4 @@ public interface AppConfig {
     String getGame();
 
     boolean getContinuePlayback();
-
-    default int getRecommendedShardCount() {
-        return DiscordUtil.shardCount.get();
-    }
 }

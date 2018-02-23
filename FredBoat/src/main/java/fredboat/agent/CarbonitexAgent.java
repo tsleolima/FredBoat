@@ -64,7 +64,7 @@ public class CarbonitexAgent extends FredBoatAgent {
             }
         }
 
-        if (shards.size() < Launcher.getBotController().getAppConfig().getRecommendedShardCount()) {
+        if (shards.size() < Launcher.getBotController().getCredentials().getRecommendedShardCount()) {
             log.warn("Skipping posting stats because not all shards initialized!");
             return;
         }

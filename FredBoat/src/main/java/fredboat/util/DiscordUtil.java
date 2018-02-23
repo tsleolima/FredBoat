@@ -25,12 +25,10 @@
 
 package fredboat.util;
 
-import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import fredboat.commandmeta.abs.CommandContext;
-import fredboat.config.AppConfig;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
@@ -54,7 +52,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class DiscordUtil {
 
@@ -90,13 +87,10 @@ public class DiscordUtil {
 
     /**
      * Will be calculated (=fetched from Discord) exactly once
-     * access this through {@link AppConfig#getRecommendedShardCount()}
+     * access this through {@link fredboat.config.Credentials#getRecommendedShardCount()}
      */
-    public static final Supplier<Integer> shardCount = Suppliers.memoize(() -> {
-        int count = getRecommendedShardCount(Launcher.getBotController().getCredentials().getBotToken());
-        log.info("Discord recommends " + count + " shard(s)");
-        return count;
-    });
+    public static final LoadingCache<String, Integer> shardCount = CacheBuilder.newBuilder()
+            .build(CacheLoader.from(DiscordUtil::getRecommendedShardCount));
 
     private static int getRecommendedShardCount(@Nonnull String token) {
         Http.SimpleRequest request = BotController.HTTP.get(Requester.DISCORD_API_PREFIX + "gateway/bot")
@@ -110,7 +104,9 @@ public class DiscordUtil {
                 log.error("Unexpected response from discord: {} {}", response.code(), response.toString());
             }
             //noinspection ConstantConditions
-            return new JSONObject(response.body().string()).getInt("shards");
+            int shards = new JSONObject(response.body().string()).getInt("shards");
+            log.info("Discord recommends " + shards + " shard(s)");
+            return shards;
         } catch (IOException | JSONException e) {
             throw new RuntimeException("Something went wrong fetching the shard count from Discord", e);
         }
@@ -136,7 +132,7 @@ public class DiscordUtil {
     //token <-> botid
     @Nonnull
     public static final LoadingCache<String, Long> BOT_ID = CacheBuilder.newBuilder()
-            .build(CacheLoader.asyncReloading(CacheLoader.from(DiscordUtil::getUserId), Launcher.getBotController().getExecutor()));
+            .build(CacheLoader.from(DiscordUtil::getUserId));
 
 
     //uses our configured bot token to retrieve our own userid

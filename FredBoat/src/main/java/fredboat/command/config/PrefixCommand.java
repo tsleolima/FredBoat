@@ -64,7 +64,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
             .recordStats()
             .refreshAfterWrite(1, TimeUnit.MINUTES) //NOTE: never use refreshing without async reloading, because Guavas cache uses the thread calling it to do cleanup tasks (including refreshing)
             .expireAfterAccess(1, TimeUnit.MINUTES) //evict inactive guilds
-            .concurrencyLevel(Launcher.getBotController().getAppConfig().getRecommendedShardCount())  //each shard has a thread (main JDA thread) accessing this cache many times
+            .concurrencyLevel(Launcher.getBotController().getCredentials().getRecommendedShardCount())  //each shard has a thread (main JDA thread) accessing this cache many times
             .build(CacheLoader.asyncReloading(CacheLoader.from(
                     guildId -> Launcher.getBotController().getEntityIO().getPrefix(new GuildBotComposite(guildId, DiscordUtil.getBotId()))),
                     Launcher.getBotController().getExecutor()));

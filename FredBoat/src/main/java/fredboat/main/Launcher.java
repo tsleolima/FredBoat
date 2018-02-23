@@ -412,7 +412,7 @@ public class Launcher implements ApplicationRunner {
                         .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(botController.getMainEventListener())
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
-                .setShardsTotal(configProvider.getAppConfig().getRecommendedShardCount());
+                .setShardsTotal(configProvider.getCredentials().getRecommendedShardCount());
 
         try {
             builder.addEventListeners(new EventLogger(configProvider.getEventLoggerConfig()));

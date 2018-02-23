@@ -104,7 +104,7 @@ public class ShardsCommand extends Command implements IInfoCommand {
         //healthy shards summary, contains sensible data only if we aren't doing a full report
         if (!full) {
             String content = String.format("+ %s of %s shards are %s -- Guilds: %s -- Users: %s", (shards.size() - borkenShards),
-                    Launcher.getBotController().getAppConfig().getRecommendedShardCount(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
+                    Launcher.getBotController().getCredentials().getRecommendedShardCount(), JDA.Status.CONNECTED, healthyGuilds, healthyUsers);
             messages.add(0, CentralMessaging.getClearThreadLocalMessageBuilder().append(TextUtils.asCodeBlock(content, "diff")).build());
         }
 
