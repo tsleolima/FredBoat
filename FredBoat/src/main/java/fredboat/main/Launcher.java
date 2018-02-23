@@ -10,6 +10,7 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.config.DatabaseConfig;
 import fredboat.config.FileConfig;
+import fredboat.config.PropertyConfigProvider;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
@@ -50,6 +51,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Scope;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -72,11 +74,13 @@ import java.util.concurrent.ExecutorService;
         HibernateJpaAutoConfiguration.class,
         FlywayAutoConfiguration.class
 })
+@ComponentScan(basePackages = {"fredboat.main", "fredboat.config"})
 public class Launcher implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
     private static BotController BC; //temporary hack access to the bot context
+    private final PropertyConfigProvider configProvider;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -97,16 +101,17 @@ public class Launcher implements ApplicationRunner {
         return BC;
     }
 
-    public Launcher(BotController botController) {
+    public Launcher(BotController botController, PropertyConfigProvider configProvider) {
         this.botController = botController;
         Launcher.BC = botController;
+        this.configProvider = configProvider;
     }
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
         Runtime.getRuntime().addShutdownHook(new Thread(botController.shutdownHook, "FredBoat main shutdownhook"));
         //create the sentry appender as early as possible
-        String sentryDsn = botController.getCredentials().getSentryDsn();
+        String sentryDsn = configProvider.getCredentials().getSentryDsn();
         if (!sentryDsn.isEmpty()) {
             SentryDsnCommand.turnOn(sentryDsn);
         } else {
@@ -145,9 +150,9 @@ public class Launcher implements ApplicationRunner {
 
         //dont run migrations or validate the db from the patron bot
         boolean migrateAndValidate = DiscordUtil.getBotId() == BotConstants.PATRON_BOT_ID;
-        DatabaseConfig dbConf = botController.getDatabaseConfig();
+        DatabaseConfig dbConf = configProvider.getDatabaseConfig();
         DatabaseManager dbManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
-                dbConf.getHikariPoolSize(), botController.getAppConfig().getDistribution().name(), migrateAndValidate,
+                dbConf.getHikariPoolSize(), configProvider.getAppConfig().getDistribution().name(), migrateAndValidate,
                 dbConf.getMainJdbcUrl(), dbConf.getMainSshTunnelConfig(),
                 dbConf.getCacheJdbcUrl(), dbConf.getCacheSshTunnelConfig(),
                 (puName, dataSource, properties, entityPackages) -> {
@@ -204,7 +209,7 @@ public class Launcher implements ApplicationRunner {
         CommandInitializer.initCommands();
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
-        if (!botController.getAppConfig().isPatronDistribution()) {
+        if (!configProvider.getAppConfig().isPatronDistribution()) {
             log.info("Starting VoiceChannelCleanupAgent.");
             FredBoatAgent.start(new VoiceChannelCleanupAgent());
         } else {
@@ -223,8 +228,8 @@ public class Launcher implements ApplicationRunner {
         //Check OpenWeather key
         executor.submit(this::hasValidOpenWeatherKey);
 
-        String carbonKey = botController.getCredentials().getCarbonKey();
-        if (botController.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
+        String carbonKey = configProvider.getCredentials().getCarbonKey();
+        if (configProvider.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
             FredBoatAgent.start(new CarbonitexAgent(carbonKey));
         }
 
@@ -243,8 +248,8 @@ public class Launcher implements ApplicationRunner {
     // ################################################################################
 
     private boolean hasValidMALLogin() {
-        String malUser = botController.getCredentials().getMalUser();
-        String malPassWord = botController.getCredentials().getMalPassword();
+        String malUser = configProvider.getCredentials().getMalUser();
+        String malPassWord = configProvider.getCredentials().getMalPassword();
         if (malUser.isEmpty() || malPassWord.isEmpty()) {
             log.info("MAL credentials not found. MAL related commands will not be available.");
             return false;
@@ -268,7 +273,7 @@ public class Launcher implements ApplicationRunner {
     }
 
     private boolean hasValidImgurCredentials() {
-        String imgurClientId = botController.getCredentials().getImgurClientId();
+        String imgurClientId = configProvider.getCredentials().getImgurClientId();
         if (imgurClientId.isEmpty()) {
             log.info("Imgur credentials not found. Commands relying on Imgur will not work properly.");
             return false;
@@ -309,7 +314,7 @@ public class Launcher implements ApplicationRunner {
      * @return True if it can retrieve data, else return false.
      */
     private boolean hasValidOpenWeatherKey() {
-        if ("".equals(botController.getCredentials().getOpenWeatherKey())) {
+        if ("".equals(configProvider.getCredentials().getOpenWeatherKey())) {
             log.warn("Open Weather API credentials not found. Weather related commands will not work properly.");
             return false;
         }
@@ -390,13 +395,13 @@ public class Launcher implements ApplicationRunner {
     }
 
     private ShardManager buildShardManager() throws LoginException {
-        SessionController sessionController = botController.getCredentials().getDikeUrl().isEmpty()
+        SessionController sessionController = configProvider.getCredentials().getDikeUrl().isEmpty()
                 ? new SessionControllerAdapter()
                 : new DikeSessionController();
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
-                .setToken(botController.getCredentials().getBotToken())
-                .setGame(Game.playing(botController.getAppConfig().getGame()))
+                .setToken(configProvider.getCredentials().getBotToken())
+                .setGame(Game.playing(configProvider.getAppConfig().getGame()))
                 .setBulkDeleteSplittingEnabled(false)
                 .setEnableShutdownHook(false)
                 .setAudioEnabled(true)
@@ -407,10 +412,10 @@ public class Launcher implements ApplicationRunner {
                         .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(botController.getMainEventListener())
                 .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
-                .setShardsTotal(botController.getAppConfig().getRecommendedShardCount());
+                .setShardsTotal(configProvider.getAppConfig().getRecommendedShardCount());
 
         try {
-            builder.addEventListeners(new EventLogger(botController.getEventLoggerConfig()));
+            builder.addEventListeners(new EventLogger(configProvider.getEventLoggerConfig()));
         } catch (Exception e) {
             log.error("Failed to create Eventlogger, events / guild stats will not be logged to discord via webhook", e);
         }

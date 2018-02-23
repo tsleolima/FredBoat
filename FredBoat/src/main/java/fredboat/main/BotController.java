@@ -1,6 +1,5 @@
 package fredboat.main;
 
-import com.google.common.annotations.VisibleForTesting;
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.queue.MusicPersistenceHandler;
@@ -22,7 +21,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 
 /**
  * Class responsible for controlling FredBoat at large
@@ -35,6 +33,7 @@ public class BotController {
             .build());
 
     private static final Logger log = LoggerFactory.getLogger(BotController.class);
+    private final PropertyConfigProvider configProvider;
     private ShardManager shardManager = null;
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
 
@@ -50,46 +49,32 @@ public class BotController {
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
 
 
-    private Supplier<AppConfig> appConfigSupplier = FileConfig::get;
-    private Supplier<AudioSourcesConfig> audioSourcesConfigSupplier = FileConfig::get;
-    private Supplier<Credentials> credentialsSupplier = FileConfig::get;
-    private Supplier<DatabaseConfig> databaseConfigSupplier = FileConfig::get;
-    private Supplier<EventLoggerConfig> eventLoggerConfigSupplier = FileConfig::get;
-    private Supplier<LavalinkConfig> lavalinkConfigSupplier = FileConfig::get;
-
-    @VisibleForTesting
-    @SuppressWarnings("unchecked")
-    public void setConfigSuppliers(Supplier allConfigsSupplier) {
-        appConfigSupplier = allConfigsSupplier;
-        audioSourcesConfigSupplier = allConfigsSupplier;
-        credentialsSupplier = allConfigsSupplier;
-        databaseConfigSupplier = allConfigsSupplier;
-        eventLoggerConfigSupplier = allConfigsSupplier;
-        lavalinkConfigSupplier = allConfigsSupplier;
+    public BotController(PropertyConfigProvider configProvider) {
+        this.configProvider = configProvider;
     }
 
     public AppConfig getAppConfig() {
-        return appConfigSupplier.get();
+        return configProvider.getAppConfig();
     }
 
     public AudioSourcesConfig getAudioSourcesConfig() {
-        return audioSourcesConfigSupplier.get();
+        return configProvider.getAudioSourcesConfig();
     }
 
     public Credentials getCredentials() {
-        return credentialsSupplier.get();
+        return configProvider.getCredentials();
     }
 
     public DatabaseConfig getDatabaseConfig() {
-        return databaseConfigSupplier.get();
+        return configProvider.getDatabaseConfig();
     }
 
     public EventLoggerConfig getEventLoggerConfig() {
-        return eventLoggerConfigSupplier.get();
+        return configProvider.getEventLoggerConfig();
     }
 
     public LavalinkConfig getLavalinkConfig() {
-        return lavalinkConfigSupplier.get();
+        return configProvider.getLavalinkConfig();
     }
 
     /**
