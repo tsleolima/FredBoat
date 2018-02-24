@@ -33,6 +33,7 @@ import lavalink.client.io.Lavalink;
 import lavalink.client.io.metrics.LavalinkCollector;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
+import net.dv8tion.jda.core.audio.AudioSendHandler;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.Event;
@@ -85,9 +86,14 @@ public class AudioConnectionFacade implements EventListener {
                 : lavalink.getLink(guildId).getPlayer();
     }
 
-    public void openConnection(VoiceChannel channel) {
+    /**
+     * Open a connection to a channel and set a send handler
+     */
+    public void openConnection(VoiceChannel channel, AudioSendHandler audioSendHandler) {
         if (lavalink == null) {
             AudioManager audioManager = channel.getGuild().getAudioManager();
+            audioManager.openAudioConnection(channel);
+            audioManager.setSendingHandler(audioSendHandler);
             audioManager.setConnectionListener(debugConnectionListenerProvider.get(channel.getGuild()));
         } else {
             lavalink.getLink(channel.getGuild()).connect(channel);

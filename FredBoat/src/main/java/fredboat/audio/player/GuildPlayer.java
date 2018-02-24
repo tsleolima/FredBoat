@@ -44,7 +44,6 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.managers.AudioManager;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -83,10 +82,6 @@ public class GuildPlayer extends AbstractPlayer {
         this.shard = ShardContext.of(guild.getJDA(), playerRegistry);
         this.guildId = guild.getIdLong();
 
-        if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
-            AudioManager manager = guild.getAudioManager();
-            manager.setSendingHandler(this);
-        }
         audioTrackProvider = new SimpleTrackProvider();
         audioLoader = new AudioLoader(audioTrackProvider, getPlayerManager(), this);
     }

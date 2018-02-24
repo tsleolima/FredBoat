@@ -25,7 +25,6 @@
 
 package fredboat.audio.player;
 
-import fredboat.main.Launcher;
 import net.dv8tion.jda.core.entities.Guild;
 import org.springframework.stereotype.Component;
 
@@ -50,19 +49,12 @@ public class PlayerRegistry {
 
     @Nonnull
     public GuildPlayer getOrCreate(@Nonnull Guild guild) {
-        GuildPlayer player = registry.computeIfAbsent(
+        return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
                     GuildPlayer p = new GuildPlayer(guild, this, musicTextChannelProvider);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });
-
-        // Attempt to set the player as a sending handler. Important after a shard revive
-        if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
-            guild.getAudioManager().setSendingHandler(player);
-        }
-
-        return player;
     }
 
     @Nullable

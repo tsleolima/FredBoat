@@ -33,7 +33,6 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.ShutdownEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import net.dv8tion.jda.core.managers.AudioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -74,13 +73,7 @@ public class ShardReviveHandler extends ListenerAdapter {
             VoiceChannel channel = event.getJDA().getVoiceChannelById(vcid);
             if (channel == null) return;
             GuildPlayer player = playerRegistry.getOrCreate(channel.getGuild());
-
-            audioConnectionFacade.openConnection(channel);
-
-            if (audioConnectionFacade.isLocal()) {
-                AudioManager am = channel.getGuild().getAudioManager();
-                am.setSendingHandler(player);
-            }
+            audioConnectionFacade.openConnection(channel, player);
         });
     }
 
