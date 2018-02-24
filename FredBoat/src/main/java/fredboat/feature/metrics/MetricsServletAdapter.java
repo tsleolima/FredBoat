@@ -26,6 +26,7 @@
 package fredboat.feature.metrics;
 
 import io.prometheus.client.exporter.MetricsServlet;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,8 @@ import java.io.IOException;
  * <p>
  * used to expose the prometheus metrics with a spark api
  */
-public class SparkMetricsServlet extends MetricsServlet {
+@Component
+public class MetricsServletAdapter extends MetricsServlet {
     private static final long serialVersionUID = -442447083882925873L;
 
     //wrapping http methods

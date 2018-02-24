@@ -32,6 +32,7 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
 import net.dv8tion.jda.core.JDA;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ import java.util.List;
  * <p>
  * Collects various FredBoat stats for prometheus
  */
+@Component
 public class FredBoatCollector extends Collector {
 
     @Override

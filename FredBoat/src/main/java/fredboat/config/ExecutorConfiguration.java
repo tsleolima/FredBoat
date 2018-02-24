@@ -24,7 +24,7 @@
 
 package fredboat.config;
 
-import fredboat.feature.metrics.Metrics;
+import fredboat.feature.metrics.collectors.ThreadPoolCollector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,11 +43,11 @@ public class ExecutorConfiguration {
      * Use this executor for various small async tasks
      */
     @Bean
-    public ExecutorService executor() {
+    public ExecutorService executor(ThreadPoolCollector threadPoolCollector) {
         ExecutorService executor = Executors.newCachedThreadPool(
                 r -> new Thread(r, "main-executor-worker")
         );
-        Metrics.instance().threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
+        threadPoolCollector.addPool("main-executor", (ThreadPoolExecutor) executor);
         Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdown, "main-executor-shutdown-hook"));
         return executor;
     }

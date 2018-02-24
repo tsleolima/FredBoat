@@ -52,6 +52,7 @@ import fredboat.util.TextUtils;
 import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
 import io.prometheus.client.Histogram;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.ShutdownEvent;
@@ -87,9 +88,9 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandContextParser commandContextParser = new CommandContextParser();
     private final CommandManager commandManager;
 
-    public EventListenerBoat(CommandManager commandManager) {
+    public EventListenerBoat(CommandManager commandManager, CacheMetricsCollector cacheMetrics) {
         this.commandManager = commandManager;
-        Metrics.instance().cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
+        cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
     @Override

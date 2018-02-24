@@ -31,6 +31,7 @@ import fredboat.config.property.PropertyConfigProvider;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.EventLogger;
 import fredboat.feature.DikeSessionController;
+import fredboat.feature.metrics.JdaEventsMetricsListener;
 import fredboat.feature.metrics.Metrics;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
@@ -62,7 +63,7 @@ public class ShardManagerConfiguration {
     @Bean
     public ShardManager buildShardManager(PropertyConfigProvider configProvider, EventListenerBoat mainEventListener,
                                           LavalinkManager lavalinkManager, SessionController sessionController,
-                                          EventLogger eventLogger) {
+                                          EventLogger eventLogger, JdaEventsMetricsListener jdaEventsMetricsListener) {
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
                 .setToken(configProvider.getCredentials().getBotToken())
@@ -76,7 +77,7 @@ public class ShardManagerConfiguration {
                 .setHttpClientBuilder(Http.DEFAULT_BUILDER.newBuilder()
                         .eventListener(new OkHttpEventMetrics("jda", Metrics.httpEventCounter)))
                 .addEventListeners(mainEventListener)
-                .addEventListeners(Metrics.instance().jdaEventsMetricsListener)
+                .addEventListeners(jdaEventsMetricsListener)
                 .addEventListeners(eventLogger)
                 .setShardsTotal(configProvider.getCredentials().getRecommendedShardCount());
 

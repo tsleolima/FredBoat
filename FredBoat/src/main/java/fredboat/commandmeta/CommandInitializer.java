@@ -47,7 +47,9 @@ import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.SearchUtil;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -66,7 +68,7 @@ public class CommandInitializer {
     public static final String CONFIG_COMM_NAME = "config";
     public static final String LANGUAGE_COMM_NAME = "language";
 
-    public static void initCommands() {
+    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics) {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
         CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
@@ -113,7 +115,7 @@ public class CommandInitializer {
         configModule.registerCommand(new ConfigCommand(CONFIG_COMM_NAME, "cfg"));
         configModule.registerCommand(new LanguageCommand(LANGUAGE_COMM_NAME, "lang"));
         configModule.registerCommand(new ModulesCommand("modules", "module", "mods"));
-        configModule.registerCommand(new PrefixCommand(PREFIX_COMM_NAME, "pre"));
+        configModule.registerCommand(new PrefixCommand(cacheMetrics, PREFIX_COMM_NAME, "pre"));
         /* Perms */
         configModule.registerCommand(new PermissionsCommand(PermissionLevel.ADMIN, "admin", "admins"));
         configModule.registerCommand(new PermissionsCommand(PermissionLevel.DJ, "dj", "djs"));
@@ -137,13 +139,13 @@ public class CommandInitializer {
         utilityModule.registerCommand(new RoleInfoCommand("roleinfo"));
         utilityModule.registerCommand(new ServerInfoCommand("serverinfo", "guildinfo"));
         utilityModule.registerCommand(new UserInfoCommand("userinfo", "memberinfo"));
-        utilityModule.registerCommand(new WeatherCommand(new OpenWeatherAPI(), "weather"));
+        utilityModule.registerCommand(new WeatherCommand(new OpenWeatherAPI(cacheMetrics), "weather"));
 
 
         // Fun Module - mostly ascii, memes, pictures, games
         CommandRegistry funModule = new CommandRegistry(Module.FUN);
         funModule.registerCommand(new AkinatorCommand("akinator", "aki"));
-        funModule.registerCommand(new DanceCommand("dance"));
+        funModule.registerCommand(new DanceCommand(cacheMetrics, "dance"));
         funModule.registerCommand(new JokeCommand("joke", "jk"));
         funModule.registerCommand(new RiotCommand("riot"));
         funModule.registerCommand(new SayCommand("say"));

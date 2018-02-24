@@ -26,7 +26,6 @@
 package fredboat.feature.metrics;
 
 import ch.qos.logback.classic.LoggerContext;
-import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
 import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.VideoSelection;
 import fredboat.command.info.HelpCommand;
@@ -35,11 +34,11 @@ import fredboat.feature.metrics.collectors.ThreadPoolCollector;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import io.prometheus.client.hotspot.DefaultExports;
 import io.prometheus.client.logback.InstrumentedAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -49,46 +48,17 @@ import java.util.concurrent.ThreadPoolExecutor;
  * This is a central place for all Counters and Gauges and whatever else we are using so that the available stats can be
  * seen at one glance.
  */
+@Component
 public class Metrics {
     private static final Logger log = LoggerFactory.getLogger(Metrics.class);
 
-    //call this once at the start of the bot to set up things
-    // further calls won't have any effect
-    public static void setup() {
-        log.info("Metrics set up {}", instance().toString());
-    }
+    public Metrics(CacheMetricsCollector cacheMetrics, InstrumentedAppender prometheusAppender,
+                   FredBoatCollector fredBoatCollector, ThreadPoolCollector threadPoolCollector) {
+        log.info("Setting up metrics");
 
-    //holder pattern
-    public static Metrics instance() {
-        return MetricHolder.INSTANCE;
-    }
-
-    private static class MetricHolder {
-        private static final Metrics INSTANCE = new Metrics();
-    }
-
-    //call register on the hibernate stats after all connections are set up
-    public final HibernateStatisticsCollector hibernateStats = new HibernateStatisticsCollector();
-    public final PrometheusMetricsTrackerFactory hikariStats = new PrometheusMetricsTrackerFactory();
-
-    //expose the metrics with spark
-    public final SparkMetricsServlet metricsServlet = new SparkMetricsServlet();
-    //guava cache metrics
-    public final CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
-    // collect jda events metrics
-    public final JdaEventsMetricsListener jdaEventsMetricsListener = new JdaEventsMetricsListener();
-
-    //our custom collectors / listeners etc:
-    // fredboat stuff
-    public final FredBoatCollector fredBoatCollector = new FredBoatCollector();
-    // threadpools
-    public final ThreadPoolCollector threadPoolCollector = new ThreadPoolCollector();
-
-    private Metrics() {
         //log metrics
         final LoggerContext factory = (LoggerContext) LoggerFactory.getILoggerFactory();
         final ch.qos.logback.classic.Logger root = factory.getLogger(Logger.ROOT_LOGGER_NAME);
-        final InstrumentedAppender prometheusAppender = new InstrumentedAppender();
         prometheusAppender.setContext(root.getLoggerContext());
         prometheusAppender.start();
         root.addAppender(prometheusAppender);
@@ -96,7 +66,7 @@ public class Metrics {
         //jvm (hotspot) metrics
         DefaultExports.initialize();
 
-        //add one of our guava caches that is only statically reachable
+        //add some of our guava caches that are currently only statically reachable
         cacheMetrics.addCache("videoSelections", VideoSelection.SELECTIONS);
         cacheMetrics.addCache("HELP_RECEIVED_RECENTLY", HelpCommand.HELP_RECEIVED_RECENTLY);
 
@@ -109,6 +79,8 @@ public class Metrics {
 
         //register some of our "important" thread pools
         threadPoolCollector.addPool("agents-scheduler", (ThreadPoolExecutor) FredBoatAgent.getScheduler());
+
+        log.info("Metrics set up");
     }
 
 

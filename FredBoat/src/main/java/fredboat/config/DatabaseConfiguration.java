@@ -24,16 +24,17 @@
 
 package fredboat.config;
 
+import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
 import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.FredBoatAgent;
 import fredboat.config.property.DatabaseConfig;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.db.DatabaseManager;
-import fredboat.feature.metrics.Metrics;
 import fredboat.main.ShutdownHandler;
 import fredboat.shared.constant.BotConstants;
 import fredboat.shared.constant.ExitCodes;
 import fredboat.util.DiscordUtil;
+import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -115,13 +116,14 @@ public class DatabaseConfiguration {
     }
 
     @Bean
-    public DatabaseManager databaseManager(PropertyConfigProvider configProvider) {
+    public DatabaseManager databaseManager(PropertyConfigProvider configProvider, HibernateStatisticsCollector hibernateStats,
+                                           PrometheusMetricsTrackerFactory hikariStats) {
         //dont run migrations or validate the db from the patron bot
         boolean migrateAndValidate = DiscordUtil.getBotId(configProvider.getCredentials()) == BotConstants.PATRON_BOT_ID;
 
         DatabaseConfig dbConf = configProvider.getDatabaseConfig();
 
-        DatabaseManager databaseManager = new DatabaseManager(Metrics.instance().hibernateStats, Metrics.instance().hikariStats,
+        DatabaseManager databaseManager = new DatabaseManager(hibernateStats, hikariStats,
                 dbConf.getHikariPoolSize(), configProvider.getAppConfig().getDistribution().name(), migrateAndValidate,
                 dbConf.getMainJdbcUrl(), dbConf.getMainSshTunnelConfig(),
                 dbConf.getCacheJdbcUrl(), dbConf.getCacheSshTunnelConfig(),

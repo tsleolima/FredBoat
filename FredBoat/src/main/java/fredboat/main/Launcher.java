@@ -12,7 +12,7 @@ import fredboat.commandmeta.CommandRegistry;
 import fredboat.config.property.FileConfig;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.feature.I18n;
-import fredboat.feature.metrics.Metrics;
+import fredboat.feature.metrics.MetricsServletAdapter;
 import fredboat.util.AppInfo;
 import fredboat.util.DiscordUtil;
 import fredboat.util.GitRepoState;
@@ -20,6 +20,7 @@ import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import okhttp3.Credentials;
@@ -58,6 +59,7 @@ import java.util.concurrent.ExecutorService;
         "fredboat.config",
         "fredboat.commandmeta",
         "fredboat.db",
+        "fredboat.feature.metrics",
         "fredboat.event",
         "fredboat.feature",
         "fredboat.main",
@@ -69,6 +71,8 @@ public class Launcher implements ApplicationRunner {
     private static BotController BC; //temporary hack access to the bot context
     private final PropertyConfigProvider configProvider;
     private final ExecutorService executor;
+    private final MetricsServletAdapter metricsServlet;
+    private final CacheMetricsCollector cacheMetrics;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -115,17 +119,18 @@ public class Launcher implements ApplicationRunner {
         return BC;
     }
 
-    public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor) {
+    public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
+                    MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
+        this.metricsServlet = metricsServlet;
+        this.cacheMetrics = cacheMetrics;
     }
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
-
-        Metrics.setup();
 
         I18n.start();
 
@@ -136,7 +141,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //Commands
-        CommandInitializer.initCommands();
+        CommandInitializer.initCommands(cacheMetrics);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {
@@ -240,7 +245,7 @@ public class Launcher implements ApplicationRunner {
             return false;
         }
 
-        OpenWeatherAPI api = new OpenWeatherAPI();
+        OpenWeatherAPI api = new OpenWeatherAPI(null);
         RetrievedWeather weather = api.getCurrentWeatherByCity("san francisco");
 
         boolean isSuccess = !(weather == null || weather.isError());
@@ -292,7 +297,7 @@ public class Launcher implements ApplicationRunner {
             }
         } finally {
             FredBoatAgent.start(statsAgent);
-            API.turnOnMetrics();
+            API.turnOnMetrics(metricsServlet);
         }
     }
 

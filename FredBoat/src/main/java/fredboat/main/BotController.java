@@ -11,6 +11,7 @@ import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.Metrics;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
+import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class BotController {
 
     public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
-                         EntityIO entityIO, ExecutorService executor) {
+                         EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
         this.shardManager = shardManager;
@@ -54,7 +55,7 @@ public class BotController {
         this.shutdownHandler = shutdownHandler;
         this.databaseManager = databaseManager;
         this.entityIO = entityIO;
-        Metrics.instance().hibernateStats.register(); //call this exactly once after all db connections have been created
+        hibernateStats.register(); //call this exactly once after all db connections have been created
         this.executor = executor;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), "FredBoat main shutdownhook"));

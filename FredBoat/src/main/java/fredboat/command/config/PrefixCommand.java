@@ -32,13 +32,13 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.definitions.PermissionLevel;
-import fredboat.feature.metrics.Metrics;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.CacheUtil;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.Guild;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 
@@ -52,9 +52,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class PrefixCommand extends Command implements IConfigCommand {
 
-    public PrefixCommand(@Nonnull String name, String... aliases) {
+    public PrefixCommand(@Nullable CacheMetricsCollector cacheMetrics, @Nonnull String name, String... aliases) {
         super(name, aliases);
-        Metrics.instance().cacheMetrics.addCache("customPrefixes", CUSTOM_PREFIXES);
+        if (cacheMetrics != null) {
+            cacheMetrics.addCache("customPrefixes", CUSTOM_PREFIXES);
+        }
     }
 
     @SuppressWarnings("ConstantConditions")

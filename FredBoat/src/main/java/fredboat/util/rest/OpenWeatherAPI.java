@@ -16,11 +16,13 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.Refill;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
@@ -39,7 +41,7 @@ public class OpenWeatherAPI implements Weather {
     private ObjectMapper objectMapper;
     private HttpUrl currentWeatherBaseUrl;
 
-    public OpenWeatherAPI() {
+    public OpenWeatherAPI(@Nullable CacheMetricsCollector cacheMetrics) {
         client = Http.DEFAULT_BUILDER.newBuilder()
                 .eventListener(new OkHttpEventMetrics("openWeatherApi", Metrics.httpEventCounter))
                 .build();
@@ -63,7 +65,9 @@ public class OpenWeatherAPI implements Weather {
                         return processGetWeatherByCity(key);
                     }
                 });
-        Metrics.instance().cacheMetrics.addCache("openWeatherApi", weatherCache);
+        if (cacheMetrics != null) {
+            cacheMetrics.addCache("openWeatherApi", weatherCache);
+        }
     }
 
     /**

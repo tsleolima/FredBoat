@@ -27,6 +27,7 @@ package fredboat.api;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.Metrics;
+import fredboat.feature.metrics.MetricsServletAdapter;
 import fredboat.main.BotMetrics;
 import fredboat.main.Launcher;
 import net.dv8tion.jda.core.JDA;
@@ -102,7 +103,7 @@ public class API {
         });
     }
 
-    public static void turnOnMetrics() {
+    public static void turnOnMetrics(MetricsServletAdapter metricsServlet) {
         if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
@@ -110,7 +111,7 @@ public class API {
 
         Spark.get("/metrics", (req, resp) -> {
             Metrics.apiServed.labels("/metrics").inc();
-            return Metrics.instance().metricsServlet.servletGet(req.raw(), resp.raw());
+            return metricsServlet.servletGet(req.raw(), resp.raw());
         });
     }
 
