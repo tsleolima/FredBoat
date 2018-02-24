@@ -27,7 +27,6 @@ package fredboat.command.info;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import fredboat.agent.FredBoatAgent;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -93,7 +92,7 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "\n----------\n\n";
 
         content += "Sharding:                       " + jda.getShardInfo().getShardString() + "\n";
-        content += "Players playing:                " + PlayerRegistry.getPlayingPlayers().size() + "\n";
+        content += "Players playing:                " + Launcher.getBotController().getPlayerRegistry().getPlayingPlayers().size() + "\n";
         content += "Known servers:                  " + BotMetrics.getTotalGuildsCount() + "\n";
         content += "Known users in servers:         " + BotMetrics.getTotalUniqueUsersCount() + "\n";
         content += "Distribution:                   " + Launcher.getBotController().getAppConfig().getDistribution() + "\n";

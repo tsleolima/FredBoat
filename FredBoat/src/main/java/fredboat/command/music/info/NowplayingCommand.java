@@ -33,12 +33,12 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
@@ -61,9 +61,9 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
-        if (player.isPlaying()) {
+        if (player != null && player.isPlaying()) {
 
             AudioTrackContext atc = player.getPlayingTrack();
             AudioTrack at = atc.getTrack();

@@ -25,11 +25,13 @@ public class ShardContext {
     private static final Logger log = LoggerFactory.getLogger(ShardContext.class);
     private static final ConcurrentHashMap<Integer, ShardContext> instances = new ConcurrentHashMap<>();
     private final int id;
+    private final PlayerRegistry playerRegistry;
     private final ArrayList<String> channelsToRejoin = new ArrayList<>();
     private final BotMetrics.JdaEntityCounts jdaEntityCountsShard = new BotMetrics.JdaEntityCounts();
 
-    private ShardContext(int id) {
+    private ShardContext(int id, PlayerRegistry playerRegistry) {
         this.id = id;
+        this.playerRegistry = playerRegistry;
 
         if (Launcher.getBotController().getShardManager().getShardById(id) == null) {
             throw new IllegalArgumentException("Shard " + id + " does not exist!");
@@ -37,13 +39,13 @@ public class ShardContext {
     }
 
     @Nonnull
-    public static ShardContext of(int id) {
-        return instances.computeIfAbsent(id, integer -> new ShardContext(id));
+    public static ShardContext of(int id, PlayerRegistry playerRegistry) {
+        return instances.computeIfAbsent(id, integer -> new ShardContext(id, playerRegistry));
     }
 
     @Nonnull
-    public static ShardContext of(JDA jda) {
-        return of(jda.getShardInfo().getShardId());
+    public static ShardContext of(JDA jda, PlayerRegistry playerRegistry) {
+        return of(jda.getShardInfo().getShardId(), playerRegistry);
     }
 
     public int getId() {
@@ -65,14 +67,14 @@ public class ShardContext {
 
         if (Launcher.getBotController().getCredentials().getRecommendedShardCount() <= 10) {
             //the current implementation of music persistence is not a good idea on big bots
-            MusicPersistenceHandler.reloadPlaylists(getJda());
+            MusicPersistenceHandler.reloadPlaylists(getJda(), playerRegistry);
         }
 
         //Rejoin old channels if revived
         channelsToRejoin.forEach(vcid -> {
             VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
             if (channel == null) return;
-            GuildPlayer player = PlayerRegistry.getOrCreate(channel.getGuild());
+            GuildPlayer player = playerRegistry.getOrCreate(channel.getGuild());
 
             Launcher.getBotController().getLavalinkManager().openConnection(channel);
 
@@ -89,7 +91,7 @@ public class ShardContext {
         try {
             channelsToRejoin.clear();
 
-            PlayerRegistry.getPlayingPlayers().stream()
+            playerRegistry.getPlayingPlayers().stream()
                     .filter(guildPlayer -> guildPlayer.getJda().getShardInfo().getShardId() == id)
                     .forEach(guildPlayer -> {
                         VoiceChannel channel = guildPlayer.getCurrentVoiceChannel();

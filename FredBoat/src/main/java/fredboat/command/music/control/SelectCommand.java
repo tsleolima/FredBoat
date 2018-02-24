@@ -27,7 +27,6 @@ package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.player.VideoSelection;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.commandmeta.abs.Command;
@@ -60,7 +59,6 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
 
     static void select(CommandContext context) {
         Member invoker = context.invoker;
-        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
         VideoSelection selection = VideoSelection.get(invoker);
         if (selection == null) {
             context.reply(context.i18n("selectSelectionNotGiven"));
@@ -103,7 +101,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
             } else {
                 AudioTrack[] selectedTracks = new AudioTrack[validChoices.size()];
                 StringBuilder outputMsgBuilder = new StringBuilder();
-
+                GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
                 for (int i = 0; i < validChoices.size(); i++) {
                     selectedTracks[i] = selection.choices.get(validChoices.get(i) - 1);
 

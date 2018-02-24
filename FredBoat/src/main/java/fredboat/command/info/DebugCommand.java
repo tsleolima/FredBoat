@@ -27,7 +27,6 @@ package fredboat.command.info;
 
 import fredboat.audio.player.AudioLossCounter;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -70,7 +69,7 @@ public class DebugCommand extends Command implements IInfoCommand, ICommandRestr
         }
 
         if (guild != null) {
-            context.reply(getDebugEmbed(PlayerRegistry.getOrCreate(guild)).build());
+            context.reply(getDebugEmbed(Launcher.getBotController().getPlayerRegistry().getOrCreate(guild)).build());
         } else {
             context.replyWithName(String.format("There is no guild with id `%s`.", context.args[0]));
         }

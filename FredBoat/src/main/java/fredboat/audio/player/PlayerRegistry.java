@@ -27,6 +27,7 @@ package fredboat.audio.player;
 
 import fredboat.main.Launcher;
 import net.dv8tion.jda.core.entities.Guild;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,26 +36,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Component
 public class PlayerRegistry {
 
     public static final float DEFAULT_VOLUME = 1f;
 
-    private final Map<Long, GuildPlayer> REGISTRY = new ConcurrentHashMap<>();
-
-    //internal holder pattern
-    private static PlayerRegistry instance() {
-        return RegistryHolder.INSTANCE;
-    }
-
-    private static class RegistryHolder {
-        private static final PlayerRegistry INSTANCE = new PlayerRegistry();
-    }
+    private final Map<Long, GuildPlayer> registry = new ConcurrentHashMap<>();
 
     @Nonnull
-    public static GuildPlayer getOrCreate(@Nonnull Guild guild) {
-        GuildPlayer player = instance().REGISTRY.computeIfAbsent(
+    public GuildPlayer getOrCreate(@Nonnull Guild guild) {
+        GuildPlayer player = registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
-                    GuildPlayer p = new GuildPlayer(guild);
+                    GuildPlayer p = new GuildPlayer(guild, this);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });
@@ -68,40 +61,40 @@ public class PlayerRegistry {
     }
 
     @Nullable
-    public static GuildPlayer getExisting(@Nonnull Guild guild) {
+    public GuildPlayer getExisting(@Nonnull Guild guild) {
         return getExisting(guild.getIdLong());
     }
 
     @Nullable
-    public static GuildPlayer getExisting(long guildId) {
-        return instance().REGISTRY.get(guildId);
+    public GuildPlayer getExisting(long guildId) {
+        return registry.get(guildId);
     }
 
-    public static Map<Long, GuildPlayer> getRegistry() {
-        return instance().REGISTRY;
+    public Map<Long, GuildPlayer> getRegistry() {
+        return registry;
 
     }
 
-    public static List<GuildPlayer> getPlayingPlayers() {
-        return instance().REGISTRY.values().stream()
+    public List<GuildPlayer> getPlayingPlayers() {
+        return registry.values().stream()
                 .filter(GuildPlayer::isPlaying)
                 .collect(Collectors.toList());
     }
 
-    public static void destroyPlayer(Guild g) {
+    public void destroyPlayer(Guild g) {
         destroyPlayer(g.getIdLong());
     }
 
-    public static void destroyPlayer(long guildId) {
+    public void destroyPlayer(long guildId) {
         GuildPlayer player = getExisting(guildId);
         if (player != null) {
             player.destroy();
-            instance().REGISTRY.remove(guildId);
+            registry.remove(guildId);
         }
     }
 
-    public static long playingCount() {
-        return instance().REGISTRY.values().stream()
+    public long playingCount() {
+        return registry.values().stream()
                 .filter(GuildPlayer::isPlaying)
                 .count();
     }

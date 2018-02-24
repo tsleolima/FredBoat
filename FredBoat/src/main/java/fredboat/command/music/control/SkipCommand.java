@@ -26,7 +26,6 @@
 package fredboat.command.music.control;
 
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
@@ -34,6 +33,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
@@ -66,9 +66,9 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
-        if (player.isQueueEmpty()) {
+        if (player == null || player.isQueueEmpty()) {
             context.reply(context.i18n("skipEmpty"));
             return;
         }
@@ -80,7 +80,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         if (!context.hasArguments()) {
-            skipNext(context);
+            skipNext(player, context);
         } else if (context.hasArguments() && StringUtils.isNumeric(context.args[0])) {
             skipGivenIndex(player, context);
         } else if (context.hasArguments() && trackRangePattern.matcher(context.args[0]).matches()) {
@@ -114,7 +114,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         if (givenIndex == 1) {
-            skipNext(context);
+            skipNext(player, context);
             return;
         }
 
@@ -225,8 +225,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
         }
     }
 
-    private void skipNext(CommandContext context) {
-        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
+    private void skipNext(GuildPlayer player, CommandContext context) {
         AudioTrackContext atc = player.getPlayingTrack();
         if (atc == null) {
             context.reply(context.i18n("skipTrackNotFound"));

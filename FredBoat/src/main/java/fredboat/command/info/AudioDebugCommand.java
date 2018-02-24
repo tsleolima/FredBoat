@@ -27,7 +27,6 @@ package fredboat.command.info;
 
 import fredboat.audio.player.AudioLossCounter;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
@@ -59,7 +58,7 @@ public class AudioDebugCommand extends Command implements IInfoCommand {
 
     private void handleLavaplayer(CommandContext context) {
         String msg = "";
-        GuildPlayer guildPlayer = PlayerRegistry.getExisting(context.guild);
+        GuildPlayer guildPlayer = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
         if(guildPlayer == null) {
             msg = msg + "No GuildPlayer found.\n";

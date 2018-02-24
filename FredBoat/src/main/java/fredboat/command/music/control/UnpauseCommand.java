@@ -26,7 +26,6 @@
 package fredboat.command.music.control;
 
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -49,8 +48,8 @@ public class UnpauseCommand extends Command implements IMusicCommand, ICommandRe
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         Guild guild = context.guild;
-        GuildPlayer player = PlayerRegistry.getOrCreate(guild);
-        if (player.isQueueEmpty()) {
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(guild);
+        if (player == null || player.isQueueEmpty()) {
             context.reply(context.i18n("unpauseQueueEmpty"));
         } else if (!player.isPaused()) {
             context.reply(context.i18n("unpausePlayerNotPaused"));

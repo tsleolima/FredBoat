@@ -63,7 +63,7 @@ public class MusicPersistenceHandler {
     private MusicPersistenceHandler() {
     }
 
-    public static void handlePreShutdown(int code) {
+    public static void handlePreShutdown(int code, PlayerRegistry playerRegistry) {
         File dir = new File("music_persistence");
         if (!dir.exists()) {
             boolean created = dir.mkdir();
@@ -72,7 +72,7 @@ public class MusicPersistenceHandler {
                 return;
             }
         }
-        Map<Long, GuildPlayer> reg = PlayerRegistry.getRegistry();
+        Map<Long, GuildPlayer> reg = playerRegistry.getRegistry();
 
         boolean isUpdate = code == ExitCodes.EXIT_CODE_UPDATE;
         boolean isRestart = code == ExitCodes.EXIT_CODE_RESTART;
@@ -152,7 +152,7 @@ public class MusicPersistenceHandler {
         }
     }
 
-    public static void reloadPlaylists(JDA jda) {
+    public static void reloadPlaylists(JDA jda, PlayerRegistry playerRegistry) {
         File dir = new File("music_persistence");
 
         if (Launcher.getBotController().getAppConfig().isMusicDistribution()) {
@@ -189,7 +189,7 @@ public class MusicPersistenceHandler {
                 RepeatMode repeatMode = data.getEnum(RepeatMode.class, "repeatMode");
                 boolean shuffle = data.getBoolean("shuffle");
 
-                GuildPlayer player = PlayerRegistry.getOrCreate(guild);
+                GuildPlayer player = playerRegistry.getOrCreate(guild);
 
                 if (vc != null) {
                     player.joinChannel(vc);

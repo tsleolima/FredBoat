@@ -46,6 +46,13 @@ import java.util.List;
 @Component
 public class FredBoatCollector extends Collector {
 
+    private final PlayerRegistry playerRegistry;
+
+    public FredBoatCollector(PlayerRegistry playerRegistry) {
+        super();
+        this.playerRegistry = playerRegistry;
+    }
+
     @Override
     public List<MetricFamilySamples> collect() {
 
@@ -72,7 +79,7 @@ public class FredBoatCollector extends Collector {
         jdaEntities.addMetric(Arrays.asList("total", "Category"), BotMetrics.getTotalCategoriesCount());
         jdaEntities.addMetric(Arrays.asList("total", "Emote"), BotMetrics.getTotalEmotesCount());
         jdaEntities.addMetric(Arrays.asList("total", "Role"), BotMetrics.getTotalRolesCount());
-        playersPlaying.addMetric(Arrays.asList("total", "Players"), PlayerRegistry.playingCount());
+        playersPlaying.addMetric(Arrays.asList("total", "Players"), playerRegistry.playingCount());
 
         //docker stats
         int dockerPullsBotCount = BotMetrics.getDockerPullsBot();

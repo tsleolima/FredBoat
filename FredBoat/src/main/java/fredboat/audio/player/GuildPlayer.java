@@ -68,16 +68,18 @@ public class GuildPlayer extends AbstractPlayer {
     private long currentTCId;
 
     private final AudioLoader audioLoader;
+    private final PlayerRegistry playerRegistry;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public GuildPlayer(Guild guild) {
+    public GuildPlayer(Guild guild, PlayerRegistry playerRegistry) {
         super(guild.getId());
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
+        this.playerRegistry = playerRegistry;
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
-        this.shard = ShardContext.of(guild.getJDA());
+        this.shard = ShardContext.of(guild.getJDA(), playerRegistry);
         this.guildId = guild.getIdLong();
 
         if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
@@ -168,7 +170,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void queue(String identifier, CommandContext context) {
-        IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker);
+        IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker, playerRegistry);
 
         joinChannel(context.invoker);
 

@@ -26,6 +26,7 @@
 package fredboat.commandmeta;
 
 
+import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -58,9 +59,11 @@ public class CommandManager {
 
     public static final AtomicInteger totalCommandsExecuted = new AtomicInteger(0);
     private final PatronageChecker patronageChecker;
+    private final PlayerRegistry playerRegistry;
 
-    public CommandManager(PatronageChecker patronageChecker) {
+    public CommandManager(PatronageChecker patronageChecker, PlayerRegistry playerRegistry) {
         this.patronageChecker = patronageChecker;
+        this.playerRegistry = playerRegistry;
     }
 
     public void prefixCalled(CommandContext context) {
@@ -115,7 +118,10 @@ public class CommandManager {
         }
 
         if (invoked instanceof IMusicCommand) {
-            PlayerRegistry.getOrCreate(guild).setCurrentTC(channel);
+            GuildPlayer player = playerRegistry.getExisting(guild);
+            if (player != null) {
+                player.setCurrentTC(channel);
+            }
         }
 
         try {

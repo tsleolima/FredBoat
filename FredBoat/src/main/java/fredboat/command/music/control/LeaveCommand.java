@@ -26,7 +26,6 @@
 package fredboat.command.music.control;
 
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -50,9 +49,11 @@ public class LeaveCommand extends Command implements IMusicCommand, ICommandRest
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         try {
-            GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-            player.pause();
-            player.leaveVoiceChannelRequest(context, false);
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+            if (player != null) {
+                player.pause();
+                player.leaveVoiceChannelRequest(context, false);
+            }
         } catch (Exception e) {
             log.error("Something caused us to not properly leave a voice channel!", e);
             Launcher.getBotController().getLavalinkManager().closeConnection(context.guild);

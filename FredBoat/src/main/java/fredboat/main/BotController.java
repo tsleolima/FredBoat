@@ -3,6 +3,7 @@ package fredboat.main;
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.player.LavalinkManager;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.config.property.*;
 import fredboat.db.DatabaseManager;
@@ -40,6 +41,7 @@ public class BotController {
     private final ShutdownHandler shutdownHandler;
     private final DatabaseManager databaseManager;
     private final EntityIO entityIO;
+    private final PlayerRegistry playerRegistry;
     private final ExecutorService executor;
 
 
@@ -47,7 +49,8 @@ public class BotController {
 
     public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
-                         EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats) {
+                         EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
+                         PlayerRegistry playerRegistry) {
         this.configProvider = configProvider;
         this.lavalinkManager = lavalinkManager;
         this.shardManager = shardManager;
@@ -55,10 +58,11 @@ public class BotController {
         this.shutdownHandler = shutdownHandler;
         this.databaseManager = databaseManager;
         this.entityIO = entityIO;
+        this.playerRegistry = playerRegistry;
         hibernateStats.register(); //call this exactly once after all db connections have been created
         this.executor = executor;
 
-        Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), "FredBoat main shutdownhook"));
+        Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(), "FredBoat main shutdownhook"));
     }
 
     public AppConfig getAppConfig() {
@@ -121,8 +125,12 @@ public class BotController {
         return entityIO;
     }
 
+    public PlayerRegistry getPlayerRegistry() {
+        return playerRegistry;
+    }
+
     //Shutdown hook
-    private Runnable createShutdownHook(ShutdownHandler shutdownHandler) {
+    private Runnable createShutdownHook() {
         return () -> {
             int shutdownCode = shutdownHandler.getShutdownCode();
             int code = shutdownCode != ShutdownHandler.UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
@@ -130,7 +138,7 @@ public class BotController {
             FredBoatAgent.shutdown();
 
             try {
-                MusicPersistenceHandler.handlePreShutdown(code);
+                MusicPersistenceHandler.handlePreShutdown(code, playerRegistry);
             } catch (Exception e) {
                 log.error("Critical error while handling music persistence.", e);
             }

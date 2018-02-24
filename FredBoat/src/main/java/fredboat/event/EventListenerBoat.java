@@ -87,10 +87,13 @@ public class EventListenerBoat extends AbstractEventListener {
 
     private final CommandManager commandManager;
     private final CommandContextParser commandContextParser;
+    private final PlayerRegistry playerRegistry;
 
-    public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser, CacheMetricsCollector cacheMetrics) {
+    public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
+                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
+        this.playerRegistry = playerRegistry;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -274,7 +277,7 @@ public class EventListenerBoat extends AbstractEventListener {
         if (joined.getUser().isBot()
                 && guild.getSelfMember().getUser().getIdLong() != joined.getUser().getIdLong()) return;
 
-        GuildPlayer player = PlayerRegistry.getExisting(guild);
+        GuildPlayer player = playerRegistry.getExisting(guild);
 
         if (player != null
                 && player.isPaused()
@@ -296,7 +299,7 @@ public class EventListenerBoat extends AbstractEventListener {
             return;
 
         Guild guild = channelLeft.getGuild();
-        GuildPlayer player = PlayerRegistry.getExisting(guild);
+        GuildPlayer player = playerRegistry.getExisting(guild);
 
         if (player == null) {
             return;
@@ -339,7 +342,7 @@ public class EventListenerBoat extends AbstractEventListener {
 
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
-        PlayerRegistry.destroyPlayer(event.getGuild());
+        playerRegistry.destroyPlayer(event.getGuild());
     }
 
     @Override
@@ -353,12 +356,12 @@ public class EventListenerBoat extends AbstractEventListener {
     /* Shard lifecycle */
     @Override
     public void onReady(ReadyEvent event) {
-        ShardContext.of(event.getJDA()).onReady(event);
+        ShardContext.of(event.getJDA(), playerRegistry).onReady(event);
     }
 
     @Override
     public void onShutdown(ShutdownEvent event) {
-        ShardContext.of(event.getJDA()).onShutdown();
+        ShardContext.of(event.getJDA(), playerRegistry).onShutdown();
     }
 
 

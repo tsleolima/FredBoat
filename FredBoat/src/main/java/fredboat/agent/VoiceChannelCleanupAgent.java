@@ -46,9 +46,11 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
     private static final Logger log = LoggerFactory.getLogger(VoiceChannelCleanupAgent.class);
     private static final HashMap<String, Long> VC_LAST_USED = new HashMap<>();
     private static final int UNUSED_CLEANUP_THRESHOLD = 60000 * 60; // Effective when users are in the VC, but the player is not playing
+    private final PlayerRegistry playerRegistry;
 
-    public VoiceChannelCleanupAgent() {
+    public VoiceChannelCleanupAgent(PlayerRegistry playerRegistry) {
         super("voice-cleanup", 10, TimeUnit.MINUTES);
+        this.playerRegistry = playerRegistry;
     }
 
     @Override
@@ -124,7 +126,7 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
     }
 
     private boolean isBeingUsed(VoiceChannel vc) {
-        GuildPlayer guildPlayer = PlayerRegistry.getExisting(vc.getGuild());
+        GuildPlayer guildPlayer = playerRegistry.getExisting(vc.getGuild());
 
         return guildPlayer != null && guildPlayer.isPlaying();
     }

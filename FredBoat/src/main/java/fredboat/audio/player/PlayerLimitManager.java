@@ -9,19 +9,19 @@ public class PlayerLimitManager {
     // A negative limit means unlimited
     private static int limit = -1;
 
-    public static boolean checkLimit(Guild guild) {
-        GuildPlayer guildPlayer = PlayerRegistry.getExisting(guild);
+    public static boolean checkLimit(Guild guild, PlayerRegistry playerRegistry) {
+        GuildPlayer guildPlayer = playerRegistry.getExisting(guild);
         //noinspection SimplifiableIfStatement
         if (guildPlayer != null && guildPlayer.getTrackCount() > 0)
             return true;
 
         return limit < 0
-                || PlayerRegistry.getPlayingPlayers().size() < limit;
+                || playerRegistry.getPlayingPlayers().size() < limit;
 
     }
 
-    public static boolean checkLimitResponsive(CommandContext context) {
-        boolean b = checkLimit(context.guild);
+    public static boolean checkLimitResponsive(CommandContext context, PlayerRegistry playerRegistry) {
+        boolean b = checkLimit(context.guild, playerRegistry);
 
         if (!b) {
             String patronUrl = "<" + BotConstants.DOCS_DONATE_URL + ">";

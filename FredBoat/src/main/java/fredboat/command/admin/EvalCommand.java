@@ -27,11 +27,11 @@ package fredboat.command.admin;
 
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.JDA;
@@ -104,7 +104,7 @@ public class EvalCommand extends Command implements ICommandRestricted {
         engine.put("jda", jda);
         engine.put("api", jda);
         engine.put("channel", context.channel);
-        GuildPlayer player = PlayerRegistry.getExisting(guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(guild);
         engine.put("vc", player != null ? player.getCurrentVoiceChannel() : null);
         engine.put("author", context.msg.getAuthor());
         engine.put("invoker", context.invoker);

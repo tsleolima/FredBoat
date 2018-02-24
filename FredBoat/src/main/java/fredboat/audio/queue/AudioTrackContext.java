@@ -27,7 +27,6 @@ package fredboat.audio.queue;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.LeakSafeContext;
 import net.dv8tion.jda.core.entities.Guild;
@@ -104,7 +103,7 @@ public class AudioTrackContext extends LeakSafeContext implements Comparable<Aud
     public long getEffectivePosition() {
         Guild guild = Launcher.getBotController().getShardManager().getGuildById(guildId);
         if (guild != null) {
-            return PlayerRegistry.getOrCreate(guild).getPosition();
+            return Launcher.getBotController().getPlayerRegistry().getOrCreate(guild).getPosition();
         } else {
             return getStartPosition();
         }
@@ -151,7 +150,7 @@ public class AudioTrackContext extends LeakSafeContext implements Comparable<Aud
     public TextChannel getTextChannel() {
         Guild guild = Launcher.getBotController().getShardManager().getGuildById(guildId);
         if (guild != null) {
-            GuildPlayer guildPlayer = PlayerRegistry.getExisting(guild);
+            GuildPlayer guildPlayer = Launcher.getBotController().getPlayerRegistry().getExisting(guild);
             if (guildPlayer != null) {
                 return guildPlayer.getActiveTextChannel();
             }

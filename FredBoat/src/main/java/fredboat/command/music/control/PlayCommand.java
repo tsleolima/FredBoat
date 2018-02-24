@@ -29,7 +29,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerLimitManager;
-import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.player.VideoSelection;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -50,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class PlayCommand extends Command implements IMusicCommand, ICommandRestricted {
@@ -71,10 +71,10 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
-        if (!PlayerLimitManager.checkLimitResponsive(context)) return;
+        if (!PlayerLimitManager.checkLimitResponsive(context, Launcher.getBotController().getPlayerRegistry())) return;
 
         if (!context.msg.getAttachments().isEmpty()) {
-            GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
 
             for (Attachment atc : context.msg.getAttachments()) {
                 player.queue(atc.getUrl(), context);
@@ -86,7 +86,8 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         if (!context.hasArguments()) {
-            handleNoArguments(context);
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+            handleNoArguments(context, player);
             return;
         }
 
@@ -105,18 +106,16 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             url = url.replaceFirst(FILE_PREFIX, ""); //LocalAudioSourceManager does not manage this itself
         }
 
-        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
-
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
         player.queue(url, context);
         player.setPause(false);
 
         context.deleteMessage();
     }
 
-    private void handleNoArguments(CommandContext context) {
+    private void handleNoArguments(CommandContext context, @Nullable GuildPlayer player) {
         Guild guild = context.guild;
-        GuildPlayer player = PlayerRegistry.getOrCreate(guild);
-        if (player.isQueueEmpty()) {
+        if (player == null || player.isQueueEmpty()) {
             context.reply(context.i18n("playQueueEmpty"));
         } else if (player.isPlaying()) {
             context.reply(context.i18n("playAlreadyPlaying"));

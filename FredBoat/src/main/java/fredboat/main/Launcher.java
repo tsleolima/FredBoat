@@ -6,6 +6,7 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.agent.VoiceChannelCleanupAgent;
 import fredboat.api.API;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
@@ -73,6 +74,7 @@ public class Launcher implements ApplicationRunner {
     private final ExecutorService executor;
     private final MetricsServletAdapter metricsServlet;
     private final CacheMetricsCollector cacheMetrics;
+    private final PlayerRegistry playerRegistry;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -120,13 +122,14 @@ public class Launcher implements ApplicationRunner {
     }
 
     public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
-                    MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics) {
+                    MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
         this.metricsServlet = metricsServlet;
         this.cacheMetrics = cacheMetrics;
+        this.playerRegistry = playerRegistry;
     }
 
     @Override
@@ -135,7 +138,7 @@ public class Launcher implements ApplicationRunner {
         I18n.start();
 
         try {
-            API.start();
+            API.start(playerRegistry);
         } catch (Exception e) {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
@@ -146,7 +149,7 @@ public class Launcher implements ApplicationRunner {
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {
             log.info("Starting VoiceChannelCleanupAgent.");
-            FredBoatAgent.start(new VoiceChannelCleanupAgent());
+            FredBoatAgent.start(new VoiceChannelCleanupAgent(playerRegistry));
         } else {
             log.info("Skipped setting up the VoiceChannelCleanupAgent, " +
                     "either running Patron distro or overridden by temp config");

@@ -47,7 +47,7 @@ public class API {
 
     private API() {}
 
-    public static void start() {
+    public static void start(PlayerRegistry playerRegistry) {
         if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
@@ -81,8 +81,8 @@ public class API {
             }
 
             JSONObject g = new JSONObject();
-            g.put("playingPlayers", PlayerRegistry.getPlayingPlayers().size())
-                    .put("totalPlayers", PlayerRegistry.getRegistry().size())
+            g.put("playingPlayers", playerRegistry.getPlayingPlayers().size())
+                    .put("totalPlayers", playerRegistry.getRegistry().size())
                     .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
                     .put("guilds", BotMetrics.getTotalGuildsCount())
                     .put("users", BotMetrics.getTotalUniqueUsersCount());

@@ -52,7 +52,7 @@ public class VolumeCommand extends Command implements IMusicCommand, ICommandRes
 
         if (Launcher.getBotController().getAppConfig().getDistribution().volumeSupported()) {
 
-            GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
             try {
                 float volume = Float.parseFloat(context.args[0]) / 100;
                 volume = Math.max(0, Math.min(1.5f, volume));

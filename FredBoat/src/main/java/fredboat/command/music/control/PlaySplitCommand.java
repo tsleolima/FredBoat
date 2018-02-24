@@ -35,6 +35,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 
 import javax.annotation.Nonnull;
@@ -53,12 +54,13 @@ public class PlaySplitCommand extends Command implements IMusicCommand, ICommand
             return;
         }
 
-        if (!PlayerLimitManager.checkLimitResponsive(context)) return;
+        PlayerRegistry playerRegistry = Launcher.getBotController().getPlayerRegistry();
+        if (!PlayerLimitManager.checkLimitResponsive(context, playerRegistry)) return;
 
-        IdentifierContext ic = new IdentifierContext(context.args[0], context.channel, context.invoker);
+        IdentifierContext ic = new IdentifierContext(context.args[0], context.channel, context.invoker, playerRegistry);
         ic.setSplit(true);
 
-        GuildPlayer player = PlayerRegistry.getOrCreate(context.guild);
+        GuildPlayer player = playerRegistry.getOrCreate(context.guild);
         player.queue(ic);
         player.setPause(false);
 

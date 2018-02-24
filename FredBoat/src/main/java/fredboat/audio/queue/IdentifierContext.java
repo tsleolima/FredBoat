@@ -25,8 +25,9 @@
 
 package fredboat.audio.queue;
 
-import fredboat.messaging.internal.LeakSafeContext;
+import fredboat.audio.player.PlayerRegistry;
 import fredboat.main.ShardContext;
+import fredboat.messaging.internal.LeakSafeContext;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -40,9 +41,9 @@ public class IdentifierContext extends LeakSafeContext {
     private boolean split = false;
     private long position = 0L;
 
-    public IdentifierContext(String identifier, TextChannel textChannel, Member member) {
+    public IdentifierContext(String identifier, TextChannel textChannel, Member member, PlayerRegistry playerRegistry) {
         super(textChannel, member);
-        this.shard = ShardContext.of(textChannel.getJDA());
+        this.shard = ShardContext.of(textChannel.getJDA(), playerRegistry);
         this.identifier = identifier;
     }
 
