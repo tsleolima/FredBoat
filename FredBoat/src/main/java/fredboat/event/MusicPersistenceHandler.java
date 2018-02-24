@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
+import fredboat.audio.player.MusicTextChannelProvider;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.audio.queue.RepeatMode;
@@ -69,10 +70,13 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     private static final Logger log = LoggerFactory.getLogger(MusicPersistenceHandler.class);
     private final PlayerRegistry playerRegistry;
     private final Credentials credentials;
+    private final MusicTextChannelProvider musicTextChannelProvider;
 
-    public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials) {
+    public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials,
+                                   MusicTextChannelProvider musicTextChannelProvider) {
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
+        this.musicTextChannelProvider = musicTextChannelProvider;
     }
 
     public void handlePreShutdown(int code) {
@@ -215,11 +219,11 @@ public class MusicPersistenceHandler extends ListenerAdapter {
 
                 GuildPlayer player = playerRegistry.getOrCreate(guild);
 
+                if (tc != null) {
+                    musicTextChannelProvider.setMusicChannel(tc);
+                }
                 if (vc != null) {
                     player.joinChannel(vc);
-                }
-                if (tc != null) {
-                    player.setCurrentTC(tc);
                 }
                 if (Launcher.getBotController().getAppConfig().getDistribution().volumeSupported()) {
                     player.setVolume(volume);

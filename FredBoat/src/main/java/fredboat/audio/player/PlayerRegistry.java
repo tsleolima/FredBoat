@@ -42,12 +42,17 @@ public class PlayerRegistry {
     public static final float DEFAULT_VOLUME = 1f;
 
     private final Map<Long, GuildPlayer> registry = new ConcurrentHashMap<>();
+    private final MusicTextChannelProvider musicTextChannelProvider;
+
+    public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider) {
+        this.musicTextChannelProvider = musicTextChannelProvider;
+    }
 
     @Nonnull
     public GuildPlayer getOrCreate(@Nonnull Guild guild) {
         GuildPlayer player = registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
-                    GuildPlayer p = new GuildPlayer(guild, this);
+                    GuildPlayer p = new GuildPlayer(guild, this, musicTextChannelProvider);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });
