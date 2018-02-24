@@ -22,15 +22,17 @@
  * SOFTWARE.
  */
 
-package fredboat.main;
+package fredboat.event;
 
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.Credentials;
 import fredboat.util.DiscordUtil;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.ReadyEvent;
+import net.dv8tion.jda.core.events.ShutdownEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by napster on 24.02.18.
  */
 @Component
-public class ShardReviveHandler {
+public class ShardReviveHandler extends ListenerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(ShardReviveHandler.class);
 
@@ -61,14 +63,15 @@ public class ShardReviveHandler {
         this.lavalinkManager = lavalinkManager;
     }
 
-    public void onReady(JDA jda) {
+    @Override
+    public void onReady(ReadyEvent event) {
         //Rejoin old channels if revived
-        List<Long> channels = channelsToRejoin.computeIfAbsent(jda.getShardInfo().getShardId(), ArrayList::new);
+        List<Long> channels = channelsToRejoin.computeIfAbsent(event.getJDA().getShardInfo().getShardId(), ArrayList::new);
         List<Long> toRejoin = new ArrayList<>(channels);
         channels.clear();//avoid situations where this method is called twice with the same channels
 
         toRejoin.forEach(vcid -> {
-            VoiceChannel channel = jda.getVoiceChannelById(vcid);
+            VoiceChannel channel = event.getJDA().getVoiceChannelById(vcid);
             if (channel == null) return;
             GuildPlayer player = playerRegistry.getOrCreate(channel.getGuild());
 
@@ -81,20 +84,20 @@ public class ShardReviveHandler {
         });
     }
 
-    public void onShutdown(JDA jda) {
+    @Override
+    public void onShutdown(ShutdownEvent event) {
         try {
             List<Long> channels = new ArrayList<>();
-            int shardId = jda.getShardInfo().getShardId();
+            int shardId = event.getJDA().getShardInfo().getShardId();
             playerRegistry.getPlayingPlayers().stream()
                     .filter(guildPlayer -> DiscordUtil.getShardId(guildPlayer.getGuildId(), credentials) == shardId)
                     .forEach(guildPlayer -> {
-                        VoiceChannel channel = guildPlayer.getCurrentVoiceChannel();
+                        VoiceChannel channel = guildPlayer.getCurrentVoiceChannel(event.getJDA());
                         if (channel != null) channels.add(channel.getIdLong());
                     });
             channelsToRejoin.put(shardId, channels);
         } catch (Exception ex) {
-            log.error("Caught exception while saving channels to revive shard {}", jda.getShardInfo(), ex);
+            log.error("Caught exception while saving channels to revive shard {}", event.getJDA().getShardInfo(), ex);
         }
     }
-
 }

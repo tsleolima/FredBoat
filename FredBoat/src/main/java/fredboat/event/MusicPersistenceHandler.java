@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.audio.queue;
+package fredboat.event;
 
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
@@ -31,6 +30,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.queue.AudioTrackContext;
+import fredboat.audio.queue.RepeatMode;
+import fredboat.audio.queue.SplitAudioTrackContext;
+import fredboat.config.property.Credentials;
 import fredboat.feature.I18n;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
@@ -40,6 +43,8 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.ReadyEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -59,13 +64,15 @@ import java.util.ArrayList;
 import java.util.Map;
 
 @Component
-public class MusicPersistenceHandler {
+public class MusicPersistenceHandler extends ListenerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(MusicPersistenceHandler.class);
     private final PlayerRegistry playerRegistry;
+    private final Credentials credentials;
 
-    public MusicPersistenceHandler(PlayerRegistry playerRegistry) {
+    public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials) {
         this.playerRegistry = playerRegistry;
+        this.credentials = credentials;
     }
 
     public void handlePreShutdown(int code) {
@@ -157,7 +164,19 @@ public class MusicPersistenceHandler {
         }
     }
 
-    public void reloadPlaylists(JDA jda) {
+    @Override
+    public void onReady(ReadyEvent event) {
+        //the current implementation of music persistence is not a good idea on big bots
+        if (credentials.getRecommendedShardCount() <= 10) {
+            try {
+                reloadPlaylists(event.getJDA());
+            } catch (Exception e) {
+                log.error("Uncaught exception when dispatching ready event to music persistence handler", e);
+            }
+        }
+    }
+
+    private void reloadPlaylists(JDA jda) {
         File dir = new File("music_persistence");
 
         if (Launcher.getBotController().getAppConfig().isMusicDistribution()) {

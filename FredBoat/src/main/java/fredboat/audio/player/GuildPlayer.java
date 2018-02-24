@@ -260,6 +260,10 @@ public class GuildPlayer extends AbstractPlayer {
         } else {
             j = jda[0];
         }
+        if (j == null) {
+            log.warn("JDA is null when looking up current VC. Try passing a valid JDA when calling this method");
+            return null;
+        }
         Guild guild = j.getGuildById(guildId);
         if (guild != null)
             return guild.getSelfMember().getVoiceState().getChannel();

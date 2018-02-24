@@ -28,7 +28,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.command.info.HelloCommand;
 import fredboat.command.info.HelpCommand;
 import fredboat.command.info.ShardsCommand;
@@ -38,7 +37,6 @@ import fredboat.commandmeta.CommandContextParser;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
-import fredboat.config.property.Credentials;
 import fredboat.db.entity.main.GuildData;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
@@ -47,7 +45,6 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
 import fredboat.main.ShardContext;
-import fredboat.main.ShardReviveHandler;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
@@ -58,7 +55,6 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.ReadyEvent;
-import net.dv8tion.jda.core.events.ShutdownEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
@@ -91,20 +87,12 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandManager commandManager;
     private final CommandContextParser commandContextParser;
     private final PlayerRegistry playerRegistry;
-    private final Credentials credentials;
-    private final MusicPersistenceHandler musicPersistenceHandler;
-    private final ShardReviveHandler shardReviveHandler;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
-                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
-                             MusicPersistenceHandler musicPersistenceHandler, Credentials credentials,
-                             ShardReviveHandler shardReviveHandler) {
+                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
-        this.credentials = credentials;
-        this.musicPersistenceHandler = musicPersistenceHandler;
-        this.shardReviveHandler = shardReviveHandler;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -325,7 +313,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //are we in the channel that someone left from?
-        VoiceChannel currentVc = player.getCurrentVoiceChannel();
+        VoiceChannel currentVc = player.getCurrentVoiceChannel(guild.getJDA());
         if (currentVc != null && currentVc.getIdLong() != channelLeft.getIdLong()) {
             return;
         }
@@ -372,28 +360,7 @@ public class EventListenerBoat extends AbstractEventListener {
         } catch (Exception e) {
             log.error("Uncaught exception when dispatching ready event to shard context", e);
         }
-
-        //the current implementation of music persistence is not a good idea on big bots
-        if (credentials.getRecommendedShardCount() <= 10) {
-            try {
-                musicPersistenceHandler.reloadPlaylists(event.getJDA());
-            } catch (Exception e) {
-                log.error("Uncaught exception when dispatching ready event to music persistence handler", e);
-            }
-        }
-
-        try {
-            shardReviveHandler.onReady(event.getJDA());
-        } catch (Exception e) {
-            log.error("Uncaught exception when dipatching ready event to shard revive handler", e);
-        }
     }
-
-    @Override
-    public void onShutdown(ShutdownEvent event) {
-        shardReviveHandler.onShutdown(event.getJDA());
-    }
-
 
     private static void sendHelloOnJoin(@Nonnull Guild guild) {
         //filter guilds that already received a hello message

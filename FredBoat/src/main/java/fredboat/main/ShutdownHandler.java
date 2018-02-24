@@ -24,7 +24,7 @@
 
 package fredboat.main;
 
-import fredboat.audio.queue.MusicPersistenceHandler;
+import fredboat.event.MusicPersistenceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -30,6 +30,8 @@ import fredboat.config.property.Credentials;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.EventLogger;
+import fredboat.event.MusicPersistenceHandler;
+import fredboat.event.ShardReviveHandler;
 import fredboat.feature.DikeSessionController;
 import fredboat.feature.metrics.JdaEventsMetricsListener;
 import fredboat.feature.metrics.Metrics;
@@ -63,7 +65,8 @@ public class ShardManagerConfiguration {
     @Bean
     public ShardManager buildShardManager(PropertyConfigProvider configProvider, EventListenerBoat mainEventListener,
                                           LavalinkManager lavalinkManager, SessionController sessionController,
-                                          EventLogger eventLogger, JdaEventsMetricsListener jdaEventsMetricsListener) {
+                                          EventLogger eventLogger, JdaEventsMetricsListener jdaEventsMetricsListener,
+                                          ShardReviveHandler shardReviveHandler, MusicPersistenceHandler musicPersistenceHandler) {
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
                 .setToken(configProvider.getCredentials().getBotToken())
@@ -79,6 +82,8 @@ public class ShardManagerConfiguration {
                 .addEventListeners(mainEventListener)
                 .addEventListeners(jdaEventsMetricsListener)
                 .addEventListeners(eventLogger)
+                .addEventListeners(shardReviveHandler)
+                .addEventListeners(musicPersistenceHandler)
                 .setShardsTotal(configProvider.getCredentials().getRecommendedShardCount());
 
         if (lavalinkManager.isEnabled()) {
