@@ -44,7 +44,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -56,14 +58,17 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
+@Component
 public class MusicPersistenceHandler {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(MusicPersistenceHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(MusicPersistenceHandler.class);
+    private final PlayerRegistry playerRegistry;
 
-    private MusicPersistenceHandler() {
+    public MusicPersistenceHandler(PlayerRegistry playerRegistry) {
+        this.playerRegistry = playerRegistry;
     }
 
-    public static void handlePreShutdown(int code, PlayerRegistry playerRegistry) {
+    public void handlePreShutdown(int code) {
         File dir = new File("music_persistence");
         if (!dir.exists()) {
             boolean created = dir.mkdir();
@@ -152,7 +157,7 @@ public class MusicPersistenceHandler {
         }
     }
 
-    public static void reloadPlaylists(JDA jda, PlayerRegistry playerRegistry) {
+    public void reloadPlaylists(JDA jda) {
         File dir = new File("music_persistence");
 
         if (Launcher.getBotController().getAppConfig().isMusicDistribution()) {

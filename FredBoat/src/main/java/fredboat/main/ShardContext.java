@@ -3,7 +3,6 @@ package fredboat.main;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.audio.queue.MusicPersistenceHandler;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -64,11 +63,6 @@ public class ShardContext {
         log.info("Received ready event for {}", readyEvent.getJDA().getShardInfo().toString());
         jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()), true);//jda finished loading, do a single count to init values
 
-
-        if (Launcher.getBotController().getCredentials().getRecommendedShardCount() <= 10) {
-            //the current implementation of music persistence is not a good idea on big bots
-            MusicPersistenceHandler.reloadPlaylists(getJda(), playerRegistry);
-        }
 
         //Rejoin old channels if revived
         channelsToRejoin.forEach(vcid -> {

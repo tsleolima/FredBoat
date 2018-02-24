@@ -26,7 +26,6 @@
 package fredboat.commandmeta;
 
 
-import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -118,10 +117,7 @@ public class CommandManager {
         }
 
         if (invoked instanceof IMusicCommand) {
-            GuildPlayer player = playerRegistry.getExisting(guild);
-            if (player != null) {
-                player.setCurrentTC(channel);
-            }
+            playerRegistry.getOrCreate(guild).setCurrentTC(channel);
         }
 
         try {

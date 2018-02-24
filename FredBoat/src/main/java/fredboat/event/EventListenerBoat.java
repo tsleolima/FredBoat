@@ -28,6 +28,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.command.info.HelloCommand;
 import fredboat.command.info.HelpCommand;
 import fredboat.command.info.ShardsCommand;
@@ -37,6 +38,7 @@ import fredboat.commandmeta.CommandContextParser;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.config.property.Credentials;
 import fredboat.db.entity.main.GuildData;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
@@ -88,12 +90,17 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandManager commandManager;
     private final CommandContextParser commandContextParser;
     private final PlayerRegistry playerRegistry;
+    private final Credentials credentials;
+    private final MusicPersistenceHandler musicPersistenceHandler;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
-                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics) {
+                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
+                             MusicPersistenceHandler musicPersistenceHandler, Credentials credentials) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
+        this.credentials = credentials;
+        this.musicPersistenceHandler = musicPersistenceHandler;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -357,6 +364,11 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onReady(ReadyEvent event) {
         ShardContext.of(event.getJDA(), playerRegistry).onReady(event);
+
+        if (credentials.getRecommendedShardCount() <= 10) {
+            //the current implementation of music persistence is not a good idea on big bots
+            musicPersistenceHandler.reloadPlaylists(event.getJDA());
+        }
     }
 
     @Override

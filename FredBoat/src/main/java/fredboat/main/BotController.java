@@ -4,7 +4,6 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.config.property.*;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
@@ -14,8 +13,6 @@ import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
 import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -30,8 +27,6 @@ public class BotController {
     public static final Http HTTP = new Http(Http.DEFAULT_BUILDER.newBuilder()
             .eventListener(new OkHttpEventMetrics("default", Metrics.httpEventCounter))
             .build());
-
-    private static final Logger log = LoggerFactory.getLogger(BotController.class);
 
     private final PropertyConfigProvider configProvider;
     private final LavalinkManager lavalinkManager;
@@ -132,16 +127,7 @@ public class BotController {
     //Shutdown hook
     private Runnable createShutdownHook() {
         return () -> {
-            int shutdownCode = shutdownHandler.getShutdownCode();
-            int code = shutdownCode != ShutdownHandler.UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
-
             FredBoatAgent.shutdown();
-
-            try {
-                MusicPersistenceHandler.handlePreShutdown(code, playerRegistry);
-            } catch (Exception e) {
-                log.error("Critical error while handling music persistence.", e);
-            }
         };
     }
 }

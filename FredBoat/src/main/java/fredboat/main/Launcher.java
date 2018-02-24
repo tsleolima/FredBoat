@@ -57,6 +57,7 @@ import java.util.concurrent.ExecutorService;
 })
 @ComponentScan(basePackages = {
         "fredboat.audio.player",
+        "fredboat.audio.queue",
         "fredboat.config",
         "fredboat.commandmeta",
         "fredboat.db",
