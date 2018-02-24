@@ -65,7 +65,7 @@ subprojects {
         jdaVersion                  = '3.5.1_339'
 
         //audio deps
-        lavaplayerVersion           = '1.2.51'
+        lavaplayerVersion           = '1.2.53'
         jdaNasVersion               = '1.0.6'
         lavalinkVersion             = '2f0df387c36b1850f63779398e89270c83f56ee3'
 
