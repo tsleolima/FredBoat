@@ -85,11 +85,12 @@ public class EventListenerBoat extends AbstractEventListener {
             .expireAfterWrite(6, TimeUnit.HOURS)
             .build();
 
-    private final CommandContextParser commandContextParser = new CommandContextParser();
     private final CommandManager commandManager;
+    private final CommandContextParser commandContextParser;
 
-    public EventListenerBoat(CommandManager commandManager, CacheMetricsCollector cacheMetrics) {
+    public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser, CacheMetricsCollector cacheMetrics) {
         this.commandManager = commandManager;
+        this.commandContextParser = commandContextParser;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 

@@ -32,6 +32,7 @@ import fredboat.main.Launcher;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 /**
  * Created by napster on 23.02.18.
  */
+@Component
 public class CommandContextParser {
 
     private static final Logger log = LoggerFactory.getLogger(CommandContext.class);
