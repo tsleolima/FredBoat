@@ -145,10 +145,7 @@ public class GuildPlayer extends AbstractPlayer {
         }
 
         try {//todo inject audio connection facade
-            Launcher.getBotController().getAudioConnectionFacade().openConnection(targetChannel);
-            if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
-                guild.getAudioManager().setConnectionListener(new DebugConnectionListener(guildId, getJda().getShardInfo()));
-            }
+            Launcher.getBotController().getAudioConnectionFacade().openConnection(targetChannel, this);
             log.info("Connected to voice channel " + targetChannel);
         } catch (Exception e) {
             log.error("Failed to join voice channel {}", targetChannel, e);

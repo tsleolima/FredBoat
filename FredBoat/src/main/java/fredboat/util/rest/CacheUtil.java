@@ -26,15 +26,21 @@
 package fredboat.util.rest;
 
 import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,6 +84,19 @@ public class CacheUtil {
                 }
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public static <K, V> V getUncheckedUnwrapped(Cache<K, V> cache, K key, Callable<V> loader) {
+        try {
+            return cache.get(key, loader);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Cache loader threw exception", e);
+        } catch (UncheckedExecutionException e) {
+            Throwables.throwIfUnchecked(e.getCause());
+
+            // Will never run.
+            throw new IllegalStateException(e);
         }
     }
 

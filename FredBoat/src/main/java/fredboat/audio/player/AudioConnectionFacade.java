@@ -37,6 +37,7 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.hooks.EventListener;
+import net.dv8tion.jda.core.managers.AudioManager;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -50,8 +51,11 @@ public class AudioConnectionFacade implements EventListener {
 
     @Nullable
     private final Lavalink lavalink;
+    private final DebugConnectionListenerProvider debugConnectionListenerProvider;
 
-    public AudioConnectionFacade(LavalinkConfig lavalinkConfig, Credentials credentials) {
+    public AudioConnectionFacade(LavalinkConfig lavalinkConfig, Credentials credentials,
+                                 DebugConnectionListenerProvider debugConnectionListenerProvider) {
+        this.debugConnectionListenerProvider = debugConnectionListenerProvider;
         if (lavalinkConfig.getLavalinkHosts().isEmpty()) {
             lavalink = null; //local playback
             return;
@@ -83,7 +87,8 @@ public class AudioConnectionFacade implements EventListener {
 
     public void openConnection(VoiceChannel channel) {
         if (lavalink == null) {
-            channel.getGuild().getAudioManager().openAudioConnection(channel);
+            AudioManager audioManager = channel.getGuild().getAudioManager();
+            audioManager.setConnectionListener(debugConnectionListenerProvider.get(channel.getGuild()));
         } else {
             lavalink.getLink(channel.getGuild()).connect(channel);
         }
