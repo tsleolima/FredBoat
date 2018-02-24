@@ -61,6 +61,8 @@ public class LavalinkManager {
                 shardId -> Launcher.getBotController().getShardManager().getShardById(shardId)
         );
 
+        Runtime.getRuntime().addShutdownHook(new Thread(lavalink::shutdown, "lavalink-shutdown-hook"));
+
         List<LavalinkConfig.LavalinkHost> hosts = configProvider.getLavalinkConfig().getLavalinkHosts();
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getName(), lavalinkHost.getUri(),
                 lavalinkHost.getPassword()));
