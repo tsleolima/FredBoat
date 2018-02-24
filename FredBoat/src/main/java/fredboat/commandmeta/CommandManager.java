@@ -44,23 +44,26 @@ import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Component
 public class CommandManager {
-
-    private static final Logger log = LoggerFactory.getLogger(CommandManager.class);
 
     public static final Set<Command> disabledCommands = new HashSet<>(0);
 
     public static final AtomicInteger totalCommandsExecuted = new AtomicInteger(0);
+    private final PatronageChecker patronageChecker;
 
-    public static void prefixCalled(CommandContext context) {
+    public CommandManager(PatronageChecker patronageChecker) {
+        this.patronageChecker = patronageChecker;
+    }
+
+    public void prefixCalled(CommandContext context) {
         Guild guild = context.guild;
         Command invoked = context.command;
         TextChannel channel = context.channel;
@@ -70,7 +73,7 @@ public class CommandManager {
         Metrics.commandsExecuted.labels(invoked.getClass().getSimpleName()).inc();
 
         if (FeatureFlags.PATRON_VALIDATION.isActive()) {
-            PatronageChecker.Status status = PatronageCheckerHolder.instance.getStatus(guild);
+            PatronageChecker.Status status = patronageChecker.getStatus(guild);
             if (!status.isValid()) {
                 String msg = "Access denied. This bot can only be used if invited from <https://patron.fredboat.com/> "
                         + "by someone who currently has a valid pledge on Patreon.\n**Denial reason:** " + status.getReason() + "\n\n";
@@ -128,10 +131,5 @@ public class CommandManager {
             TextUtils.handleException(e, context);
         }
 
-    }
-
-    //holder class pattern for the checker
-    private static class PatronageCheckerHolder {
-        private static final PatronageChecker instance = new PatronageChecker();
     }
 }

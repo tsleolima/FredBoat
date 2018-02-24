@@ -36,11 +36,13 @@ import net.dv8tion.jda.core.entities.Guild;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class PatronageChecker {
 
     private static final Logger log = LoggerFactory.getLogger(PatronageChecker.class);

@@ -85,8 +85,10 @@ public class EventListenerBoat extends AbstractEventListener {
             .build();
 
     private final CommandContextParser commandContextParser = new CommandContextParser();
+    private final CommandManager commandManager;
 
-    public EventListenerBoat() {
+    public EventListenerBoat(CommandManager commandManager) {
+        this.commandManager = commandManager;
         Metrics.instance().cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -178,7 +180,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 executionTimer = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer();
             }
             try {
-                CommandManager.prefixCalled(context);
+                commandManager.prefixCalled(context);
             } finally {
                 //NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
                 if (FeatureFlags.FULL_METRICS.isActive() && executionTimer != null) {

@@ -56,8 +56,10 @@ import java.util.concurrent.ExecutorService;
 @ComponentScan(basePackages = {
         "fredboat.audio.player",
         "fredboat.config",
+        "fredboat.commandmeta",
         "fredboat.db",
         "fredboat.event",
+        "fredboat.feature",
         "fredboat.main",
 })
 public class Launcher implements ApplicationRunner {
