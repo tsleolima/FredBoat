@@ -35,6 +35,7 @@ import fredboat.event.ShardReviveHandler;
 import fredboat.feature.DikeSessionController;
 import fredboat.feature.metrics.JdaEventsMetricsListener;
 import fredboat.feature.metrics.Metrics;
+import fredboat.main.ShutdownHandler;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
@@ -42,6 +43,8 @@ import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.utils.SessionController;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -55,6 +58,8 @@ import javax.security.auth.login.LoginException;
 @Configuration
 public class ShardManagerConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(ShardManagerConfiguration.class);
+
     @Bean
     public SessionController getSessionController(Credentials credentials) {
         return credentials.getDikeUrl().isEmpty()
@@ -66,7 +71,8 @@ public class ShardManagerConfiguration {
     public ShardManager buildShardManager(PropertyConfigProvider configProvider, EventListenerBoat mainEventListener,
                                           LavalinkManager lavalinkManager, SessionController sessionController,
                                           EventLogger eventLogger, JdaEventsMetricsListener jdaEventsMetricsListener,
-                                          ShardReviveHandler shardReviveHandler, MusicPersistenceHandler musicPersistenceHandler) {
+                                          ShardReviveHandler shardReviveHandler, MusicPersistenceHandler musicPersistenceHandler,
+                                          ShutdownHandler shutdownHandler) {
 
         DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder()
                 .setToken(configProvider.getCredentials().getBotToken())
@@ -102,7 +108,25 @@ public class ShardManagerConfiguration {
             throw new RuntimeException("Failed to log in to Discord! Is your token invalid?", e);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(shardManager::shutdown, "shardmanager-shutdown-hook"));
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(createShardManagerShutdownHook(shutdownHandler, musicPersistenceHandler, shardManager),
+                        "shardmanager-shutdown-hook"));
         return shardManager;
+    }
+
+    private Runnable createShardManagerShutdownHook(ShutdownHandler shutdownHandler,
+                                                    MusicPersistenceHandler musicPersistenceHandler,
+                                                    ShardManager shardManager) {
+        return () -> {
+            try {
+                int shutdownCode = shutdownHandler.getShutdownCode();
+                int code = shutdownCode != ShutdownHandler.UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
+                musicPersistenceHandler.handlePreShutdown(code);
+            } catch (Exception e) {
+                log.error("Critical error while handling music persistence.", e);
+            }
+
+            shardManager.shutdown();
+        };
     }
 }

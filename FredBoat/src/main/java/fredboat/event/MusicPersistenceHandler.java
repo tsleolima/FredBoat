@@ -79,6 +79,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
         this.musicTextChannelProvider = musicTextChannelProvider;
     }
 
+    //this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
     public void handlePreShutdown(int code) {
         File dir = new File("music_persistence");
         if (!dir.exists()) {

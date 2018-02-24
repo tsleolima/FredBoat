@@ -24,7 +24,6 @@
 
 package fredboat.main;
 
-import fredboat.event.MusicPersistenceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,28 +37,13 @@ public class ShutdownHandler {
     public static final int UNKNOWN_SHUTDOWN_CODE = -991023;
 
     private static final Logger log = LoggerFactory.getLogger(ShutdownHandler.class);
-    private final MusicPersistenceHandler musicPersistenceHandler;
 
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
-
-    public ShutdownHandler(MusicPersistenceHandler musicPersistenceHandler) {
-        this.musicPersistenceHandler = musicPersistenceHandler;
-    }
 
     public void shutdown(int code) {
         log.info("Shutting down with exit code " + code);
         shutdownCode = code;
-        preShutdown();
         System.exit(code);
-    }
-
-    private void preShutdown() {
-        try {
-            int code = shutdownCode != ShutdownHandler.UNKNOWN_SHUTDOWN_CODE ? shutdownCode : -1;
-            musicPersistenceHandler.handlePreShutdown(code);
-        } catch (Exception e) {
-            log.error("Critical error while handling music persistence.", e);
-        }
     }
 
     public int getShutdownCode() {
