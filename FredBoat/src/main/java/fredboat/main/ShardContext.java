@@ -62,39 +62,6 @@ public class ShardContext {
 
         log.info("Received ready event for {}", readyEvent.getJDA().getShardInfo().toString());
         jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()), true);//jda finished loading, do a single count to init values
-
-
-        //Rejoin old channels if revived
-        channelsToRejoin.forEach(vcid -> {
-            VoiceChannel channel = readyEvent.getJDA().getVoiceChannelById(vcid);
-            if (channel == null) return;
-            GuildPlayer player = playerRegistry.getOrCreate(channel.getGuild());
-
-            Launcher.getBotController().getLavalinkManager().openConnection(channel);
-
-            if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
-                AudioManager am = channel.getGuild().getAudioManager();
-                am.setSendingHandler(player);
-            }
-        });
-
-        channelsToRejoin.clear();
-    }
-
-    public void onShutdown() {
-        try {
-            channelsToRejoin.clear();
-
-            playerRegistry.getPlayingPlayers().stream()
-                    .filter(guildPlayer -> guildPlayer.getJda().getShardInfo().getShardId() == id)
-                    .forEach(guildPlayer -> {
-                        VoiceChannel channel = guildPlayer.getCurrentVoiceChannel();
-                        if (channel != null) channelsToRejoin.add(channel.getId());
-                    });
-        } catch (Exception ex) {
-            log.error("Caught exception while saving channels to revive shard {}", id, ex);
-        }
-
     }
 
     private static class ShardStatsCounter implements StatsAgent.Action {

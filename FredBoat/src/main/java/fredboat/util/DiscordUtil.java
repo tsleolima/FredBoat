@@ -188,6 +188,11 @@ public class DiscordUtil {
                 || botId == BotConstants.MAIN_BOT_ID;
     }
 
+    //https://discordapp.com/developers/docs/topics/gateway#sharding
+    public static int getShardId(long guildId, Credentials credentials) {
+        return (int) ((guildId >> 22) % credentials.getRecommendedShardCount());
+    }
+
     // ########## Moderation related helper functions
     public static String getReasonForModAction(CommandContext context) {
         String r = null;

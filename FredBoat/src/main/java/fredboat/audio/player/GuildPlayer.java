@@ -31,7 +31,6 @@ import fredboat.audio.queue.*;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.CommandContext;
-import fredboat.db.DatabaseNotReadyException;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.main.Launcher;
@@ -317,12 +316,16 @@ public class GuildPlayer extends AbstractPlayer {
 
     @Override
     public String toString() {
-        return "[GP:" + getGuild().getId() + "]";
+        return "[GP:" + guildId + "]";
     }
 
     @Nullable
     public Guild getGuild() {
         return getJda().getGuildById(guildId);
+    }
+
+    public long getGuildId() {
+        return guildId;
     }
 
     public RepeatMode getRepeatMode() {
@@ -446,7 +449,8 @@ public class GuildPlayer extends AbstractPlayer {
             if (guild != null) {
                 enabled = Launcher.getBotController().getEntityIO().fetchGuildConfig(guild).isTrackAnnounce();
             }
-        } catch (DatabaseNotReadyException ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return enabled;
     }

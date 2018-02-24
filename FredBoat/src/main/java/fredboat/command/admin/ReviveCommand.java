@@ -32,6 +32,7 @@ import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
+import fredboat.util.DiscordUtil;
 
 import javax.annotation.Nonnull;
 
@@ -58,8 +59,7 @@ public class ReviveCommand extends Command implements ICommandRestricted {
         try {
             if (context.args.length > 1 && context.args[0].equals("guild")) {
                 long guildId = Long.valueOf(context.args[1]);
-                //https://discordapp.com/developers/docs/topics/gateway#sharding
-                shardId = (int) ((guildId >> 22) % Launcher.getBotController().getCredentials().getRecommendedShardCount());
+                shardId = DiscordUtil.getShardId(guildId, Launcher.getBotController().getCredentials());
             } else {
                 shardId = Integer.parseInt(context.args[0]);
             }

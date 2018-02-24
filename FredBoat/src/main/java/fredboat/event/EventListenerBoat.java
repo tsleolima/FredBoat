@@ -47,6 +47,7 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
 import fredboat.main.ShardContext;
+import fredboat.main.ShardReviveHandler;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
@@ -92,15 +93,18 @@ public class EventListenerBoat extends AbstractEventListener {
     private final PlayerRegistry playerRegistry;
     private final Credentials credentials;
     private final MusicPersistenceHandler musicPersistenceHandler;
+    private final ShardReviveHandler shardReviveHandler;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
-                             MusicPersistenceHandler musicPersistenceHandler, Credentials credentials) {
+                             MusicPersistenceHandler musicPersistenceHandler, Credentials credentials,
+                             ShardReviveHandler shardReviveHandler) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
         this.musicPersistenceHandler = musicPersistenceHandler;
+        this.shardReviveHandler = shardReviveHandler;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -363,17 +367,31 @@ public class EventListenerBoat extends AbstractEventListener {
     /* Shard lifecycle */
     @Override
     public void onReady(ReadyEvent event) {
-        ShardContext.of(event.getJDA(), playerRegistry).onReady(event);
+        try {
+            ShardContext.of(event.getJDA(), playerRegistry).onReady(event);
+        } catch (Exception e) {
+            log.error("Uncaught exception when dispatching ready event to shard context", e);
+        }
 
+        //the current implementation of music persistence is not a good idea on big bots
         if (credentials.getRecommendedShardCount() <= 10) {
-            //the current implementation of music persistence is not a good idea on big bots
-            musicPersistenceHandler.reloadPlaylists(event.getJDA());
+            try {
+                musicPersistenceHandler.reloadPlaylists(event.getJDA());
+            } catch (Exception e) {
+                log.error("Uncaught exception when dispatching ready event to music persistence handler", e);
+            }
+        }
+
+        try {
+            shardReviveHandler.onReady(event.getJDA());
+        } catch (Exception e) {
+            log.error("Uncaught exception when dipatching ready event to shard revive handler", e);
         }
     }
 
     @Override
     public void onShutdown(ShutdownEvent event) {
-        ShardContext.of(event.getJDA(), playerRegistry).onShutdown();
+        shardReviveHandler.onShutdown(event.getJDA());
     }
 
 
