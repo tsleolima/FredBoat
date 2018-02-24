@@ -26,7 +26,6 @@
 package fredboat.audio.player;
 
 import fredboat.main.Launcher;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 
 import javax.annotation.Nonnull;
@@ -51,27 +50,18 @@ public class PlayerRegistry {
         private static final PlayerRegistry INSTANCE = new PlayerRegistry();
     }
 
-    public static void put(long guildId, GuildPlayer guildPlayer) {
-        instance().REGISTRY.put(guildId, guildPlayer);
-    }
-
     @Nonnull
     public static GuildPlayer getOrCreate(@Nonnull Guild guild) {
-        return getOrCreate(guild.getJDA(), guild.getIdLong());
-    }
-
-    @Nonnull
-    public static GuildPlayer getOrCreate(JDA jda, long guildId) {
-        GuildPlayer player = instance().REGISTRY.get(guildId);
-        if (player == null) {
-            player = new GuildPlayer(jda.getGuildById(guildId));
-            player.setVolume(DEFAULT_VOLUME);
-            instance().REGISTRY.put(guildId, player);
-        }
+        GuildPlayer player = instance().REGISTRY.computeIfAbsent(
+                guild.getIdLong(), guildId -> {
+                    GuildPlayer p = new GuildPlayer(guild);
+                    p.setVolume(DEFAULT_VOLUME);
+                    return p;
+                });
 
         // Attempt to set the player as a sending handler. Important after a shard revive
-        if (!Launcher.getBotController().getLavalinkManager().isEnabled() && jda.getGuildById(guildId) != null) {
-            jda.getGuildById(guildId).getAudioManager().setSendingHandler(player);
+        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
+            guild.getAudioManager().setSendingHandler(player);
         }
 
         return player;
@@ -79,19 +69,12 @@ public class PlayerRegistry {
 
     @Nullable
     public static GuildPlayer getExisting(@Nonnull Guild guild) {
-        return getExisting(guild.getJDA(), guild.getIdLong());
+        return getExisting(guild.getIdLong());
     }
 
     @Nullable
-    public static GuildPlayer getExisting(JDA jda, long guildId) {
-        if (instance().REGISTRY.containsKey(guildId)) {
-            return getOrCreate(jda, guildId);
-        }
-        return null;
-    }
-
-    public static GuildPlayer remove(long guildId) {
-        return instance().REGISTRY.remove(guildId);
+    public static GuildPlayer getExisting(long guildId) {
+        return instance().REGISTRY.get(guildId);
     }
 
     public static Map<Long, GuildPlayer> getRegistry() {
@@ -106,14 +89,14 @@ public class PlayerRegistry {
     }
 
     public static void destroyPlayer(Guild g) {
-        destroyPlayer(g.getJDA(), g.getIdLong());
+        destroyPlayer(g.getIdLong());
     }
 
-    public static void destroyPlayer(JDA jda, long guildId) {
-        GuildPlayer player = getExisting(jda, guildId);
+    public static void destroyPlayer(long guildId) {
+        GuildPlayer player = getExisting(guildId);
         if (player != null) {
             player.destroy();
-            remove(guildId);
+            instance().REGISTRY.remove(guildId);
         }
     }
 
