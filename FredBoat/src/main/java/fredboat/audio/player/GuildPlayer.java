@@ -151,7 +151,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     public void leaveVoiceChannelRequest(CommandContext commandContext, boolean silent) {
         if (!silent) {
-            VoiceChannel currentVc = Launcher.getBotController().getLavalinkManager().getConnectedChannel(commandContext.guild);
+            VoiceChannel currentVc = commandContext.guild.getSelfMember().getVoiceState().getChannel();
             if (currentVc == null) {
                 commandContext.reply(commandContext.i18n("playerNotInChannel"));
             } else {
@@ -263,7 +263,7 @@ public class GuildPlayer extends AbstractPlayer {
         }
         Guild guild = j.getGuildById(guildId);
         if (guild != null)
-            return Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild);
+            return guild.getSelfMember().getVoiceState().getChannel();
         else
             return null;
     }

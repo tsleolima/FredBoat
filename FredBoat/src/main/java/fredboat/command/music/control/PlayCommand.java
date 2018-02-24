@@ -43,7 +43,6 @@ import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.SearchUtil;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message.Attachment;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -114,17 +113,16 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
     }
 
     private void handleNoArguments(CommandContext context, @Nullable GuildPlayer player) {
-        Guild guild = context.guild;
         if (player == null || player.isQueueEmpty()) {
             context.reply(context.i18n("playQueueEmpty"));
         } else if (player.isPlaying()) {
             context.reply(context.i18n("playAlreadyPlaying"));
-        } else if (player.getHumanUsersInCurrentVC().isEmpty() && Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
+        } else if (player.getHumanUsersInCurrentVC().isEmpty() && context.guild.getSelfMember().getVoiceState().getChannel() != null) {
             context.reply(context.i18n("playVCEmpty"));
-        } else if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) == null) {
+        } else if (context.guild.getSelfMember().getVoiceState().getChannel() == null) {
             // When we just want to continue playing, but the user is not in a VC
             JOIN_COMMAND.onInvoke(context);
-            if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
+            if (context.guild.getSelfMember().getVoiceState().getChannel() != null) {
                 player.play();
                 context.reply(context.i18n("playWillNowPlay"));
             }

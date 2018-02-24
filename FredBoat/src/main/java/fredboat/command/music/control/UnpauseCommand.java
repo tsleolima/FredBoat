@@ -53,12 +53,12 @@ public class UnpauseCommand extends Command implements IMusicCommand, ICommandRe
             context.reply(context.i18n("unpauseQueueEmpty"));
         } else if (!player.isPaused()) {
             context.reply(context.i18n("unpausePlayerNotPaused"));
-        } else if (player.getHumanUsersInCurrentVC().isEmpty() && player.isPaused() && Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
+        } else if (player.getHumanUsersInCurrentVC().isEmpty() && player.isPaused() && guild.getSelfMember().getVoiceState().getChannel() != null) {
             context.reply(context.i18n("unpauseNoUsers"));
-        } else if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(context.guild) == null) {
+        } else if (guild.getSelfMember().getVoiceState().getChannel() == null) {
             // When we just want to continue playing, but the user is not in a VC
             JOIN_COMMAND.onInvoke(context);
-            if (Launcher.getBotController().getLavalinkManager().getConnectedChannel(guild) != null) {
+            if (guild.getSelfMember().getVoiceState().getChannel() != null) {
                 player.play();
                 context.reply(context.i18n("unpauseSuccess"));
             }
