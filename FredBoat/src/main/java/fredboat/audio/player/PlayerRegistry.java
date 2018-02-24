@@ -58,7 +58,7 @@ public class PlayerRegistry {
                 });
 
         // Attempt to set the player as a sending handler. Important after a shard revive
-        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
+        if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
             guild.getAudioManager().setSendingHandler(player);
         }
 

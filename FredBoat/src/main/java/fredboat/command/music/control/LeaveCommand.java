@@ -56,7 +56,7 @@ public class LeaveCommand extends Command implements IMusicCommand, ICommandRest
             }
         } catch (Exception e) {
             log.error("Something caused us to not properly leave a voice channel!", e);
-            Launcher.getBotController().getLavalinkManager().closeConnection(context.guild);
+            Launcher.getBotController().getAudioConnectionFacade().closeConnection(context.guild);
         }
     }
 

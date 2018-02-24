@@ -24,8 +24,8 @@
 
 package fredboat.event;
 
+import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.Credentials;
 import fredboat.util.DiscordUtil;
@@ -55,12 +55,12 @@ public class ShardReviveHandler extends ListenerAdapter {
 
     private final PlayerRegistry playerRegistry;
     private final Credentials credentials;
-    private final LavalinkManager lavalinkManager;
+    private final AudioConnectionFacade audioConnectionFacade;
 
-    public ShardReviveHandler(PlayerRegistry playerRegistry, Credentials credentials, LavalinkManager lavalinkManager) {
+    public ShardReviveHandler(PlayerRegistry playerRegistry, Credentials credentials, AudioConnectionFacade audioConnectionFacade) {
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
-        this.lavalinkManager = lavalinkManager;
+        this.audioConnectionFacade = audioConnectionFacade;
     }
 
     @Override
@@ -75,9 +75,9 @@ public class ShardReviveHandler extends ListenerAdapter {
             if (channel == null) return;
             GuildPlayer player = playerRegistry.getOrCreate(channel.getGuild());
 
-            lavalinkManager.openConnection(channel);
+            audioConnectionFacade.openConnection(channel);
 
-            if (!lavalinkManager.isEnabled()) {
+            if (audioConnectionFacade.isLocal()) {
                 AudioManager am = channel.getGuild().getAudioManager();
                 am.setSendingHandler(player);
             }

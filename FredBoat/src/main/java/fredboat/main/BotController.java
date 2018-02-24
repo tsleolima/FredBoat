@@ -2,7 +2,7 @@ package fredboat.main;
 
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
-import fredboat.audio.player.LavalinkManager;
+import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.*;
 import fredboat.db.DatabaseManager;
@@ -29,7 +29,7 @@ public class BotController {
             .build());
 
     private final PropertyConfigProvider configProvider;
-    private final LavalinkManager lavalinkManager;
+    private final AudioConnectionFacade audioConnectionFacade;
     private final ShardManager shardManager;
     //central event listener that all events by all shards pass through
     private final EventListenerBoat mainEventListener;
@@ -42,12 +42,12 @@ public class BotController {
 
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
 
-    public BotController(PropertyConfigProvider configProvider, LavalinkManager lavalinkManager, ShardManager shardManager,
+    public BotController(PropertyConfigProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
                          EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
                          PlayerRegistry playerRegistry) {
         this.configProvider = configProvider;
-        this.lavalinkManager = lavalinkManager;
+        this.audioConnectionFacade = audioConnectionFacade;
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
@@ -84,8 +84,8 @@ public class BotController {
         return configProvider.getLavalinkConfig();
     }
 
-    public LavalinkManager getLavalinkManager() {
-        return lavalinkManager;
+    public AudioConnectionFacade getAudioConnectionFacade() {
+        return audioConnectionFacade;
     }
 
     public ShutdownHandler getShutdownHandler() {

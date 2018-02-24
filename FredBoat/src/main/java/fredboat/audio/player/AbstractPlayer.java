@@ -88,7 +88,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     @SuppressWarnings("LeakingThisInConstructor")
     AbstractPlayer(String guildId) {
         initAudioPlayerManager();
-        player = Launcher.getBotController().getLavalinkManager().createPlayer(guildId);
+        player = Launcher.getBotController().getAudioConnectionFacade().createPlayer(guildId);
 
         player.addListener(this);
     }
@@ -106,8 +106,8 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
             }
 
             playerManager.getConfiguration().setResamplingQuality(quality);
-            if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
-                playerManager.enableGcMonitoring(); //we are playing tracks locally
+            if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
+                playerManager.enableGcMonitoring();
             }
             playerManager.setFrameBufferDuration(1000);
             playerManager.setItemLoaderThreadPoolSize(500);

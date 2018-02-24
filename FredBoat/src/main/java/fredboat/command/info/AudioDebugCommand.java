@@ -45,10 +45,10 @@ public class AudioDebugCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (Launcher.getBotController().getLavalinkManager().isEnabled()) {
-            handleLavalink(context);
-        } else {
+        if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
             handleLavaplayer(context);
+        } else {
+            handleLavalink(context);
         }
     }
 

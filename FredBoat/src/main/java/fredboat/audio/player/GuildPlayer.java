@@ -83,7 +83,7 @@ public class GuildPlayer extends AbstractPlayer {
         this.shard = ShardContext.of(guild.getJDA(), playerRegistry);
         this.guildId = guild.getIdLong();
 
-        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
+        if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
             AudioManager manager = guild.getAudioManager();
             manager.setSendingHandler(this);
         }
@@ -144,9 +144,9 @@ public class GuildPlayer extends AbstractPlayer {
                     Permission.VOICE_MOVE_OTHERS.getName()));
         }
 
-        try {//todo inject lavalinkmanager
-            Launcher.getBotController().getLavalinkManager().openConnection(targetChannel);
-            if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
+        try {//todo inject audio connection facade
+            Launcher.getBotController().getAudioConnectionFacade().openConnection(targetChannel);
+            if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
                 guild.getAudioManager().setConnectionListener(new DebugConnectionListener(guildId, getJda().getShardInfo()));
             }
             log.info("Connected to voice channel " + targetChannel);
@@ -164,7 +164,7 @@ public class GuildPlayer extends AbstractPlayer {
                 commandContext.reply(commandContext.i18nFormat("playerLeftChannel", currentVc.getName()));
             }
         }
-        Launcher.getBotController().getLavalinkManager().closeConnection(getGuild());
+        Launcher.getBotController().getAudioConnectionFacade().closeConnection(getGuild());
     }
 
     /**

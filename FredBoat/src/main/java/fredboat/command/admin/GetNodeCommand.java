@@ -44,7 +44,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (!Launcher.getBotController().getLavalinkManager().isEnabled()) {
+        if (Launcher.getBotController().getAudioConnectionFacade().isLocal()) {
             context.replyWithName("Lavalink is not enabled.");
             return;
         }
@@ -63,7 +63,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         } else {
             guild = context.guild;
         }
-        LavalinkSocket node = Launcher.getBotController().getLavalinkManager().getLavalink().getLink(guild).getNode();
+        LavalinkSocket node = Launcher.getBotController().getAudioConnectionFacade().getLavalink().getLink(guild).getNode();
 
         String reply = String.format("Guild %s id `%s` lavalink socket: `%s`",
                 context.guild.getName(), context.guild.getIdLong(), String.valueOf(node));

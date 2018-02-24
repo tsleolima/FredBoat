@@ -25,7 +25,7 @@
 package fredboat.config;
 
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
-import fredboat.audio.player.LavalinkManager;
+import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.config.property.Credentials;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.event.EventListenerBoat;
@@ -69,7 +69,7 @@ public class ShardManagerConfiguration {
 
     @Bean
     public ShardManager buildShardManager(PropertyConfigProvider configProvider, EventListenerBoat mainEventListener,
-                                          LavalinkManager lavalinkManager, SessionController sessionController,
+                                          AudioConnectionFacade audioConnectionFacade, SessionController sessionController,
                                           EventLogger eventLogger, JdaEventsMetricsListener jdaEventsMetricsListener,
                                           ShardReviveHandler shardReviveHandler, MusicPersistenceHandler musicPersistenceHandler,
                                           ShutdownHandler shutdownHandler) {
@@ -90,11 +90,8 @@ public class ShardManagerConfiguration {
                 .addEventListeners(eventLogger)
                 .addEventListeners(shardReviveHandler)
                 .addEventListeners(musicPersistenceHandler)
+                .addEventListeners(audioConnectionFacade)
                 .setShardsTotal(configProvider.getCredentials().getRecommendedShardCount());
-
-        if (lavalinkManager.isEnabled()) {
-            builder.addEventListeners(lavalinkManager.getLavalink());
-        }
 
         if (!System.getProperty("os.arch").equalsIgnoreCase("arm")
                 && !System.getProperty("os.arch").equalsIgnoreCase("arm-linux")) {

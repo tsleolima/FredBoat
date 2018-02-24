@@ -25,8 +25,8 @@
 
 package fredboat.audio.player;
 
+import fredboat.config.property.Credentials;
 import fredboat.config.property.LavalinkConfig;
-import fredboat.config.property.PropertyConfigProvider;
 import fredboat.main.Launcher;
 import fredboat.util.DiscordUtil;
 import lavalink.client.io.Lavalink;
@@ -35,68 +35,77 @@ import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavaplayerPlayerWrapper;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.Event;
+import net.dv8tion.jda.core.hooks.EventListener;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
+/**
+ * Delegate audio connections either to the local JDA instances or remote lavalink nodes
+ */
 @Component
-public class LavalinkManager {
+public class AudioConnectionFacade implements EventListener {
 
-    private Lavalink lavalink = null;
+    @Nullable
+    private final Lavalink lavalink;
 
-    private final PropertyConfigProvider configProvider;
-
-    public LavalinkManager(PropertyConfigProvider configProvider) {
-        this.configProvider = configProvider;
-
-        start();
-    }
-
-    private void start() {
-        if (!isEnabled()) return;
+    public AudioConnectionFacade(LavalinkConfig lavalinkConfig, Credentials credentials) {
+        if (lavalinkConfig.getLavalinkHosts().isEmpty()) {
+            lavalink = null; //local playback
+            return;
+        }
 
         lavalink = new Lavalink(
-                Long.toString(DiscordUtil.getBotId(configProvider.getCredentials())),
-                configProvider.getCredentials().getRecommendedShardCount(),
+                Long.toString(DiscordUtil.getBotId(credentials)),
+                credentials.getRecommendedShardCount(),
                 shardId -> Launcher.getBotController().getShardManager().getShardById(shardId)
         );
-
         Runtime.getRuntime().addShutdownHook(new Thread(lavalink::shutdown, "lavalink-shutdown-hook"));
 
-        List<LavalinkConfig.LavalinkHost> hosts = configProvider.getLavalinkConfig().getLavalinkHosts();
+        List<LavalinkConfig.LavalinkHost> hosts = lavalinkConfig.getLavalinkHosts();
         hosts.forEach(lavalinkHost -> lavalink.addNode(lavalinkHost.getName(), lavalinkHost.getUri(),
                 lavalinkHost.getPassword()));
 
         new LavalinkCollector(lavalink).register();
     }
 
-    public boolean isEnabled() {
-        return !configProvider.getLavalinkConfig().getLavalinkHosts().isEmpty();
+    public boolean isLocal() {
+        return lavalink == null;
     }
 
     IPlayer createPlayer(String guildId) {
-        return isEnabled()
-                ? lavalink.getLink(guildId).getPlayer()
-                : new LavaplayerPlayerWrapper(AbstractPlayer.getPlayerManager().createPlayer());
+        return lavalink == null
+                ? new LavaplayerPlayerWrapper(AbstractPlayer.getPlayerManager().createPlayer())
+                : lavalink.getLink(guildId).getPlayer();
     }
 
     public void openConnection(VoiceChannel channel) {
-        if (isEnabled()) {
-            lavalink.getLink(channel.getGuild()).connect(channel);
-        } else {
+        if (lavalink == null) {
             channel.getGuild().getAudioManager().openAudioConnection(channel);
+        } else {
+            lavalink.getLink(channel.getGuild()).connect(channel);
         }
     }
 
     public void closeConnection(Guild guild) {
-        if (isEnabled()) {
-            lavalink.getLink(guild).disconnect();
-        } else {
+        if (lavalink == null) {
             guild.getAudioManager().closeAudioConnection();
+        } else {
+            lavalink.getLink(guild).disconnect();
         }
     }
 
+    @Nullable
     public Lavalink getLavalink() {
         return lavalink;
+    }
+
+    @Override
+    public void onEvent(Event event) {
+        if (lavalink != null) {
+            lavalink.onEvent(event);
+        }
     }
 }
