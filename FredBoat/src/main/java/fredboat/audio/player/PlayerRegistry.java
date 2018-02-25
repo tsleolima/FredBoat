@@ -28,6 +28,7 @@ package fredboat.audio.player;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.db.EntityIO;
 import fredboat.jda.JdaEntityProvider;
+import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.entities.Guild;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -49,16 +50,19 @@ public class PlayerRegistry {
     private final AudioConnectionFacade audioConnectionFacade;
     private final EntityIO entityIO;
     private final AudioPlayerManager audioPlayerManager;
+    private final Ratelimiter ratelimiter;
     private final MusicTextChannelProvider musicTextChannelProvider;
 
     public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                           AudioConnectionFacade audioConnectionFacade, EntityIO entityIO,
-                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
+                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
+                          Ratelimiter ratelimiter) {
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.entityIO = entityIO;
         this.audioPlayerManager = audioPlayerManager;
+        this.ratelimiter = ratelimiter;
     }
 
     @Nonnull
@@ -66,7 +70,7 @@ public class PlayerRegistry {
         return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
                     GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, jdaEntityProvider,
-                            audioConnectionFacade, audioPlayerManager, entityIO);
+                            audioConnectionFacade, audioPlayerManager, entityIO, ratelimiter);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });

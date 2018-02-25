@@ -29,18 +29,19 @@ import fredboat.command.info.ShardsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.command.util.WeatherCommand;
 import fredboat.commandmeta.abs.Command;
+import fredboat.config.property.AppConfig;
+import fredboat.db.api.BlacklistIO;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
-import fredboat.util.DiscordUtil;
 import fredboat.util.Tuple2;
-import net.dv8tion.jda.core.JDA;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by napster on 17.04.17.
@@ -49,61 +50,38 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * http://i.imgur.com/ha0R3XZ.gif
  */
+@Component
 public class Ratelimiter {
 
     private static final int RATE_LIMIT_HITS_BEFORE_BLACKLIST = 10;
 
-    //one ratelimiter for all running shards
-    private static volatile Ratelimiter ratelimiterSingleton;
-
-    public static Ratelimiter getRatelimiter() {
-        Ratelimiter singleton = ratelimiterSingleton;
-        if (singleton == null) {
-            //we can't use the holder class pattern.
-            //we have to use double-checked locking,
-            //since we need to be able to retry the creation.
-            synchronized (Ratelimiter.class) {
-                singleton = ratelimiterSingleton;
-                if (singleton == null) {
-                    ratelimiterSingleton = singleton = new Ratelimiter();
-                }
-            }
-        }
-        return singleton;
-    }
-
     private final List<Ratelimit> ratelimits;
+    @Nullable
     private Blacklist autoBlacklist = null;
 
-    private Ratelimiter() {
+    public Ratelimiter(AppConfig appConfig, ExecutorService executor, BlacklistIO blacklistIO) {
         Set<Long> whitelist = ConcurrentHashMap.newKeySet();
 
-        //it is ok to use the jda of any shard as long as we aren't using it for guild specific stuff
-        Optional<JDA> shard = Launcher.getBotController().getJdaEntityProvider().streamShards().findAny();
-        if (shard.isPresent()) {
-            JDA jda = shard.get();
-            whitelist.add(DiscordUtil.getOwnerId(jda));
-            whitelist.add(jda.getSelfUser().getIdLong());
-        }
         //only works for those admins who are added with their userId and not through a roleId
-        for (String admin : Launcher.getBotController().getAppConfig().getAdminIds())
+        for (String admin : appConfig.getAdminIds()) {
             whitelist.add(Long.valueOf(admin));
-
+        }
 
         //Create all the rate limiters we want
         ratelimits = new ArrayList<>();
 
-        if (Launcher.getBotController().getAppConfig().useAutoBlacklist())
-            autoBlacklist = new Blacklist(whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
+        if (appConfig.useAutoBlacklist()) {
+            autoBlacklist = new Blacklist(blacklistIO, whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
+        }
 
         //sort these by harsher limits coming first
-        ratelimits.add(new Ratelimit(whitelist, Ratelimit.Scope.USER, 2, 30000, ShardsCommand.class));
-        ratelimits.add(new Ratelimit(whitelist, Ratelimit.Scope.USER, 5, 20000, SkipCommand.class));
-        ratelimits.add(new Ratelimit(whitelist, Ratelimit.Scope.USER, 5, 10000, Command.class));
+        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.USER, 2, 30000, ShardsCommand.class));
+        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.USER, 5, 20000, SkipCommand.class));
+        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.USER, 5, 10000, Command.class));
 
-        ratelimits.add(new Ratelimit(whitelist, Ratelimit.Scope.GUILD, 30, 180000, WeatherCommand.class));
-        ratelimits.add(new Ratelimit(whitelist, Ratelimit.Scope.GUILD, 1000, 120000, PlaylistInfo.class));
-        ratelimits.add(new Ratelimit(whitelist, Ratelimit.Scope.GUILD, 10, 10000, Command.class));
+        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.GUILD, 30, 180000, WeatherCommand.class));
+        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.GUILD, 1000, 120000, PlaylistInfo.class));
+        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.GUILD, 10, 10000, Command.class));
     }
 
     /**

@@ -70,6 +70,7 @@ import java.util.concurrent.ExecutorService;
         "fredboat.feature.metrics",
         "fredboat.jda",
         "fredboat.main",
+        "fredboat.util.ratelimit",
         "fredboat.util.rest",
 })
 public class Launcher implements ApplicationRunner {

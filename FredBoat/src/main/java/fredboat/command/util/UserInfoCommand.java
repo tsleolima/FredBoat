@@ -33,7 +33,6 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.ArgumentUtil;
 import fredboat.util.TextUtils;
-import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.entities.Member;
 
 import javax.annotation.Nonnull;
@@ -93,7 +92,7 @@ public class UserInfoCommand extends Command implements IUtilCommand {
                 .addField(context.i18n("userinfoJoinDate"), target.getJoinDate().format(dtf), true)
                 .addField(context.i18n("userinfoCreationTime"), target.getUser().getCreationTime().format(dtf), true)
                 .addField(context.i18n("userinfoBlacklisted"),
-                        Boolean.toString(Ratelimiter.getRatelimiter().isBlacklisted(target.getUser().getIdLong())), true)
+                        Boolean.toString(Launcher.getBotController().getRatelimiter().isBlacklisted(target.getUser().getIdLong())), true)
                 .build()
         );
     }

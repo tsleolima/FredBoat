@@ -63,6 +63,7 @@ public class AudioLoader implements AudioLoadResultHandler {
     private static final int QUEUE_TRACK_LIMIT = 10000;
 
     private final JdaEntityProvider jdaEntityProvider;
+    private final Ratelimiter ratelimiter;
     private final ITrackProvider trackProvider;
     private final AudioPlayerManager playerManager;
     private final GuildPlayer gplayer;
@@ -70,8 +71,10 @@ public class AudioLoader implements AudioLoadResultHandler {
     private IdentifierContext context = null;
     private volatile boolean isLoading = false;
 
-    public AudioLoader(JdaEntityProvider jdaEntityProvider, ITrackProvider trackProvider, AudioPlayerManager playerManager, GuildPlayer gplayer) {
+    public AudioLoader(JdaEntityProvider jdaEntityProvider, Ratelimiter ratelimiter, ITrackProvider trackProvider,
+                       AudioPlayerManager playerManager, GuildPlayer gplayer) {
         this.jdaEntityProvider = jdaEntityProvider;
+        this.ratelimiter = ratelimiter;
         this.trackProvider = trackProvider;
         this.playerManager = playerManager;
         this.gplayer = gplayer;
@@ -124,7 +127,7 @@ public class AudioLoader implements AudioLoadResultHandler {
         else {
             boolean result = true;
             if (FeatureFlags.RATE_LIMITER.isActive()) {
-                result = Ratelimiter.getRatelimiter().isAllowed(ic, playlistInfo, playlistInfo.getTotalTracks()).a;
+                result = ratelimiter.isAllowed(ic, playlistInfo, playlistInfo.getTotalTracks()).a;
             }
 
             if (result) {

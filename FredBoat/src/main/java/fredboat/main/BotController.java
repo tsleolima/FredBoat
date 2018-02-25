@@ -15,6 +15,7 @@ import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.metrics.OkHttpEventMetrics;
+import fredboat.util.ratelimit.Ratelimiter;
 import fredboat.util.rest.Http;
 import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
@@ -47,13 +48,15 @@ public class BotController {
     private final BotMetrics botMetrics;
     private final ExecutorService executor;
     private final AudioPlayerManager audioPlayerManager;
+    private final Ratelimiter ratelimiter;
 
 
     public BotController(PropertyConfigProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
                          EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
                          PlayerRegistry playerRegistry, JdaEntityProvider jdaEntityProvider, BotMetrics botMetrics,
-                         @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
+                         @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
+                         Ratelimiter ratelimiter) {
         this.configProvider = configProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.shardManager = shardManager;
@@ -67,6 +70,7 @@ public class BotController {
         this.jdaEntityProvider = jdaEntityProvider;
         this.botMetrics = botMetrics;
         this.audioPlayerManager = audioPlayerManager;
+        this.ratelimiter = ratelimiter;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(), "FredBoat main shutdownhook"));
     }
@@ -127,6 +131,10 @@ public class BotController {
 
     public AudioPlayerManager getAudioPlayerManager() {
         return audioPlayerManager;
+    }
+
+    public Ratelimiter getRatelimiter() {
+        return ratelimiter;
     }
 
     //Shutdown hook

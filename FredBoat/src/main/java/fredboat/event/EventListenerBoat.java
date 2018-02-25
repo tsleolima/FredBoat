@@ -90,15 +90,18 @@ public class EventListenerBoat extends AbstractEventListener {
     private final PlayerRegistry playerRegistry;
     private final ShardStatsCounterProvider shardStatsCounterProvider;
     private final JdaEntityProvider jdaEntityProvider;
+    private final Ratelimiter ratelimiter;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
-                             ShardStatsCounterProvider shardStatsCounterProvider, JdaEntityProvider jdaEntityProvider) {
+                             ShardStatsCounterProvider shardStatsCounterProvider, JdaEntityProvider jdaEntityProvider,
+                             Ratelimiter ratelimiter) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
         this.shardStatsCounterProvider = shardStatsCounterProvider;
         this.jdaEntityProvider = jdaEntityProvider;
+        this.ratelimiter = ratelimiter;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -116,7 +119,7 @@ public class EventListenerBoat extends AbstractEventListener {
 
     private void doOnMessageReceived(MessageReceivedEvent event) {
         if (FeatureFlags.RATE_LIMITER.isActive()) {
-            if (Ratelimiter.getRatelimiter().isBlacklisted(event.getAuthor().getIdLong())) {
+            if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
                 Metrics.blacklistedMessagesReceived.inc();
                 return;
             }
@@ -181,7 +184,7 @@ public class EventListenerBoat extends AbstractEventListener {
     private void limitOrExecuteCommand(CommandContext context) {
         Tuple2<Boolean, Class> ratelimiterResult = new Tuple2<>(true, null);
         if (FeatureFlags.RATE_LIMITER.isActive()) {
-            ratelimiterResult = Ratelimiter.getRatelimiter().isAllowed(context, context.command, 1);
+            ratelimiterResult = ratelimiter.isAllowed(context, context.command, 1);
         }
 
         if (ratelimiterResult.a) {
@@ -221,7 +224,7 @@ public class EventListenerBoat extends AbstractEventListener {
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
 
         if (FeatureFlags.RATE_LIMITER.isActive()) {
-            if (Ratelimiter.getRatelimiter().isBlacklisted(event.getAuthor().getIdLong())) {
+            if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
                 //dont need to inc() the metrics counter here, because private message events are a subset of
                 // MessageReceivedEvents where we inc() the blacklisted messages counter already
                 return;

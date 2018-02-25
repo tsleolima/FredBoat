@@ -39,6 +39,7 @@ import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
+import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -72,7 +73,8 @@ public class GuildPlayer extends AbstractPlayer {
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
-                       AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager, EntityIO entityIO) {
+                       AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager, EntityIO entityIO,
+                       Ratelimiter ratelimiter) {
         super(guild.getId(), audioConnectionFacade);
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
@@ -86,7 +88,7 @@ public class GuildPlayer extends AbstractPlayer {
         this.guildId = guild.getIdLong();
 
         audioTrackProvider = new SimpleTrackProvider();
-        audioLoader = new AudioLoader(jdaEntityProvider, audioTrackProvider, audioPlayerManager, this);
+        audioLoader = new AudioLoader(jdaEntityProvider, ratelimiter, audioTrackProvider, audioPlayerManager, this);
     }
 
     private void announceTrack(AudioTrackContext atc) {
