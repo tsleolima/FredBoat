@@ -25,7 +25,7 @@
 package fredboat.feature.metrics;
 
 import fredboat.agent.StatsAgent;
-import fredboat.jda.JdaProvider;
+import fredboat.jda.ShardProvider;
 import fredboat.util.func.NonnullSupplier;
 import net.dv8tion.jda.core.JDA;
 import org.springframework.stereotype.Component;
@@ -41,17 +41,17 @@ public class ShardStatsCounterProvider {
 
     private final ConcurrentHashMap<Integer, ShardStatsCounter> shardStatsCounters = new ConcurrentHashMap<>();
     private final StatsAgent statsAgent;
-    private final JdaProvider jdaProvider;
+    private final ShardProvider shardProvider;
 
-    public ShardStatsCounterProvider(StatsAgent statsAgent, JdaProvider jdaProvider) {
+    public ShardStatsCounterProvider(StatsAgent statsAgent, ShardProvider shardProvider) {
         this.statsAgent = statsAgent;
-        this.jdaProvider = jdaProvider;
+        this.shardProvider = shardProvider;
     }
 
-    public void registerShard(int shardId) {
+    public void registerShard(JDA.ShardInfo shardInfo) {
+        int shardId = shardInfo.getShardId();
         shardStatsCounters.computeIfAbsent(shardId, id -> {
-            ShardStatsCounter shardStatsCounter = create(jdaProvider.getShardById(id).getShardInfo(),
-                    () -> jdaProvider.getShardById(shardId));
+            ShardStatsCounter shardStatsCounter = create(shardInfo, () -> shardProvider.getShardById(shardId));
             statsAgent.addAction(shardStatsCounter);
             return shardStatsCounter;
         });

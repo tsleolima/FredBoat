@@ -104,7 +104,6 @@ public class BotController {
         return mainEventListener;
     }
 
-    // Can be null during init, but usually not
     public ShardManager getShardManager() {
         return shardManager;
     }

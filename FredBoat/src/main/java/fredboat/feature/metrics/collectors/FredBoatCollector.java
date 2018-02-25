@@ -27,11 +27,10 @@ package fredboat.feature.metrics.collectors;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
+import fredboat.jda.ShardProvider;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
-import net.dv8tion.jda.bot.sharding.ShardManager;
-import net.dv8tion.jda.core.JDA;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -48,13 +47,13 @@ public class FredBoatCollector extends Collector {
 
     private final PlayerRegistry playerRegistry;
     private final BotMetrics botMetrics;
-    private final ShardManager shardManager;
+    private final ShardProvider shardProvider;
 
-    public FredBoatCollector(PlayerRegistry playerRegistry, BotMetrics botMetrics, ShardManager shardManager) {
+    public FredBoatCollector(PlayerRegistry playerRegistry, BotMetrics botMetrics, ShardProvider shardProvider) {
         super();
         this.playerRegistry = playerRegistry;
         this.botMetrics = botMetrics;
-        this.shardManager = shardManager;
+        this.shardProvider = shardProvider;
     }
 
     @Override
@@ -97,7 +96,7 @@ public class FredBoatCollector extends Collector {
 
 
         //per shard stats
-        for (JDA shard : shardManager.getShards()) {
+        shardProvider.streamShards().forEach(shard -> {
             String shardId = Integer.toString(shard.getShardInfo().getShardId());
             jdaEntities.addMetric(Arrays.asList(shardId, "User"), shard.getUserCache().size());
             jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), shard.getGuildCache().size());
@@ -106,7 +105,7 @@ public class FredBoatCollector extends Collector {
             jdaEntities.addMetric(Arrays.asList(shardId, "Category"), shard.getCategoryCache().size());
             jdaEntities.addMetric(Arrays.asList(shardId, "Emote"), shard.getEmoteCache().size());
             jdaEntities.addMetric(Arrays.asList(shardId, "Role"), shard.getRoleCache().size());
-        }
+        });
 
         return mfs;
     }

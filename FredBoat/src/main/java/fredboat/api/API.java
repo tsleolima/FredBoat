@@ -29,8 +29,8 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.MetricsServletAdapter;
+import fredboat.jda.ShardProvider;
 import fredboat.main.Launcher;
-import net.dv8tion.jda.core.JDA;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +47,7 @@ public class API {
 
     private API() {}
 
-    public static void start(PlayerRegistry playerRegistry, BotMetrics botMetrics) {
+    public static void start(PlayerRegistry playerRegistry, BotMetrics botMetrics, ShardProvider shardProvider) {
         if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
@@ -70,7 +70,7 @@ public class API {
             JSONObject root = new JSONObject();
             JSONArray a = new JSONArray();
 
-            for (JDA shard : Launcher.getBotController().getShardManager().getShards()) {
+            shardProvider.streamShards().forEach(shard -> {
                 JSONObject fbStats = new JSONObject();
                 fbStats.put("id", shard.getShardInfo().getShardId())
                         .put("guilds", shard.getGuildCache().size())
@@ -78,7 +78,7 @@ public class API {
                         .put("status", shard.getStatus());
 
                 a.put(fbStats);
-            }
+            });
 
             JSONObject g = new JSONObject();
             g.put("playingPlayers", playerRegistry.getPlayingPlayers().size())

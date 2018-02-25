@@ -122,7 +122,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                 }
 
                 videoSelectionCache.remove(invoker);
-                TextChannel tc = Launcher.getBotController().getShardManager().getTextChannelById(selection.channelId);
+                TextChannel tc = Launcher.getBotController().getJdaEntityProvider().getTextChannelById(selection.channelId);
                 if (tc != null) {
                     CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(outputMsgBuilder.toString()));
                 }

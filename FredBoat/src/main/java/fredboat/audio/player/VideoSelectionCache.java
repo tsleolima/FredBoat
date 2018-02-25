@@ -28,9 +28,9 @@ package fredboat.audio.player;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import fredboat.jda.TextChannelProvider;
 import fredboat.messaging.CentralMessaging;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -52,10 +52,10 @@ public class VideoSelectionCache {
             .recordStats()
             .expireAfterWrite(60, TimeUnit.MINUTES)
             .build();
-    private final ShardManager shardManager;
+    private final TextChannelProvider textChannelProvider;
 
-    public VideoSelectionCache(ShardManager shardManager, CacheMetricsCollector cacheMetrics) {
-        this.shardManager = shardManager;
+    public VideoSelectionCache(TextChannelProvider textChannelProvider, CacheMetricsCollector cacheMetrics) {
+        this.textChannelProvider = textChannelProvider;
         cacheMetrics.addCache("videoSelections", videoSelections);
     }
 
@@ -70,7 +70,7 @@ public class VideoSelectionCache {
     }
 
     public void put(@Nonnull Member member, List<AudioTrack> choices, Message outMsg) {
-        videoSelections.put(asKey(member), new VideoSelection(choices, outMsg, shardManager));
+        videoSelections.put(asKey(member), new VideoSelection(choices, outMsg, textChannelProvider));
     }
 
     @Nullable
@@ -99,17 +99,17 @@ public class VideoSelectionCache {
         public final List<AudioTrack> choices;
         public final long outMsgId; //our own message
         public final long channelId;
-        private final ShardManager shardManager;
+        private final TextChannelProvider textChannelProvider;
 
-        private VideoSelection(List<AudioTrack> choices, Message outMsg, ShardManager shardManager) {
+        private VideoSelection(List<AudioTrack> choices, Message outMsg, TextChannelProvider textChannelProvider) {
             this.choices = choices;
             this.outMsgId = outMsg.getIdLong();
             this.channelId = outMsg.getChannel().getIdLong();
-            this.shardManager = shardManager;
+            this.textChannelProvider = textChannelProvider;
         }
 
         public void deleteMessage() {
-            TextChannel tc = shardManager.getTextChannelById(channelId);
+            TextChannel tc = textChannelProvider.getTextChannelById(channelId);
             if (tc != null) {
                 //we can call this without an additional permission check, as this should be our own message that we are
                 //deleting

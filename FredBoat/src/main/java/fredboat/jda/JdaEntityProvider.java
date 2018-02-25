@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 /**
  * Created by napster on 25.02.18.
@@ -38,13 +39,24 @@ import javax.annotation.Nullable;
  * The Lazy init of the shard manager allows us to resolve circular dependency of our components on the shard manager
  */
 @Component
-public class JdaEntityProvider implements GuildProvider, JdaProvider, MemberProvider, RoleProvider, TextChannelProvider,
-        UserProvider, VoiceChannelProvider {
+public class JdaEntityProvider implements EmoteProvider, GuildProvider, MemberProvider, RoleProvider, ShardProvider,
+        TextChannelProvider, UserProvider, VoiceChannelProvider {
 
     private final ShardManager shardManager;
 
     public JdaEntityProvider(@Lazy ShardManager shardManager) {
         this.shardManager = shardManager;
+    }
+
+    @Nullable
+    @Override
+    public Emote getEmoteById(long emoteId) {
+        return shardManager.getEmoteById(emoteId);
+    }
+
+    @Override
+    public Stream<Emote> streamEmotes() {
+        return shardManager.getEmoteCache().stream();
     }
 
     @Override
@@ -54,8 +66,8 @@ public class JdaEntityProvider implements GuildProvider, JdaProvider, MemberProv
     }
 
     @Override
-    public JDA getShardById(int shardId) {
-        return shardManager.getShardById(shardId);
+    public Stream<Guild> streamGuilds() {
+        return shardManager.getGuildCache().stream();
     }
 
     @Override
@@ -72,9 +84,29 @@ public class JdaEntityProvider implements GuildProvider, JdaProvider, MemberProv
     }
 
     @Override
+    public Stream<Role> streamRoles() {
+        return shardManager.getRoleCache().stream();
+    }
+
+    @Override
+    public JDA getShardById(int shardId) {
+        return shardManager.getShardById(shardId);
+    }
+
+    @Override
+    public Stream<JDA> streamShards() {
+        return shardManager.getShardCache().stream();
+    }
+
+    @Override
     @Nullable
     public TextChannel getTextChannelById(long textChannelId) {
         return shardManager.getTextChannelById(textChannelId);
+    }
+
+    @Override
+    public Stream<TextChannel> streamTextChannels() {
+        return shardManager.getTextChannelCache().stream();
     }
 
     @Override
@@ -84,8 +116,18 @@ public class JdaEntityProvider implements GuildProvider, JdaProvider, MemberProv
     }
 
     @Override
+    public Stream<User> streamUsers() {
+        return shardManager.getUserCache().stream();
+    }
+
+    @Override
     @Nullable
     public VoiceChannel getVoiceChannelById(long voiceChannelId) {
         return shardManager.getVoiceChannelById(voiceChannelId);
+    }
+
+    @Override
+    public Stream<VoiceChannel> streamVoiceChannels() {
+        return shardManager.getVoiceChannelCache().stream();
     }
 }

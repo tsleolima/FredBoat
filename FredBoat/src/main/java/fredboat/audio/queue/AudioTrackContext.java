@@ -30,7 +30,6 @@ import fredboat.audio.player.GuildPlayer;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.LeakSafeContext;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 
@@ -145,14 +144,10 @@ public class AudioTrackContext extends LeakSafeContext implements Comparable<Aud
     @Override
     @Nullable
     public TextChannel getTextChannel() {
-        Guild guild = Launcher.getBotController().getShardManager().getGuildById(guildId);
-        if (guild != null) {
-            GuildPlayer guildPlayer = Launcher.getBotController().getPlayerRegistry().getExisting(guild);
-            if (guildPlayer != null) {
-                return guildPlayer.getActiveTextChannel();
-            }
+        GuildPlayer guildPlayer = Launcher.getBotController().getPlayerRegistry().getExisting(guildId);
+        if (guildPlayer != null) {
+            return guildPlayer.getActiveTextChannel();
         }
-
         return null;
     }
 }

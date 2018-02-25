@@ -30,7 +30,7 @@ import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.feature.metrics.Metrics;
-import net.dv8tion.jda.bot.sharding.ShardManager;
+import fredboat.jda.GuildProvider;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import org.slf4j.Logger;
@@ -48,14 +48,14 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
     private static final HashMap<String, Long> VC_LAST_USED = new HashMap<>();
     private static final int UNUSED_CLEANUP_THRESHOLD = 60000 * 60; // Effective when users are in the VC, but the player is not playing
     private final PlayerRegistry playerRegistry;
-    private final ShardManager shardManager;
+    private final GuildProvider guildProvider;
     private final AudioConnectionFacade audioConnectionFacade;
 
-    public VoiceChannelCleanupAgent(PlayerRegistry playerRegistry, ShardManager shardManager,
+    public VoiceChannelCleanupAgent(PlayerRegistry playerRegistry, GuildProvider guildProvider,
                                     AudioConnectionFacade audioConnectionFacade) {
         super("voice-cleanup", 10, TimeUnit.MINUTES);
         this.playerRegistry = playerRegistry;
-        this.shardManager = shardManager;
+        this.guildProvider = guildProvider;
         this.audioConnectionFacade = audioConnectionFacade;
     }
 
@@ -75,7 +75,7 @@ public class VoiceChannelCleanupAgent extends FredBoatAgent {
         final AtomicInteger totalVcs = new AtomicInteger(0);
         final AtomicInteger closedVcs = new AtomicInteger(0);
 
-        shardManager.getGuildCache().stream().forEach(guild -> {
+        guildProvider.streamGuilds().forEach(guild -> {
             try {
                 totalGuilds.incrementAndGet();
                 if (guild != null

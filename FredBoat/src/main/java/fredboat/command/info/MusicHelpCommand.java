@@ -117,7 +117,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
             return;
         }
 
-        TextChannel fbhMusicCommandsChannel = Launcher.getBotController().getShardManager().getTextChannelById(channelId);
+        TextChannel fbhMusicCommandsChannel = Launcher.getBotController().getJdaEntityProvider().getTextChannelById(channelId);
         if (fbhMusicCommandsChannel == null) {
             context.reply("Could not find the requested channel with id " + channelId);
             return;

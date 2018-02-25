@@ -27,6 +27,7 @@ package fredboat.jda;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 
 import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 /**
  * Created by napster on 25.02.18.
@@ -35,4 +36,6 @@ public interface VoiceChannelProvider {
 
     @Nullable
     VoiceChannel getVoiceChannelById(long voiceChannelId);
+
+    Stream<VoiceChannel> streamVoiceChannels();
 }

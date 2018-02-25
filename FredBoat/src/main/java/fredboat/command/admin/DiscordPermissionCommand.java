@@ -77,7 +77,7 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
         } else if (context.hasArguments()) {
             try {
                 long channelId = Long.parseUnsignedLong(context.args[0]);
-                TextChannel textChannel = Launcher.getBotController().getShardManager().getTextChannelById(channelId);
+                TextChannel textChannel = Launcher.getBotController().getJdaEntityProvider().getTextChannelById(channelId);
                 if (textChannel == null) {
                     context.reply(String.format("No text channel with id `%s` found.", channelId));
                     return;

@@ -38,6 +38,7 @@ import net.dv8tion.jda.core.JDA;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -78,9 +79,12 @@ public class Ratelimiter {
         Set<Long> whitelist = ConcurrentHashMap.newKeySet();
 
         //it is ok to use the jda of any shard as long as we aren't using it for guild specific stuff
-        JDA jda = Launcher.getBotController().getShardManager().getShardById(0);
-        whitelist.add(DiscordUtil.getOwnerId(jda));
-        whitelist.add(jda.getSelfUser().getIdLong());
+        Optional<JDA> shard = Launcher.getBotController().getJdaEntityProvider().streamShards().findAny();
+        if (shard.isPresent()) {
+            JDA jda = shard.get();
+            whitelist.add(DiscordUtil.getOwnerId(jda));
+            whitelist.add(jda.getSelfUser().getIdLong());
+        }
         //only works for those admins who are added with their userId and not through a roleId
         for (String admin : Launcher.getBotController().getAppConfig().getAdminIds())
             whitelist.add(Long.valueOf(admin));

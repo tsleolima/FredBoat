@@ -24,13 +24,18 @@
 
 package fredboat.jda;
 
-import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.Emote;
+
+import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 /**
  * Created by napster on 25.02.18.
  */
-public interface JdaProvider {
+public interface EmoteProvider {
 
-    JDA getShardById(int shardId);
+    @Nullable
+    Emote getEmoteById(long emoteId);
 
+    Stream<Emote> streamEmotes();
 }

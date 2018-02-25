@@ -26,10 +26,10 @@ package fredboat.feature.metrics;
 
 import fredboat.agent.StatsAgent;
 import fredboat.config.property.Credentials;
+import fredboat.jda.ShardProvider;
 import fredboat.main.BotController;
 import fredboat.util.DiscordUtil;
 import fredboat.util.JDAUtil;
-import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Metrics for the whole FredBoat
@@ -97,15 +98,16 @@ public class BotMetrics {
     }
 
     //call this once, after shards are all up
-    public void start(ShardManager shardManager, Credentials credentials) {
+    public void start(ShardProvider shardProvider, Credentials credentials) {
         BotMetrics.JdaEntityCounts jdaEntityCountsTotal = getJdaEntityCountsTotal();
+        Supplier<Collection<JDA>> shardsSupplier = () -> shardProvider.streamShards().collect(Collectors.toList());
         try {
-            jdaEntityCountsTotal.count(shardManager::getShards);
+            jdaEntityCountsTotal.count(shardsSupplier);
         } catch (Exception ignored) {
         }
 
         statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
-                () -> jdaEntityCountsTotal.count(shardManager::getShards)));
+                () -> jdaEntityCountsTotal.count(shardsSupplier)));
 
         if (DiscordUtil.isOfficialBot(credentials)) {
             BotMetrics.DockerStats dockerStats = getDockerStats();

@@ -27,7 +27,7 @@ package fredboat.event;
 
 import fredboat.config.property.EventLoggerConfig;
 import fredboat.config.property.PropertyConfigProvider;
-import fredboat.main.Launcher;
+import fredboat.jda.ShardProvider;
 import fredboat.main.ShutdownHandler;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.Emojis;
@@ -52,10 +52,7 @@ import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -77,6 +74,7 @@ public class EventLogger extends ListenerAdapter {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(
             runnable -> new Thread(runnable, "eventlogger"));
+    private final ShardProvider shardProvider;
     @Nullable
     private WebhookClient eventLogWebhook;
     @Nullable
@@ -182,7 +180,8 @@ public class EventLogger extends ListenerAdapter {
     }
 
     //actual constructor
-    public EventLogger(PropertyConfigProvider configProvider, ShutdownHandler shutdownHandler) {
+    public EventLogger(PropertyConfigProvider configProvider, ShutdownHandler shutdownHandler, ShardProvider shardProvider) {
+        this.shardProvider = shardProvider;
         EventLoggerConfig config = configProvider.getEventLoggerConfig();
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(shutdownHandler), EventLogger.class.getSimpleName() + " shutdownhook"));
 
@@ -275,10 +274,9 @@ public class EventLogger extends ListenerAdapter {
                 .addField("Guilds joined", Integer.toString(guildsJoinedEvents.getAndSet(0)), true)
                 .addField("Guilds left", Integer.toString(guildsLeftEvents.getAndSet(0)), true);
 
-        List<JDA> shards = Launcher.getBotController().getShardManager().getShards();
-
-        if (!shards.isEmpty()) {
-            JDA anyShard = shards.get(0);
+        Optional<JDA> shards = shardProvider.streamShards().findAny();
+        if (shards.isPresent()) {
+            JDA anyShard = shards.get();
             User self = anyShard.getSelfUser();
             eb.setFooter(self.getName(), self.getEffectiveAvatarUrl());
         }

@@ -53,7 +53,7 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         if (context.hasArguments()) {
             try {
                 long guildId = Long.parseUnsignedLong(context.args[0]);
-                guild = Launcher.getBotController().getShardManager().getGuildById(guildId);
+                guild = Launcher.getBotController().getJdaEntityProvider().getGuildById(guildId);
             } catch (NumberFormatException ignored) {
             }
             if (guild == null) {

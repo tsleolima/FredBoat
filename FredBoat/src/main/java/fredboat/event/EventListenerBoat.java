@@ -44,6 +44,7 @@ import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.ShardStatsCounterProvider;
 import fredboat.feature.togglz.FeatureFlags;
+import fredboat.jda.JdaEntityProvider;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -88,14 +89,16 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandContextParser commandContextParser;
     private final PlayerRegistry playerRegistry;
     private final ShardStatsCounterProvider shardStatsCounterProvider;
+    private final JdaEntityProvider jdaEntityProvider;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
-                             ShardStatsCounterProvider shardStatsCounterProvider) {
+                             ShardStatsCounterProvider shardStatsCounterProvider, JdaEntityProvider jdaEntityProvider) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
         this.shardStatsCounterProvider = shardStatsCounterProvider;
+        this.jdaEntityProvider = jdaEntityProvider;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -335,7 +338,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //wait a few seconds to allow permissions to be set and applied and propagated
         CentralMessaging.restService.schedule(() -> {
             //retrieve the guild again - many things may have happened in 10 seconds!
-            Guild g = Launcher.getBotController().getShardManager().getGuildById(event.getGuild().getIdLong());
+            Guild g = jdaEntityProvider.getGuildById(event.getGuild().getIdLong());
             if (g != null) {
                 sendHelloOnJoin(g);
             }
@@ -360,7 +363,7 @@ public class EventListenerBoat extends AbstractEventListener {
     public void onReady(ReadyEvent event) {
         log.info("Received ready event for {}", event.getJDA().getShardInfo().toString());
 
-        shardStatsCounterProvider.registerShard(event.getJDA().getShardInfo().getShardId());
+        shardStatsCounterProvider.registerShard(event.getJDA().getShardInfo());
     }
 
     private static void sendHelloOnJoin(@Nonnull Guild guild) {

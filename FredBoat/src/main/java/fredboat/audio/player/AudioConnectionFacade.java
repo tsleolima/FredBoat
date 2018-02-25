@@ -28,7 +28,7 @@ package fredboat.audio.player;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.config.property.Credentials;
 import fredboat.config.property.LavalinkConfig;
-import fredboat.jda.JdaProvider;
+import fredboat.jda.ShardProvider;
 import fredboat.util.DiscordUtil;
 import lavalink.client.io.Lavalink;
 import lavalink.client.io.metrics.LavalinkCollector;
@@ -60,7 +60,7 @@ public class AudioConnectionFacade implements EventListener {
     public AudioConnectionFacade(LavalinkConfig lavalinkConfig, Credentials credentials,
                                  DebugConnectionListenerProvider debugConnectionListenerProvider,
                                  @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
-                                 JdaProvider jdaProvider) {
+                                 ShardProvider shardProvider) {
         this.debugConnectionListenerProvider = debugConnectionListenerProvider;
         this.audioPlayerManager = audioPlayerManager;
         if (lavalinkConfig.getLavalinkHosts().isEmpty()) {
@@ -72,7 +72,7 @@ public class AudioConnectionFacade implements EventListener {
         lavalink = new Lavalink(
                 Long.toString(DiscordUtil.getBotId(credentials)),
                 credentials.getRecommendedShardCount(),
-                jdaProvider::getShardById
+                shardProvider::getShardById
         );
         Runtime.getRuntime().addShutdownHook(new Thread(lavalink::shutdown, "lavalink-shutdown-hook"));
 

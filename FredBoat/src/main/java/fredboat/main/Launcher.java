@@ -17,6 +17,8 @@ import fredboat.config.property.PropertyConfigProvider;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.MetricsServletAdapter;
+import fredboat.jda.GuildProvider;
+import fredboat.jda.ShardProvider;
 import fredboat.util.AppInfo;
 import fredboat.util.GitRepoState;
 import fredboat.util.TextUtils;
@@ -24,7 +26,6 @@ import fredboat.util.rest.Http;
 import fredboat.util.rest.TrackSearcher;
 import fredboat.util.rest.Weather;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import okhttp3.Credentials;
@@ -83,12 +84,12 @@ public class Launcher implements ApplicationRunner {
     private final PlayerRegistry playerRegistry;
     private final StatsAgent statsAgent;
     private final BotMetrics botMetrics;
-    private final ShardManager shardManager;
     private final Weather weather;
     private final AudioConnectionFacade audioConnectionFacade;
     private final TrackSearcher trackSearcher;
     private final VideoSelectionCache videoSelectionCache;
-    private final BotController botController;
+    private final ShardProvider shardProvider;
+    private final GuildProvider guildProvider;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
@@ -136,10 +137,9 @@ public class Launcher implements ApplicationRunner {
 
     public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
                     MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
-                    StatsAgent statsAgent, BotMetrics botMetrics, ShardManager shardManager, Weather weather,
+                    StatsAgent statsAgent, BotMetrics botMetrics, Weather weather,
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
-                    VideoSelectionCache videoSelectionCache) {
-        this.botController = botController;
+                    VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider) {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
@@ -148,11 +148,12 @@ public class Launcher implements ApplicationRunner {
         this.playerRegistry = playerRegistry;
         this.statsAgent = statsAgent;
         this.botMetrics = botMetrics;
-        this.shardManager = shardManager;
         this.weather = weather;
         this.audioConnectionFacade = audioConnectionFacade;
         this.trackSearcher = trackSearcher;
         this.videoSelectionCache = videoSelectionCache;
+        this.shardProvider = shardProvider;
+        this.guildProvider = guildProvider;
     }
 
     @Override
@@ -161,7 +162,7 @@ public class Launcher implements ApplicationRunner {
         I18n.start();
 
         try {
-            API.start(playerRegistry, botMetrics);
+            API.start(playerRegistry, botMetrics, shardProvider);
         } catch (Exception e) {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
@@ -172,7 +173,7 @@ public class Launcher implements ApplicationRunner {
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {
             log.info("Starting VoiceChannelCleanupAgent.");
-            FredBoatAgent.start(new VoiceChannelCleanupAgent(playerRegistry, shardManager, audioConnectionFacade));
+            FredBoatAgent.start(new VoiceChannelCleanupAgent(playerRegistry, guildProvider, audioConnectionFacade));
         } else {
             log.info("Skipped setting up the VoiceChannelCleanupAgent, " +
                     "either running Patron distro or overridden by temp config");
@@ -188,7 +189,7 @@ public class Launcher implements ApplicationRunner {
 
         String carbonKey = configProvider.getCredentials().getCarbonKey();
         if (configProvider.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
-            FredBoatAgent.start(new CarbonitexAgent(configProvider.getCredentials(), botMetrics, shardManager));
+            FredBoatAgent.start(new CarbonitexAgent(configProvider.getCredentials(), botMetrics, shardProvider));
         }
     }
 
@@ -258,24 +259,19 @@ public class Launcher implements ApplicationRunner {
     }
 
     //returns true if all registered shards are reporting back as CONNECTED, false otherwise
-    private boolean areWeReadyYet() {
-        for (JDA.Status status : botController.getShardManager().getStatuses().values()) {
-            if (status != JDA.Status.CONNECTED) {
-                return false;
-            }
-        }
-
-        return true;
+    private boolean areThereNotConnectedShards() {
+        return shardProvider.streamShards()
+                .anyMatch(shard -> shard.getStatus() != JDA.Status.CONNECTED);
     }
 
     //wait for all shards to ready up before requesting a total count of jda entities and enabling further stats counts
     private void enableMetrics() throws InterruptedException {
-        while (!areWeReadyYet()) {
+        while (areThereNotConnectedShards()) {
             Thread.sleep(1000);
         }
 
         //force some metrics to be populated, then turn on metrics to be served
-        botMetrics.start(shardManager, configProvider.getCredentials());
+        botMetrics.start(shardProvider, configProvider.getCredentials());
         FredBoatAgent.start(statsAgent);
         API.turnOnMetrics(metricsServlet);
     }

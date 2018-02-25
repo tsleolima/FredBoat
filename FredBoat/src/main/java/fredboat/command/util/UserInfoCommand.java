@@ -62,7 +62,7 @@ public class UserInfoCommand extends Command implements IUtilCommand {
             target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.rawArgs, true);
         }
         if (target == null) return;
-        Launcher.getBotController().getShardManager().getGuilds().forEach(guild -> {
+        Launcher.getBotController().getJdaEntityProvider().streamGuilds().forEach(guild -> {
             if (guild.getMemberById(target.getUser().getId()) != null) {
                 matchedGuildNames.add(guild.getName());
             }
