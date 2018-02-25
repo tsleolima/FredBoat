@@ -1,10 +1,39 @@
-package fredboat.main;
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package fredboat.feature.metrics;
 
 import fredboat.agent.StatsAgent;
+import fredboat.config.property.Credentials;
+import fredboat.main.BotController;
+import fredboat.util.DiscordUtil;
 import fredboat.util.JDAUtil;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -12,49 +41,80 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+/**
+ * Metrics for the whole FredBoat
+ */
+@Component
 public class BotMetrics {
 
     private static final Logger log = LoggerFactory.getLogger(BotMetrics.class);
-    private static BotMetrics.JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
-    private static BotMetrics.DockerStats dockerStats = new DockerStats();
+    private final StatsAgent statsAgent;
+    private BotMetrics.JdaEntityCounts jdaEntityCountsTotal = new JdaEntityCounts();
+    private BotMetrics.DockerStats dockerStats = new DockerStats();
+
+
+    public BotMetrics(StatsAgent statsAgent) {
+        this.statsAgent = statsAgent;
+    }
 
     @Nonnull
-    public static JdaEntityCounts getJdaEntityCountsTotal() {
+    public JdaEntityCounts getJdaEntityCountsTotal() {
         return jdaEntityCountsTotal;
     }
 
     @Nonnull
-    public static DockerStats getDockerStats() {
+    public DockerStats getDockerStats() {
         return dockerStats;
     }
 
     //JDA total entity counts
-    public static int getTotalUniqueUsersCount() {
+    public int getTotalUniqueUsersCount() {
         return jdaEntityCountsTotal.uniqueUsersCount;
     }
 
-    public static int getTotalGuildsCount() {
+    public int getTotalGuildsCount() {
         return jdaEntityCountsTotal.guildsCount;
     }
 
-    public static int getTotalTextChannelsCount() {
+    public int getTotalTextChannelsCount() {
         return jdaEntityCountsTotal.textChannelsCount;
     }
 
-    public static int getTotalVoiceChannelsCount() {
+    public int getTotalVoiceChannelsCount() {
         return jdaEntityCountsTotal.voiceChannelsCount;
     }
 
-    public static int getTotalCategoriesCount() {
+    public int getTotalCategoriesCount() {
         return jdaEntityCountsTotal.categoriesCount;
     }
 
-    public static int getTotalEmotesCount() {
+    public int getTotalEmotesCount() {
         return jdaEntityCountsTotal.emotesCount;
     }
 
-    public static int getTotalRolesCount() {
+    public int getTotalRolesCount() {
         return jdaEntityCountsTotal.rolesCount;
+    }
+
+    //call this once, after shards are all up
+    public void start(ShardManager shardManager, Credentials credentials) {
+        BotMetrics.JdaEntityCounts jdaEntityCountsTotal = getJdaEntityCountsTotal();
+        try {
+            jdaEntityCountsTotal.count(shardManager::getShards);
+        } catch (Exception ignored) {
+        }
+
+        statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
+                () -> jdaEntityCountsTotal.count(shardManager::getShards)));
+
+        if (DiscordUtil.isOfficialBot(credentials)) {
+            BotMetrics.DockerStats dockerStats = getDockerStats();
+            try {
+                dockerStats.fetch();
+            } catch (Exception ignored) {
+            }
+            statsAgent.addAction(dockerStats::fetch);
+        }
     }
 
     //holds counts of JDA entities
@@ -104,7 +164,7 @@ public class BotMetrics {
     protected static class JdaEntityStatsCounter implements StatsAgent.Action {
         private final Runnable action;
 
-        JdaEntityStatsCounter(Runnable action) {
+        protected JdaEntityStatsCounter(Runnable action) {
             this.action = action;
         }
 
@@ -139,12 +199,12 @@ public class BotMetrics {
     }
 
     //is 0 while uncalculated
-    public static int getDockerPullsBot() {
+    public int getDockerPullsBot() {
         return dockerStats.dockerPullsBot;
     }
 
     //is 0 while uncalculated
-    public static int getDockerPullsDb() {
+    public int getDockerPullsDb() {
         return dockerStats.dockerPullsDb;
     }
 }

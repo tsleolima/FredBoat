@@ -1,89 +1,107 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package fredboat.main;
 
 import fredboat.agent.StatsAgent;
-import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerRegistry;
+import fredboat.config.property.Credentials;
+import fredboat.feature.metrics.ShardStatsCounterProvider;
+import fredboat.util.DiscordUtil;
+import fredboat.util.func.NonnullSupplier;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.events.ReadyEvent;
-import net.dv8tion.jda.core.managers.AudioManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A reference to a shard. Directly referencing a JDA instance is problematic, as it may shut down and be replaced.
- * Furthermore, it causes a memory leak.
+ * Created by napster on 24.02.18.
+ * <p>
+ * This component's main goal is to provide access to the JDA of a shard and other, shard specific, objects
  */
+@Component
 public class ShardContext {
 
-    private static final Logger log = LoggerFactory.getLogger(ShardContext.class);
-    private static final ConcurrentHashMap<Integer, ShardContext> instances = new ConcurrentHashMap<>();
-    private final int id;
-    private final PlayerRegistry playerRegistry;
-    private final ArrayList<String> channelsToRejoin = new ArrayList<>();
-    private final BotMetrics.JdaEntityCounts jdaEntityCountsShard = new BotMetrics.JdaEntityCounts();
+    private final ConcurrentHashMap<Integer, JdaProxy> instances = new ConcurrentHashMap<>();
+    private final Credentials credentials;
+    private final ShardManager shardManager;
+    private final StatsAgent statsAgent;
+    private final ShardStatsCounterProvider shardStatsCounterProvider;
 
-    private ShardContext(int id, PlayerRegistry playerRegistry) {
-        this.id = id;
-        this.playerRegistry = playerRegistry;
+    public ShardContext(Credentials credentials, @Lazy ShardManager shardManager, StatsAgent statsAgent,
+                        ShardStatsCounterProvider shardStatsCounterProvider) {
+        this.credentials = credentials;
+        this.shardManager = shardManager;
+        this.statsAgent = statsAgent;
+        this.shardStatsCounterProvider = shardStatsCounterProvider;
+    }
 
-        if (Launcher.getBotController().getShardManager().getShardById(id) == null) {
-            throw new IllegalArgumentException("Shard " + id + " does not exist!");
-        }
+    @Nonnull //todo resolve circular dependency in a less ugly way than lazy loading the shard manager?
+    private JDA getJda(int shardId) {
+        return shardManager.getShardById(shardId);
     }
 
     @Nonnull
-    public static ShardContext of(int id, PlayerRegistry playerRegistry) {
-        return instances.computeIfAbsent(id, integer -> new ShardContext(id, playerRegistry));
+    public JdaProxy of(int id) {
+        if ((shardManager.getShardById(id) == null) || id < 0 || id >= credentials.getRecommendedShardCount()) {
+            throw new IllegalArgumentException("Shard " + id + " is outside of our shard range");
+        }
+
+        return instances.computeIfAbsent(id, integer -> {
+            statsAgent.addAction(shardStatsCounterProvider.get(getJda(id).getShardInfo(), () -> this.getJda(id)));
+
+            return new JdaProxy(() -> this.getJda(id));
+        });
     }
 
     @Nonnull
-    public static ShardContext of(JDA jda, PlayerRegistry playerRegistry) {
-        return of(jda.getShardInfo().getShardId(), playerRegistry);
-    }
-
-    public int getId() {
-        return id;
+    public JdaProxy of(JDA jda) {
+        return of(jda.getShardInfo().getShardId());
     }
 
     @Nonnull
-    public JDA getJda() {
-        return Launcher.getBotController().getShardManager().getShardById(id);
+    public JdaProxy ofGuildId(long guildId) {
+        return of(DiscordUtil.getShardId(guildId, credentials));
     }
 
-    public void onReady(@Nonnull ReadyEvent readyEvent) {
-        Launcher.getBotController().getStatsAgent().addAction(new ShardStatsCounter(getJda().getShardInfo(),
-                () -> jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()))));
+    /**
+     * A reference to a shard. Directly referencing a JDA instance is problematic, as it may shut down and be replaced.
+     * Furthermore, it causes a memory leak.
+     */
+    public static class JdaProxy {
+        private final NonnullSupplier<JDA> jdaProvider;
 
-        log.info("Received ready event for {}", readyEvent.getJDA().getShardInfo().toString());
-        jdaEntityCountsShard.count(() -> Collections.singletonList(getJda()), true);//jda finished loading, do a single count to init values
-    }
-
-    private static class ShardStatsCounter implements StatsAgent.Action {
-        private final JDA.ShardInfo shardInfo;
-        private final Runnable action;
-
-        ShardStatsCounter(JDA.ShardInfo shardInfo, Runnable action) {
-            this.shardInfo = shardInfo;
-            this.action = action;
+        //should only be created through the ShardContext
+        private JdaProxy(NonnullSupplier<JDA> jdaProvider) {
+            this.jdaProvider = jdaProvider;
         }
 
-
-        @Override
-        public String getName() {
-            return "jda entity stats for shard " + shardInfo.getShardString();
-        }
-
-
-        @Override
-        public void act() {
-            action.run();
+        @Nonnull
+        public JDA getJda() {
+            return jdaProvider.get();
         }
     }
-
 }

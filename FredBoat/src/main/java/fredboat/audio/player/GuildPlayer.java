@@ -61,25 +61,23 @@ public class GuildPlayer extends AbstractPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(GuildPlayer.class);
 
-    private final ShardContext shard;
     private final long guildId;
 
     private final AudioLoader audioLoader;
-    private final PlayerRegistry playerRegistry;
 
     private final MusicTextChannelProvider musicTextChannelProvider;
+    private final ShardContext.JdaProxy shard;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public GuildPlayer(Guild guild, PlayerRegistry playerRegistry, MusicTextChannelProvider musicTextChannelProvider) {
+    public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, ShardContext.JdaProxy shard) {
         super(guild.getId());
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
-        this.playerRegistry = playerRegistry;
+        this.shard = shard;
         this.musicTextChannelProvider = musicTextChannelProvider;
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
-        this.shard = ShardContext.of(guild.getJDA(), playerRegistry);
         this.guildId = guild.getIdLong();
 
         audioTrackProvider = new SimpleTrackProvider();
@@ -168,7 +166,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void queue(String identifier, CommandContext context) {
-        IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker, playerRegistry);
+        IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker, shard);
 
         joinChannel(context.invoker);
 

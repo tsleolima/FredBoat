@@ -13,15 +13,16 @@ import fredboat.commandmeta.CommandRegistry;
 import fredboat.config.property.FileConfig;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.feature.I18n;
+import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.MetricsServletAdapter;
 import fredboat.util.AppInfo;
-import fredboat.util.DiscordUtil;
 import fredboat.util.GitRepoState;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.models.weather.RetrievedWeather;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import okhttp3.Credentials;
@@ -76,6 +77,9 @@ public class Launcher implements ApplicationRunner {
     private final MetricsServletAdapter metricsServlet;
     private final CacheMetricsCollector cacheMetrics;
     private final PlayerRegistry playerRegistry;
+    private final StatsAgent statsAgent;
+    private final BotMetrics botMetrics;
+    private final ShardManager shardManager;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -123,7 +127,8 @@ public class Launcher implements ApplicationRunner {
     }
 
     public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
-                    MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry) {
+                    MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
+                    StatsAgent statsAgent, BotMetrics botMetrics, ShardManager shardManager) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
@@ -131,6 +136,9 @@ public class Launcher implements ApplicationRunner {
         this.metricsServlet = metricsServlet;
         this.cacheMetrics = cacheMetrics;
         this.playerRegistry = playerRegistry;
+        this.statsAgent = statsAgent;
+        this.botMetrics = botMetrics;
+        this.shardManager = shardManager;
     }
 
     @Override
@@ -139,7 +147,7 @@ public class Launcher implements ApplicationRunner {
         I18n.start();
 
         try {
-            API.start(playerRegistry);
+            API.start(playerRegistry, botMetrics);
         } catch (Exception e) {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }
@@ -165,12 +173,12 @@ public class Launcher implements ApplicationRunner {
         //Check OpenWeather key
         executor.submit(this::hasValidOpenWeatherKey);
 
+        enableMetrics();
+
         String carbonKey = configProvider.getCredentials().getCarbonKey();
         if (configProvider.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
-            FredBoatAgent.start(new CarbonitexAgent(carbonKey));
+            FredBoatAgent.start(new CarbonitexAgent(carbonKey, botMetrics));
         }
-
-        enableMetrics();
     }
 
     // ################################################################################
@@ -273,36 +281,16 @@ public class Launcher implements ApplicationRunner {
         return true;
     }
 
+    //wait for all shards to ready up before requesting a total count of jda entities and enabling further stats counts
     private void enableMetrics() throws InterruptedException {
-        //wait for all shards to ready up before requesting a total count of jda entities
         while (!areWeReadyYet()) {
             Thread.sleep(1000);
         }
 
-        StatsAgent statsAgent = botController.getStatsAgent();
         //force some metrics to be populated, then turn on metrics to be served
-        try {
-            BotMetrics.JdaEntityCounts jdaEntityCountsTotal = BotMetrics.getJdaEntityCountsTotal();
-            try {
-                jdaEntityCountsTotal.count(() -> botController.getShardManager().getShards());
-            } catch (Exception ignored) {
-            }
-
-            statsAgent.addAction(new BotMetrics.JdaEntityStatsCounter(
-                    () -> jdaEntityCountsTotal.count(() -> botController.getShardManager().getShards())));
-
-            if (DiscordUtil.isOfficialBot(configProvider.getCredentials())) {
-                BotMetrics.DockerStats dockerStats = BotMetrics.getDockerStats();
-                try {
-                    dockerStats.fetch();
-                } catch (Exception ignored) {
-                }
-                statsAgent.addAction(dockerStats::fetch);
-            }
-        } finally {
-            FredBoatAgent.start(statsAgent);
-            API.turnOnMetrics(metricsServlet);
-        }
+        botMetrics.start(shardManager, configProvider.getCredentials());
+        FredBoatAgent.start(statsAgent);
+        API.turnOnMetrics(metricsServlet);
     }
 
     private static String getVersionInfo() {

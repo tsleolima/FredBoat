@@ -25,6 +25,7 @@
 
 package fredboat.audio.player;
 
+import fredboat.main.ShardContext;
 import net.dv8tion.jda.core.entities.Guild;
 import org.springframework.stereotype.Component;
 
@@ -41,17 +42,19 @@ public class PlayerRegistry {
     public static final float DEFAULT_VOLUME = 1f;
 
     private final Map<Long, GuildPlayer> registry = new ConcurrentHashMap<>();
+    private final ShardContext shardContext;
     private final MusicTextChannelProvider musicTextChannelProvider;
 
-    public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider) {
+    public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider, ShardContext shardContext) {
         this.musicTextChannelProvider = musicTextChannelProvider;
+        this.shardContext = shardContext;
     }
 
     @Nonnull
     public GuildPlayer getOrCreate(@Nonnull Guild guild) {
         return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
-                    GuildPlayer p = new GuildPlayer(guild, this, musicTextChannelProvider);
+                    GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, shardContext.of(guild.getJDA()));
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });

@@ -32,7 +32,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.feature.I18n;
-import fredboat.main.BotMetrics;
+import fredboat.feature.metrics.BotMetrics;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
@@ -83,6 +83,7 @@ public class StatsCommand extends Command implements IInfoCommand {
 
         str += "\n\n";
         String content = "";
+        BotMetrics botMetrics = Launcher.getBotController().getBotMetrics();
 
         content += "Reserved memory:                " + Runtime.getRuntime().totalMemory() / 1000000 + "MB\n";
         content += "-> Of which is used:            " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000 + "MB\n";
@@ -93,8 +94,8 @@ public class StatsCommand extends Command implements IInfoCommand {
 
         content += "Sharding:                       " + jda.getShardInfo().getShardString() + "\n";
         content += "Players playing:                " + Launcher.getBotController().getPlayerRegistry().getPlayingPlayers().size() + "\n";
-        content += "Known servers:                  " + BotMetrics.getTotalGuildsCount() + "\n";
-        content += "Known users in servers:         " + BotMetrics.getTotalUniqueUsersCount() + "\n";
+        content += "Known servers:                  " + botMetrics.getTotalGuildsCount() + "\n";
+        content += "Known users in servers:         " + botMetrics.getTotalUniqueUsersCount() + "\n";
         content += "Distribution:                   " + Launcher.getBotController().getAppConfig().getDistribution() + "\n";
         content += "JDA responses total:            " + jda.getResponseTotal() + "\n";
         content += "JDA version:                    " + JDAInfo.VERSION + "\n";
@@ -104,8 +105,8 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "\n----------\n\n";
         if (DiscordUtil.isOfficialBot(Launcher.getBotController().getCredentials())) {
             content += "Docker pulls:\n";
-            content += "    FredBoat image:             " + BotMetrics.getDockerPullsBot() + "\n";
-            content += "    Database image:             " + BotMetrics.getDockerPullsDb() + "\n";
+            content += "    FredBoat image:             " + botMetrics.getDockerPullsBot() + "\n";
+            content += "    Database image:             " + botMetrics.getDockerPullsDb() + "\n";
             content += "\n----------\n\n";
         }
 

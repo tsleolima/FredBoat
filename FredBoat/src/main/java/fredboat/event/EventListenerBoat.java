@@ -87,12 +87,15 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandManager commandManager;
     private final CommandContextParser commandContextParser;
     private final PlayerRegistry playerRegistry;
+    private final ShardContext shardContext;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
-                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics) {
+                             PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
+                             ShardContext shardContext) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
+        this.shardContext = shardContext;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -355,8 +358,10 @@ public class EventListenerBoat extends AbstractEventListener {
     /* Shard lifecycle */
     @Override
     public void onReady(ReadyEvent event) {
+        log.info("Received ready event for {}", event.getJDA().getShardInfo().toString());
+
         try {
-            ShardContext.of(event.getJDA(), playerRegistry).onReady(event);
+            shardContext.of(event.getJDA()); //make sure a shard context is created the latest when it is ready
         } catch (Exception e) {
             log.error("Uncaught exception when dispatching ready event to shard context", e);
         }

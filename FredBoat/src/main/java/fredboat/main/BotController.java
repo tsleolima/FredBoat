@@ -1,13 +1,13 @@
 package fredboat.main;
 
 import fredboat.agent.FredBoatAgent;
-import fredboat.agent.StatsAgent;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.*;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
+import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
@@ -37,15 +37,15 @@ public class BotController {
     private final DatabaseManager databaseManager;
     private final EntityIO entityIO;
     private final PlayerRegistry playerRegistry;
+    private final ShardContext shardContext;
+    private final BotMetrics botMetrics;
     private final ExecutorService executor;
 
-
-    private final StatsAgent statsAgent = new StatsAgent("bot metrics");
 
     public BotController(PropertyConfigProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
                          EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
-                         PlayerRegistry playerRegistry) {
+                         PlayerRegistry playerRegistry, ShardContext shardContext, BotMetrics botMetrics) {
         this.configProvider = configProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.shardManager = shardManager;
@@ -53,9 +53,11 @@ public class BotController {
         this.shutdownHandler = shutdownHandler;
         this.databaseManager = databaseManager;
         this.entityIO = entityIO;
-        this.playerRegistry = playerRegistry;
         hibernateStats.register(); //call this exactly once after all db connections have been created
         this.executor = executor;
+        this.playerRegistry = playerRegistry;
+        this.shardContext = shardContext;
+        this.botMetrics = botMetrics;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(), "FredBoat main shutdownhook"));
     }
@@ -70,18 +72,6 @@ public class BotController {
 
     public Credentials getCredentials() {
         return configProvider.getCredentials();
-    }
-
-    public DatabaseConfig getDatabaseConfig() {
-        return configProvider.getDatabaseConfig();
-    }
-
-    public EventLoggerConfig getEventLoggerConfig() {
-        return configProvider.getEventLoggerConfig();
-    }
-
-    public LavalinkConfig getLavalinkConfig() {
-        return configProvider.getLavalinkConfig();
     }
 
     public AudioConnectionFacade getAudioConnectionFacade() {
@@ -105,11 +95,6 @@ public class BotController {
         return mainEventListener;
     }
 
-    @Nonnull
-    protected StatsAgent getStatsAgent() {
-        return statsAgent;
-    }
-
     // Can be null during init, but usually not
     public ShardManager getShardManager() {
         return shardManager;
@@ -124,10 +109,16 @@ public class BotController {
         return playerRegistry;
     }
 
+    public ShardContext getShardContext() {
+        return shardContext;
+    }
+
+    public BotMetrics getBotMetrics() {
+        return botMetrics;
+    }
+
     //Shutdown hook
     private Runnable createShutdownHook() {
-        return () -> {
-            FredBoatAgent.shutdown();
-        };
+        return FredBoatAgent::shutdown;
     }
 }

@@ -26,9 +26,9 @@
 package fredboat.api;
 
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.MetricsServletAdapter;
-import fredboat.main.BotMetrics;
 import fredboat.main.Launcher;
 import net.dv8tion.jda.core.JDA;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -47,7 +47,7 @@ public class API {
 
     private API() {}
 
-    public static void start(PlayerRegistry playerRegistry) {
+    public static void start(PlayerRegistry playerRegistry, BotMetrics botMetrics) {
         if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
             log.warn("Rest server is not enabled. Skipping Spark ignition!");
             return;
@@ -84,8 +84,8 @@ public class API {
             g.put("playingPlayers", playerRegistry.getPlayingPlayers().size())
                     .put("totalPlayers", playerRegistry.getRegistry().size())
                     .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
-                    .put("guilds", BotMetrics.getTotalGuildsCount())
-                    .put("users", BotMetrics.getTotalUniqueUsersCount());
+                    .put("guilds", botMetrics.getTotalGuildsCount())
+                    .put("users", botMetrics.getTotalUniqueUsersCount());
 
             root.put("shards", a);
             root.put("global", g);

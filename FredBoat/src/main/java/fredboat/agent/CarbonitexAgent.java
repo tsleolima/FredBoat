@@ -25,8 +25,8 @@
 
 package fredboat.agent;
 
+import fredboat.feature.metrics.BotMetrics;
 import fredboat.main.BotController;
-import fredboat.main.BotMetrics;
 import fredboat.main.Launcher;
 import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.JDA;
@@ -41,10 +41,12 @@ public class CarbonitexAgent extends FredBoatAgent {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(CarbonitexAgent.class);
 
     private final String key;
+    private final BotMetrics botMetrics;
 
-    public CarbonitexAgent(String key) {
+    public CarbonitexAgent(String key, BotMetrics botMetrics) {
         super("carbonitex", 30, TimeUnit.MINUTES);
         this.key = key;
+        this.botMetrics = botMetrics;
     }
 
     @Override
@@ -72,7 +74,7 @@ public class CarbonitexAgent extends FredBoatAgent {
         try (Response response = BotController.HTTP.post("https://www.carbonitex.net/discord/data/botdata.php",
                 Http.Params.of(
                         "key", key,
-                        "servercount", Integer.toString(BotMetrics.getTotalGuildsCount())
+                        "servercount", Integer.toString(botMetrics.getTotalGuildsCount())
                 ))
                 .execute()) {
 
