@@ -25,10 +25,11 @@
 
 package fredboat.agent;
 
+import fredboat.config.property.Credentials;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.main.BotController;
-import fredboat.main.Launcher;
 import fredboat.util.rest.Http;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import okhttp3.Response;
 import org.slf4j.LoggerFactory;
@@ -40,13 +41,15 @@ public class CarbonitexAgent extends FredBoatAgent {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(CarbonitexAgent.class);
 
-    private final String key;
+    private final Credentials credentials;
     private final BotMetrics botMetrics;
+    private final ShardManager shardManager;
 
-    public CarbonitexAgent(String key, BotMetrics botMetrics) {
+    public CarbonitexAgent(Credentials credentials, BotMetrics botMetrics, ShardManager shardManager) {
         super("carbonitex", 30, TimeUnit.MINUTES);
-        this.key = key;
+        this.credentials = credentials;
         this.botMetrics = botMetrics;
+        this.shardManager = shardManager;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class CarbonitexAgent extends FredBoatAgent {
     }
 
     private void sendStats() {
-        List<JDA> shards = Launcher.getBotController().getShardManager().getShards();
+        List<JDA> shards = shardManager.getShards();
 
         for (JDA jda : shards) {
             if (jda.getStatus() != JDA.Status.CONNECTED) {
@@ -66,14 +69,14 @@ public class CarbonitexAgent extends FredBoatAgent {
             }
         }
 
-        if (shards.size() < Launcher.getBotController().getCredentials().getRecommendedShardCount()) {
+        if (shards.size() < credentials.getRecommendedShardCount()) {
             log.warn("Skipping posting stats because not all shards initialized!");
             return;
         }
 
         try (Response response = BotController.HTTP.post("https://www.carbonitex.net/discord/data/botdata.php",
                 Http.Params.of(
-                        "key", key,
+                        "key", credentials.getCarbonKey(),
                         "servercount", Integer.toString(botMetrics.getTotalGuildsCount())
                 ))
                 .execute()) {

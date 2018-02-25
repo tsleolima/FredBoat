@@ -176,7 +176,7 @@ public class Launcher implements ApplicationRunner {
 
         String carbonKey = configProvider.getCredentials().getCarbonKey();
         if (configProvider.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
-            FredBoatAgent.start(new CarbonitexAgent(carbonKey, botMetrics));
+            FredBoatAgent.start(new CarbonitexAgent(configProvider.getCredentials(), botMetrics, shardManager));
         }
     }
 
