@@ -74,7 +74,7 @@ public class GuildPlayer extends AbstractPlayer {
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, ShardContext.JdaProxy shard,
                        AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager, EntityIO entityIO) {
-        super(guild.getId());
+        super(guild.getId(), audioConnectionFacade);
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
         this.shard = shard;

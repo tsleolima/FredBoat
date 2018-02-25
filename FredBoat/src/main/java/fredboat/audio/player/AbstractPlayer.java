@@ -37,7 +37,6 @@ import fredboat.audio.queue.ITrackProvider;
 import fredboat.audio.queue.SplitAudioTrackContext;
 import fredboat.audio.queue.TrackEndMarkerHandler;
 import fredboat.commandmeta.MessagingException;
-import fredboat.main.Launcher;
 import fredboat.util.TextUtils;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -69,8 +68,8 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     private ConcurrentLinkedQueue<AudioTrackContext> historyQueue = new ConcurrentLinkedQueue<>();
 
     @SuppressWarnings("LeakingThisInConstructor")
-    AbstractPlayer(String guildId) {
-        player = Launcher.getBotController().getAudioConnectionFacade().createPlayer(guildId);
+    AbstractPlayer(String guildId, AudioConnectionFacade audioConnectionFacade) {
+        player = audioConnectionFacade.createPlayer(guildId);
 
         player.addListener(this);
     }
