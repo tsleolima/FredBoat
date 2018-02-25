@@ -27,14 +27,11 @@ package fredboat.util.rest;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
-import fredboat.audio.player.AbstractPlayer;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.definitions.SearchProvider;
@@ -43,6 +40,8 @@ import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,30 +52,27 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SearchUtil {
-
+@Component
+public class TrackSearcher {
 
     public static final int MAX_RESULTS = 5;
     public static final long DEFAULT_CACHE_MAX_AGE = TimeUnit.HOURS.toMillis(48);
     public static final String PUNCTUATION_REGEX = "[.,/#!$%^&*;:{}=\\-_`~()\"\']";
-
-    private static final Logger log = LoggerFactory.getLogger(SearchUtil.class);
-
-    private static final AudioPlayerManager PLAYER_MANAGER = initPlayerManager();
     private static final int DEFAULT_TIMEOUT = 3000;
+
+    private static final Logger log = LoggerFactory.getLogger(TrackSearcher.class);
 
     //give youtube a break if we get flagged and keep getting 503s
     private static final long DEFAULT_YOUTUBE_COOLDOWN = TimeUnit.MINUTES.toMillis(10); // 10 minutes
     private static long youtubeCooldownUntil;
 
-    private static AudioPlayerManager initPlayerManager() {
-        DefaultAudioPlayerManager manager = new DefaultAudioPlayerManager();
-        manager.registerSourceManager(AbstractPlayer.produceYoutubeAudioSourceManager());
-        manager.registerSourceManager(new SoundCloudAudioSourceManager());
-        return manager;
+    private final AudioPlayerManager audioPlayerManager;
+
+    public TrackSearcher(@Qualifier("searchAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
+        this.audioPlayerManager = audioPlayerManager;
     }
 
-    public static AudioPlaylist searchForTracks(String query, List<SearchProvider> providers) throws SearchingException {
+    public AudioPlaylist searchForTracks(String query, List<SearchProvider> providers) throws SearchingException {
         return searchForTracks(query, DEFAULT_CACHE_MAX_AGE, DEFAULT_TIMEOUT, providers);
     }
 
@@ -89,7 +85,7 @@ public class SearchUtil {
      * @return The result of the search, or an empty list.
      * @throws SearchingException If none of the search providers could give us a result, and there was at least one SearchingException thrown by them
      */
-    public static AudioPlaylist searchForTracks(String query, long cacheMaxAge, int timeoutMillis, List<SearchProvider> providers)
+    public AudioPlaylist searchForTracks(String query, long cacheMaxAge, int timeoutMillis, List<SearchProvider> providers)
             throws SearchingException {
         Metrics.searchRequests.inc();
 
@@ -116,12 +112,13 @@ public class SearchUtil {
             //2. lavaplayer todo break up this beautiful construction of ifs and exception handling in a better readable one?
             if (provider != SearchProvider.YOUTUBE || System.currentTimeMillis() > youtubeCooldownUntil) {
                 try {
-                    AudioPlaylist lavaplayerResult = new SearchResultHandler().searchSync(provider, query, timeoutMillis);
+                    AudioPlaylist lavaplayerResult = new SearchResultHandler()
+                            .searchSync(audioPlayerManager, provider, query, timeoutMillis);
                     if (!lavaplayerResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from lavaplayer", provider, query);
                         // got a search result? cache and return it
                         Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getEntityIO()
-                                .merge(new SearchResult(PLAYER_MANAGER, provider, query, lavaplayerResult)));
+                                .merge(new SearchResult(audioPlayerManager, provider, query, lavaplayerResult)));
                         Metrics.searchHits.labels("lavaplayer-" + provider.name().toLowerCase()).inc();
                         return lavaplayerResult;
                     }
@@ -141,12 +138,12 @@ public class SearchUtil {
                     (Launcher.getBotController().getAppConfig().isPatronDistribution()
                             || Launcher.getBotController().getAppConfig().isDevDistribution())) {
                 try {
-                    AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, PLAYER_MANAGER.source(YoutubeAudioSourceManager.class));
+                    AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, audioPlayerManager.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it
                         Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getEntityIO()
-                                .merge(new SearchResult(PLAYER_MANAGER, provider, query, youtubeApiResult)));
+                                .merge(new SearchResult(audioPlayerManager, provider, query, youtubeApiResult)));
                         Metrics.searchHits.labels("youtube-api").inc();
                         return youtubeApiResult;
                     }
@@ -171,11 +168,11 @@ public class SearchUtil {
      * @param searchTerm the searchTerm to search for
      */
     @Nullable
-    private static AudioPlaylist fromCache(SearchProvider provider, String searchTerm, long cacheMaxAge) {
+    private AudioPlaylist fromCache(SearchProvider provider, String searchTerm, long cacheMaxAge) {
         try {
             SearchResult.SearchResultId id = new SearchResult.SearchResultId(provider, searchTerm);
             SearchResult searchResult = Launcher.getBotController().getEntityIO().getSearchResult(id, cacheMaxAge);
-            return searchResult != null ? searchResult.getSearchResult(PLAYER_MANAGER) : null;
+            return searchResult != null ? searchResult.getSearchResult(audioPlayerManager) : null;
         } catch (DatabaseNotReadyException ignored) {
             log.warn("Could not retrieve cached search result from database.");
             return null;
@@ -207,7 +204,7 @@ public class SearchUtil {
         }
     }
 
-    static class SearchResultHandler implements AudioLoadResultHandler {
+    private static class SearchResultHandler implements AudioLoadResultHandler {
 
         Exception exception;
         AudioPlaylist result;
@@ -216,14 +213,16 @@ public class SearchUtil {
          * @return The result of the search (which may be empty but not null).
          */
         @Nonnull
-        AudioPlaylist searchSync(SearchProvider provider, String query, int timeoutMillis) throws SearchingException {
+        AudioPlaylist searchSync(AudioPlayerManager audioPlayerManager, SearchProvider provider, String query, int timeoutMillis)
+                throws SearchingException {
+            SearchProvider searchProvider = provider;
             if (FeatureFlags.FORCE_SOUNDCLOUD_SEARCH.isActive()) {
-                provider = SearchProvider.SOUNDCLOUD;
+                searchProvider = SearchProvider.SOUNDCLOUD;
             }
 
-            log.debug("Searching {} for {}", provider, query);
+            log.debug("Searching {} for {}", searchProvider, query);
             try {
-                PLAYER_MANAGER.loadItem(provider.getPrefix() + query, this)
+                audioPlayerManager.loadItem(searchProvider.getPrefix() + query, this)
                         .get(timeoutMillis, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -231,7 +230,7 @@ public class SearchUtil {
                 exception = e;
             } catch (TimeoutException e) {
                 throw new SearchingException(String.format("Searching provider %s for %s timed out after %sms",
-                        provider.name(), query, timeoutMillis));
+                        searchProvider.name(), query, timeoutMillis));
             }
 
             if (exception != null) {
@@ -243,12 +242,12 @@ public class SearchUtil {
                 }
 
                 String message = String.format("Failed to search provider %s for query %s with exception %s.",
-                        provider, query, exception.getMessage());
+                        searchProvider, query, exception.getMessage());
                 throw new SearchingException(message, exception);
             }
 
             if (result == null) {
-                throw new SearchingException(String.format("Result from provider %s for query %s is unexpectedly null", provider, query));
+                throw new SearchingException(String.format("Result from provider %s for query %s is unexpectedly null", searchProvider, query));
             }
 
             return result;

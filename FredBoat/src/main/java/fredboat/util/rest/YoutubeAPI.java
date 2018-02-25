@@ -120,7 +120,7 @@ public class YoutubeAPI {
     //docs: https://developers.google.com/youtube/v3/docs/search/list
     //theres a lot of room for tweaking the searches
     public static AudioPlaylist search(String query, int maxResults, YoutubeAudioSourceManager sourceManager)
-            throws SearchUtil.SearchingException {
+            throws TrackSearcher.SearchingException {
         JSONObject data;
         String gkey = Launcher.getBotController().getCredentials().getRandomGoogleKey();
 
@@ -133,7 +133,7 @@ public class YoutubeAPI {
         try {
             data = request.asJson();
         } catch (IOException e) {
-            throw new SearchUtil.SearchingException("Youtube API search failed", e);
+            throw new TrackSearcher.SearchingException("Youtube API search failed", e);
         }
 
         //The search contains all values we need, except for the duration :feelsbadman:
@@ -148,7 +148,7 @@ public class YoutubeAPI {
         } catch (JSONException e) {
             String message = String.format("Youtube search with API key ending on %s for query %s returned unexpected JSON:\n%s",
                     gkey.substring(20), query, data.toString());
-            throw new SearchUtil.SearchingException(message, e);
+            throw new TrackSearcher.SearchingException(message, e);
         }
 
         List<AudioTrack> tracks = new ArrayList<>();
@@ -157,7 +157,7 @@ public class YoutubeAPI {
                 YoutubeVideo vid = getVideoFromID(id, true);
                 tracks.add(sourceManager.buildTrackObject(id, vid.name, vid.channelTitle, vid.isStream, vid.getDurationInMillis()));
             } catch (RuntimeException e) {
-                throw new SearchUtil.SearchingException("Could not look up details for youtube video with id " + id, e);
+                throw new TrackSearcher.SearchingException("Could not look up details for youtube video with id " + id, e);
             }
         }
         return new BasicAudioPlaylist("Search results for: " + query, tracks, null, true);

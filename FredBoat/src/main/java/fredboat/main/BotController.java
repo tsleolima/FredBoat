@@ -1,9 +1,13 @@
 package fredboat.main;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
-import fredboat.config.property.*;
+import fredboat.config.property.AppConfig;
+import fredboat.config.property.AudioSourcesConfig;
+import fredboat.config.property.Credentials;
+import fredboat.config.property.PropertyConfigProvider;
 import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
@@ -13,6 +17,7 @@ import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
 import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -40,12 +45,14 @@ public class BotController {
     private final ShardContext shardContext;
     private final BotMetrics botMetrics;
     private final ExecutorService executor;
+    private final AudioPlayerManager audioPlayerManager;
 
 
     public BotController(PropertyConfigProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
                          EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
-                         PlayerRegistry playerRegistry, ShardContext shardContext, BotMetrics botMetrics) {
+                         PlayerRegistry playerRegistry, ShardContext shardContext, BotMetrics botMetrics,
+                         @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         this.configProvider = configProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.shardManager = shardManager;
@@ -58,6 +65,7 @@ public class BotController {
         this.playerRegistry = playerRegistry;
         this.shardContext = shardContext;
         this.botMetrics = botMetrics;
+        this.audioPlayerManager = audioPlayerManager;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(), "FredBoat main shutdownhook"));
     }
@@ -115,6 +123,10 @@ public class BotController {
 
     public BotMetrics getBotMetrics() {
         return botMetrics;
+    }
+
+    public AudioPlayerManager getAudioPlayerManager() {
+        return audioPlayerManager;
     }
 
     //Shutdown hook

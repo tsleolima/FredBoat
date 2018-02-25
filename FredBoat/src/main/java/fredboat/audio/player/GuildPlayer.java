@@ -26,14 +26,15 @@
 package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.queue.*;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.db.EntityIO;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
-import fredboat.main.Launcher;
 import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -67,21 +68,26 @@ public class GuildPlayer extends AbstractPlayer {
 
     private final MusicTextChannelProvider musicTextChannelProvider;
     private final ShardContext.JdaProxy shard;
+    private final AudioConnectionFacade audioConnectionFacade;
+    private final EntityIO entityIO;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, ShardContext.JdaProxy shard) {
+    public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, ShardContext.JdaProxy shard,
+                       AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager, EntityIO entityIO) {
         super(guild.getId());
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
         this.shard = shard;
         this.musicTextChannelProvider = musicTextChannelProvider;
+        this.audioConnectionFacade = audioConnectionFacade;
+        this.entityIO = entityIO;
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
         this.guildId = guild.getIdLong();
 
         audioTrackProvider = new SimpleTrackProvider();
-        audioLoader = new AudioLoader(audioTrackProvider, getPlayerManager(), this);
+        audioLoader = new AudioLoader(audioTrackProvider, audioPlayerManager, this);
     }
 
     private void announceTrack(AudioTrackContext atc) {
@@ -137,8 +143,8 @@ public class GuildPlayer extends AbstractPlayer {
                     Permission.VOICE_MOVE_OTHERS.getName()));
         }
 
-        try {//todo inject audio connection facade
-            Launcher.getBotController().getAudioConnectionFacade().openConnection(targetChannel, this);
+        try {
+            audioConnectionFacade.openConnection(targetChannel, this);
             log.info("Connected to voice channel " + targetChannel);
         } catch (Exception e) {
             log.error("Failed to join voice channel {}", targetChannel, e);
@@ -154,7 +160,7 @@ public class GuildPlayer extends AbstractPlayer {
                 commandContext.reply(commandContext.i18nFormat("playerLeftChannel", currentVc.getName()));
             }
         }
-        Launcher.getBotController().getAudioConnectionFacade().closeConnection(getGuild());
+        audioConnectionFacade.closeConnection(getGuild());
     }
 
     /**
@@ -425,7 +431,7 @@ public class GuildPlayer extends AbstractPlayer {
         try {
             Guild guild = getGuild();
             if (guild != null) {
-                enabled = Launcher.getBotController().getEntityIO().fetchGuildConfig(guild).isTrackAnnounce();
+                enabled = entityIO.fetchGuildConfig(guild).isTrackAnnounce();
             }
         } catch (Exception ignored) {
         }

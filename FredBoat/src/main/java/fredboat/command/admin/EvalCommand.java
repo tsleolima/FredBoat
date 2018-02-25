@@ -25,7 +25,6 @@
 
 package fredboat.command.admin;
 
-import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -113,7 +112,7 @@ public class EvalCommand extends Command implements ICommandRestricted {
         engine.put("message", context.msg);
         engine.put("guild", guild);
         engine.put("player", player);
-        engine.put("pm", AbstractPlayer.getPlayerManager());
+        engine.put("pm", Launcher.getBotController().getAudioPlayerManager());
         engine.put("context", context);
 
         ScheduledExecutorService service = Executors.newScheduledThreadPool(1, r -> new Thread(r, "Eval comm execution"));

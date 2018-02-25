@@ -41,7 +41,7 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.TextUtils;
-import fredboat.util.rest.SearchUtil;
+import fredboat.util.rest.TrackSearcher;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message.Attachment;
 import org.apache.commons.lang3.StringUtils;
@@ -54,12 +54,14 @@ import java.util.List;
 public class PlayCommand extends Command implements IMusicCommand, ICommandRestricted {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlayCommand.class);
+    private final TrackSearcher trackSearcher;
     private final List<SearchProvider> searchProviders;
     private static final JoinCommand JOIN_COMMAND = new JoinCommand("");
     private static final String FILE_PREFIX = "file://";
 
-    public PlayCommand(List<SearchProvider> searchProviders, String name, String... aliases) {
+    public PlayCommand(TrackSearcher trackSearcher, List<SearchProvider> searchProviders, String name, String... aliases) {
         super(name, aliases);
+        this.trackSearcher = trackSearcher;
         this.searchProviders = searchProviders;
     }
 
@@ -134,13 +136,13 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
     private void searchForVideos(CommandContext context) {
         //Now remove all punctuation
-        String query = context.rawArgs.replaceAll(SearchUtil.PUNCTUATION_REGEX, "");
+        String query = context.rawArgs.replaceAll(TrackSearcher.PUNCTUATION_REGEX, "");
 
         context.reply(context.i18n("playSearching").replace("{q}", query), outMsg -> {
             AudioPlaylist list;
             try {
-                list = SearchUtil.searchForTracks(query, searchProviders);
-            } catch (SearchUtil.SearchingException e) {
+                list = trackSearcher.searchForTracks(query, searchProviders);
+            } catch (TrackSearcher.SearchingException e) {
                 context.reply(context.i18n("playYoutubeSearchError"));
                 log.error("YouTube search exception", e);
                 return;
@@ -153,7 +155,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
             } else {
                 //Get at most 5 tracks
-                List<AudioTrack> selectable = list.getTracks().subList(0, Math.min(SearchUtil.MAX_RESULTS, list.getTracks().size()));
+                List<AudioTrack> selectable = list.getTracks().subList(0, Math.min(TrackSearcher.MAX_RESULTS, list.getTracks().size()));
 
                 VideoSelection oldSelection = VideoSelection.remove(context.invoker);
                 if(oldSelection != null) {

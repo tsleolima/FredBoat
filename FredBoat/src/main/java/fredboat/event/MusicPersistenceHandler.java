@@ -24,10 +24,10 @@
 
 package fredboat.event;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.MusicTextChannelProvider;
 import fredboat.audio.player.PlayerRegistry;
@@ -52,6 +52,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -71,12 +72,15 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     private final PlayerRegistry playerRegistry;
     private final Credentials credentials;
     private final MusicTextChannelProvider musicTextChannelProvider;
+    private final AudioPlayerManager audioPlayerManager;
 
     public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials,
-                                   MusicTextChannelProvider musicTextChannelProvider) {
+                                   MusicTextChannelProvider musicTextChannelProvider,
+                                   @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
         this.musicTextChannelProvider = musicTextChannelProvider;
+        this.audioPlayerManager = audioPlayerManager;
     }
 
     //this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
@@ -133,7 +137,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
 
                 for (AudioTrackContext atc : player.getRemainingTracks()) {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    AbstractPlayer.getPlayerManager().encodeTrack(new MessageOutput(baos), atc.getTrack());
+                    audioPlayerManager.encodeTrack(new MessageOutput(baos), atc.getTrack());
 
                     JSONObject ident = new JSONObject()
                             .put("message", Base64.encodeBase64String(baos.toByteArray()))
@@ -244,7 +248,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                     AudioTrack at;
                     try {
                         ByteArrayInputStream bais = new ByteArrayInputStream(message);
-                        at = AbstractPlayer.getPlayerManager().decodeTrack(new MessageInput(bais)).decodedTrack;
+                        at = audioPlayerManager.decodeTrack(new MessageInput(bais)).decodedTrack;
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

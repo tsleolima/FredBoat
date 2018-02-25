@@ -25,6 +25,7 @@
 
 package fredboat.audio.player;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.config.property.Credentials;
 import fredboat.config.property.LavalinkConfig;
 import fredboat.main.Launcher;
@@ -39,6 +40,7 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.hooks.EventListener;
 import net.dv8tion.jda.core.managers.AudioManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -53,12 +55,16 @@ public class AudioConnectionFacade implements EventListener {
     @Nullable
     private final Lavalink lavalink;
     private final DebugConnectionListenerProvider debugConnectionListenerProvider;
+    private final AudioPlayerManager audioPlayerManager;
 
     public AudioConnectionFacade(LavalinkConfig lavalinkConfig, Credentials credentials,
-                                 DebugConnectionListenerProvider debugConnectionListenerProvider) {
+                                 DebugConnectionListenerProvider debugConnectionListenerProvider,
+                                 @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         this.debugConnectionListenerProvider = debugConnectionListenerProvider;
+        this.audioPlayerManager = audioPlayerManager;
         if (lavalinkConfig.getLavalinkHosts().isEmpty()) {
             lavalink = null; //local playback
+            audioPlayerManager.enableGcMonitoring();
             return;
         }
 
@@ -82,7 +88,7 @@ public class AudioConnectionFacade implements EventListener {
 
     IPlayer createPlayer(String guildId) {
         return lavalink == null
-                ? new LavaplayerPlayerWrapper(AbstractPlayer.getPlayerManager().createPlayer())
+                ? new LavaplayerPlayerWrapper(audioPlayerManager.createPlayer())
                 : lavalink.getLink(guildId).getPlayer();
     }
 

@@ -45,7 +45,7 @@ import fredboat.definitions.PermissionLevel;
 import fredboat.definitions.SearchProvider;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
-import fredboat.util.rest.SearchUtil;
+import fredboat.util.rest.TrackSearcher;
 import fredboat.util.rest.Weather;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
@@ -68,7 +68,7 @@ public class CommandInitializer {
     public static final String CONFIG_COMM_NAME = "config";
     public static final String LANGUAGE_COMM_NAME = "language";
 
-    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather) {
+    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather, TrackSearcher trackSearcher) {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
         CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
@@ -211,11 +211,11 @@ public class CommandInitializer {
         musicModule.registerCommand(new JoinCommand("join", "summon", "jn", "j"));
         musicModule.registerCommand(new LeaveCommand("leave", "lv"));
         musicModule.registerCommand(new PauseCommand("pause", "pa", "ps"));
-        musicModule.registerCommand(new PlayCommand(Arrays.asList(SearchProvider.YOUTUBE, SearchProvider.SOUNDCLOUD),
+        musicModule.registerCommand(new PlayCommand(trackSearcher, Arrays.asList(SearchProvider.YOUTUBE, SearchProvider.SOUNDCLOUD),
                 PLAY_COMM_NAME, "p"));
-        musicModule.registerCommand(new PlayCommand(Collections.singletonList(SearchProvider.YOUTUBE),
+        musicModule.registerCommand(new PlayCommand(trackSearcher, Collections.singletonList(SearchProvider.YOUTUBE),
                 YOUTUBE_COMM_NAME, "yt"));
-        musicModule.registerCommand(new PlayCommand(Collections.singletonList(SearchProvider.SOUNDCLOUD),
+        musicModule.registerCommand(new PlayCommand(trackSearcher, Collections.singletonList(SearchProvider.SOUNDCLOUD),
                 SOUNDCLOUD_COMM_NAME, "sc"));
         musicModule.registerCommand(new PlaySplitCommand("split"));
         musicModule.registerCommand(new RepeatCommand("repeat", "rep", "loop"));
@@ -250,12 +250,12 @@ public class CommandInitializer {
      * @return String array that contains string representation of numbers with addOnAliases.
      */
     private static String[] buildNumericalSelectAliases(String... extraAliases) {
-        String[] selectTrackAliases = new String[SearchUtil.MAX_RESULTS + extraAliases.length];
+        String[] selectTrackAliases = new String[TrackSearcher.MAX_RESULTS + extraAliases.length];
         int i = 0;
         for (; i < extraAliases.length; i++) {
             selectTrackAliases[i] = extraAliases[i];
         }
-        for (; i < SearchUtil.MAX_RESULTS + extraAliases.length; i++) {
+        for (; i < TrackSearcher.MAX_RESULTS + extraAliases.length; i++) {
             selectTrackAliases[i] = String.valueOf(i - extraAliases.length + 1);
         }
         return selectTrackAliases;

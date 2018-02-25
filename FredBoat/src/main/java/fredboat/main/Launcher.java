@@ -20,6 +20,7 @@ import fredboat.util.AppInfo;
 import fredboat.util.GitRepoState;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
+import fredboat.util.rest.TrackSearcher;
 import fredboat.util.rest.Weather;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
@@ -83,6 +84,7 @@ public class Launcher implements ApplicationRunner {
     private final ShardManager shardManager;
     private final Weather weather;
     private final AudioConnectionFacade audioConnectionFacade;
+    private final TrackSearcher trackSearcher;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -132,7 +134,7 @@ public class Launcher implements ApplicationRunner {
     public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
                     MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
                     StatsAgent statsAgent, BotMetrics botMetrics, ShardManager shardManager, Weather weather,
-                    AudioConnectionFacade audioConnectionFacade) {
+                    AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
@@ -145,6 +147,7 @@ public class Launcher implements ApplicationRunner {
         this.shardManager = shardManager;
         this.weather = weather;
         this.audioConnectionFacade = audioConnectionFacade;
+        this.trackSearcher = trackSearcher;
     }
 
     @Override
@@ -159,7 +162,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //Commands
-        CommandInitializer.initCommands(cacheMetrics, weather);
+        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {

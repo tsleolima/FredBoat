@@ -31,9 +31,9 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
-import fredboat.audio.player.AbstractPlayer;
 import fredboat.audio.queue.PlaylistInfo;
 import fredboat.main.BotController;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.DataInput;
@@ -47,10 +47,13 @@ import java.util.regex.Matcher;
 
 public class PlaylistImportSourceManager implements AudioSourceManager, PlaylistImporter {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlaylistImportSourceManager.class);
+    private static final Logger log = LoggerFactory.getLogger(PlaylistImportSourceManager.class);
 
-    private static final AudioPlayerManager PRIVATE_MANAGER = AbstractPlayer
-            .registerSourceManagers(new DefaultAudioPlayerManager());
+    private final AudioPlayerManager audioPlayerManager;
+
+    public PlaylistImportSourceManager(AudioPlayerManager audioPlayerManager) {
+        this.audioPlayerManager = audioPlayerManager;
+    }
 
     @Override
     public String getSourceName() {
@@ -74,7 +77,7 @@ public class PlaylistImportSourceManager implements AudioSourceManager, Playlist
         PasteServiceAudioResultHandler handler = new PasteServiceAudioResultHandler();
         Future<Void> lastFuture = null;
         for (String id : trackIds) {
-            lastFuture = PRIVATE_MANAGER.loadItemOrdered(handler, id, handler);
+            lastFuture = audioPlayerManager.loadItemOrdered(handler, id, handler);
         }
 
         if (lastFuture == null) {
@@ -96,12 +99,12 @@ public class PlaylistImportSourceManager implements AudioSourceManager, Playlist
     }
 
     @Override
-    public void encodeTrack(AudioTrack track, DataOutput output) throws IOException {
+    public void encodeTrack(AudioTrack track, DataOutput output) {
         throw new UnsupportedOperationException("This source manager is only for loading playlists");
     }
 
     @Override
-    public AudioTrack decodeTrack(AudioTrackInfo trackInfo, DataInput input) throws IOException {
+    public AudioTrack decodeTrack(AudioTrackInfo trackInfo, DataInput input) {
         throw new UnsupportedOperationException("This source manager is only for loading playlists");
     }
 
@@ -201,7 +204,7 @@ public class PlaylistImportSourceManager implements AudioSourceManager, Playlist
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
-            log.info("Attempt to load a playlist recursively, skipping");
+            loadedTracks.addAll(playlist.getTracks());
         }
 
         @Override
