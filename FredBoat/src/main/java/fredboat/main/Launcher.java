@@ -19,8 +19,7 @@ import fredboat.util.AppInfo;
 import fredboat.util.GitRepoState;
 import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
-import fredboat.util.rest.OpenWeatherAPI;
-import fredboat.util.rest.models.weather.RetrievedWeather;
+import fredboat.util.rest.Weather;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
@@ -66,6 +65,7 @@ import java.util.concurrent.ExecutorService;
         "fredboat.feature",
         "fredboat.feature.metrics",
         "fredboat.main",
+        "fredboat.util.rest",
 })
 public class Launcher implements ApplicationRunner {
 
@@ -80,6 +80,7 @@ public class Launcher implements ApplicationRunner {
     private final StatsAgent statsAgent;
     private final BotMetrics botMetrics;
     private final ShardManager shardManager;
+    private final Weather weather;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -128,7 +129,7 @@ public class Launcher implements ApplicationRunner {
 
     public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
                     MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
-                    StatsAgent statsAgent, BotMetrics botMetrics, ShardManager shardManager) {
+                    StatsAgent statsAgent, BotMetrics botMetrics, ShardManager shardManager, Weather weather) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
@@ -139,6 +140,7 @@ public class Launcher implements ApplicationRunner {
         this.statsAgent = statsAgent;
         this.botMetrics = botMetrics;
         this.shardManager = shardManager;
+        this.weather = weather;
     }
 
     @Override
@@ -153,7 +155,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //Commands
-        CommandInitializer.initCommands(cacheMetrics);
+        CommandInitializer.initCommands(cacheMetrics, weather);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {
@@ -169,9 +171,6 @@ public class Launcher implements ApplicationRunner {
 
         //Check imgur creds
         executor.submit(this::hasValidImgurCredentials);
-
-        //Check OpenWeather key
-        executor.submit(this::hasValidOpenWeatherKey);
 
         enableMetrics();
 
@@ -244,30 +243,6 @@ public class Launcher implements ApplicationRunner {
             log.warn("Imgur login failed, it seems to be down.", e);
         }
         return false;
-    }
-
-    /**
-     * Method to check if there is an error to retrieve open weather data.
-     *
-     * @return True if it can retrieve data, else return false.
-     */
-    private boolean hasValidOpenWeatherKey() {
-        if ("".equals(configProvider.getCredentials().getOpenWeatherKey())) {
-            log.warn("Open Weather API credentials not found. Weather related commands will not work properly.");
-            return false;
-        }
-
-        OpenWeatherAPI api = new OpenWeatherAPI(null);
-        RetrievedWeather weather = api.getCurrentWeatherByCity("san francisco");
-
-        boolean isSuccess = !(weather == null || weather.isError());
-
-        if (isSuccess) {
-            log.info("Open Weather API check successful");
-        } else {
-            log.warn("Open Weather API check failed. It may be down, the provided credentials may be invalid, or temporarily blocked.");
-        }
-        return isSuccess;
     }
 
     //returns true if all registered shards are reporting back as CONNECTED, false otherwise

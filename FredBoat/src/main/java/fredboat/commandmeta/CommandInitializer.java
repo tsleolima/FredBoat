@@ -45,8 +45,8 @@ import fredboat.definitions.PermissionLevel;
 import fredboat.definitions.SearchProvider;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
-import fredboat.util.rest.OpenWeatherAPI;
 import fredboat.util.rest.SearchUtil;
+import fredboat.util.rest.Weather;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
 import javax.annotation.Nullable;
@@ -68,7 +68,7 @@ public class CommandInitializer {
     public static final String CONFIG_COMM_NAME = "config";
     public static final String LANGUAGE_COMM_NAME = "language";
 
-    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics) {
+    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather) {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
         CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
@@ -139,7 +139,7 @@ public class CommandInitializer {
         utilityModule.registerCommand(new RoleInfoCommand("roleinfo"));
         utilityModule.registerCommand(new ServerInfoCommand("serverinfo", "guildinfo"));
         utilityModule.registerCommand(new UserInfoCommand("userinfo", "memberinfo"));
-        utilityModule.registerCommand(new WeatherCommand(new OpenWeatherAPI(cacheMetrics), "weather"));
+        utilityModule.registerCommand(new WeatherCommand(weather, "weather"));
 
 
         // Fun Module - mostly ascii, memes, pictures, games

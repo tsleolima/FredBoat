@@ -6,8 +6,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import fredboat.config.property.Credentials;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.Launcher;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.models.weather.OpenWeatherCurrent;
 import fredboat.util.rest.models.weather.RetrievedWeather;
@@ -20,20 +20,22 @@ import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class OpenWeatherAPI implements Weather {
     private static final String TAG = "OpenWeather";
     private static final Logger log = LoggerFactory.getLogger(OpenWeatherAPI.class);
     private static final String OPEN_WEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5";
     private static final int MAX_CACHE_HOUR = 6;
     private static final int MAX_API_RATE = 60;
+    private final Credentials credentials;
     private LoadingCache<String, RetrievedWeather> weatherCache;
 
     private final Bucket limitBucket;
@@ -41,7 +43,8 @@ public class OpenWeatherAPI implements Weather {
     private ObjectMapper objectMapper;
     private HttpUrl currentWeatherBaseUrl;
 
-    public OpenWeatherAPI(@Nullable CacheMetricsCollector cacheMetrics) {
+    public OpenWeatherAPI(CacheMetricsCollector cacheMetrics, Credentials credentials) {
+        this.credentials = credentials;
         client = Http.DEFAULT_BUILDER.newBuilder()
                 .eventListener(new OkHttpEventMetrics("openWeatherApi", Metrics.httpEventCounter))
                 .build();
@@ -61,12 +64,32 @@ public class OpenWeatherAPI implements Weather {
                 .expireAfterWrite(MAX_CACHE_HOUR, TimeUnit.HOURS)
                 .build(new CacheLoader<String, RetrievedWeather>() {
                     @Override
-                    public RetrievedWeather load(@Nonnull String key) throws Exception {
+                    public RetrievedWeather load(@Nonnull String key) {
                         return processGetWeatherByCity(key);
                     }
                 });
-        if (cacheMetrics != null) {
-            cacheMetrics.addCache("openWeatherApi", weatherCache);
+        cacheMetrics.addCache("openWeatherApi", weatherCache);
+
+        testOpenWeatherKey();
+    }
+
+    /**
+     * Method to check if there is an error to retrieve open weather data.
+     */
+    private void testOpenWeatherKey() {
+        if ("".equals(credentials.getOpenWeatherKey())) {
+            log.warn("Open Weather API credentials not found. Weather related commands will not work properly.");
+            return;
+        }
+
+        RetrievedWeather weather = getCurrentWeatherByCity("san francisco");
+
+        boolean isSuccess = !(weather == null || weather.isError());
+
+        if (isSuccess) {
+            log.info("Open Weather API check successful");
+        } else {
+            log.warn("Open Weather API check failed. It may be down, the provided credentials may be invalid, or temporarily blocked.");
         }
     }
 
@@ -113,7 +136,7 @@ public class OpenWeatherAPI implements Weather {
                 HttpUrl.Builder urlBuilder = currentWeatherBaseUrl.newBuilder();
 
                 urlBuilder.addQueryParameter("q", query);
-                urlBuilder.addQueryParameter("appid", Launcher.getBotController().getCredentials().getOpenWeatherKey());
+                urlBuilder.addQueryParameter("appid", credentials.getOpenWeatherKey());
 
                 HttpUrl url = urlBuilder.build();
                 Request request = new Request.Builder()
@@ -123,7 +146,6 @@ public class OpenWeatherAPI implements Weather {
                 try {
                     Response response = client.newCall(request).execute();
                     ResponseBody responseBody = response.body();
-                    String resultBody = "";
 
                     switch (response.code()) {
                         case 200:
