@@ -42,9 +42,9 @@ import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
+import fredboat.feature.metrics.ShardStatsCounterProvider;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
-import fredboat.main.ShardContext;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
@@ -87,15 +87,15 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandManager commandManager;
     private final CommandContextParser commandContextParser;
     private final PlayerRegistry playerRegistry;
-    private final ShardContext shardContext;
+    private final ShardStatsCounterProvider shardStatsCounterProvider;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
-                             ShardContext shardContext) {
+                             ShardStatsCounterProvider shardStatsCounterProvider) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
-        this.shardContext = shardContext;
+        this.shardStatsCounterProvider = shardStatsCounterProvider;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -316,7 +316,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //are we in the channel that someone left from?
-        VoiceChannel currentVc = player.getCurrentVoiceChannel(guild.getJDA());
+        VoiceChannel currentVc = player.getCurrentVoiceChannel();
         if (currentVc != null && currentVc.getIdLong() != channelLeft.getIdLong()) {
             return;
         }
@@ -360,11 +360,7 @@ public class EventListenerBoat extends AbstractEventListener {
     public void onReady(ReadyEvent event) {
         log.info("Received ready event for {}", event.getJDA().getShardInfo().toString());
 
-        try {
-            shardContext.of(event.getJDA()); //make sure a shard context is created the latest when it is ready
-        } catch (Exception e) {
-            log.error("Uncaught exception when dispatching ready event to shard context", e);
-        }
+        shardStatsCounterProvider.registerShard(event.getJDA().getShardInfo().getShardId());
     }
 
     private static void sendHelloOnJoin(@Nonnull Guild guild) {

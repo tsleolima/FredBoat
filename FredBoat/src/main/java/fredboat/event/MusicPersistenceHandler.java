@@ -36,6 +36,7 @@ import fredboat.audio.queue.RepeatMode;
 import fredboat.audio.queue.SplitAudioTrackContext;
 import fredboat.config.property.Credentials;
 import fredboat.feature.I18n;
+import fredboat.jda.JdaEntityProvider;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.ExitCodes;
@@ -72,14 +73,16 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     private final PlayerRegistry playerRegistry;
     private final Credentials credentials;
     private final MusicTextChannelProvider musicTextChannelProvider;
+    private final JdaEntityProvider jdaEntityProvider;
     private final AudioPlayerManager audioPlayerManager;
 
     public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials,
-                                   MusicTextChannelProvider musicTextChannelProvider,
+                                   MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                                    @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
         this.musicTextChannelProvider = musicTextChannelProvider;
+        this.jdaEntityProvider = jdaEntityProvider;
         this.audioPlayerManager = audioPlayerManager;
     }
 
@@ -262,7 +265,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                     AudioTrackContext atc;
                     JSONObject split = json.optJSONObject("split");
                     if(split != null) {
-                        atc = new SplitAudioTrackContext(at, member,
+                        atc = new SplitAudioTrackContext(jdaEntityProvider, at, member,
                                 split.getLong("startPos"),
                                 split.getLong("endPos"),
                                 split.getString("title")
@@ -276,7 +279,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                             }
                         }
                     } else {
-                        atc = new AudioTrackContext(at, member);
+                        atc = new AudioTrackContext(jdaEntityProvider, at, member);
 
                         if (isFirst[0]) {
                             isFirst[0] = false;

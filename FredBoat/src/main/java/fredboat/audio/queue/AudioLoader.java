@@ -37,6 +37,7 @@ import fredboat.audio.source.PlaylistImporter;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
+import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.TextUtils;
 import fredboat.util.ratelimit.Ratelimiter;
@@ -61,6 +62,7 @@ public class AudioLoader implements AudioLoadResultHandler {
     private static final Pattern SPLIT_DESCRIPTION_PATTERN = Pattern.compile("(.*?)[( \\[]*((?:\\d?\\d:)?\\d?\\d:\\d\\d)[) \\]]*(.*)");
     private static final int QUEUE_TRACK_LIMIT = 10000;
 
+    private final JdaEntityProvider jdaEntityProvider;
     private final ITrackProvider trackProvider;
     private final AudioPlayerManager playerManager;
     private final GuildPlayer gplayer;
@@ -68,7 +70,8 @@ public class AudioLoader implements AudioLoadResultHandler {
     private IdentifierContext context = null;
     private volatile boolean isLoading = false;
 
-    public AudioLoader(ITrackProvider trackProvider, AudioPlayerManager playerManager, GuildPlayer gplayer) {
+    public AudioLoader(JdaEntityProvider jdaEntityProvider, ITrackProvider trackProvider, AudioPlayerManager playerManager, GuildPlayer gplayer) {
+        this.jdaEntityProvider = jdaEntityProvider;
         this.trackProvider = trackProvider;
         this.playerManager = playerManager;
         this.gplayer = gplayer;
@@ -185,7 +188,7 @@ public class AudioLoader implements AudioLoadResultHandler {
 
                 at.setPosition(context.getPosition());
 
-                trackProvider.add(new AudioTrackContext(at, context.getMember()));
+                trackProvider.add(new AudioTrackContext(jdaEntityProvider, at, context.getMember()));
                 if (!gplayer.isPaused()) {
                     gplayer.play();
                 }
@@ -208,7 +211,7 @@ public class AudioLoader implements AudioLoadResultHandler {
 
             List<AudioTrackContext> toAdd = new ArrayList<>();
             for (AudioTrack at : ap.getTracks()) {
-                toAdd.add(new AudioTrackContext(at, context.getMember()));
+                toAdd.add(new AudioTrackContext(jdaEntityProvider, at, context.getMember()));
             }
             trackProvider.addAll(toAdd);
             context.reply(context.i18nFormat("loadListSuccess", ap.getTracks().size(), ap.getName()));
@@ -297,7 +300,7 @@ public class AudioLoader implements AudioLoadResultHandler {
             AudioTrack newAt = at.makeClone();
             newAt.setPosition(startPos);
 
-            SplitAudioTrackContext atc = new SplitAudioTrackContext(newAt, ic.getMember(), startPos, endPos, pair.getRight());
+            SplitAudioTrackContext atc = new SplitAudioTrackContext(jdaEntityProvider, newAt, ic.getMember(), startPos, endPos, pair.getRight());
 
             list.add(atc);
             gplayer.queue(atc);

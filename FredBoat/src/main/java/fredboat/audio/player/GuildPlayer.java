@@ -35,11 +35,10 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.EntityIO;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
-import fredboat.main.ShardContext;
+import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -67,17 +66,17 @@ public class GuildPlayer extends AbstractPlayer {
     private final AudioLoader audioLoader;
 
     private final MusicTextChannelProvider musicTextChannelProvider;
-    private final ShardContext.JdaProxy shard;
+    private final JdaEntityProvider jdaEntityProvider;
     private final AudioConnectionFacade audioConnectionFacade;
     private final EntityIO entityIO;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, ShardContext.JdaProxy shard,
+    public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                        AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager, EntityIO entityIO) {
         super(guild.getId(), audioConnectionFacade);
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
-        this.shard = shard;
+        this.jdaEntityProvider = jdaEntityProvider;
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.entityIO = entityIO;
@@ -87,7 +86,7 @@ public class GuildPlayer extends AbstractPlayer {
         this.guildId = guild.getIdLong();
 
         audioTrackProvider = new SimpleTrackProvider();
-        audioLoader = new AudioLoader(audioTrackProvider, audioPlayerManager, this);
+        audioLoader = new AudioLoader(jdaEntityProvider, audioTrackProvider, audioPlayerManager, this);
     }
 
     private void announceTrack(AudioTrackContext atc) {
@@ -119,7 +118,7 @@ public class GuildPlayer extends AbstractPlayer {
         if (targetChannel == null) {
             throw new MessagingException(I18n.get(getGuild()).getString("playerUserNotInChannel"));
         }
-        if (targetChannel.equals(getCurrentVoiceChannel(targetChannel.getJDA()))) {
+        if (targetChannel.equals(getCurrentVoiceChannel())) {
             // already connected to the channel
             return;
         }
@@ -172,7 +171,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void queue(String identifier, CommandContext context) {
-        IdentifierContext ic = new IdentifierContext(identifier, context.channel, context.invoker, shard);
+        IdentifierContext ic = new IdentifierContext(jdaEntityProvider, identifier, context.channel, context.invoker);
 
         joinChannel(context.invoker);
 
@@ -256,24 +255,10 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
 
-    //optionally pass a jda object to use for the lookup
     @Nullable
-    public VoiceChannel getCurrentVoiceChannel(JDA... jda) {
-        JDA j;
-        if (jda.length == 0) {
-            j = getJda();
-        } else {
-            j = jda[0];
-        }
-        if (j == null) {
-            log.warn("JDA is null when looking up current VC. Try passing a valid JDA when calling this method");
-            return null;
-        }
-        Guild guild = j.getGuildById(guildId);
-        if (guild != null)
-            return guild.getSelfMember().getVoiceState().getChannel();
-        else
-            return null;
+    public VoiceChannel getCurrentVoiceChannel() {
+        Guild guild = jdaEntityProvider.getGuildById(guildId);
+        return guild == null ? null : guild.getSelfMember().getVoiceState().getChannel();
     }
 
     /**
@@ -319,7 +304,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     @Nullable
     public Guild getGuild() {
-        return getJda().getGuildById(guildId);
+        return jdaEntityProvider.getGuildById(guildId);
     }
 
     public long getGuildId() {
@@ -437,11 +422,6 @@ public class GuildPlayer extends AbstractPlayer {
         }
 
         return enabled;
-    }
-
-    @Nonnull
-    private JDA getJda() {
-        return shard.getJda();
     }
 
     @Override

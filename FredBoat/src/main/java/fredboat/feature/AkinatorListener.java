@@ -69,7 +69,7 @@ public final class AkinatorListener extends UserListener {
 
 
     public AkinatorListener(Context context) throws IOException, JSONException {
-        this.context = new LeakSafeContext(context);
+        this.context = new LeakSafeContext(Launcher.getBotController().getJdaEntityProvider(), context);
         this.userId = context.getMember().getUser().getId();
         this.channelId = context.getTextChannel().getId();
 

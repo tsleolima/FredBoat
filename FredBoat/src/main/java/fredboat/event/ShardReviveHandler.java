@@ -85,7 +85,7 @@ public class ShardReviveHandler extends ListenerAdapter {
             playerRegistry.getPlayingPlayers().stream()
                     .filter(guildPlayer -> DiscordUtil.getShardId(guildPlayer.getGuildId(), credentials) == shardId)
                     .forEach(guildPlayer -> {
-                        VoiceChannel channel = guildPlayer.getCurrentVoiceChannel(event.getJDA());
+                        VoiceChannel channel = guildPlayer.getCurrentVoiceChannel();
                         if (channel != null) channels.add(channel.getIdLong());
                     });
             channelsToRejoin.put(shardId, channels);

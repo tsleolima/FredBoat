@@ -117,7 +117,8 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                     }
                     outputMsgBuilder.append(msg);
 
-                    player.queue(new AudioTrackContext(selectedTracks[i], invoker));
+                    player.queue(new AudioTrackContext(Launcher.getBotController().getJdaEntityProvider(),
+                            selectedTracks[i], invoker));
                 }
 
                 videoSelectionCache.remove(invoker);

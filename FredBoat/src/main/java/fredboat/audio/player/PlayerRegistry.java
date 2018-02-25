@@ -27,7 +27,7 @@ package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.db.EntityIO;
-import fredboat.main.ShardContext;
+import fredboat.jda.JdaEntityProvider;
 import net.dv8tion.jda.core.entities.Guild;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -45,17 +45,17 @@ public class PlayerRegistry {
     public static final float DEFAULT_VOLUME = 1f;
 
     private final Map<Long, GuildPlayer> registry = new ConcurrentHashMap<>();
-    private final ShardContext shardContext;
+    private final JdaEntityProvider jdaEntityProvider;
     private final AudioConnectionFacade audioConnectionFacade;
     private final EntityIO entityIO;
     private final AudioPlayerManager audioPlayerManager;
     private final MusicTextChannelProvider musicTextChannelProvider;
 
-    public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider, ShardContext shardContext,
+    public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                           AudioConnectionFacade audioConnectionFacade, EntityIO entityIO,
                           @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         this.musicTextChannelProvider = musicTextChannelProvider;
-        this.shardContext = shardContext;
+        this.jdaEntityProvider = jdaEntityProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.entityIO = entityIO;
         this.audioPlayerManager = audioPlayerManager;
@@ -65,7 +65,7 @@ public class PlayerRegistry {
     public GuildPlayer getOrCreate(@Nonnull Guild guild) {
         return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
-                    GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, shardContext.of(guild.getJDA()),
+                    GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, jdaEntityProvider,
                             audioConnectionFacade, audioPlayerManager, entityIO);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;

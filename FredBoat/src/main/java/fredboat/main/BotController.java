@@ -13,6 +13,7 @@ import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
+import fredboat.jda.JdaEntityProvider;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.rest.Http;
 import io.prometheus.client.hibernate.HibernateStatisticsCollector;
@@ -42,7 +43,7 @@ public class BotController {
     private final DatabaseManager databaseManager;
     private final EntityIO entityIO;
     private final PlayerRegistry playerRegistry;
-    private final ShardContext shardContext;
+    private final JdaEntityProvider jdaEntityProvider;
     private final BotMetrics botMetrics;
     private final ExecutorService executor;
     private final AudioPlayerManager audioPlayerManager;
@@ -51,7 +52,7 @@ public class BotController {
     public BotController(PropertyConfigProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
                          EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
-                         PlayerRegistry playerRegistry, ShardContext shardContext, BotMetrics botMetrics,
+                         PlayerRegistry playerRegistry, JdaEntityProvider jdaEntityProvider, BotMetrics botMetrics,
                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         this.configProvider = configProvider;
         this.audioConnectionFacade = audioConnectionFacade;
@@ -63,7 +64,7 @@ public class BotController {
         hibernateStats.register(); //call this exactly once after all db connections have been created
         this.executor = executor;
         this.playerRegistry = playerRegistry;
-        this.shardContext = shardContext;
+        this.jdaEntityProvider = jdaEntityProvider;
         this.botMetrics = botMetrics;
         this.audioPlayerManager = audioPlayerManager;
 
@@ -117,8 +118,8 @@ public class BotController {
         return playerRegistry;
     }
 
-    public ShardContext getShardContext() {
-        return shardContext;
+    public JdaEntityProvider getJdaEntityProvider() {
+        return jdaEntityProvider;
     }
 
     public BotMetrics getBotMetrics() {

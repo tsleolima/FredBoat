@@ -57,8 +57,8 @@ public class PlaySplitCommand extends Command implements IMusicCommand, ICommand
         PlayerRegistry playerRegistry = Launcher.getBotController().getPlayerRegistry();
         if (!PlayerLimitManager.checkLimitResponsive(context, playerRegistry)) return;
 
-        IdentifierContext ic = new IdentifierContext(context.args[0], context.channel, context.invoker,
-                Launcher.getBotController().getShardContext().of(context.guild.getJDA()));
+        IdentifierContext ic = new IdentifierContext(Launcher.getBotController().getJdaEntityProvider(),
+                context.args[0], context.channel, context.invoker);
         ic.setSplit(true);
 
         GuildPlayer player = playerRegistry.getOrCreate(context.guild);

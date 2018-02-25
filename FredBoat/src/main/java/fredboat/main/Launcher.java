@@ -67,6 +67,7 @@ import java.util.concurrent.ExecutorService;
         "fredboat.event",
         "fredboat.feature",
         "fredboat.feature.metrics",
+        "fredboat.jda",
         "fredboat.main",
         "fredboat.util.rest",
 })

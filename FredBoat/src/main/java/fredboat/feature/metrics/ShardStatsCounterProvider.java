@@ -24,16 +24,14 @@
 
 package fredboat.feature.metrics;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import fredboat.agent.StatsAgent;
+import fredboat.jda.JdaProvider;
 import fredboat.util.func.NonnullSupplier;
-import fredboat.util.rest.CacheUtil;
-import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.JDA;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by napster on 25.02.18.
@@ -41,22 +39,29 @@ import java.util.Collections;
 @Component
 public class ShardStatsCounterProvider {
 
-    private final Cache<Integer, ShardStatsCounter> shardStatsCounters = CacheBuilder.newBuilder()
-            .recordStats()
-            //todo expire them? they are pretty lightweight
-            .build();
+    private final ConcurrentHashMap<Integer, ShardStatsCounter> shardStatsCounters = new ConcurrentHashMap<>();
+    private final StatsAgent statsAgent;
+    private final JdaProvider jdaProvider;
 
-    public ShardStatsCounterProvider(CacheMetricsCollector cacheMetrics) {
-        cacheMetrics.addCache("shardStatsCounters", shardStatsCounters);
+    public ShardStatsCounterProvider(StatsAgent statsAgent, JdaProvider jdaProvider) {
+        this.statsAgent = statsAgent;
+        this.jdaProvider = jdaProvider;
     }
 
-    public ShardStatsCounter get(JDA.ShardInfo shardInfo, NonnullSupplier<JDA> jdaSupplier) {
-        return CacheUtil.getUncheckedUnwrapped(shardStatsCounters, shardInfo.getShardId(),
-                () -> new ShardStatsCounter(shardInfo,
+    public void registerShard(int shardId) {
+        shardStatsCounters.computeIfAbsent(shardId, id -> {
+            ShardStatsCounter shardStatsCounter = create(jdaProvider.getShardById(id).getShardInfo(),
+                    () -> jdaProvider.getShardById(shardId));
+            statsAgent.addAction(shardStatsCounter);
+            return shardStatsCounter;
+        });
+    }
+
+    private ShardStatsCounter create(JDA.ShardInfo shardInfo, NonnullSupplier<JDA> jdaSupplier) {
+        return new ShardStatsCounter(shardInfo,
                         () -> new BotMetrics.JdaEntityCounts().count(
                                 () -> Collections.singletonList(jdaSupplier.get())
                         )
-                )
         );
     }
 
