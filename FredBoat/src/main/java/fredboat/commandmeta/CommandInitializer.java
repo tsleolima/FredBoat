@@ -24,6 +24,7 @@
 
 package fredboat.commandmeta;
 
+import fredboat.audio.player.VideoSelectionCache;
 import fredboat.command.admin.*;
 import fredboat.command.config.*;
 import fredboat.command.fun.*;
@@ -68,7 +69,8 @@ public class CommandInitializer {
     public static final String CONFIG_COMM_NAME = "config";
     public static final String LANGUAGE_COMM_NAME = "language";
 
-    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather, TrackSearcher trackSearcher) {
+    public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather, TrackSearcher trackSearcher,
+                                    VideoSelectionCache videoSelectionCache) {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
         CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
@@ -211,16 +213,20 @@ public class CommandInitializer {
         musicModule.registerCommand(new JoinCommand("join", "summon", "jn", "j"));
         musicModule.registerCommand(new LeaveCommand("leave", "lv"));
         musicModule.registerCommand(new PauseCommand("pause", "pa", "ps"));
-        musicModule.registerCommand(new PlayCommand(trackSearcher, Arrays.asList(SearchProvider.YOUTUBE, SearchProvider.SOUNDCLOUD),
+        musicModule.registerCommand(new PlayCommand(trackSearcher, videoSelectionCache,
+                Arrays.asList(SearchProvider.YOUTUBE, SearchProvider.SOUNDCLOUD),
                 PLAY_COMM_NAME, "p"));
-        musicModule.registerCommand(new PlayCommand(trackSearcher, Collections.singletonList(SearchProvider.YOUTUBE),
+        musicModule.registerCommand(new PlayCommand(trackSearcher, videoSelectionCache,
+                Collections.singletonList(SearchProvider.YOUTUBE),
                 YOUTUBE_COMM_NAME, "yt"));
-        musicModule.registerCommand(new PlayCommand(trackSearcher, Collections.singletonList(SearchProvider.SOUNDCLOUD),
+        musicModule.registerCommand(new PlayCommand(trackSearcher, videoSelectionCache,
+                Collections.singletonList(SearchProvider.SOUNDCLOUD),
                 SOUNDCLOUD_COMM_NAME, "sc"));
         musicModule.registerCommand(new PlaySplitCommand("split"));
         musicModule.registerCommand(new RepeatCommand("repeat", "rep", "loop"));
         musicModule.registerCommand(new ReshuffleCommand("reshuffle", "resh"));
-        musicModule.registerCommand(new SelectCommand("select", buildNumericalSelectAliases("sel")));
+        musicModule.registerCommand(new SelectCommand(videoSelectionCache, "select",
+                buildNumericalSelectAliases("sel")));
         musicModule.registerCommand(new ShuffleCommand("shuffle", "sh", "random"));
         musicModule.registerCommand(new SkipCommand(SKIP_COMM_NAME, "sk", "s"));
         musicModule.registerCommand(new StopCommand("stop", "st"));

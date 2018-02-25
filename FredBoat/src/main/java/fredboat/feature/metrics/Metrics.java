@@ -27,7 +27,6 @@ package fredboat.feature.metrics;
 
 import ch.qos.logback.classic.LoggerContext;
 import fredboat.agent.FredBoatAgent;
-import fredboat.audio.player.VideoSelection;
 import fredboat.command.info.HelpCommand;
 import fredboat.feature.metrics.collectors.FredBoatCollector;
 import fredboat.feature.metrics.collectors.ThreadPoolCollector;
@@ -67,7 +66,6 @@ public class Metrics {
         DefaultExports.initialize();
 
         //add some of our guava caches that are currently only statically reachable
-        cacheMetrics.addCache("videoSelections", VideoSelection.SELECTIONS);
         cacheMetrics.addCache("HELP_RECEIVED_RECENTLY", HelpCommand.HELP_RECEIVED_RECENTLY);
 
         try {

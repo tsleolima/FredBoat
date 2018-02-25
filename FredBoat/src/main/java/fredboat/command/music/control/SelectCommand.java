@@ -27,7 +27,8 @@ package fredboat.command.music.control;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.VideoSelection;
+import fredboat.audio.player.VideoSelectionCache;
+import fredboat.audio.player.VideoSelectionCache.VideoSelection;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
@@ -48,18 +49,21 @@ import java.util.LinkedHashSet;
 
 public class SelectCommand extends Command implements IMusicCommand, ICommandRestricted {
 
-    public SelectCommand(String name, String... aliases) {
+    private final VideoSelectionCache videoSelectionCache;
+
+    public SelectCommand(VideoSelectionCache videoSelectionCache, String name, String... aliases) {
         super(name, aliases);
+        this.videoSelectionCache = videoSelectionCache;
     }
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        select(context);
+        select(context, videoSelectionCache);
     }
 
-    static void select(CommandContext context) {
+    static void select(CommandContext context, VideoSelectionCache videoSelectionCache) {
         Member invoker = context.invoker;
-        VideoSelection selection = VideoSelection.get(invoker);
+        VideoSelection selection = videoSelectionCache.get(invoker);
         if (selection == null) {
             context.reply(context.i18n("selectSelectionNotGiven"));
             return;
@@ -116,7 +120,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                     player.queue(new AudioTrackContext(selectedTracks[i], invoker));
                 }
 
-                VideoSelection.remove(invoker);
+                videoSelectionCache.remove(invoker);
                 TextChannel tc = Launcher.getBotController().getShardManager().getTextChannelById(selection.channelId);
                 if (tc != null) {
                     CentralMessaging.editMessage(tc, selection.outMsgId, CentralMessaging.from(outputMsgBuilder.toString()));

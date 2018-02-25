@@ -28,61 +28,61 @@ package fredboat.audio.player;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class VideoSelection {
-
-    public final List<AudioTrack> choices;
-    public final long outMsgId; //our own message
-    public final long channelId;
-
-    public VideoSelection(List<AudioTrack> choices, Message outMsg) {
-        this.choices = choices;
-        this.outMsgId = outMsg.getIdLong();
-        this.channelId = outMsg.getChannel().getIdLong();
-    }
-
-    public void deleteMessage() {
-        TextChannel tc = Launcher.getBotController().getShardManager().getTextChannelById(channelId);
-        if (tc != null) {
-            //we can call this without an additional permission check, as this should be our own message that we are
-            //deleting
-            CentralMessaging.deleteMessageById(tc, outMsgId);
-        }
-    }
-    
-
-    // ********************************************************************************
-    //                     Caching of the video selections
-    // ********************************************************************************
+/**
+ * Cache and provide video selections (aka seach results shown to users, for them to select from)
+ */
+@Component
+public class VideoSelectionCache {
 
     //the key looks like this: guildId:userId
-    public static final Cache<String, VideoSelection> SELECTIONS = CacheBuilder.newBuilder()
+    private final Cache<String, VideoSelection> videoSelections = CacheBuilder.newBuilder()
             .recordStats()
             .expireAfterWrite(60, TimeUnit.MINUTES)
             .build();
+    private final ShardManager shardManager;
+
+    public VideoSelectionCache(ShardManager shardManager, CacheMetricsCollector cacheMetrics) {
+        this.shardManager = shardManager;
+        cacheMetrics.addCache("videoSelections", videoSelections);
+    }
 
     @Nullable
-    public static VideoSelection get(@Nonnull Member member) {
+    public VideoSelection get(@Nonnull Member member) {
         return get(member.getGuild().getIdLong(), member.getUser().getIdLong());
     }
 
     @Nullable
-    public static VideoSelection remove(@Nonnull Member member) {
+    public VideoSelection remove(@Nonnull Member member) {
         return remove(member.getGuild().getIdLong(), member.getUser().getIdLong());
     }
 
-    public static void put(@Nonnull Member member, VideoSelection selection) {
-        SELECTIONS.put(asKey(member), selection);
+    public void put(@Nonnull Member member, List<AudioTrack> choices, Message outMsg) {
+        videoSelections.put(asKey(member), new VideoSelection(choices, outMsg, shardManager));
+    }
+
+    @Nullable
+    private VideoSelection get(long guildId, long userId) {
+        return videoSelections.getIfPresent(asKey(guildId, userId));
+    }
+
+    @Nullable
+    private VideoSelection remove(long guildId, long userId) {
+        VideoSelection result = get(guildId, userId);
+        videoSelections.invalidate(asKey(guildId, userId));
+        return result;
     }
 
 
@@ -94,15 +94,27 @@ public class VideoSelection {
         return guildId + ":" + userId;
     }
 
-    @Nullable
-    private static VideoSelection get(long guildId, long userId) {
-        return SELECTIONS.getIfPresent(asKey(guildId, userId));
-    }
+    public static class VideoSelection {
 
-    @Nullable
-    private static VideoSelection remove(long guildId, long userId) {
-        VideoSelection result = get(guildId, userId);
-        SELECTIONS.invalidate(asKey(guildId, userId));
-        return result;
+        public final List<AudioTrack> choices;
+        public final long outMsgId; //our own message
+        public final long channelId;
+        private final ShardManager shardManager;
+
+        private VideoSelection(List<AudioTrack> choices, Message outMsg, ShardManager shardManager) {
+            this.choices = choices;
+            this.outMsgId = outMsg.getIdLong();
+            this.channelId = outMsg.getChannel().getIdLong();
+            this.shardManager = shardManager;
+        }
+
+        public void deleteMessage() {
+            TextChannel tc = shardManager.getTextChannelById(channelId);
+            if (tc != null) {
+                //we can call this without an additional permission check, as this should be our own message that we are
+                //deleting
+                CentralMessaging.deleteMessageById(tc, outMsgId);
+            }
+        }
     }
 }

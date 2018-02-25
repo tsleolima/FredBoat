@@ -44,7 +44,7 @@ public class CommandInitializerTest extends BaseTest {
 //    @Test disabled until spring refactoring is sorted out
     public void testHelpStrings() {
 
-        CommandInitializer.initCommands(null, null, null);
+        CommandInitializer.initCommands(null, null, null, null);
 
         for (String c : CommandRegistry.getAllRegisteredCommandsAndAliases()) {
             Command com = CommandRegistry.findCommand(c);

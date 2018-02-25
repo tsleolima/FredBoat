@@ -8,6 +8,7 @@ import fredboat.agent.VoiceChannelCleanupAgent;
 import fredboat.api.API;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.player.VideoSelectionCache;
 import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
@@ -85,6 +86,7 @@ public class Launcher implements ApplicationRunner {
     private final Weather weather;
     private final AudioConnectionFacade audioConnectionFacade;
     private final TrackSearcher trackSearcher;
+    private final VideoSelectionCache videoSelectionCache;
     private final BotController botController;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -134,7 +136,8 @@ public class Launcher implements ApplicationRunner {
     public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
                     MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
                     StatsAgent statsAgent, BotMetrics botMetrics, ShardManager shardManager, Weather weather,
-                    AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher) {
+                    AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
+                    VideoSelectionCache videoSelectionCache) {
         this.botController = botController;
         Launcher.BC = botController;
         this.configProvider = configProvider;
@@ -148,6 +151,7 @@ public class Launcher implements ApplicationRunner {
         this.weather = weather;
         this.audioConnectionFacade = audioConnectionFacade;
         this.trackSearcher = trackSearcher;
+        this.videoSelectionCache = videoSelectionCache;
     }
 
     @Override
@@ -162,7 +166,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //Commands
-        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher);
+        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {

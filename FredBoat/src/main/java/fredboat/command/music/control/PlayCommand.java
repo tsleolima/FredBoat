@@ -29,7 +29,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.PlayerLimitManager;
-import fredboat.audio.player.VideoSelection;
+import fredboat.audio.player.VideoSelectionCache;
+import fredboat.audio.player.VideoSelectionCache.VideoSelection;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -55,13 +56,16 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlayCommand.class);
     private final TrackSearcher trackSearcher;
+    private final VideoSelectionCache videoSelectionCache;
     private final List<SearchProvider> searchProviders;
     private static final JoinCommand JOIN_COMMAND = new JoinCommand("");
     private static final String FILE_PREFIX = "file://";
 
-    public PlayCommand(TrackSearcher trackSearcher, List<SearchProvider> searchProviders, String name, String... aliases) {
+    public PlayCommand(TrackSearcher trackSearcher, VideoSelectionCache videoSelectionCache,
+                       List<SearchProvider> searchProviders, String name, String... aliases) {
         super(name, aliases);
         this.trackSearcher = trackSearcher;
+        this.videoSelectionCache = videoSelectionCache;
         this.searchProviders = searchProviders;
     }
 
@@ -93,7 +97,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         if (TextUtils.isSplitSelect(context.rawArgs)) {
-            SelectCommand.select(context);
+            SelectCommand.select(context, videoSelectionCache);
             return;
         }
 
@@ -157,7 +161,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 //Get at most 5 tracks
                 List<AudioTrack> selectable = list.getTracks().subList(0, Math.min(TrackSearcher.MAX_RESULTS, list.getTracks().size()));
 
-                VideoSelection oldSelection = VideoSelection.remove(context.invoker);
+                VideoSelection oldSelection = videoSelectionCache.remove(context.invoker);
                 if(oldSelection != null) {
                     oldSelection.deleteMessage();
                 }
@@ -179,7 +183,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 }
 
                 CentralMessaging.editMessage(outMsg, builder.build());
-                VideoSelection.put(context.invoker, new VideoSelection(selectable, outMsg));
+                videoSelectionCache.put(context.invoker, selectable, outMsg);
             }
         });
     }
