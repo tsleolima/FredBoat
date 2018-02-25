@@ -27,10 +27,10 @@ package fredboat.feature.metrics.collectors;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
-import fredboat.main.Launcher;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import org.springframework.stereotype.Component;
 
@@ -48,11 +48,13 @@ public class FredBoatCollector extends Collector {
 
     private final PlayerRegistry playerRegistry;
     private final BotMetrics botMetrics;
+    private final ShardManager shardManager;
 
-    public FredBoatCollector(PlayerRegistry playerRegistry, BotMetrics botMetrics) {
+    public FredBoatCollector(PlayerRegistry playerRegistry, BotMetrics botMetrics, ShardManager shardManager) {
         super();
         this.playerRegistry = playerRegistry;
         this.botMetrics = botMetrics;
+        this.shardManager = shardManager;
     }
 
     @Override
@@ -95,10 +97,7 @@ public class FredBoatCollector extends Collector {
 
 
         //per shard stats
-        if (Launcher.getBotController() == null || Launcher.getBotController().getShardManager() == null) {
-            return mfs; // This collector is invoked when we begin building the shard manager
-        }
-        for (JDA shard : Launcher.getBotController().getShardManager().getShards()) {
+        for (JDA shard : shardManager.getShards()) {
             String shardId = Integer.toString(shard.getShardInfo().getShardId());
             jdaEntities.addMetric(Arrays.asList(shardId, "User"), shard.getUserCache().size());
             jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), shard.getGuildCache().size());
