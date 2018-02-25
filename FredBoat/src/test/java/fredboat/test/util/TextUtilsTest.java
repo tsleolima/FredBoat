@@ -66,7 +66,7 @@ class TextUtilsTest extends BaseTest {
         return Stream.concat(
                 DynamicTest.stream(Arrays.asList(
                         "1q 2 3",
-                        "1q 2what 3"
+                        "1q 2w 3e"
                         ).iterator(),
                         testCase -> String.format("split select of `%s`", testCase),
                         testCase -> assertSplitSelect(one_two_three, testCase)),
@@ -74,7 +74,9 @@ class TextUtilsTest extends BaseTest {
                 DynamicTest.stream(Arrays.asList(
                         "q",
                         "We are number 1 but this string doesn't match",
-                        "1, 2, 3, 4, 5 Once we caught a fish alive"
+                        "1, 2, 3, 4, 5 Once I caught a fish alive",
+                        "metal 69",
+                        "blink182"
                         ).iterator(),
                         testCase -> String.format("not matching split select of `%s`", testCase),
                         testCase -> assertNoSplitSelect(testCase)

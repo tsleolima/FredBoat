@@ -327,7 +327,7 @@ public class TextUtils {
     public static boolean isSplitSelect(@Nonnull String arg) {
         String cleaned = SPLIT_SELECT_ALLOWED.negate().collapseFrom(arg, ' ');
         int numberOfCollapsed = arg.length() - cleaned.length();
-        if (numberOfCollapsed  >= 5) {
+        if (numberOfCollapsed  >= 2) {
             // rationale: prefix will be collapsed to 1 char, won't matter that much
             //            small typos (1q 2 3 4) will be collapsed in place, won't matter that much
             //            longer strings will be collapsed, words reduced to 1 char
