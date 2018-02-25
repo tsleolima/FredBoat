@@ -34,10 +34,10 @@ import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.AudioTrackContext;
 import fredboat.audio.queue.RepeatMode;
 import fredboat.audio.queue.SplitAudioTrackContext;
+import fredboat.config.property.AppConfig;
 import fredboat.config.property.Credentials;
 import fredboat.feature.I18n;
 import fredboat.jda.JdaEntityProvider;
-import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.ExitCodes;
 import net.dv8tion.jda.core.JDA;
@@ -75,15 +75,18 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     private final MusicTextChannelProvider musicTextChannelProvider;
     private final JdaEntityProvider jdaEntityProvider;
     private final AudioPlayerManager audioPlayerManager;
+    private final AppConfig appConfig;
 
     public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials,
                                    MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
-                                   @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
+                                   @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
+                                   AppConfig appConfig) {
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.audioPlayerManager = audioPlayerManager;
+        this.appConfig = appConfig;
     }
 
     //this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
@@ -191,7 +194,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     private void reloadPlaylists(JDA jda) {
         File dir = new File("music_persistence");
 
-        if (Launcher.getBotController().getAppConfig().isMusicDistribution()) {
+        if (appConfig.isMusicDistribution()) {
             log.warn("Music persistence loading is disabled on the MUSIC distribution! Use PATRON or DEVELOPMENT instead"
                     + "How did this call end up in here anyways?");
             return;
@@ -233,7 +236,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                 if (vc != null) {
                     player.joinChannel(vc);
                 }
-                if (Launcher.getBotController().getAppConfig().getDistribution().volumeSupported()) {
+                if (appConfig.getDistribution().volumeSupported()) {
                     player.setVolume(volume);
                 }
                 player.setRepeatMode(repeatMode);

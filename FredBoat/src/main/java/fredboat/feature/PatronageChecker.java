@@ -28,8 +28,8 @@ package fredboat.feature;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import fredboat.config.property.AppConfig;
 import fredboat.main.BotController;
-import fredboat.main.Launcher;
 import fredboat.util.rest.CacheUtil;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.Guild;
@@ -59,9 +59,11 @@ public class PatronageChecker {
         thread.setName("patreon-denial-cleaner");
         return thread;
     });
+    private final AppConfig appConfig;
 
     // Pay attention to how we also clear the status early if we get an exception
-    public PatronageChecker(CacheMetricsCollector cacheMetrics) {
+    public PatronageChecker(CacheMetricsCollector cacheMetrics, AppConfig appConfig) {
+        this.appConfig = appConfig;
         denialCleaner.scheduleAtFixedRate(
                 () -> cache.asMap().replaceAll(
                         (__, status) -> status.isValid() || status.isCausedByError() ? status : null
@@ -111,11 +113,11 @@ public class PatronageChecker {
 
         @SuppressWarnings("NullableProblems")
         @Override
-        public Status load(String key) throws Exception {
+        public Status load(String key) {
             //TODO prevent selfhosters from running this?
             try {
                 return new Status(
-                        BotController.HTTP.get(Launcher.getBotController().getAppConfig().isPatronDistribution()
+                        BotController.HTTP.get(appConfig.isPatronDistribution()
                                 ? "https://patronapi.fredboat.com/api/drm/" + key
                                 : "http://localhost:4500/api/drm/" + key)
                                 .asJson()
@@ -128,7 +130,7 @@ public class PatronageChecker {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize() {
         denialCleaner.shutdown();
     }
 

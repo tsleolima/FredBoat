@@ -64,7 +64,7 @@ public class ShardManagerConfiguration {
     public SessionController getSessionController(Credentials credentials) {
         return credentials.getDikeUrl().isEmpty()
                 ? new SessionControllerAdapter()
-                : new DikeSessionController();
+                : new DikeSessionController(credentials);
     }
 
     @Bean
