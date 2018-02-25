@@ -13,6 +13,9 @@ ext {
     moduleName = 'FredBoat'
 }
 
+//compiling tests during bootRun increases the likelyhood of catching broken tests locally instead of on the CI
+bootRun.dependsOn compileTestJava
+
 bootJar {
     archiveName = "FredBoat.jar"
     doLast {
