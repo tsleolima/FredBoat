@@ -100,13 +100,8 @@ public class AudioTrackContext extends LeakSafeContext implements Comparable<Aud
     }
 
     //NOTE: convenience method that returns the position of the track currently playing in the guild where this track was added
-    public long getEffectivePosition() {
-        Guild guild = Launcher.getBotController().getShardManager().getGuildById(guildId);
-        if (guild != null) {
-            return Launcher.getBotController().getPlayerRegistry().getOrCreate(guild).getPosition();
-        } else {
-            return getStartPosition();
-        }
+    public long getEffectivePosition(GuildPlayer guildPlayer) {
+        return guildPlayer.getPosition();
     }
 
     public String getEffectiveTitle() {

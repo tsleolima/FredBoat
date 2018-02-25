@@ -70,22 +70,22 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
             EmbedBuilder builder;
             if (at instanceof YoutubeAudioTrack) {
-                builder = getYoutubeEmbed(atc, (YoutubeAudioTrack) at);
+                builder = getYoutubeEmbed(atc, player, (YoutubeAudioTrack) at);
             } else if (at instanceof SoundCloudAudioTrack) {
-                builder = getSoundcloudEmbed(atc, (SoundCloudAudioTrack) at);
+                builder = getSoundcloudEmbed(atc, player, (SoundCloudAudioTrack) at);
             } else if (at instanceof HttpAudioTrack && at.getIdentifier().contains("gensokyoradio.net")){
                 //Special handling for GR
                 builder = getGensokyoRadioEmbed(context);
             } else if (at instanceof HttpAudioTrack) {
-                builder = getHttpEmbed(atc, (HttpAudioTrack) at);
+                builder = getHttpEmbed(atc, player, (HttpAudioTrack) at);
             } else if (at instanceof BandcampAudioTrack) {
-                builder = getBandcampResponse(atc, (BandcampAudioTrack) at);
+                builder = getBandcampResponse(atc, player, (BandcampAudioTrack) at);
             } else if (at instanceof TwitchStreamAudioTrack) {
                 builder = getTwitchEmbed(atc, (TwitchStreamAudioTrack) at);
             } else if (at instanceof BeamAudioTrack) {
                 builder = getBeamEmbed(atc, (BeamAudioTrack) at);
             } else {
-                builder = getDefaultEmbed(atc, at);
+                builder = getDefaultEmbed(atc, player, at);
             }
             Member requester = atc.getMember() != null ? atc.getMember() : context.guild.getSelfMember();
             builder = CentralMessaging.addNpFooter(builder, requester);
@@ -96,10 +96,10 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         }
     }
 
-    private EmbedBuilder getYoutubeEmbed(AudioTrackContext atc, YoutubeAudioTrack at) {
+    private EmbedBuilder getYoutubeEmbed(AudioTrackContext atc, GuildPlayer player, YoutubeAudioTrack at) {
         YoutubeVideo yv = YoutubeAPI.getVideoFromID(at.getIdentifier(), true);
         String timeField = "["
-                + TextUtils.formatTime(atc.getEffectivePosition())
+                + TextUtils.formatTime(atc.getEffectivePosition(player))
                 + "/"
                 + TextUtils.formatTime(atc.getEffectiveDuration())
                 + "]";
@@ -126,20 +126,20 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         return eb;
     }
 
-    private EmbedBuilder getSoundcloudEmbed(AudioTrackContext atc, SoundCloudAudioTrack at) {
+    private EmbedBuilder getSoundcloudEmbed(AudioTrackContext atc, GuildPlayer player, SoundCloudAudioTrack at) {
         return CentralMessaging.getClearThreadLocalEmbedBuilder()
                 .setAuthor(at.getInfo().author, null, null)
                 .setTitle(atc.getEffectiveTitle(), null)
                 .setDescription(atc.i18nFormat("npLoadedSoundcloud",
-                        TextUtils.formatTime(atc.getEffectivePosition()), TextUtils.formatTime(atc.getEffectiveDuration()))) //TODO: Gather description, thumbnail, etc
+                        TextUtils.formatTime(atc.getEffectivePosition(player)), TextUtils.formatTime(atc.getEffectiveDuration()))) //TODO: Gather description, thumbnail, etc
                 .setColor(new Color(255, 85, 0));
     }
 
-    private EmbedBuilder getBandcampResponse(AudioTrackContext atc, BandcampAudioTrack at) {
+    private EmbedBuilder getBandcampResponse(AudioTrackContext atc, GuildPlayer player, BandcampAudioTrack at) {
         String desc = at.getDuration() == Long.MAX_VALUE ?
                 "[LIVE]" :
                 "["
-                        + TextUtils.formatTime(atc.getEffectivePosition())
+                        + TextUtils.formatTime(atc.getEffectivePosition(player))
                         + "/"
                         + TextUtils.formatTime(atc.getEffectiveDuration())
                         + "]";
@@ -214,11 +214,11 @@ public class NowplayingCommand extends Command implements IMusicCommand {
         }
     }
 
-    private EmbedBuilder getHttpEmbed(AudioTrackContext atc, HttpAudioTrack at) {
+    private EmbedBuilder getHttpEmbed(AudioTrackContext atc, GuildPlayer player, HttpAudioTrack at) {
         String desc = at.getDuration() == Long.MAX_VALUE ?
                 "[LIVE]" :
                 "["
-                        + TextUtils.formatTime(atc.getEffectivePosition())
+                        + TextUtils.formatTime(atc.getEffectivePosition(player))
                         + "/"
                         + TextUtils.formatTime(atc.getEffectiveDuration())
                         + "]";
@@ -229,11 +229,11 @@ public class NowplayingCommand extends Command implements IMusicCommand {
                 .setDescription(atc.i18nFormat("npLoadedFromHTTP", desc, at.getIdentifier())); //TODO: Probe data
     }
 
-    private EmbedBuilder getDefaultEmbed(AudioTrackContext atc, AudioTrack at) {
+    private EmbedBuilder getDefaultEmbed(AudioTrackContext atc, GuildPlayer player, AudioTrack at) {
         String desc = at.getDuration() == Long.MAX_VALUE ?
                 "[LIVE]" :
                 "["
-                        + TextUtils.formatTime(atc.getEffectivePosition())
+                        + TextUtils.formatTime(atc.getEffectivePosition(player))
                         + "/"
                         + TextUtils.formatTime(atc.getEffectiveDuration())
                         + "]";

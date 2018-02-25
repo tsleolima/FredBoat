@@ -26,6 +26,7 @@
 package fredboat.audio.queue;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import fredboat.audio.player.GuildPlayer;
 import lavalink.client.player.TrackData;
 import net.dv8tion.jda.core.entities.Member;
 
@@ -54,8 +55,8 @@ public class SplitAudioTrackContext extends AudioTrackContext {
     }
 
     @Override
-    public long getEffectivePosition() {
-        return super.getEffectivePosition() - startPos;
+    public long getEffectivePosition(GuildPlayer guildPlayer) {
+        return super.getEffectivePosition(guildPlayer) - startPos;
     }
 
     @Override
