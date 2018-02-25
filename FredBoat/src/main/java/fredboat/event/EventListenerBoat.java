@@ -37,6 +37,9 @@ import fredboat.commandmeta.CommandContextParser;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.config.property.AppConfig;
+import fredboat.db.api.GuildConfigIO;
+import fredboat.db.api.GuildDataIO;
 import fredboat.db.entity.main.GuildData;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
@@ -45,7 +48,6 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.ShardStatsCounterProvider;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.jda.JdaEntityProvider;
-import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
@@ -91,17 +93,24 @@ public class EventListenerBoat extends AbstractEventListener {
     private final ShardStatsCounterProvider shardStatsCounterProvider;
     private final JdaEntityProvider jdaEntityProvider;
     private final Ratelimiter ratelimiter;
+    private final AppConfig appConfig;
+    private final GuildDataIO guildDataIO;
+    private final GuildConfigIO guildConfigIO;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
                              ShardStatsCounterProvider shardStatsCounterProvider, JdaEntityProvider jdaEntityProvider,
-                             Ratelimiter ratelimiter) {
+                             Ratelimiter ratelimiter, AppConfig appConfig, GuildDataIO guildDataIO,
+                             GuildConfigIO guildConfigIO) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
         this.shardStatsCounterProvider = shardStatsCounterProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.ratelimiter = ratelimiter;
+        this.appConfig = appConfig;
+        this.guildDataIO = guildDataIO;
+        this.guildConfigIO = guildConfigIO;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -238,7 +247,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //quick n dirty bot admin / owner check
-        if (Launcher.getBotController().getAppConfig().getAdminIds().contains(event.getAuthor().getId())
+        if (appConfig.getAdminIds().contains(event.getAuthor().getId())
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
@@ -292,7 +301,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 && player.getPlayingTrack() != null
                 && joinedChannel.getMembers().contains(guild.getSelfMember())
                 && player.getHumanUsersInCurrentVC().size() > 0
-                && Launcher.getBotController().getEntityIO().fetchGuildConfig(guild).isAutoResume()
+                && guildConfigIO.fetchGuildConfig(guild).isAutoResume()
                 ) {
             player.setPause(false);
             TextChannel activeTextChannel = player.getActiveTextChannel();
@@ -303,7 +312,7 @@ public class EventListenerBoat extends AbstractEventListener {
     }
 
     private void checkForAutoPause(VoiceChannel channelLeft) {
-        if (Launcher.getBotController().getAppConfig().getContinuePlayback())
+        if (appConfig.getContinuePlayback())
             return;
 
         Guild guild = channelLeft.getGuild();
@@ -369,11 +378,11 @@ public class EventListenerBoat extends AbstractEventListener {
         shardStatsCounterProvider.registerShard(event.getJDA().getShardInfo());
     }
 
-    private static void sendHelloOnJoin(@Nonnull Guild guild) {
+    private void sendHelloOnJoin(@Nonnull Guild guild) {
         //filter guilds that already received a hello message
         // useful for when discord trolls us with fake guild joins
         // or to prevent it send repeatedly due to kick and reinvite
-        GuildData gd = Launcher.getBotController().getEntityIO().fetchGuildData(guild);
+        GuildData gd = guildDataIO.fetchGuildData(guild);
         if (gd.getTimestampHelloSent() > 0) {
             return;
         }
@@ -395,6 +404,6 @@ public class EventListenerBoat extends AbstractEventListener {
 
         //send actual hello message and persist on success
         CentralMessaging.sendMessage(channel, HelloCommand.getHello(guild),
-                __ -> Launcher.getBotController().getEntityIO().transformGuildData(guild, GuildData::helloSent));
+                __ -> guildDataIO.transformGuildData(guild, GuildData::helloSent));
     }
 }
