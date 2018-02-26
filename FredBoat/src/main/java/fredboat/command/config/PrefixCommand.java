@@ -36,7 +36,6 @@ import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
-import fredboat.util.TextUtils;
 import fredboat.util.rest.CacheUtil;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.Guild;
@@ -121,8 +120,8 @@ public class PrefixCommand extends Command implements IConfigCommand {
     }
 
     public static void showPrefix(@Nonnull Context context, @Nonnull String prefix) {
-        String escapedPrefix = prefix.isEmpty() ? "No Prefix" : TextUtils.escapeMarkdown(prefix);
-        context.reply(context.i18nFormat("prefixGuild", "**" + escapedPrefix + "**")
+        String p = prefix.isEmpty() ? "No Prefix" : prefix;
+        context.reply(context.i18nFormat("prefixGuild", "``" + p + "``")
                 + "\n" + context.i18n("prefixShowAgain"));
     }
 
