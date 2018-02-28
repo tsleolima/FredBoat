@@ -64,7 +64,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class MusicPersistenceHandler extends ListenerAdapter {
@@ -108,10 +112,6 @@ public class MusicPersistenceHandler extends ListenerAdapter {
             try {
                 GuildPlayer player = reg.get(gId);
 
-                if (!player.isPlaying()) {
-                    continue;//Nothing to see here
-                }
-
                 String msg;
 
                 if (isUpdate) {
@@ -123,12 +123,19 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                 }
 
                 TextChannel activeTextChannel = player.getActiveTextChannel();
-                if (activeTextChannel != null) {
-                    CentralMessaging.sendMessage(activeTextChannel, msg);
+                List<CompletableFuture> announcements = new ArrayList<>();
+                if (activeTextChannel != null && player.isPlaying()) {
+                    announcements.add(CentralMessaging.sendMessage(activeTextChannel, msg));
+                }
+                for (Future announcement : announcements) {
+                    try {
+                        announcement.get(30, TimeUnit.SECONDS); //30 seconds is enough on patron boat
+                    } catch (Exception ignored) {}
                 }
 
                 JSONObject data = new JSONObject();
-                data.put("vc", player.getCurrentVoiceChannel().getId());
+                VoiceChannel vc = player.getCurrentVoiceChannel();
+                data.put("vc", vc != null ? vc.getId() : "0");
                 data.put("tc", activeTextChannel != null ? activeTextChannel.getId() : "");
                 data.put("isPaused", player.isPaused());
                 data.put("volume", Float.toString(player.getVolume()));
@@ -233,9 +240,6 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                 if (tc != null) {
                     musicTextChannelProvider.setMusicChannel(tc);
                 }
-                if (vc != null) {
-                    player.joinChannel(vc);
-                }
                 if (appConfig.getDistribution().volumeSupported()) {
                     player.setVolume(volume);
                 }
@@ -244,6 +248,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
 
                 final boolean[] isFirst = {true};
 
+                List<AudioTrackContext> tracks = new ArrayList<>();
                 sources.forEach((Object t) -> {
                     JSONObject json = (JSONObject) t;
                     byte[] message = Base64.decodeBase64(json.getString("message"));
@@ -292,12 +297,20 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                         }
                     }
 
-                    player.queue(atc);
+                    tracks.add(atc);
                 });
 
-                player.setPause(isPaused);
-                if (tc != null) {
-                    CentralMessaging.sendMessage(tc, MessageFormat.format(I18n.get(player.getGuild()).getString("reloadSuccess"), sources.length()));
+                player.loadAll(tracks);
+                if (!isPaused) {
+                    if (vc != null) {
+                        try {
+                            player.joinChannel(vc);
+                            player.play();
+                        } catch (Exception ignored) {}
+                    }
+                    if (tc != null) {
+                        CentralMessaging.sendMessage(tc, MessageFormat.format(I18n.get(guild).getString("reloadSuccess"), sources.length()));
+                    }
                 }
             } catch (Exception ex) {
                 log.error("Error when loading persistence file", ex);

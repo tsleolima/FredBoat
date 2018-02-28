@@ -200,6 +200,11 @@ public class GuildPlayer extends AbstractPlayer {
         play();
     }
 
+    //add a bunch of tracks to the track provider
+    public void loadAll(Collection<AudioTrackContext> tracks){
+        audioTrackProvider.addAll(tracks);
+    }
+
     public int getTrackCount() {
         int trackCount = audioTrackProvider.size();
         if (player.getPlayingTrack() != null) trackCount++;
