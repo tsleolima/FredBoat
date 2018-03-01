@@ -118,8 +118,8 @@ public class DatabaseConfiguration {
     @Bean
     public DatabaseManager databaseManager(PropertyConfigProvider configProvider, HibernateStatisticsCollector hibernateStats,
                                            PrometheusMetricsTrackerFactory hikariStats) {
-        //dont run migrations or validate the db from the patron bot
-        boolean migrateAndValidate = DiscordUtil.getBotId(configProvider.getCredentials()) == BotConstants.PATRON_BOT_ID;
+        //run migrations except when its the patron boat
+        boolean migrateAndValidate = DiscordUtil.getBotId(configProvider.getCredentials()) != BotConstants.PATRON_BOT_ID;
 
         DatabaseConfig dbConf = configProvider.getDatabaseConfig();
 
