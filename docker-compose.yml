@@ -66,7 +66,7 @@ services:
       #- C:\Users\your_user_name\Music:/opt/FredBoat/music
 
     # Need a bigger memory size or any other custom JVM args? uncomment and edit the line below accordingly
-    #entrypoint: java -jar -Xmx128m FredBoat.jar
+    #entrypoint: java -Xmx128m -jar FredBoat.jar
 
 
   ################################################################################
