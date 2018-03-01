@@ -19,7 +19,7 @@ services:
   ################################################################################
   db:
     image: fredboat/postgres
-    #build: ./docker/database/ #useful alternative for developers
+    #build: ./FredBoat/docker/database/ #useful alternative for developers
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -45,7 +45,7 @@ services:
     # FredBoat selfhosting website and/or the selfhosters channel (see top of this file for how to get to these places)
     image: fredboat/fredboat:stable-v2
     #image: fredboat/fredboat:dev-v2
-    #build: . #useful alternative for developers
+    #build: ./FredBoat #useful alternative for developers
 
     restart: on-failure:3
     labels:
