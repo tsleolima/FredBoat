@@ -43,8 +43,8 @@ services:
     # versions (example: v2) receive continous non-breaking (best effort) updates via watchtower. switching between versions
     # (example: going from v2 to v3) usually requires manual migration. what exactly is needed is published on the
     # FredBoat selfhosting website and/or the selfhosters channel (see top of this file for how to get to these places)
-    image: fredboat/fredboat:stable-v2
-    #image: fredboat/fredboat:dev-v2
+    image: fredboat/fredboat:stable-v3
+    #image: fredboat/fredboat:dev-v3
     #build: ./FredBoat #useful alternative for developers
 
     restart: on-failure:3
