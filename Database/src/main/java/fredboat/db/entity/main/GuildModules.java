@@ -26,6 +26,8 @@
 package fredboat.db.entity.main;
 
 import fredboat.definitions.Module;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.dv8tion.jda.core.entities.Guild;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -64,6 +66,7 @@ import java.util.Objects;
 @Table(name = "guild_modules")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = "guild_modules")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class GuildModules extends SaucedEntity<Long, GuildModules> {
 
     @Id
@@ -118,11 +121,6 @@ public class GuildModules extends SaucedEntity<Long, GuildModules> {
     @Nullable
     @Column(name = "fun", nullable = true)
     private Boolean funModule;
-
-
-    //for jpa / database wrapper
-    GuildModules() {
-    }
 
     @Nonnull
     public static EntityKey<Long, GuildModules> key(@Nonnull Guild guild) {

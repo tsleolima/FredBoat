@@ -26,6 +26,8 @@
 package fredboat.db.entity.main;
 
 import fredboat.definitions.PermissionLevel;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.dv8tion.jda.core.entities.Guild;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -42,6 +44,7 @@ import java.util.List;
 @Table(name = "guild_permissions")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = "guild_permissions")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class GuildPermissions extends SaucedEntity<String, GuildPermissions> {
 
     // Guild ID
@@ -57,10 +60,6 @@ public class GuildPermissions extends SaucedEntity<String, GuildPermissions> {
 
     @Column(name = "list_user", nullable = false, columnDefinition = "text")
     private String userList = "";
-
-    //for jpa / db wrapper
-    GuildPermissions() {
-    }
 
     @Nonnull
     public static EntityKey<String, GuildPermissions> key(@Nonnull Guild guild) {

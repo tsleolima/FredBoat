@@ -25,6 +25,8 @@
 
 package fredboat.db.entity.main;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.dv8tion.jda.core.entities.Guild;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -38,6 +40,7 @@ import javax.persistence.*;
 @Table(name = "guild_config")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = "guild_config")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class GuildConfig extends SaucedEntity<String, GuildConfig> {
 
     @Id
@@ -52,10 +55,6 @@ public class GuildConfig extends SaucedEntity<String, GuildConfig> {
 
     @Column(name = "lang", nullable = false)
     private String lang = "en_US";
-
-    //for jpa / db wrapper
-    GuildConfig() {
-    }
 
     @Nonnull
     public static EntityKey<String, GuildConfig> key(@Nonnull String guildId) {

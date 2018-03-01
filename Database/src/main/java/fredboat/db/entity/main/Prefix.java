@@ -25,6 +25,8 @@
 
 package fredboat.db.entity.main;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.dv8tion.jda.core.entities.Guild;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 import space.npstr.sqlsauce.entities.SaucedEntity;
@@ -46,6 +48,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "prefixes")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class Prefix extends SaucedEntity<GuildBotComposite, Prefix> {
 
     @EmbeddedId
@@ -55,10 +58,6 @@ public class Prefix extends SaucedEntity<GuildBotComposite, Prefix> {
     //may be null to indicate that there is no custom prefix for this guild
     @Column(name = "prefix", nullable = true, columnDefinition = "text")
     private String prefix;
-
-    //for jpa & the database wrapper
-    Prefix() {
-    }
 
     public Prefix(@Nonnull GuildBotComposite id, @Nullable String prefix) {
         this.id = id;

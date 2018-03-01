@@ -32,6 +32,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.definitions.SearchProvider;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -58,6 +60,7 @@ import java.util.Objects;
 @Table(name = "search_results")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = "search_results")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, SearchResult> {
 
     @EmbeddedId
@@ -69,10 +72,6 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
     @Lob
     @Column(name = "search_result")
     private byte[] serializedSearchResult;
-
-    //for jpa / db wrapper
-    SearchResult() {
-    }
 
     public SearchResult(AudioPlayerManager playerManager, SearchProvider provider, String searchTerm,
                         AudioPlaylist searchResult) {
@@ -143,6 +142,7 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
      * Composite primary key for SearchResults
      */
     @Embeddable
+    @NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
     public static class SearchResultId implements Serializable {
 
         private static final long serialVersionUID = 8969973651938173208L;
@@ -152,10 +152,6 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
 
         @Column(name = "search_term", nullable = false, columnDefinition = "text")
         private String searchTerm;
-
-        //for jpa / db wrapper
-        public SearchResultId() {
-        }
 
         public SearchResultId(SearchProvider provider, String searchTerm) {
             this.provider = provider.name();
@@ -193,6 +189,7 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
     }
 
 
+    @NoArgsConstructor(access = AccessLevel.MODULE) // required for deserialization
     private static class SerializableAudioPlaylist implements Serializable {
         private static final long serialVersionUID = -6823555858689776338L;
 
@@ -204,10 +201,6 @@ public class SearchResult extends SaucedEntity<SearchResult.SearchResultId, Sear
         @Nullable
         private byte[] selectedTrack;
         private boolean isSearchResult;
-
-        //required for deserialization
-        SerializableAudioPlaylist() {
-        }
 
         public SerializableAudioPlaylist(AudioPlayerManager playerManager, AudioPlaylist audioPlaylist) {
             this.name = audioPlaylist.getName();

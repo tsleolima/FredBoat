@@ -25,6 +25,8 @@
 
 package fredboat.db.entity.main;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.dv8tion.jda.core.entities.Guild;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -45,6 +47,7 @@ import javax.persistence.*;
 @Table(name = "guild_data")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "guild_data")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class GuildData extends SaucedEntity<Long, GuildData> {
 
     @Id
@@ -56,10 +59,6 @@ public class GuildData extends SaucedEntity<Long, GuildData> {
     @ColumnDefault(value = "0")
     private long timestampHelloSent;
 
-
-    //for jpa / db wrapper
-    GuildData() {
-    }
 
     @Nonnull
     public static EntityKey<Long, GuildData> key(@Nonnull Guild guild) {

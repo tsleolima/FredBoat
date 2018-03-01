@@ -25,6 +25,8 @@
 
 package fredboat.db.entity.main;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import space.npstr.sqlsauce.entities.SaucedEntity;
 
 import javax.annotation.Nonnull;
@@ -40,6 +42,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "blacklist")
+@NoArgsConstructor(access = AccessLevel.MODULE) //for jpa / database wrapper
 public class BlacklistEntry extends SaucedEntity<Long, BlacklistEntry> {
 
     //id of the user or guild that this blacklist entry belongs to
@@ -90,10 +93,6 @@ public class BlacklistEntry extends SaucedEntity<Long, BlacklistEntry> {
     }
 
     //Boilerplate code below
-
-    //for jpa / db wrapper
-    BlacklistEntry() {
-    }
 
     public int getLevel() {
         return level;
