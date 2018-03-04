@@ -36,10 +36,10 @@ import io.prometheus.client.guava.cache.CacheMetricsCollector;
  */
 public class RestGuildModulesRepo extends CachedRestRepo<Long, GuildModules> implements GuildModulesRepo {
 
-    public static final String PATH = "/guildmodules";
+    public static final String PATH = "guildmodules/";
 
     public RestGuildModulesRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + PATH, GuildModules.class, http, gson, auth);
+        super(apiBasePath + V1 + PATH, GuildModules.class, http, gson, auth);
     }
 
     @Override

@@ -40,10 +40,10 @@ import java.util.List;
  */
 public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> implements BlacklistRepo {
 
-    public static final String PATH = "/blacklist";
+    public static final String PATH = "blacklist/";
 
     public RestBlacklistRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + PATH, BlacklistEntry.class, http, gson, auth);
+        super(apiBasePath + V1 + PATH, BlacklistEntry.class, http, gson, auth);
     }
 
 
@@ -56,7 +56,7 @@ public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> impl
     @Override
     public List<BlacklistEntry> loadBlacklist() {
         try {
-            Http.SimpleRequest get = http.get(path + "/loadall");
+            Http.SimpleRequest get = http.get(path + "loadall");
             String answer = auth(get).asString();
             log.debug(answer);
             return gson.fromJson(answer, new TypeToken<List<BlacklistEntry>>() {

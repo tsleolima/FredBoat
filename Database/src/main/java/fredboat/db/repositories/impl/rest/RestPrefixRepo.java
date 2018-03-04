@@ -40,10 +40,10 @@ import java.io.IOException;
  */
 public class RestPrefixRepo extends CachedRestRepo<GuildBotComposite, Prefix> implements PrefixRepo {
 
-    public static final String PATH = "/prefix";
+    public static final String PATH = "prefix/";
 
     public RestPrefixRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + PATH, Prefix.class, http, gson, auth);
+        super(apiBasePath + V1 + PATH, Prefix.class, http, gson, auth);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class RestPrefixRepo extends CachedRestRepo<GuildBotComposite, Prefix> im
         try {
             String payload = gson.toJson(id);
             log.debug("Payload: " + payload);
-            Http.SimpleRequest getRaw = http.post(path + "/getraw", payload, "application/json");
+            Http.SimpleRequest getRaw = http.post(path + "getraw", payload, "application/json");
             return gson.fromJson(auth(getRaw).asString(), String.class);
         } catch (IOException e) {
             throw new BackendException("Could not get prefix for guild " + id.getGuildId(), e);

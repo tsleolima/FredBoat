@@ -72,12 +72,17 @@ public class BackendConfigProperties implements BackendConfig {
         if (host == null || host.isEmpty()) {
             if ("docker".equals(System.getenv("ENV"))) {
                 log.info("No backend host found, docker environment detected. Using default backend url");
-                this.host = "http://backend:4269/v1";
+                this.host = "http://backend:4269/";
             } else {
                 String message = "No backend host provided in a non-docker environment. FredBoat cannot work without a backend.";
                 log.error(message);
                 throw new RuntimeException(message);
             }
+        }
+
+        //fix up a missing trailing slash
+        if (!this.host.endsWith("/")) {
+            this.host += "/";
         }
     }
 

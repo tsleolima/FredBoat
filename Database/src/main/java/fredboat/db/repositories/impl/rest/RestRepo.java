@@ -43,6 +43,7 @@ import java.io.Serializable;
 public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I, E>> implements Repo<I, E> {
 
     protected static final Logger log = LoggerFactory.getLogger(RestRepo.class);
+    protected static final String V1 = "v1/";
 
     protected final String path;
     protected final Class<E> entityClass;
@@ -50,6 +51,10 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
     protected final Gson gson;
     protected final String auth;
 
+    /**
+     * @param path base path of this resource, including the version and a trailing slash
+     *             Example: http://backend:4269/v1/blacklist/
+     */
     public RestRepo(String path, Class<E> entityClass, Http http, Gson gson, String auth) {
         this.path = path;
         this.entityClass = entityClass;
@@ -65,7 +70,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
     @Override
     public void delete(I id) { //todo success handling?
         try {
-            Http.SimpleRequest delete = http.post(path + "/delete", gson.toJson(id), "application/json");
+            Http.SimpleRequest delete = http.post(path + "delete", gson.toJson(id), "application/json");
             //noinspection ResultOfMethodCallIgnored
             auth(delete).execute();
         } catch (IOException e) {
@@ -76,7 +81,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
     @Override
     public E fetch(I id) {
         try {
-            Http.SimpleRequest fetch = http.post(path + "/fetch", gson.toJson(id), "application/json");
+            Http.SimpleRequest fetch = http.post(path + "fetch", gson.toJson(id), "application/json");
             return gson.fromJson(auth(fetch).asString(), entityClass);
         } catch (IOException e) {
             throw new BackendException(String.format("Could not fetch entity with id %s of class %s", id, entityClass), e);
@@ -86,7 +91,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
     @Override
     public E merge(E entity) {
         try {
-            Http.SimpleRequest merge = http.post(path + "/merge", gson.toJson(entity), "application/json");
+            Http.SimpleRequest merge = http.post(path + "merge", gson.toJson(entity), "application/json");
             return gson.fromJson(auth(merge).asString(), entityClass);
         } catch (IOException e) {
             throw new BackendException(String.format("Could not merge entity with id %s of class %s", entity.getId(), entityClass), e);

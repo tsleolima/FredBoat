@@ -39,10 +39,10 @@ import java.io.IOException;
  */
 public class RestSearchResultRepo extends CachedRestRepo<SearchResult.SearchResultId, SearchResult> implements SearchResultRepo {
 
-    public static final String PATH = "/searchresult";
+    public static final String PATH = "searchresult/";
 
     public RestSearchResultRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + PATH, SearchResult.class, http, gson, auth);
+        super(apiBasePath + V1 + PATH, SearchResult.class, http, gson, auth);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class RestSearchResultRepo extends CachedRestRepo<SearchResult.SearchResu
     @Override
     public SearchResult getMaxAged(SearchResult.SearchResultId id, long maxAgeMillis) {
         try {
-            String url = path + "/getmaxaged";
+            String url = path + "getmaxaged";
             Http.SimpleRequest getMaxAged = http.post(url, gson.toJson(id), "application/json")
                     .url(url, Http.Params.of("millis", Long.toString(maxAgeMillis)));
             return gson.fromJson(auth(getMaxAged).asString(), SearchResult.class);
