@@ -44,7 +44,9 @@ import java.io.Serializable;
 public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I, E>> implements Repo<I, E> {
 
     protected static final Logger log = LoggerFactory.getLogger(RestRepo.class);
-    protected static final String V1 = "v1/";
+
+    public static final int API_VERSION = 0;
+    public static final String VERSION_PATH = "v" + API_VERSION + "/";
 
     protected final String path;
     protected final Class<E> entityClass;

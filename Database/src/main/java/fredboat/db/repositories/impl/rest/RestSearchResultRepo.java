@@ -43,7 +43,7 @@ public class RestSearchResultRepo extends CachedRestRepo<SearchResult.SearchResu
     public static final String PATH = "searchresult/";
 
     public RestSearchResultRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + V1 + PATH, SearchResult.class, http, gson, auth);
+        super(apiBasePath + VERSION_PATH + PATH, SearchResult.class, http, gson, auth);
     }
 
     @Override

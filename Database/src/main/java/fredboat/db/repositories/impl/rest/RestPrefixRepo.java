@@ -44,7 +44,7 @@ public class RestPrefixRepo extends CachedRestRepo<GuildBotComposite, Prefix> im
     public static final String PATH = "prefix/";
 
     public RestPrefixRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + V1 + PATH, Prefix.class, http, gson, auth);
+        super(apiBasePath + VERSION_PATH + PATH, Prefix.class, http, gson, auth);
     }
 
     @Override

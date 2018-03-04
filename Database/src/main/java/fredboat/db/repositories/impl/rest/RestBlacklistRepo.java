@@ -44,7 +44,7 @@ public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> impl
     public static final String PATH = "blacklist/";
 
     public RestBlacklistRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + V1 + PATH, BlacklistEntry.class, http, gson, auth);
+        super(apiBasePath + VERSION_PATH + PATH, BlacklistEntry.class, http, gson, auth);
     }
 
 

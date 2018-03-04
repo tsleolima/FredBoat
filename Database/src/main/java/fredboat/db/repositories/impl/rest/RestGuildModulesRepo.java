@@ -39,7 +39,7 @@ public class RestGuildModulesRepo extends CachedRestRepo<Long, GuildModules> imp
     public static final String PATH = "guildmodules/";
 
     public RestGuildModulesRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + V1 + PATH, GuildModules.class, http, gson, auth);
+        super(apiBasePath + VERSION_PATH + PATH, GuildModules.class, http, gson, auth);
     }
 
     @Override
