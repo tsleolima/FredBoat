@@ -15,6 +15,13 @@
 ###   key: value
 ###
 ###
+### Never edit or add a value to lines that have no default value, like:
+###
+###   credentials:
+###
+### Just leave them be. A default value may be an empty string like so: ""
+###
+###
 ### You can wrap most values into quotation marks, except numbers and booleans:
 ###
 ###   someUrl: "http://example.com"
@@ -74,6 +81,17 @@ audio-sources:
 ################################################################
 ###                 Essential credentials
 ################################################################
+
+backend:
+  # Host address of your backend, including port. Example: https://such.example.com:4269/
+  # No need set the host when running the whole FredBoat in docker.
+  host: ""
+  # Admin username and pass that you configured in the backend.yaml.
+  # Do not leave any of them empty.
+  user: ""
+  pass: ""
+
+
 credentials:
   # Add your discord bot token below, between the quotation marks
   # Find the token of your bot on https://discordapp.com/developers/applications/me
@@ -129,17 +147,6 @@ event-logger:
   eventLogInterval:           1  # interval at which connect / disconnect events are posted in minutes
   guildStatsWebhook:          "" # webhook url for guild stats
   guildStatsInterval:         60 # interval at which guild stats are posted in minutes
-
-
-
-backend:
-  # Host address of your backend, including port. Example: https://such.example.com:4269/
-  # No need set the host when running in docker.
-  host: ""
-  # Admin username and pass that you configured in the backend.yaml.
-  # Do not leave any of them blank or empty.
-  user: ""
-  pass: ""
 
 
 
