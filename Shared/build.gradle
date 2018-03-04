@@ -3,6 +3,32 @@ version '1.0'
 ext {
     moduleName = 'Shared'
 }
+
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId rootProject.group
+            artifactId moduleName
+
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+task install(dependsOn: 'publishToMavenLocal')
+publishToMavenLocal.dependsOn 'jar'
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 dependencies {
     compile group: 'org.json', name: 'json', version: jsonOrgVersion
     compile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
