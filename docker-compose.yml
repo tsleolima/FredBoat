@@ -50,6 +50,8 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     depends_on:
       - db
+    volumes:
+      - ./backend.yaml:/opt/Backend/backend.yaml
     # Need a bigger memory size or any other custom JVM args? uncomment and edit the line below accordingly
     #entrypoint: java -Xmx128m -jar Backend.jar
 
@@ -83,7 +85,7 @@ services:
       #- C:\Users\your_user_name\Music:/opt/FredBoat/music
 
     # Need a bigger memory size or any other custom JVM args? uncomment and edit the line below accordingly
-    #entrypoint: java -Xmx128m -jar FredBoat.jar
+    #entrypoint: java -Xmx256m -jar FredBoat.jar
 
 
   ################################################################################
