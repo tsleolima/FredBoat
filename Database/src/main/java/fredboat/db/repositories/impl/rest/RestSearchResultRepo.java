@@ -26,6 +26,7 @@
 package fredboat.db.repositories.impl.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.db.repositories.api.SearchResultRepo;
 import fredboat.util.rest.Http;
@@ -59,7 +60,7 @@ public class RestSearchResultRepo extends CachedRestRepo<SearchResult.SearchResu
             Http.SimpleRequest getMaxAged = http.post(url, gson.toJson(id), "application/json")
                     .url(url, Http.Params.of("millis", Long.toString(maxAgeMillis)));
             return gson.fromJson(auth(getMaxAged).asString(), SearchResult.class);
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             throw new BackendException("Could not get search result for " + id, e);
         }
     }

@@ -26,6 +26,7 @@
 package fredboat.db.repositories.impl.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import fredboat.db.repositories.api.Repo;
 import fredboat.util.rest.Http;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
             Http.SimpleRequest delete = http.post(path + "delete", gson.toJson(id), "application/json");
             //noinspection ResultOfMethodCallIgnored
             auth(delete).execute();
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             throw new BackendException(String.format("Could not delete entity with id %s of class %s", id, entityClass), e);
         }
     }
@@ -83,7 +84,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
         try {
             Http.SimpleRequest fetch = http.post(path + "fetch", gson.toJson(id), "application/json");
             return gson.fromJson(auth(fetch).asString(), entityClass);
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             throw new BackendException(String.format("Could not fetch entity with id %s of class %s", id, entityClass), e);
         }
     }
@@ -93,7 +94,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
         try {
             Http.SimpleRequest merge = http.post(path + "merge", gson.toJson(entity), "application/json");
             return gson.fromJson(auth(merge).asString(), entityClass);
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             throw new BackendException(String.format("Could not merge entity with id %s of class %s", entity.getId(), entityClass), e);
         }
     }

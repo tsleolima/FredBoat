@@ -26,6 +26,7 @@
 package fredboat.db.repositories.impl.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import fredboat.db.entity.main.Prefix;
 import fredboat.db.repositories.api.PrefixRepo;
 import fredboat.util.rest.Http;
@@ -60,7 +61,7 @@ public class RestPrefixRepo extends CachedRestRepo<GuildBotComposite, Prefix> im
             log.debug("Payload: " + payload);
             Http.SimpleRequest getRaw = http.post(path + "getraw", payload, "application/json");
             return gson.fromJson(auth(getRaw).asString(), String.class);
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             throw new BackendException("Could not get prefix for guild " + id.getGuildId(), e);
         }
     }

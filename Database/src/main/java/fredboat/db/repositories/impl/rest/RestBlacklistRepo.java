@@ -26,6 +26,7 @@
 package fredboat.db.repositories.impl.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.repositories.api.BlacklistRepo;
@@ -61,7 +62,7 @@ public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> impl
             log.debug(answer);
             return gson.fromJson(answer, new TypeToken<List<BlacklistEntry>>() {
             }.getType());
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             throw new BackendException("Could not load the blacklist", e);
         }
     }
