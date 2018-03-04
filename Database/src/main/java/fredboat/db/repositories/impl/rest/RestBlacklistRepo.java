@@ -57,7 +57,9 @@ public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> impl
     public List<BlacklistEntry> loadBlacklist() {
         try {
             Http.SimpleRequest get = http.get(path + "/loadall");
-            return gson.fromJson(auth(get).asString(), new TypeToken<List<BlacklistEntry>>() {
+            String answer = auth(get).asString();
+            log.debug(answer);
+            return gson.fromJson(answer, new TypeToken<List<BlacklistEntry>>() {
             }.getType());
         } catch (IOException e) {
             throw new BackendException("Could not load the blacklist", e);

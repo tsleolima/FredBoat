@@ -5,7 +5,6 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.*;
-import fredboat.db.DatabaseManager;
 import fredboat.db.EntityIO;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.BotMetrics;
@@ -38,7 +37,6 @@ public class BotController {
     //central event listener that all events by all shards pass through
     private final EventListenerBoat mainEventListener;
     private final ShutdownHandler shutdownHandler;
-    private final DatabaseManager databaseManager;
     private final EntityIO entityIO;
     private final PlayerRegistry playerRegistry;
     private final JdaEntityProvider jdaEntityProvider;
@@ -49,7 +47,7 @@ public class BotController {
 
 
     public BotController(ConfigPropertiesProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
-                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, DatabaseManager databaseManager,
+                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler,
                          EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
                          PlayerRegistry playerRegistry, JdaEntityProvider jdaEntityProvider, BotMetrics botMetrics,
                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
@@ -59,7 +57,6 @@ public class BotController {
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
-        this.databaseManager = databaseManager;
         this.entityIO = entityIO;
         try {
             hibernateStats.register(); //call this exactly once after all db connections have been created
@@ -96,10 +93,6 @@ public class BotController {
 
     public ShutdownHandler getShutdownHandler() {
         return shutdownHandler;
-    }
-
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
     }
 
     @Nonnull

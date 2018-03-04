@@ -36,18 +36,15 @@ public class SpringConfigPropertiesProvider implements ConfigPropertiesProvider 
     private final BackendConfig backendConfig;
     private final AudioSourcesConfig audioSourcesConfig;
     private final Credentials credentials;
-    private final DatabaseConfig databaseConfig;
     private final EventLoggerConfig eventLoggerConfig;
     private final LavalinkConfig lavalinkConfig;
 
     public SpringConfigPropertiesProvider(AppConfig appConfig, BackendConfig backendConfig, AudioSourcesConfig audioSourcesConfig,
-                                          Credentials credentials, DatabaseConfig databaseConfig,
-                                          EventLoggerConfig eventLoggerConfig, LavalinkConfig lavalinkConfig) {
+                                          Credentials credentials, EventLoggerConfig eventLoggerConfig, LavalinkConfig lavalinkConfig) {
         this.appConfig = appConfig;
         this.backendConfig = backendConfig;
         this.audioSourcesConfig = audioSourcesConfig;
         this.credentials = credentials;
-        this.databaseConfig = databaseConfig;
         this.eventLoggerConfig = eventLoggerConfig;
         this.lavalinkConfig = lavalinkConfig;
     }
@@ -70,11 +67,6 @@ public class SpringConfigPropertiesProvider implements ConfigPropertiesProvider 
     @Override
     public Credentials getCredentials() {
         return credentials;
-    }
-
-    @Override
-    public DatabaseConfig getDatabaseConfig() {
-        return databaseConfig;
     }
 
     @Override

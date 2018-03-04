@@ -26,15 +26,12 @@ package fredboat.config;
 
 import com.google.gson.Gson;
 import fredboat.config.property.BackendConfig;
-import fredboat.db.DatabaseManager;
 import fredboat.db.repositories.api.*;
-import fredboat.db.repositories.impl.*;
 import fredboat.db.repositories.impl.rest.*;
 import fredboat.main.BotController;
 import fredboat.util.rest.Http;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import space.npstr.sqlsauce.DatabaseWrapper;
 
 import javax.annotation.Nullable;
 
@@ -47,84 +44,46 @@ import javax.annotation.Nullable;
 public class RepoConfiguration {
 
     private final BackendConfig backendConfig;
-    private final DatabaseManager databaseManager;
     private final Gson gson = new Gson();
     private final Http http = BotController.HTTP; //todo replace
 
-    public RepoConfiguration(BackendConfig backendConfig, DatabaseManager databaseManager) {
+    public RepoConfiguration(BackendConfig backendConfig) {
         this.backendConfig = backendConfig;
-        this.databaseManager = databaseManager;
     }
 
     @Bean
     public BlacklistRepo blacklistRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            return new SqlSauceBlacklistRepo(databaseManager.getMainDbWrapper());
-        } else {
-            return new RestBlacklistRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestBlacklistRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 
     @Bean
     public GuildConfigRepo guildConfigRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            return new SqlSauceGuildConfigRepo(databaseManager.getMainDbWrapper());
-        } else {
-            return new RestGuildConfigRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestGuildConfigRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 
     @Bean
     public GuildDataRepo guildDataRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            return new SqlSauceGuildDataRepo(databaseManager.getMainDbWrapper());
-        } else {
-            return new RestGuildDataRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestGuildDataRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 
     @Bean
     public GuildModulesRepo guildModulesRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            return new SqlSauceGuildModulesRepo(databaseManager.getMainDbWrapper());
-        } else {
-            return new RestGuildModulesRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestGuildModulesRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 
     @Bean
     public GuildPermsRepo guildPermsRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            return new SqlSauceGuildPermsRepo(databaseManager.getMainDbWrapper());
-        } else {
-            return new RestGuildPermsRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestGuildPermsRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 
     @Bean
     public PrefixRepo prefixRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            return new SqlSaucePrefixRepo(databaseManager.getMainDbWrapper());
-        } else {
-            return new RestPrefixRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestPrefixRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 
     @Nullable
     @Bean
     public SearchResultRepo searchResultRepo() {
-        String backendUrl = backendConfig.getHost();
-        if (backendUrl.isEmpty()) {
-            DatabaseWrapper cacheDbWrapper = databaseManager.getCacheDbWrapper();
-            return cacheDbWrapper == null ? null : new SqlSauceSearchResultRepo(cacheDbWrapper); //todo noop repo for cache entities?
-        } else {
-            return new RestSearchResultRepo(backendUrl, http, gson, backendConfig.getBasicAuth());
-        }
+        return new RestSearchResultRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
     }
 }

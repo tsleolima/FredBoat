@@ -24,6 +24,8 @@
 
 package fredboat.config.property;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "backend")
 public class BackendConfigProperties implements BackendConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(BackendConfigProperties.class);
 
     private String host = "";
     private String user = "";
@@ -64,13 +68,36 @@ public class BackendConfigProperties implements BackendConfig {
 
     public void setHost(String host) {
         this.host = host;
+        //noinspection ConstantConditions
+        if (host == null || host.isEmpty()) {
+            if ("docker".equals(System.getenv("ENV"))) {
+                log.info("No backend host found, docker environment detected. Using default backend url");
+                this.host = "http://backend:4269/v1";
+            } else {
+                String message = "No backend host provided in a non-docker environment. FredBoat cannot work without a backend.";
+                log.error(message);
+                throw new RuntimeException(message);
+            }
+        }
     }
 
     public void setUser(String user) {
         this.user = user;
+        //noinspection ConstantConditions
+        if (user == null || user.isEmpty()) {
+            String message = "No backend user provided.";
+            log.error(message);
+            throw new RuntimeException(message);
+        }
     }
 
     public void setPass(String pass) {
         this.pass = pass;
+        //noinspection ConstantConditions
+        if (pass == null || pass.isEmpty()) {
+            String message = "No backend pass provided.";
+            log.error(message);
+            throw new RuntimeException(message);
+        }
     }
 }

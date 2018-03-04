@@ -39,8 +39,6 @@ public interface ConfigPropertiesProvider {
 
     Credentials getCredentials();
 
-    DatabaseConfig getDatabaseConfig();
-
     EventLoggerConfig getEventLoggerConfig();
 
     LavalinkConfig getLavalinkConfig();

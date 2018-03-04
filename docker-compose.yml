@@ -33,16 +33,32 @@ services:
     #volumes:
       #- postgres-data-volume:/var/lib/postgresql/data
 
-
   ################################################################################
-  ##                               FredBoat
+  ##                               Backend
   ################################################################################
-  bot:
+  backend:
     # pick one of these: stable or dev
     # dev receives more frequent updates than stable but may have more bugs / things breaking
     # versions (example: v2) receive continous non-breaking (best effort) updates via watchtower. switching between versions
     # (example: going from v2 to v3) usually requires manual migration. what exactly is needed is published on the
     # FredBoat selfhosting website and/or the selfhosters channel (see top of this file for how to get to these places)
+    # Once you use the dev branch, you may not be able to go back to stable without deleting your database.
+    image: fredboat/backend:stable-v1
+    #image: fredboat/backend:dev-v1
+    restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    depends_on:
+      - db
+    # Need a bigger memory size or any other custom JVM args? uncomment and edit the line below accordingly
+    #entrypoint: java -Xmx128m -jar Backend.jar
+
+  ################################################################################
+  ##                               FredBoat
+  ################################################################################
+  bot:
+    # for choosing between stable or dev, read the paragraph above in the backend
+    # IMPORTANT: both backend and fredboat need to either be on the stable, or on the dev branch
     image: fredboat/fredboat:stable-v3
     #image: fredboat/fredboat:dev-v3
     #build: ./FredBoat #useful alternative for developers
@@ -51,7 +67,7 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     depends_on:
-      - db
+      - backend
     ports:
       - 1356:1356
     volumes:
