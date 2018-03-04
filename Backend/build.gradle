@@ -9,6 +9,29 @@ ext {
     moduleName = 'Backend'
 }
 
+bootRun {
+    //compiling tests during bootRun increases the likelyhood of catching broken tests locally instead of on the CI
+    dependsOn compileTestJava
+
+    //pass in custom jvm args
+    // source: https://stackoverflow.com/a/25079415
+    // example: ./gradlew bootRun -PjvmArgs="--illegal-access=debug -Dwhatever=value"
+    if (project.hasProperty('jvmArgs')) {
+        jvmArgs project.jvmArgs.split('\\s+')
+    }
+}
+
+bootJar {
+    archiveName = "Backend.jar"
+    doLast {
+        //copies the jar into a place where the Dockerfile can find it easily (and users maybe too)
+        copy {
+            from 'build/libs/Backend.jar'
+            into '.'
+        }
+    }
+}
+
 dependencies {
     compile project(':Database')
 
