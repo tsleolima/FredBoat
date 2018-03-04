@@ -35,15 +35,15 @@ import org.springframework.stereotype.Component;
 public class AudioSourcesConfigProperties implements AudioSourcesConfig {
 
     // audio managers
-    private boolean youtubeEnabled;
-    private boolean soundcloudEnabled;
-    private boolean bandcampEnabled;
-    private boolean twitchEnabled;
-    private boolean vimeoEnabled;
-    private boolean mixerEnabled;
-    private boolean spotifyEnabled;
-    private boolean localEnabled;
-    private boolean httpEnabled;
+    private boolean youtubeEnabled = true;
+    private boolean soundcloudEnabled = true;
+    private boolean bandcampEnabled = true;
+    private boolean twitchEnabled = true;
+    private boolean vimeoEnabled = true;
+    private boolean mixerEnabled = true;
+    private boolean spotifyEnabled = true;
+    private boolean localEnabled = false;
+    private boolean httpEnabled = false;
 
     @Override
     public boolean isYouTubeEnabled() {
@@ -90,39 +90,39 @@ public class AudioSourcesConfigProperties implements AudioSourcesConfig {
         return httpEnabled;
     }
 
-    public void setYoutubeEnabled(boolean youtubeEnabled) {
+    public void setEnableYoutube(boolean youtubeEnabled) {
         this.youtubeEnabled = youtubeEnabled;
     }
 
-    public void setSoundcloudEnabled(boolean soundcloudEnabled) {
+    public void setEnableSoundcloud(boolean soundcloudEnabled) {
         this.soundcloudEnabled = soundcloudEnabled;
     }
 
-    public void setBandcampEnabled(boolean bandcampEnabled) {
+    public void setEnableBandcamp(boolean bandcampEnabled) {
         this.bandcampEnabled = bandcampEnabled;
     }
 
-    public void setTwitchEnabled(boolean twitchEnabled) {
+    public void setEnableTwitch(boolean twitchEnabled) {
         this.twitchEnabled = twitchEnabled;
     }
 
-    public void setVimeoEnabled(boolean vimeoEnabled) {
+    public void setEnableVimeo(boolean vimeoEnabled) {
         this.vimeoEnabled = vimeoEnabled;
     }
 
-    public void setMixerEnabled(boolean mixerEnabled) {
+    public void setEnableMixer(boolean mixerEnabled) {
         this.mixerEnabled = mixerEnabled;
     }
 
-    public void setSpotifyEnabled(boolean spotifyEnabled) {
+    public void setEnableSpotify(boolean spotifyEnabled) {
         this.spotifyEnabled = spotifyEnabled;
     }
 
-    public void setLocalEnabled(boolean localEnabled) {
+    public void setEnableLocal(boolean localEnabled) {
         this.localEnabled = localEnabled;
     }
 
-    public void setHttpEnabled(boolean httpEnabled) {
+    public void setEnableHttp(boolean httpEnabled) {
         this.httpEnabled = httpEnabled;
     }
 }

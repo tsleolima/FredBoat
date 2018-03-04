@@ -47,11 +47,11 @@ public class AppConfigProperties implements AppConfig {
     private boolean patron = true;
 
     private String prefix = "<<";
-    private boolean restServerEnabled = true;
+    private boolean restServerEnabled = false;
     private List<Long> botAdmins = new ArrayList<>();
-    private boolean autoBlacklist;
+    private boolean autoBlacklist = true;
     private String game = "";
-    private boolean continuePlayback;
+    private boolean continuePlayback = false;
 
     //undocumented
     private int playerLimit = -1;
