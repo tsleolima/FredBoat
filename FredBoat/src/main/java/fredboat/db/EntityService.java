@@ -52,10 +52,10 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("UnusedReturnValue")
 @Component
-public class EntityIO implements BlacklistIO, GuildConfigIO, GuildDataIO, GuildModulesIO, GuildPermsIO, PrefixIO,
-        SearchResultIO {
+public class EntityService implements BlacklistService, GuildConfigService, GuildDataService, GuildModulesService, GuildPermsService, PrefixService,
+        SearchResultService {
 
-    private static final Logger log = LoggerFactory.getLogger(EntityIO.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityService.class);
 
     private final ConfigPropertiesProvider configProvider;
 
@@ -69,9 +69,9 @@ public class EntityIO implements BlacklistIO, GuildConfigIO, GuildDataIO, GuildM
     @Nullable
     private final SearchResultRepo searchResultRepo;
 
-    public EntityIO(ConfigPropertiesProvider configProvider, BlacklistRepo blacklistRepo, GuildConfigRepo guildConfigRepo,
-                    GuildDataRepo guildDataRepo, GuildModulesRepo guildModulesRepo, GuildPermsRepo guildPermsRepo,
-                    PrefixRepo prefixRepo, @Nullable SearchResultRepo searchResultRepo) {
+    public EntityService(ConfigPropertiesProvider configProvider, BlacklistRepo blacklistRepo, GuildConfigRepo guildConfigRepo,
+                         GuildDataRepo guildDataRepo, GuildModulesRepo guildModulesRepo, GuildPermsRepo guildPermsRepo,
+                         PrefixRepo prefixRepo, @Nullable SearchResultRepo searchResultRepo) {
         this.configProvider = configProvider;
         this.blacklistRepo = blacklistRepo;
         this.guildConfigRepo = guildConfigRepo;
@@ -91,32 +91,32 @@ public class EntityIO implements BlacklistIO, GuildConfigIO, GuildDataIO, GuildM
         try {
             return operation.get();
         } catch (DatabaseException | BackendException e) {
-            log.error("EntityIO database operation failed", e);
+            log.error("EntityService database operation failed", e);
             throw new DatabaseNotReadyException(e);
         }
     }
 
     /**
-     * Same as {@link EntityIO#fetchUserFriendly(NonnullSupplier)}, just with a nullable return.
+     * Same as {@link EntityService#fetchUserFriendly(NonnullSupplier)}, just with a nullable return.
      */
     @Nullable
     private static <T> T getUserFriendly(Supplier<T> operation) {
         try {
             return operation.get();
         } catch (DatabaseException | BackendException e) {
-            log.error("EntityIO database operation failed", e);
+            log.error("EntityService database operation failed", e);
             throw new DatabaseNotReadyException(e);
         }
     }
 
     /**
-     * Same as {@link EntityIO#fetchUserFriendly(NonnullSupplier)}, just without returning anything
+     * Same as {@link EntityService#fetchUserFriendly(NonnullSupplier)}, just without returning anything
      */
     private static void doUserFriendly(Runnable operation) {
         try {
             operation.run();
         } catch (DatabaseException | BackendException e) {
-            log.error("EntityIO database operation failed", e);
+            log.error("EntityService database operation failed", e);
             throw new DatabaseNotReadyException(e);
         }
     }

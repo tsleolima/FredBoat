@@ -113,7 +113,7 @@ public class CommandContext extends Context {
     }
 
     public Collection<Module> getEnabledModules() {
-        return Launcher.getBotController().getEntityIO().fetchGuildModules(this.guild).getEnabledModules();
+        return Launcher.getBotController().getGuildModulesService().fetchGuildModules(this.guild).getEnabledModules();
     }
 
     @Override

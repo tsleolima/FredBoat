@@ -38,8 +38,8 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.config.property.AppConfig;
-import fredboat.db.api.GuildConfigIO;
-import fredboat.db.api.GuildDataIO;
+import fredboat.db.api.GuildConfigService;
+import fredboat.db.api.GuildDataService;
 import fredboat.db.entity.main.GuildData;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
@@ -94,14 +94,14 @@ public class EventListenerBoat extends AbstractEventListener {
     private final JdaEntityProvider jdaEntityProvider;
     private final Ratelimiter ratelimiter;
     private final AppConfig appConfig;
-    private final GuildDataIO guildDataIO;
-    private final GuildConfigIO guildConfigIO;
+    private final GuildDataService guildDataService;
+    private final GuildConfigService guildConfigService;
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
                              ShardStatsCounterProvider shardStatsCounterProvider, JdaEntityProvider jdaEntityProvider,
-                             Ratelimiter ratelimiter, AppConfig appConfig, GuildDataIO guildDataIO,
-                             GuildConfigIO guildConfigIO) {
+                             Ratelimiter ratelimiter, AppConfig appConfig, GuildDataService guildDataService,
+                             GuildConfigService guildConfigService) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
@@ -109,8 +109,8 @@ public class EventListenerBoat extends AbstractEventListener {
         this.jdaEntityProvider = jdaEntityProvider;
         this.ratelimiter = ratelimiter;
         this.appConfig = appConfig;
-        this.guildDataIO = guildDataIO;
-        this.guildConfigIO = guildConfigIO;
+        this.guildDataService = guildDataService;
+        this.guildConfigService = guildConfigService;
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
@@ -301,7 +301,7 @@ public class EventListenerBoat extends AbstractEventListener {
                 && player.getPlayingTrack() != null
                 && joinedChannel.getMembers().contains(guild.getSelfMember())
                 && player.getHumanUsersInCurrentVC().size() > 0
-                && guildConfigIO.fetchGuildConfig(guild).isAutoResume()
+                && guildConfigService.fetchGuildConfig(guild).isAutoResume()
                 ) {
             player.setPause(false);
             TextChannel activeTextChannel = player.getActiveTextChannel();
@@ -382,7 +382,7 @@ public class EventListenerBoat extends AbstractEventListener {
         //filter guilds that already received a hello message
         // useful for when discord trolls us with fake guild joins
         // or to prevent it send repeatedly due to kick and reinvite
-        GuildData gd = guildDataIO.fetchGuildData(guild);
+        GuildData gd = guildDataService.fetchGuildData(guild);
         if (gd.getTimestampHelloSent() > 0) {
             return;
         }
@@ -404,6 +404,6 @@ public class EventListenerBoat extends AbstractEventListener {
 
         //send actual hello message and persist on success
         CentralMessaging.sendMessage(channel, HelloCommand.getHello(guild),
-                __ -> guildDataIO.transformGuildData(guild, GuildData::helloSent));
+                __ -> guildDataService.transformGuildData(guild, GuildData::helloSent));
     }
 }

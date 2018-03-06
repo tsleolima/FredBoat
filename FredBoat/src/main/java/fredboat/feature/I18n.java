@@ -96,7 +96,7 @@ public class I18n {
     @Nonnull
     public static FredBoatLocale getLocale(@Nonnull Guild guild) {
         try {
-            return LANGS.getOrDefault(Launcher.getBotController().getEntityIO().fetchGuildConfig(guild).getLang(), DEFAULT);
+            return LANGS.getOrDefault(Launcher.getBotController().getGuildConfigService().fetchGuildConfig(guild).getLang(), DEFAULT);
         } catch (DatabaseNotReadyException e) {
             //don't log spam the full exceptions or logs
             return DEFAULT;
@@ -110,7 +110,7 @@ public class I18n {
         if (!LANGS.containsKey(lang))
             throw new LanguageNotSupportedException("Language not found");
 
-        Launcher.getBotController().getEntityIO().transformGuildConfig(guild, config -> config.setLang(lang));
+        Launcher.getBotController().getGuildConfigService().transformGuildConfig(guild, config -> config.setLang(lang));
     }
 
     public static class FredBoatLocale {

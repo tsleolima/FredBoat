@@ -25,29 +25,23 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.cache.SearchResult;
+import fredboat.db.entity.main.BlacklistEntry;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface SearchResultIO {
+public interface BlacklistService {
 
     /**
-     * Merge a search result into the database.
-     *
-     * @return the merged SearchResult object, or null when there is no cache database
+     * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
+     * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
      */
-    @Nullable
-    SearchResult merge(SearchResult searchResult);
+    List<BlacklistEntry> loadBlacklist();
 
-    /**
-     * @param maxAgeMillis the maximum age of the cached search result; provide a negative value for eternal cache
-     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
-     * cache database
-     */
-    @Nullable
-    SearchResult getSearchResult(SearchResult.SearchResultId id, long maxAgeMillis);
+    BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry);
+
+    void deleteBlacklistEntry(long id);
 
 }

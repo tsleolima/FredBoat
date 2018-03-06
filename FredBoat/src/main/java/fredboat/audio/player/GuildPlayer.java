@@ -32,7 +32,7 @@ import fredboat.audio.queue.*;
 import fredboat.command.music.control.VoteSkipCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.CommandContext;
-import fredboat.db.EntityIO;
+import fredboat.db.api.GuildConfigService;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.jda.JdaEntityProvider;
@@ -69,19 +69,19 @@ public class GuildPlayer extends AbstractPlayer {
     private final MusicTextChannelProvider musicTextChannelProvider;
     private final JdaEntityProvider jdaEntityProvider;
     private final AudioConnectionFacade audioConnectionFacade;
-    private final EntityIO entityIO;
+    private final GuildConfigService guildConfigService;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
-                       AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager, EntityIO entityIO,
-                       Ratelimiter ratelimiter) {
+                       AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager,
+                       GuildConfigService guildConfigService, Ratelimiter ratelimiter) {
         super(guild.getId(), audioConnectionFacade);
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
         this.jdaEntityProvider = jdaEntityProvider;
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.audioConnectionFacade = audioConnectionFacade;
-        this.entityIO = entityIO;
+        this.guildConfigService = guildConfigService;
         onPlayHook = this::announceTrack;
         onErrorHook = this::handleError;
 
@@ -423,7 +423,7 @@ public class GuildPlayer extends AbstractPlayer {
         try {
             Guild guild = getGuild();
             if (guild != null) {
-                enabled = entityIO.fetchGuildConfig(guild).isTrackAnnounce();
+                enabled = guildConfigService.fetchGuildConfig(guild).isTrackAnnounce();
             }
         } catch (Exception ignored) {
         }

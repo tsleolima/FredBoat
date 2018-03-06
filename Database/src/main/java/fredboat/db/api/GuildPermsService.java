@@ -33,7 +33,7 @@ import java.util.function.Function;
 /**
  * Created by napster on 07.02.18.
  */
-public interface GuildPermsIO {
+public interface GuildPermsService {
 
     GuildPermissions fetchGuildPermissions(Guild guild);
 

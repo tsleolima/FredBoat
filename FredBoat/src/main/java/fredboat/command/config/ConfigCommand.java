@@ -58,7 +58,7 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
     }
 
     private void printConfig(CommandContext context) {
-        GuildConfig gc = Launcher.getBotController().getEntityIO().fetchGuildConfig(context.guild);
+        GuildConfig gc = Launcher.getBotController().getGuildConfigService().fetchGuildConfig(context.guild);
 
         MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder()
                 .append(context.i18nFormat("configNoArgs", context.guild.getName())).append("\n")
@@ -86,7 +86,7 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
         switch (key) {
             case "track_announce":
                 if (val.equalsIgnoreCase("true") | val.equalsIgnoreCase("false")) {
-                    Launcher.getBotController().getEntityIO().transformGuildConfig(
+                    Launcher.getBotController().getGuildConfigService().transformGuildConfig(
                             context.guild, gc -> gc.setTrackAnnounce(Boolean.valueOf(val)));
                     context.replyWithName("`track_announce` " + context.i18nFormat("configSetTo", val));
                 } else {
@@ -95,7 +95,7 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
                 break;
             case "auto_resume":
                 if (val.equalsIgnoreCase("true") | val.equalsIgnoreCase("false")) {
-                    Launcher.getBotController().getEntityIO().transformGuildConfig(
+                    Launcher.getBotController().getGuildConfigService().transformGuildConfig(
                             context.guild, gc -> gc.setAutoResume(Boolean.valueOf(val)));
                     context.replyWithName("`auto_resume` " + context.i18nFormat("configSetTo", val));
                 } else {

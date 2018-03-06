@@ -25,18 +25,29 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.GuildModules;
-import net.dv8tion.jda.core.entities.Guild;
+import fredboat.db.entity.cache.SearchResult;
 
-import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface GuildModulesIO {
+public interface SearchResultService {
 
-    GuildModules fetchGuildModules(Guild guild);
+    /**
+     * Merge a search result into the database.
+     *
+     * @return the merged SearchResult object, or null when there is no cache database
+     */
+    @Nullable
+    SearchResult merge(SearchResult searchResult);
 
-    GuildModules transformGuildModules(Guild guild, Function<GuildModules, GuildModules> transformation);
+    /**
+     * @param maxAgeMillis the maximum age of the cached search result; provide a negative value for eternal cache
+     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
+     * cache database
+     */
+    @Nullable
+    SearchResult getSearchResult(SearchResult.SearchResultId id, long maxAgeMillis);
 
 }

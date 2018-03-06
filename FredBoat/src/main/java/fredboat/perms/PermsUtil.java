@@ -55,7 +55,7 @@ public class PermsUtil {
             return member.hasPermission(Permission.MESSAGE_MANAGE) ? PermissionLevel.DJ : PermissionLevel.USER;
         }
 
-        GuildPermissions gp = Launcher.getBotController().getEntityIO().fetchGuildPermissions(member.getGuild());
+        GuildPermissions gp = Launcher.getBotController().getGuildPermsService().fetchGuildPermissions(member.getGuild());
 
         if (checkList(gp.getAdminList(), member)) return PermissionLevel.ADMIN;
         if (checkList(gp.getDjList(), member)) return PermissionLevel.DJ;

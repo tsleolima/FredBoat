@@ -117,7 +117,7 @@ public class TrackSearcher {
                     if (!lavaplayerResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from lavaplayer", provider, query);
                         // got a search result? cache and return it
-                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getEntityIO()
+                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getSearchResultService()
                                 .merge(new SearchResult(audioPlayerManager, provider, query, lavaplayerResult)));
                         Metrics.searchHits.labels("lavaplayer-" + provider.name().toLowerCase()).inc();
                         return lavaplayerResult;
@@ -142,7 +142,7 @@ public class TrackSearcher {
                     if (!youtubeApiResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it
-                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getEntityIO()
+                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getSearchResultService()
                                 .merge(new SearchResult(audioPlayerManager, provider, query, youtubeApiResult)));
                         Metrics.searchHits.labels("youtube-api").inc();
                         return youtubeApiResult;
@@ -171,7 +171,7 @@ public class TrackSearcher {
     private AudioPlaylist fromCache(SearchProvider provider, String searchTerm, long cacheMaxAge) {
         try {
             SearchResult.SearchResultId id = new SearchResult.SearchResultId(provider, searchTerm);
-            SearchResult searchResult = Launcher.getBotController().getEntityIO().getSearchResult(id, cacheMaxAge);
+            SearchResult searchResult = Launcher.getBotController().getSearchResultService().getSearchResult(id, cacheMaxAge);
             return searchResult != null ? searchResult.getSearchResult(audioPlayerManager) : null;
         } catch (DatabaseNotReadyException ignored) {
             log.warn("Could not retrieve cached search result from database.");

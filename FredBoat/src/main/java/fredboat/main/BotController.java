@@ -5,7 +5,8 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.*;
-import fredboat.db.EntityIO;
+import fredboat.db.EntityService;
+import fredboat.db.api.*;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
@@ -37,7 +38,7 @@ public class BotController {
     //central event listener that all events by all shards pass through
     private final EventListenerBoat mainEventListener;
     private final ShutdownHandler shutdownHandler;
-    private final EntityIO entityIO;
+    private final EntityService entityService;
     private final PlayerRegistry playerRegistry;
     private final JdaEntityProvider jdaEntityProvider;
     private final BotMetrics botMetrics;
@@ -48,7 +49,7 @@ public class BotController {
 
     public BotController(ConfigPropertiesProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler,
-                         EntityIO entityIO, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
+                         EntityService entityService, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
                          PlayerRegistry playerRegistry, JdaEntityProvider jdaEntityProvider, BotMetrics botMetrics,
                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
                          Ratelimiter ratelimiter) {
@@ -57,7 +58,7 @@ public class BotController {
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
-        this.entityIO = entityIO;
+        this.entityService = entityService;
         try {
             hibernateStats.register(); //call this exactly once after all db connections have been created
         } catch (IllegalStateException ignored) {}//can happen when using the REST repos
@@ -108,9 +109,24 @@ public class BotController {
         return shardManager;
     }
 
-    @Nonnull
-    public EntityIO getEntityIO() {
-        return entityIO;
+    public GuildConfigService getGuildConfigService() {
+        return entityService;
+    }
+
+    public GuildModulesService getGuildModulesService() {
+        return entityService;
+    }
+
+    public GuildPermsService getGuildPermsService() {
+        return entityService;
+    }
+
+    public PrefixService getPrefixService() {
+        return entityService;
+    }
+
+    public SearchResultService getSearchResultService() {
+        return entityService;
     }
 
     public PlayerRegistry getPlayerRegistry() {

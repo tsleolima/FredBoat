@@ -26,7 +26,7 @@
 package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import fredboat.db.EntityIO;
+import fredboat.db.api.GuildConfigService;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.entities.Guild;
@@ -48,19 +48,19 @@ public class PlayerRegistry {
     private final Map<Long, GuildPlayer> registry = new ConcurrentHashMap<>();
     private final JdaEntityProvider jdaEntityProvider;
     private final AudioConnectionFacade audioConnectionFacade;
-    private final EntityIO entityIO;
+    private final GuildConfigService guildConfigService;
     private final AudioPlayerManager audioPlayerManager;
     private final Ratelimiter ratelimiter;
     private final MusicTextChannelProvider musicTextChannelProvider;
 
     public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
-                          AudioConnectionFacade audioConnectionFacade, EntityIO entityIO,
+                          AudioConnectionFacade audioConnectionFacade, GuildConfigService guildConfigService,
                           @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
                           Ratelimiter ratelimiter) {
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.audioConnectionFacade = audioConnectionFacade;
-        this.entityIO = entityIO;
+        this.guildConfigService = guildConfigService;
         this.audioPlayerManager = audioPlayerManager;
         this.ratelimiter = ratelimiter;
     }
@@ -70,7 +70,7 @@ public class PlayerRegistry {
         return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
                     GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, jdaEntityProvider,
-                            audioConnectionFacade, audioPlayerManager, entityIO, ratelimiter);
+                            audioConnectionFacade, audioPlayerManager, guildConfigService, ratelimiter);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });

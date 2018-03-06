@@ -25,7 +25,7 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.GuildData;
+import fredboat.db.entity.main.GuildConfig;
 import net.dv8tion.jda.core.entities.Guild;
 
 import java.util.function.Function;
@@ -33,10 +33,9 @@ import java.util.function.Function;
 /**
  * Created by napster on 07.02.18.
  */
-public interface GuildDataIO {
+public interface GuildConfigService {
 
-    GuildData fetchGuildData(Guild guild);
+    GuildConfig fetchGuildConfig(Guild guild);
 
-    GuildData transformGuildData(Guild guild, Function<GuildData, GuildData> transformation);
-
+    GuildConfig transformGuildConfig(Guild guild, Function<GuildConfig, GuildConfig> transformation);
 }

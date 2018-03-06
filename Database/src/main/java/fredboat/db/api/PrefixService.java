@@ -25,23 +25,19 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.BlacklistEntry;
+import fredboat.db.entity.main.Prefix;
+import net.dv8tion.jda.core.entities.Guild;
+import space.npstr.sqlsauce.entities.GuildBotComposite;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface BlacklistIO {
+public interface PrefixService {
 
-    /**
-     * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
-     * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
-     */
-    List<BlacklistEntry> loadBlacklist();
+    Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation);
 
-    BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry);
-
-    void deleteBlacklistEntry(long id);
-
+    Optional<String> getPrefix(GuildBotComposite id);
 }

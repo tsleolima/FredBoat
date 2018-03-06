@@ -69,7 +69,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
             .expireAfterAccess(1, TimeUnit.MINUTES) //evict inactive guilds
             .concurrencyLevel(Launcher.getBotController().getCredentials().getRecommendedShardCount())  //each shard has a thread (main JDA thread) accessing this cache many times
             .build(CacheLoader.asyncReloading(CacheLoader.from(
-                    guildId -> Launcher.getBotController().getEntityIO().getPrefix(new GuildBotComposite(guildId, DiscordUtil.getBotId(Launcher.getBotController().getCredentials())))),
+                    guildId -> Launcher.getBotController().getPrefixService().getPrefix(new GuildBotComposite(guildId, DiscordUtil.getBotId(Launcher.getBotController().getCredentials())))),
                     Launcher.getBotController().getExecutor()));
 
     @Nonnull
@@ -110,7 +110,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
             newPrefix = context.rawArgs;
         }
 
-        Launcher.getBotController().getEntityIO().transformPrefix(context.guild, prefixEntity -> prefixEntity.setPrefix(newPrefix));
+        Launcher.getBotController().getPrefixService().transformPrefix(context.guild, prefixEntity -> prefixEntity.setPrefix(newPrefix));
 
         //we could do a put instead of invalidate here and probably safe one lookup, but that undermines the database
         // as being the single source of truth for prefixes

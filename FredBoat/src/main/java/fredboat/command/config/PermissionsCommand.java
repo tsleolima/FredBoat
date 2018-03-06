@@ -136,7 +136,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             context.replyWithName(context.i18nFormat("permsRemoved", mentionableToName(selected), permissionLevel));
             return gp.setFromEnum(permissionLevel, newList);
         };
-        Launcher.getBotController().getEntityIO().transformGuildPerms(context.guild, transformation);
+        Launcher.getBotController().getGuildPermsService().transformGuildPerms(context.guild, transformation);
     }
 
     public void add(CommandContext context) {
@@ -166,13 +166,13 @@ public class PermissionsCommand extends Command implements IConfigCommand {
                     TextUtils.escapeMarkdown(mentionableToName(selected)), permissionLevel));
             return gp.setFromEnum(permissionLevel, newList);
         };
-        Launcher.getBotController().getEntityIO().transformGuildPerms(context.guild, transformation);
+        Launcher.getBotController().getGuildPermsService().transformGuildPerms(context.guild, transformation);
     }
 
     public void list(CommandContext context) {
         Guild guild = context.guild;
         Member invoker = context.invoker;
-        GuildPermissions gp = Launcher.getBotController().getEntityIO().fetchGuildPermissions(guild);
+        GuildPermissions gp = Launcher.getBotController().getGuildPermsService().fetchGuildPermissions(guild);
 
         List<IMentionable> mentionables = idsToMentionables(guild, gp.getFromEnum(permissionLevel));
 
