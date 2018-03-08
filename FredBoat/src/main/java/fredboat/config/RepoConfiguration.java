@@ -38,6 +38,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by napster on 24.02.18.
@@ -57,13 +60,13 @@ public class RepoConfiguration {
         this.backendConfig = backendConfig;
 
         log.info("Contacting the backend");
-        Version apiVersion = null;
+        String[] apiVersions = null;
         int attempts = 0;
         Exception lastException = null;
-        while (apiVersion == null && attempts < 100) { //total time is 100 sec
+        while ((apiVersions == null || apiVersions.length < 1) && attempts < 100) { //total time is 100 sec
             try {
-                String s = http.get(backendConfig.getHost() + "info/version").auth(backendConfig.getBasicAuth()).asString();
-                apiVersion = gson.fromJson(s, Version.class);
+                String s = http.get(backendConfig.getHost() + "info/api/versions").auth(backendConfig.getBasicAuth()).asString();
+                apiVersions = gson.fromJson(s, String[].class);
             } catch (Exception ignored) {
                 lastException = ignored;
                 attempts++;
@@ -71,16 +74,25 @@ public class RepoConfiguration {
             }
         }
 
-        if (apiVersion == null) {
+        if (apiVersions == null || apiVersions.length < 1) {
             log.error("Could not contact the backend. Please make sure it is started and configuration values are correct", lastException);
             shutdownHandler.shutdown(ExitCodes.EXIT_CODE_ERROR);
             return;
         }
 
-        if (apiVersion.getNumber() >= RestRepo.API_VERSION) {
-            log.info("Backend API version is v{}", apiVersion.getNumber());
+        List<String> supportedApiVersions = Arrays.stream(apiVersions).map(v -> {
+            if (!v.startsWith("v")) return "v" + v;
+            else return v;
+        }).collect(Collectors.toList());
+        log.info("Supported Backend API versions: {}", String.join(", ", supportedApiVersions));
+
+
+        String ourVersion = Integer.toString(RestRepo.API_VERSION);
+        if (supportedApiVersions.contains(ourVersion)
+                || supportedApiVersions.contains("v" + ourVersion)) {
+            log.info("Using Backend API v{}", ourVersion);
         } else {
-            log.error("Backend API is version v{}, but this FredBoat expects at least v{}", apiVersion.getNumber(), RestRepo.API_VERSION);
+            log.error("Backend API does not support our expected version v{}. Update the backend, or roll back this FredBoat version!", ourVersion);
             shutdownHandler.shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
     }
@@ -119,17 +131,5 @@ public class RepoConfiguration {
     @Bean
     public SearchResultRepo searchResultRepo() {
         return new RestSearchResultRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
-    }
-
-    private static class Version {
-        private int number = -1;
-
-        public void setNumber(int number) {
-            this.number = number;
-        }
-
-        public int getNumber() {
-            return number;
-        }
     }
 }
