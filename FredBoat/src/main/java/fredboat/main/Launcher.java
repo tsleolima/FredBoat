@@ -9,10 +9,9 @@ import fredboat.api.API;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.player.VideoSelectionCache;
-import fredboat.command.admin.SentryDsnCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
-import fredboat.config.property.FileConfig;
+import fredboat.config.SentryConfiguration;
 import fredboat.config.property.PropertyConfigProvider;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.BotMetrics;
@@ -91,6 +90,7 @@ public class Launcher implements ApplicationRunner {
     private final VideoSelectionCache videoSelectionCache;
     private final ShardProvider shardProvider;
     private final GuildProvider guildProvider;
+    private final SentryConfiguration sentryConfiguration;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
@@ -104,14 +104,6 @@ public class Launcher implements ApplicationRunner {
             return;
         }
         log.info(getVersionInfo());
-
-        //create the sentry appender as early as possible
-        String sentryDsn = FileConfig.get().getSentryDsn();
-        if (!sentryDsn.isEmpty()) {
-            SentryDsnCommand.turnOn(sentryDsn);
-        } else {
-            SentryDsnCommand.turnOff();
-        }
 
         String javaVersionMinor = null;
         try {
@@ -140,7 +132,8 @@ public class Launcher implements ApplicationRunner {
                     MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
                     StatsAgent statsAgent, BotMetrics botMetrics, Weather weather,
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
-                    VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider) {
+                    VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider,
+                    SentryConfiguration sentryConfiguration) {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
@@ -155,6 +148,7 @@ public class Launcher implements ApplicationRunner {
         this.videoSelectionCache = videoSelectionCache;
         this.shardProvider = shardProvider;
         this.guildProvider = guildProvider;
+        this.sentryConfiguration = sentryConfiguration;
     }
 
     @Override
@@ -169,7 +163,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //Commands
-        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache);
+        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache, sentryConfiguration);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {

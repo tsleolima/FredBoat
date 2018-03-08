@@ -37,6 +37,7 @@ import fredboat.commandmeta.CommandContextParser;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.config.SentryConfiguration;
 import fredboat.config.property.AppConfig;
 import fredboat.db.api.GuildConfigIO;
 import fredboat.db.api.GuildDataIO;
@@ -117,9 +118,12 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         try (// before execution set some variables that can help with finding traces that belong to each other
-                MDC.MDCCloseable _guild = MDC.putCloseable("guild", event.getGuild() != null ? event.getGuild().getId() : "PRIVATE");
-                MDC.MDCCloseable _channel = MDC.putCloseable("channel", event.getChannel().getId());
-                MDC.MDCCloseable _invoker = MDC.putCloseable("invoker", event.getAuthor().getId());
+             MDC.MDCCloseable _guild = MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_GUILD,
+                     event.getGuild() != null ? event.getGuild().getId() : "PRIVATE");
+             MDC.MDCCloseable _channel = MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_CHANNEL,
+                     event.getChannel().getId());
+             MDC.MDCCloseable _invoker = MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_INVOKER,
+                     event.getAuthor().getId());
                 ) {
 
             doOnMessageReceived(event);
