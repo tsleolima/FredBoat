@@ -123,13 +123,6 @@ public class CommandManager {
         try {
             invoked.onInvoke(context);
         } catch (Exception e) {
-            String label;
-            if (e instanceof MessagingException) {
-                label = MessagingException.class.getSimpleName();
-            } else {
-                label = e.getClass().getSimpleName();
-            }
-            Metrics.commandExceptions.labels(label).inc();
             TextUtils.handleException(e, context);
         }
 

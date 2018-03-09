@@ -41,6 +41,7 @@ import fredboat.command.music.seeking.RestartCommand;
 import fredboat.command.music.seeking.RewindCommand;
 import fredboat.command.music.seeking.SeekCommand;
 import fredboat.command.util.*;
+import fredboat.config.SentryConfiguration;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
 import fredboat.definitions.SearchProvider;
@@ -70,7 +71,7 @@ public class CommandInitializer {
     public static final String LANGUAGE_COMM_NAME = "language";
 
     public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather, TrackSearcher trackSearcher,
-                                    VideoSelectionCache videoSelectionCache) {
+                                    VideoSelectionCache videoSelectionCache, SentryConfiguration sentryConfiguration) {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
         CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
@@ -86,7 +87,7 @@ public class CommandInitializer {
         adminModule.registerCommand(new NodeAdminCommand("node", "nodes"));
         adminModule.registerCommand(new PlayerDebugCommand("playerdebug"));
         adminModule.registerCommand(new ReviveCommand("revive"));
-        adminModule.registerCommand(new SentryDsnCommand("sentrydsn"));
+        adminModule.registerCommand(new SentryDsnCommand(sentryConfiguration, "sentrydsn"));
         adminModule.registerCommand(new SetAvatarCommand("setavatar"));
         adminModule.registerCommand(new UnblacklistCommand("unblacklist", "unlimit"));
 

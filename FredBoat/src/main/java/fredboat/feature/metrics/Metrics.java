@@ -184,10 +184,16 @@ public class Metrics {
             .labelNames("class") // use the simple name of the command class: PlayCommand, DanceCommand, ShardsCommand etc
             .register();
 
-    public static final Counter commandExceptions = Counter.build()
-            .name("fredboat_commands_exceptions_total")
-            .help("Total uncaught exceptions thrown by command invocation")
-            .labelNames("class") //class of the exception
+    public static final Counter handledExceptions = Counter.build()
+            .name("fredboat_handled_exceptions_total")
+            .help("Total uncaught exceptions bubbled up by command invocation or other moving parts")
+            .labelNames("class") //class of the exception, messaging exceptions should be summed up into one, as they have their own stat, see below
+            .register();
+
+    public static final Counter messagingExceptions = Counter.build()
+            .name("fredboat_messaging_exceptions_total")
+            .help("Total messaging exceptions bubbled by command invocation or other moving parts")
+            .labelNames("class") //subclass of the messaging exception
             .register();
 
     // ################################################################################
