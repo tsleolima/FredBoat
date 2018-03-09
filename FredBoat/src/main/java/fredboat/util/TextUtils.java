@@ -29,11 +29,11 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import fredboat.commandmeta.MessagingException;
+import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import net.dv8tion.jda.core.MessageBuilder;
+import fredboat.shared.constant.BotConstants;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
@@ -109,7 +109,20 @@ public class TextUtils {
         return msg.charAt(0) == ' ' ? msg : " " + msg;
     }
 
+    private static final String SORRY = "An error occurred " + Emojis.ANGER + "\nPlease try again later. If the issue"
+            + " persists please join our support chat and explain what steps you took to receive this response."; //todo i18n?
+
     public static void handleException(Throwable e, Context context) {
+        String label;
+        if (e instanceof MessagingException) {
+            Metrics.messagingExceptions.labels(e.getClass().getSimpleName()).inc();
+            label = MessagingException.class.getSimpleName();
+        } else {
+            label = e.getClass().getSimpleName();
+        }
+        Metrics.handledExceptions.labels(label).inc();
+
+
         if (e instanceof MessagingException) {
             context.replyWithName(e.getMessage());
             return;
@@ -117,42 +130,12 @@ public class TextUtils {
 
         log.error("Caught exception while executing a command", e);
 
-        if (e instanceof InsufficientPermissionException) { //log these (see line above, but handle them more user friendly)
+        if (e instanceof InsufficientPermissionException) { //log these to find the real source (see line above, but handle them more user friendly)
             CentralMessaging.handleInsufficientPermissionsException(context.getTextChannel(), (InsufficientPermissionException) e);
             return;
         }
 
-        MessageBuilder builder = CentralMessaging.getClearThreadLocalMessageBuilder();
-
-        if (context.getMember() != null) {
-            builder.append(context.getMember());
-        }
-
-        String filtered = context.i18nFormat("utilErrorOccurred", e.toString());
-        for (String str : Launcher.getBotController().getCredentials().getGoogleKeys()) {
-            filtered = filtered.replace(str, "GOOGLE_SERVER_KEY");
-        }
-        builder.append(filtered);
-
-        for (StackTraceElement ste : e.getStackTrace()) {
-            builder.append("\t").append(ste.toString()).append("\n");
-            if ("prefixCalled".equals(ste.getMethodName())) {
-                break;
-            }
-        }
-        builder.append("\t...```"); //opening ``` is part of the utilErrorOccurred language string
-
-        try {
-            context.reply(builder.build());
-        } catch (UnsupportedOperationException | IllegalStateException tooLongEx) {
-            try {
-                context.reply(context.i18nFormat("errorOccurredTooLong",
-                        postToPasteService(builder.getStringBuilder().toString())));
-            } catch (IOException | JSONException e1) {
-                log.error("Failed to upload to any pasteservice.");
-                context.reply(context.i18n("errorOccurredTooLongAndUnirestException"));
-            }
-        }
+        context.replyWithMention(SORRY + "\n" + BotConstants.hangoutInvite);
     }
 
     private static String postToHastebin(String body) throws IOException {

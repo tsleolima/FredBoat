@@ -43,4 +43,5 @@ public class Emojis {
     public static final String KEY = "🔑";
     public static final String DIE = "🎲";
     public static final String TOOLS = "🛠";
+    public static final String ANGER = "💢";
 }
