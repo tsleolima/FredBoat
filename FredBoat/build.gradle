@@ -47,7 +47,7 @@ dependencies {
         compile(group: 'lavalink', name: 'Lavalink-Client', version: '-SNAPSHOT')
     } else {
         //production
-        compile(group: 'com.github.Frederikam.Lavalink', name: 'Lavalink-Client', version: lavalinkVersion)
+        compile(group: 'com.github.Frederikam', name: 'Lavalink', version: lavalinkVersion)
     }
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
