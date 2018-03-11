@@ -90,7 +90,7 @@ public class RepoConfiguration {
         String ourVersion = Integer.toString(RestRepo.API_VERSION);
         if (supportedApiVersions.contains(ourVersion)
                 || supportedApiVersions.contains("v" + ourVersion)) {
-            log.info("Using Quaterdeck API v{}", ourVersion);
+            log.info("Using Quarterdeck API v{}", ourVersion);
         } else {
             log.error("Quarterdeck API does not support our expected version v{}. Update quarterdeck, or roll back this FredBoat version!", ourVersion);
             shutdownHandler.shutdown(ExitCodes.EXIT_CODE_ERROR);

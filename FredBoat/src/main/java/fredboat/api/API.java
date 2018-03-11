@@ -105,7 +105,7 @@ public class API {
 
     public static void turnOnMetrics(MetricsServletAdapter metricsServlet) {
         if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
-            log.warn("Rest server is not enabled. Skipping Spark ignition!");
+            log.warn("Rest server is not enabled. Metrics will not be scrapable!");
             return;
         }
 

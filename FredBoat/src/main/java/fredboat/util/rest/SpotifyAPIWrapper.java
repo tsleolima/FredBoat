@@ -76,6 +76,9 @@ public class SpotifyAPIWrapper {
      * https://developer.spotify.com/web-api/authorization-guide/#client-credentials-flow
      */
     private void refreshAccessToken() {
+        if (credentials.getSpotifyId().isEmpty() || credentials.getSpotifySecret().isEmpty()) {
+            return; //no spotify credentials configured, dont throw unnecessary errors
+        }
         try {
             JSONObject jsonClientCredentials = BotController.HTTP.post(URL_SPOTIFY_AUTHENTICATION_HOST + "/api/token",
                     Http.Params.of(
