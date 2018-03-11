@@ -19,10 +19,9 @@ subprojects {
             //@formatter:off
 
             //plugin versions
-            gradleGitVersion        = '1.4.17'          //do not upgrade to 1.4.20, it fails builds randomly
+            gradleGitVersion        = '1.4.21'
             shadowVersion           = '2.0.2'
-            springBootVersion       = '2.0.0.RC1'
-            jUnitPluginVersion      = '1.0.2'
+            springBootVersion       = '2.0.0.RELEASE'
             propDepsVersion         = '0.0.9.RELEASE'
 
             //@formatter:on
@@ -38,7 +37,6 @@ subprojects {
             classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${gradleGitVersion}"
             classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
             classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-            classpath "org.junit.platform:junit-platform-gradle-plugin:${jUnitPluginVersion}"
             classpath "io.spring.gradle:propdeps-plugin:${propDepsVersion}"
         }
     }
@@ -55,17 +53,21 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
+    test {
+        useJUnitPlatform()
+    }
+
     ext {
         //@formatter:off
 
         springBootVersion           = "${springBootVersion}"
         //discord deps
-        jdaVersion                  = '3.5.1_339'
+        jdaVersion                  = '3.5.1_347'
 
         //audio deps
-        lavaplayerVersion           = '1.2.53'
+        lavaplayerVersion           = '1.2.56'
         jdaNasVersion               = '1.0.6'
-        lavalinkVersion             = '2f0df387c36b1850f63779398e89270c83f56ee3'
+        lavalinkVersion             = '3c54c0566e'
 
         //utility deps
         jsonOrgVersion              = '20180130'
@@ -73,7 +75,7 @@ subprojects {
         commonsIOVersion            = '2.6'
         commonsCodecVersion         = '1.11'
         commonsCollectionsVersion   = '4.1'
-        snakeYamlVersion            = '1.19'
+        snakeYamlVersion            = '1.20'
         fastUtilVersion             = '8.1.1'
         togglzVersion               = '2.5.0.Final'
         guavaVersion                = '24.0-jre'
@@ -82,26 +84,26 @@ subprojects {
 
         //logging / monitoring deps
         logbackVersion              = '1.2.3'
-        sentryVersion               = '1.6.8'
-        prometheusClientVersion     = '0.2.0'
+        sentryVersion               = '1.7.1'
+        prometheusClientVersion     = '0.3.0'
 
         //http / web deps
-        okhttpVersion               = '3.9.1'
-        sparkVersion                = '2.7.1'
+        okhttpVersion               = '3.10.0'
+        sparkVersion                = '2.7.2'
 
         //QA deps
-        spotbugsVersion             = '3.1.1'
+        spotbugsVersion             = '3.1.2'
         napsterAnnotations          = '0.0.1'
 
         //database deps
         sqlsauceVersion             = '0.0.13'
-        hibernateVersion            = '5.2.13.Final'
+        hibernateVersion            = '5.2.14.Final'
         flywayVersion               = '5.0.7'
-        dsProxyVersion              = '1.4.6'
+        dsProxyVersion              = '1.4.7'
         jaxbApiVersion              = '2.3.0'
 
         //testing deps
-        junitVersion                = '5.0.3'
+        junitVersion                = '5.1.0'
         apiGuardianVersion          = '1.0.0'
 
 
@@ -117,7 +119,7 @@ ext {
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4.1'
+    gradleVersion = '4.6'
     distributionType = DistributionType.ALL
 }
 
