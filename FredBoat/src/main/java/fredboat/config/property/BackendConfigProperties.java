@@ -38,71 +38,85 @@ public class BackendConfigProperties implements BackendConfig {
 
     private static final Logger log = LoggerFactory.getLogger(BackendConfigProperties.class);
 
-    private String host = "";
-    private String user = "";
-    private String pass = "";
-    private String auth = "";
+    private Quarterdeck quarterdeck = new Quarterdeck();
 
     @Override
-    public String getHost() {
-        return host;
+    public Quarterdeck getQuarterdeck() {
+        return quarterdeck;
     }
 
-    @Override
-    public String getUser() {
-        return user;
+    public void setQuarterdeck(Quarterdeck quarterdeck) {
+        this.quarterdeck = quarterdeck;
     }
 
-    @Override
-    public String getPass() {
-        return pass;
-    }
+    public static class Quarterdeck implements BackendConfig.Quarterdeck {
 
-    @Override
-    public String getBasicAuth() {
-        if (auth.isEmpty()) {
-            auth = okhttp3.Credentials.basic(getUser(), getPass());
+        private String host = "";
+        private String user = "";
+        private String pass = "";
+        private String auth = "";
+
+        @Override
+        public String getHost() {
+            return host;
         }
-        return auth;
-    }
 
-    public void setHost(String host) {
-        this.host = host;
-        //noinspection ConstantConditions
-        if (host == null || host.isEmpty()) {
-            if ("docker".equals(System.getenv("ENV"))) {
-                log.info("No backend host found, docker environment detected. Using default backend url");
-                this.host = "http://backend:4269/";
-            } else {
-                String message = "No backend host provided in a non-docker environment. FredBoat cannot work without a backend.";
+        @Override
+        public String getUser() {
+            return user;
+        }
+
+        @Override
+        public String getPass() {
+            return pass;
+        }
+
+        @Override
+        public String getBasicAuth() {
+            if (auth.isEmpty()) {
+                auth = okhttp3.Credentials.basic(getUser(), getPass());
+            }
+            return auth;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+            //noinspection ConstantConditions
+            if (host == null || host.isEmpty()) {
+                if ("docker".equals(System.getenv("ENV"))) {
+                    log.info("No quarterdeck host found, docker environment detected. Using default quarterdeck url");
+                    this.host = "http://quarterdeck:4269/";
+                } else {
+                    String message = "No quarterdeck host provided in a non-docker environment. FredBoat cannot work without quarterdeck.";
+                    log.error(message);
+                    throw new RuntimeException(message);
+                }
+            }
+
+            //fix up a missing trailing slash
+            if (!this.host.endsWith("/")) {
+                this.host += "/";
+            }
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+            //noinspection ConstantConditions
+            if (user == null || user.isEmpty()) {
+                String message = "No quarterdeck user provided.";
                 log.error(message);
                 throw new RuntimeException(message);
             }
         }
 
-        //fix up a missing trailing slash
-        if (!this.host.endsWith("/")) {
-            this.host += "/";
-        }
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-        //noinspection ConstantConditions
-        if (user == null || user.isEmpty()) {
-            String message = "No backend user provided.";
-            log.error(message);
-            throw new RuntimeException(message);
-        }
-    }
-
-    public void setPass(String pass) {
-        this.pass = pass;
-        //noinspection ConstantConditions
-        if (pass == null || pass.isEmpty()) {
-            String message = "No backend pass provided.";
-            log.error(message);
-            throw new RuntimeException(message);
+        public void setPass(String pass) {
+            this.pass = pass;
+            //noinspection ConstantConditions
+            if (pass == null || pass.isEmpty()) {
+                String message = "No quarterdeck pass provided.";
+                log.error(message);
+                throw new RuntimeException(message);
+            }
         }
     }
 }

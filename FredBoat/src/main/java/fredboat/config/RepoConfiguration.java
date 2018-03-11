@@ -52,20 +52,20 @@ public class RepoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(RepoConfiguration.class);
 
-    private final BackendConfig backendConfig;
+    private final BackendConfig.Quarterdeck quarterdeckConfig;
     private final Gson gson = new Gson();
     private final Http http = BotController.HTTP; //todo replace
 
     public RepoConfiguration(BackendConfig backendConfig, ShutdownHandler shutdownHandler) throws InterruptedException {
-        this.backendConfig = backendConfig;
+        this.quarterdeckConfig = backendConfig.getQuarterdeck();
 
-        log.info("Contacting the backend");
+        log.info("Contacting the quarterdeck backend");
         String[] apiVersions = null;
         int attempts = 0;
         Exception lastException = null;
         while ((apiVersions == null || apiVersions.length < 1) && attempts < 100) { //total time is 100 sec
             try {
-                String s = http.get(backendConfig.getHost() + "info/api/versions").auth(backendConfig.getBasicAuth()).asString();
+                String s = http.get(quarterdeckConfig.getHost() + "info/api/versions").auth(quarterdeckConfig.getBasicAuth()).asString();
                 apiVersions = gson.fromJson(s, String[].class);
             } catch (Exception ignored) {
                 lastException = ignored;
@@ -75,7 +75,7 @@ public class RepoConfiguration {
         }
 
         if (apiVersions == null || apiVersions.length < 1) {
-            log.error("Could not contact the backend. Please make sure it is started and configuration values are correct", lastException);
+            log.error("Could not contact the quarterdeck backend. Please make sure it is started and configuration values are correct", lastException);
             shutdownHandler.shutdown(ExitCodes.EXIT_CODE_ERROR);
             return;
         }
@@ -84,52 +84,52 @@ public class RepoConfiguration {
             if (!v.startsWith("v")) return "v" + v;
             else return v;
         }).collect(Collectors.toList());
-        log.info("Supported Backend API versions: {}", String.join(", ", supportedApiVersions));
+        log.info("Supported Quarterdeck API versions: {}", String.join(", ", supportedApiVersions));
 
 
         String ourVersion = Integer.toString(RestRepo.API_VERSION);
         if (supportedApiVersions.contains(ourVersion)
                 || supportedApiVersions.contains("v" + ourVersion)) {
-            log.info("Using Backend API v{}", ourVersion);
+            log.info("Using Quaterdeck API v{}", ourVersion);
         } else {
-            log.error("Backend API does not support our expected version v{}. Update the backend, or roll back this FredBoat version!", ourVersion);
+            log.error("Quarterdeck API does not support our expected version v{}. Update quarterdeck, or roll back this FredBoat version!", ourVersion);
             shutdownHandler.shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
     }
 
     @Bean
     public BlacklistRepo blacklistRepo() {
-        return new RestBlacklistRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestBlacklistRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 
     @Bean
     public GuildConfigRepo guildConfigRepo() {
-        return new RestGuildConfigRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestGuildConfigRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 
     @Bean
     public GuildDataRepo guildDataRepo() {
-        return new RestGuildDataRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestGuildDataRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 
     @Bean
     public GuildModulesRepo guildModulesRepo() {
-        return new RestGuildModulesRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestGuildModulesRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 
     @Bean
     public GuildPermsRepo guildPermsRepo() {
-        return new RestGuildPermsRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestGuildPermsRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 
     @Bean
     public PrefixRepo prefixRepo() {
-        return new RestPrefixRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestPrefixRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 
     @Nullable
     @Bean
     public SearchResultRepo searchResultRepo() {
-        return new RestSearchResultRepo(backendConfig.getHost(), http, gson, backendConfig.getBasicAuth());
+        return new RestSearchResultRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 }

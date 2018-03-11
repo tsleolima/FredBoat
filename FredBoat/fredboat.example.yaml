@@ -83,13 +83,15 @@ audio-sources:
 ################################################################
 
 backend:
-  # Host address of your backend, including port. Example: https://such.example.com:4269/
-  # No need set the host when running the whole FredBoat in docker.
-  host: ""
-  # Admin username and pass that you configured in the backend.yaml.
-  # Do not leave any of them empty.
-  user: ""
-  pass: ""
+  quarterdeck:
+    # Host address of your quarterdeck backend, including port unless you are using a reverse proxy.
+    # Example: https://such.example.com:4269/
+    # No need set the host when running the whole FredBoat in docker.
+    host: ""
+    # Admin username and pass that you configured in the quarterdeck.yaml.
+    # Do not leave any of them empty.
+    user: ""
+    pass: ""
 
 
 credentials:

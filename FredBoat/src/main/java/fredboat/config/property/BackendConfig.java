@@ -29,11 +29,15 @@ package fredboat.config.property;
  */
 public interface BackendConfig {
 
-    String getHost();
+    Quarterdeck getQuarterdeck();
 
-    String getUser();
+    interface Quarterdeck {
+        String getHost();
 
-    String getPass();
+        String getUser();
 
-    String getBasicAuth();
+        String getPass();
+
+        String getBasicAuth();
+    }
 }

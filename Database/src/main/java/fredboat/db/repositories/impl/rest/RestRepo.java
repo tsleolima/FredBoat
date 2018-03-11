@@ -39,7 +39,7 @@ import java.io.Serializable;
 /**
  * Created by napster on 17.02.18.
  *
- * Counterpart to the EntityController of the Backend module.
+ * Counterpart to the EntityController of the Quarterdeck module.
  */
 public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I, E>> implements Repo<I, E> {
 
@@ -56,7 +56,7 @@ public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I,
 
     /**
      * @param path base path of this resource, including the version and a trailing slash
-     *             Example: http://backend:4269/v1/blacklist/
+     *             Example: http://quarterdeck:4269/v1/blacklist/
      */
     public RestRepo(String path, Class<E> entityClass, Http http, Gson gson, String auth) {
         this.path = path;
