@@ -75,7 +75,7 @@ subprojects {
         commonsIOVersion            = '2.6'
         commonsCodecVersion         = '1.11'
         commonsCollectionsVersion   = '4.1'
-        snakeYamlVersion            = '1.20'
+        snakeYamlVersion            = '1.19' //do not upgrade to 1.20, app wont start up
         fastUtilVersion             = '8.1.1'
         togglzVersion               = '2.5.0.Final'
         guavaVersion                = '24.0-jre'
