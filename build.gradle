@@ -94,7 +94,7 @@ subprojects {
         napsterAnnotations          = '0.0.1'
 
         //database deps
-        sqlsauceVersion             = '0.0.11'
+        sqlsauceVersion             = '0.0.13'
         hibernateVersion            = '5.2.13.Final'
         flywayVersion               = '5.0.7'
         dsProxyVersion              = '1.4.6'

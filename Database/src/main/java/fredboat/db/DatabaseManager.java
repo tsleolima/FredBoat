@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
-import space.npstr.sqlsauce.ssh.SshTunnel;
 
 import javax.annotation.Nullable;
 import java.util.Properties;
@@ -60,11 +59,7 @@ public class DatabaseManager {
     private final boolean migrateAndValidate;
     private final String mainJdbc;
     @Nullable
-    private final SshTunnel.SshDetails mainTunnel;
-    @Nullable
     private final String cacheJdbc;
-    @Nullable
-    private final SshTunnel.SshDetails cacheTunnel;
     @Nullable
     private final DatabaseConnection.EntityManagerFactoryBuilder entityManagerFactoryBuilder;
 
@@ -90,9 +85,7 @@ public class DatabaseManager {
                            String appName,
                            boolean migrateAndValidate,
                            String mainJdbc,
-                           @Nullable SshTunnel.SshDetails mainTunnel,
                            @Nullable String cacheJdbc,
-                           @Nullable SshTunnel.SshDetails cacheTunnel,
                            @Nullable DatabaseConnection.EntityManagerFactoryBuilder entityManagerFactoryBuilder) {
         this.hibernateStats = hibernateStats;
         this.hikariStats = hikariStats;
@@ -100,9 +93,7 @@ public class DatabaseManager {
         this.appName = appName;
         this.migrateAndValidate = migrateAndValidate;
         this.mainJdbc = mainJdbc;
-        this.mainTunnel = mainTunnel;
         this.cacheJdbc = cacheJdbc;
-        this.cacheTunnel = cacheTunnel;
         this.entityManagerFactoryBuilder = entityManagerFactoryBuilder;
 
         if (mainJdbc.isEmpty()) {
@@ -197,7 +188,6 @@ public class DatabaseManager {
         DatabaseConnection databaseConnection = getBasicConnectionBuilder(MAIN_PERSISTENCE_UNIT_NAME, mainJdbc)
                 .setHibernateProps(buildHibernateProps("ehcache_main.xml"))
                 .addEntityPackage("fredboat.db.entity.main")
-                .setSshDetails(mainTunnel)
                 .setFlyway(flyway)
                 .build();
 
@@ -217,7 +207,6 @@ public class DatabaseManager {
         DatabaseConnection databaseConnection = getBasicConnectionBuilder(CACHE_PERSISTENCE_UNIT_NAME, jdbc)
                 .setHibernateProps(buildHibernateProps("ehcache_cache.xml"))
                 .addEntityPackage("fredboat.db.entity.cache")
-                .setSshDetails(cacheTunnel)
                 .setFlyway(flyway)
                 .build();
 
