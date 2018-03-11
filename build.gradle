@@ -23,7 +23,6 @@ subprojects {
             jdactionVersion         = '1.0.2'
             shadowVersion           = '2.0.2'
             springBootVersion       = '2.0.0.RELEASE'
-            jUnitPluginVersion      = '1.0.2'
             propDepsVersion         = '0.0.9.RELEASE'
 
             //@formatter:on
@@ -40,7 +39,6 @@ subprojects {
             classpath "gradle.plugin.com.sedmelluq:jdaction:${jdactionVersion}"
             classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
             classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-            classpath "org.junit.platform:junit-platform-gradle-plugin:${jUnitPluginVersion}"
             classpath "io.spring.gradle:propdeps-plugin:${propDepsVersion}"
         }
     }
@@ -55,6 +53,10 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     ext {
