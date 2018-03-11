@@ -29,8 +29,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
 import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.config.PersistenceConfiguration;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.flywaydb.core.Flyway;
@@ -203,11 +201,6 @@ public class DatabaseManager {
                 .setFlyway(flyway)
                 .build();
 
-        //adjusting the ehcache config
-        if (mainTunnel == null && cacheTunnel == null) {
-            //local database: turn off overflow to disk of the cache
-            turnOffLocalStorageForEhcacheManager("MAIN_CACHEMANAGER");
-        }
         log.debug(CacheManager.getCacheManager("MAIN_CACHEMANAGER").getActiveConfigurationText());
 
         return databaseConnection;
@@ -228,11 +221,6 @@ public class DatabaseManager {
                 .setFlyway(flyway)
                 .build();
 
-        //adjusting the ehcache config
-        if (mainTunnel == null && cacheTunnel == null) {
-            //local database: turn off overflow to disk of the cache
-            turnOffLocalStorageForEhcacheManager("CACHE_CACHEMANAGER");
-        }
         log.debug(CacheManager.getCacheManager("CACHE_CACHEMANAGER").getActiveConfigurationText());
 
         return databaseConnection;
@@ -289,13 +277,5 @@ public class DatabaseManager {
         }
 
         return hibernateProps;
-    }
-
-    private void turnOffLocalStorageForEhcacheManager(String cacheManagerName) {
-        CacheManager cacheManager = CacheManager.getCacheManager(cacheManagerName);
-        for (String cacheName : cacheManager.getCacheNames()) {
-            CacheConfiguration cacheConfig = cacheManager.getCache(cacheName).getCacheConfiguration();
-            cacheConfig.getPersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE);
-        }
     }
 }
