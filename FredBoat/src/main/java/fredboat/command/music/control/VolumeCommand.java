@@ -53,17 +53,22 @@ public class VolumeCommand extends Command implements IMusicCommand, ICommandRes
         if (Launcher.getBotController().getAppConfig().getDistribution().volumeSupported()) {
 
             GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
+            int oldVolume = (int) Math.floor(player.getVolume() * 100);
             try {
                 float volume = Float.parseFloat(context.args[0]) / 100;
                 volume = Math.max(0, Math.min(1.5f, volume));
 
+                int newVolume = (int) Math.floor(volume * 100);
                 context.reply(context.i18nFormat("volumeSuccess",
-                        Math.floor(player.getVolume() * 100), Math.floor(volume * 100)));
+                        oldVolume, newVolume));
 
                 player.setVolume(volume);
+                Launcher.getBotController().getEntityIO().transformGuildConfig(context.getGuild(),
+                        config -> config.setVolume(newVolume)
+                );
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException ex) {
                 throw new MessagingException(context.i18nFormat("volumeSyntax",
-                        100 * PlayerRegistry.DEFAULT_VOLUME, Math.floor(player.getVolume() * 100)));
+                        100 * PlayerRegistry.DEFAULT_VOLUME, oldVolume));
             }
         } else {
             String out = context.i18n("volumeApology") + "\n<" + BotConstants.DOCS_DONATE_URL + ">";

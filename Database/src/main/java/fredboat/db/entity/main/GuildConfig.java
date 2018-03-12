@@ -53,6 +53,9 @@ public class GuildConfig extends SaucedEntity<String, GuildConfig> {
     @Column(name = "lang", nullable = false)
     private String lang = "en_US";
 
+    @Column(name = "volume", nullable = false)
+    private int volume = 100;
+
     //for jpa / db wrapper
     GuildConfig() {
     }
@@ -115,4 +118,13 @@ public class GuildConfig extends SaucedEntity<String, GuildConfig> {
         return this;
     }
 
+    public int getVolume() {
+        return volume;
+    }
+
+    @Nonnull
+    public GuildConfig setVolume(int volume) {
+        this.volume = volume;
+        return this;
+    }
 }

@@ -27,6 +27,7 @@ package fredboat.audio.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.db.EntityIO;
+import fredboat.db.entity.main.GuildConfig;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.util.ratelimit.Ratelimiter;
 import net.dv8tion.jda.core.entities.Guild;
@@ -69,9 +70,10 @@ public class PlayerRegistry {
     public GuildPlayer getOrCreate(@Nonnull Guild guild) {
         return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
+                    GuildConfig guildConfig = entityIO.fetchGuildConfig(guild);
                     GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, jdaEntityProvider,
                             audioConnectionFacade, audioPlayerManager, entityIO, ratelimiter);
-                    p.setVolume(DEFAULT_VOLUME);
+                    p.setVolume(guildConfig.getVolume() / 100f);
                     return p;
                 });
     }
