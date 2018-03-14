@@ -76,11 +76,6 @@ public class AppConfigProperties implements AppConfig {
     }
 
     @Override
-    public boolean isRestServerEnabled() {
-        return restServerEnabled;
-    }
-
-    @Override
     public List<Long> getAdminIds() {
         return botAdmins;
     }

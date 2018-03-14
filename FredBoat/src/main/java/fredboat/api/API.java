@@ -27,92 +27,81 @@ package fredboat.api;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
-import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.MetricsServletAdapter;
 import fredboat.jda.ShardProvider;
 import fredboat.main.Launcher;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
+@RestController
 public class API {
 
-    public static final int DEFAULT_PORT = 1356;
-
     private static final Logger log = LoggerFactory.getLogger(API.class);
+    private final ShardProvider shardProvider;
+    private final PlayerRegistry playerRegistry;
+    private final BotMetrics botMetrics;
+    private final MetricsServletAdapter metricsServlet;
 
-    private API() {}
-
-    public static void start(PlayerRegistry playerRegistry, BotMetrics botMetrics, ShardProvider shardProvider,
-                             int apiPort) {
-        if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
-            log.warn("Rest server is not enabled. Skipping Spark ignition!");
-            return;
-        }
-
-        log.info("Igniting Spark API on port: " + apiPort);
-        Spark.port(apiPort);
-
-        Spark.before((request, response) -> {
-            log.info(request.requestMethod() + " " + request.pathInfo());
-            response.header("Access-Control-Allow-Origin", "*");
-            response.type("application/json");
-        });
-
-        Spark.get("/stats", (req, res) -> {
-            Metrics.apiServed.labels("/stats").inc();
-            res.type("application/json");
-
-            JSONObject root = new JSONObject();
-            JSONArray a = new JSONArray();
-
-            shardProvider.streamShards().forEach(shard -> {
-                JSONObject fbStats = new JSONObject();
-                fbStats.put("id", shard.getShardInfo().getShardId())
-                        .put("guilds", shard.getGuildCache().size())
-                        .put("users", shard.getUserCache().size())
-                        .put("status", shard.getStatus());
-
-                a.put(fbStats);
-            });
-
-            JSONObject g = new JSONObject();
-            g.put("playingPlayers", playerRegistry.getPlayingPlayers().size())
-                    .put("totalPlayers", playerRegistry.getRegistry().size())
-                    .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
-                    .put("guilds", botMetrics.getTotalGuildsCount())
-                    .put("users", botMetrics.getTotalUniqueUsersCount());
-
-            root.put("shards", a);
-            root.put("global", g);
-
-            return root;
-        });
-
-        /* Exception handling */
-        Spark.exception(Exception.class, (e, request, response) -> {
-            log.error(request.requestMethod() + " " + request.pathInfo(), e);
-
-            response.body(ExceptionUtils.getStackTrace(e));
-            response.type("text/plain");
-            response.status(500);
-        });
+    public API(ShardProvider shardProvider, PlayerRegistry playerRegistry, BotMetrics botMetrics, MetricsServletAdapter metricsServlet) {
+        this.shardProvider = shardProvider;
+        this.playerRegistry = playerRegistry;
+        this.botMetrics = botMetrics;
+        this.metricsServlet = metricsServlet;
     }
 
-    public static void turnOnMetrics(MetricsServletAdapter metricsServlet) {
-        if (!Launcher.getBotController().getAppConfig().isRestServerEnabled()) {
-            log.warn("Rest server is not enabled. Metrics will not be scrapable!");
-            return;
-        }
 
-        Spark.get("/metrics", (req, resp) -> {
-            Metrics.apiServed.labels("/metrics").inc();
-            return metricsServlet.servletGet(req.raw(), resp.raw());
-        });
+    @ExceptionHandler
+    public ResponseEntity<String> onException(Exception exception, HttpServletRequest request) {
+        log.error(request.getMethod() + " " + request.getPathInfo(), exception);
+        return new ResponseEntity<>("Sorry! An error happened.\n" + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+    @GetMapping(path = "/stats")
+    public Object getStats(HttpServletResponse response) {
+        response.setContentType("application/json");
+
+        JSONObject root = new JSONObject();
+        JSONArray a = new JSONArray();
+
+        shardProvider.streamShards().forEach(shard -> {
+            JSONObject fbStats = new JSONObject();
+            fbStats.put("id", shard.getShardInfo().getShardId())
+                    .put("guilds", shard.getGuildCache().size())
+                    .put("users", shard.getUserCache().size())
+                    .put("status", shard.getStatus());
+
+            a.put(fbStats);
+        });
+
+        JSONObject g = new JSONObject();
+        g.put("playingPlayers", playerRegistry.getPlayingPlayers().size())
+                .put("totalPlayers", playerRegistry.getRegistry().size())
+                .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
+                .put("guilds", botMetrics.getTotalGuildsCount())
+                .put("users", botMetrics.getTotalUniqueUsersCount());
+
+        root.put("shards", a);
+        root.put("global", g);
+
+        return root.toString();
+    }
+
+    @GetMapping(path = "/metrics")
+    public void getMetrics(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        metricsServlet.servletGet(request, response);
+    }
 }

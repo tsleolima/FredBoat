@@ -54,8 +54,6 @@ public interface AppConfig {
         return DEFAULT_PREFIX;
     }
 
-    boolean isRestServerEnabled();
-
     List<Long> getAdminIds();
 
     boolean useAutoBlacklist();

@@ -5,7 +5,6 @@ import fredboat.agent.CarbonitexAgent;
 import fredboat.agent.FredBoatAgent;
 import fredboat.agent.StatsAgent;
 import fredboat.agent.VoiceChannelCleanupAgent;
-import fredboat.api.API;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerLimiter;
 import fredboat.audio.player.PlayerRegistry;
@@ -34,7 +33,6 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -61,6 +59,7 @@ import java.util.concurrent.ExecutorService;
         FlywayAutoConfiguration.class
 })
 @ComponentScan(basePackages = {
+        "fredboat.api",
         "fredboat.audio.player",
         "fredboat.audio.queue",
         "fredboat.commandmeta",
@@ -92,7 +91,6 @@ public class Launcher implements ApplicationRunner {
     private final VideoSelectionCache videoSelectionCache;
     private final ShardProvider shardProvider;
     private final GuildProvider guildProvider;
-    private final int apiPort;
     private final SentryConfiguration sentryConfiguration;
     private final PlayerLimiter playerLimiter;
     private final YoutubeAPI youtubeAPI;
@@ -126,7 +124,6 @@ public class Launcher implements ApplicationRunner {
         }
 
         System.setProperty("spring.config.name", "fredboat");
-        System.setProperty("spring.main.web-application-type", "none"); //todo enable again after spark API is migrated
         SpringApplication.run(Launcher.class, args);
     }
 
@@ -139,8 +136,7 @@ public class Launcher implements ApplicationRunner {
                     StatsAgent statsAgent, BotMetrics botMetrics, Weather weather,
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
                     VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider,
-                    @Value("${server.port:" + API.DEFAULT_PORT + "}") int apiPort, SentryConfiguration sentryConfiguration,
-                    PlayerLimiter playerLimiter, YoutubeAPI youtubeAPI) {
+                    SentryConfiguration sentryConfiguration, PlayerLimiter playerLimiter, YoutubeAPI youtubeAPI) {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
@@ -155,7 +151,6 @@ public class Launcher implements ApplicationRunner {
         this.videoSelectionCache = videoSelectionCache;
         this.shardProvider = shardProvider;
         this.guildProvider = guildProvider;
-        this.apiPort = apiPort;
         this.sentryConfiguration = sentryConfiguration;
         this.playerLimiter = playerLimiter;
         this.youtubeAPI = youtubeAPI;
@@ -165,12 +160,6 @@ public class Launcher implements ApplicationRunner {
     public void run(ApplicationArguments args) throws InterruptedException {
 
         I18n.start();
-
-        try {
-            API.start(playerRegistry, botMetrics, shardProvider, apiPort);
-        } catch (Exception e) {
-            log.info("Failed to ignite Spark, FredBoat API unavailable", e);
-        }
 
         //Commands
         CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache, sentryConfiguration,
@@ -279,7 +268,6 @@ public class Launcher implements ApplicationRunner {
         //force some metrics to be populated, then turn on metrics to be served
         botMetrics.start(shardProvider, configProvider.getCredentials());
         FredBoatAgent.start(statsAgent);
-        API.turnOnMetrics(metricsServlet);
     }
 
     private static String getVersionInfo() {

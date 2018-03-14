@@ -88,11 +88,6 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, E
     }
 
     @Override
-    public boolean isRestServerEnabled() {
-        return false;
-    }
-
-    @Override
     public List<Long> getAdminIds() {
         return Collections.emptyList();
     }
