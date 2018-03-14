@@ -24,7 +24,6 @@
 
 package fredboat.config.property;
 
-import fredboat.audio.player.PlayerLimitManager;
 import fredboat.shared.constant.DistributionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,6 +140,5 @@ public class AppConfigProperties implements AppConfig {
 
     public void setPlayerLimit(int playerLimit) {
         this.playerLimit = playerLimit;
-        PlayerLimitManager.setLimit(playerLimit); //todo make the playlimitmanager a component
     }
 }

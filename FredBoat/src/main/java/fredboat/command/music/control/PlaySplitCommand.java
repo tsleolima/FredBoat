@@ -26,7 +26,7 @@
 package fredboat.command.music.control;
 
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerLimitManager;
+import fredboat.audio.player.PlayerLimiter;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.queue.IdentifierContext;
 import fredboat.command.info.HelpCommand;
@@ -42,8 +42,11 @@ import javax.annotation.Nonnull;
 
 public class PlaySplitCommand extends Command implements IMusicCommand, ICommandRestricted {
 
-    public PlaySplitCommand(String name, String... aliases) {
+    private final PlayerLimiter playerLimiter;
+
+    public PlaySplitCommand(PlayerLimiter playerLimiter, String name, String... aliases) {
         super(name, aliases);
+        this.playerLimiter = playerLimiter;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class PlaySplitCommand extends Command implements IMusicCommand, ICommand
         }
 
         PlayerRegistry playerRegistry = Launcher.getBotController().getPlayerRegistry();
-        if (!PlayerLimitManager.checkLimitResponsive(context, playerRegistry)) return;
+        if (!playerLimiter.checkLimitResponsive(context, playerRegistry)) return;
 
         IdentifierContext ic = new IdentifierContext(Launcher.getBotController().getJdaEntityProvider(),
                 context.args[0], context.channel, context.invoker);

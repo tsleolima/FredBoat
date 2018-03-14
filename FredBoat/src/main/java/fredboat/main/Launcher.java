@@ -7,6 +7,7 @@ import fredboat.agent.StatsAgent;
 import fredboat.agent.VoiceChannelCleanupAgent;
 import fredboat.api.API;
 import fredboat.audio.player.AudioConnectionFacade;
+import fredboat.audio.player.PlayerLimiter;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.audio.player.VideoSelectionCache;
 import fredboat.commandmeta.CommandInitializer;
@@ -92,6 +93,7 @@ public class Launcher implements ApplicationRunner {
     private final GuildProvider guildProvider;
     private final int apiPort;
     private final SentryConfiguration sentryConfiguration;
+    private final PlayerLimiter playerLimiter;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
@@ -135,7 +137,8 @@ public class Launcher implements ApplicationRunner {
                     StatsAgent statsAgent, BotMetrics botMetrics, Weather weather,
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
                     VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider,
-                    @Value("${server.port:" + API.DEFAULT_PORT + "}") int apiPort, SentryConfiguration sentryConfiguration) {
+                    @Value("${server.port:" + API.DEFAULT_PORT + "}") int apiPort, SentryConfiguration sentryConfiguration,
+                    PlayerLimiter playerLimiter) {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
@@ -152,6 +155,7 @@ public class Launcher implements ApplicationRunner {
         this.guildProvider = guildProvider;
         this.apiPort = apiPort;
         this.sentryConfiguration = sentryConfiguration;
+        this.playerLimiter = playerLimiter;
     }
 
     @Override
@@ -166,7 +170,8 @@ public class Launcher implements ApplicationRunner {
         }
 
         //Commands
-        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache, sentryConfiguration);
+        CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache, sentryConfiguration,
+                playerLimiter);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {

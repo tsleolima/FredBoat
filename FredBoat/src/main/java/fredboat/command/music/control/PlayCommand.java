@@ -28,7 +28,7 @@ package fredboat.command.music.control;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
-import fredboat.audio.player.PlayerLimitManager;
+import fredboat.audio.player.PlayerLimiter;
 import fredboat.audio.player.VideoSelectionCache;
 import fredboat.audio.player.VideoSelectionCache.VideoSelection;
 import fredboat.commandmeta.abs.Command;
@@ -55,15 +55,17 @@ import java.util.List;
 public class PlayCommand extends Command implements IMusicCommand, ICommandRestricted {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlayCommand.class);
+    private final PlayerLimiter playerLimiter;
     private final TrackSearcher trackSearcher;
     private final VideoSelectionCache videoSelectionCache;
     private final List<SearchProvider> searchProviders;
     private static final JoinCommand JOIN_COMMAND = new JoinCommand("");
     private static final String FILE_PREFIX = "file://";
 
-    public PlayCommand(TrackSearcher trackSearcher, VideoSelectionCache videoSelectionCache,
+    public PlayCommand(PlayerLimiter playerLimiter, TrackSearcher trackSearcher, VideoSelectionCache videoSelectionCache,
                        List<SearchProvider> searchProviders, String name, String... aliases) {
         super(name, aliases);
+        this.playerLimiter = playerLimiter;
         this.trackSearcher = trackSearcher;
         this.videoSelectionCache = videoSelectionCache;
         this.searchProviders = searchProviders;
@@ -76,7 +78,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             return;
         }
 
-        if (!PlayerLimitManager.checkLimitResponsive(context, Launcher.getBotController().getPlayerRegistry())) return;
+        if (!playerLimiter.checkLimitResponsive(context, Launcher.getBotController().getPlayerRegistry())) return;
 
         if (!context.msg.getAttachments().isEmpty()) {
             GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
