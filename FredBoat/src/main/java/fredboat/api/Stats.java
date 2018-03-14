@@ -27,52 +27,39 @@ package fredboat.api;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
-import fredboat.feature.metrics.MetricsServletAdapter;
 import fredboat.jda.ShardProvider;
 import fredboat.main.Launcher;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import reactor.core.publisher.Mono;
 
 @RestController
-public class API {
+@RequestMapping("/stats")
+public class Stats {
 
-    private static final Logger log = LoggerFactory.getLogger(API.class);
+    private static final Logger log = LoggerFactory.getLogger(Stats.class);
     private final ShardProvider shardProvider;
     private final PlayerRegistry playerRegistry;
     private final BotMetrics botMetrics;
-    private final MetricsServletAdapter metricsServlet;
 
-    public API(ShardProvider shardProvider, PlayerRegistry playerRegistry, BotMetrics botMetrics, MetricsServletAdapter metricsServlet) {
+    public Stats(ShardProvider shardProvider, PlayerRegistry playerRegistry, BotMetrics botMetrics) {
         this.shardProvider = shardProvider;
         this.playerRegistry = playerRegistry;
         this.botMetrics = botMetrics;
-        this.metricsServlet = metricsServlet;
     }
 
 
-    @ExceptionHandler
-    public ResponseEntity<String> onException(Exception exception, HttpServletRequest request) {
-        log.error(request.getMethod() + " " + request.getPathInfo(), exception);
-        return new ResponseEntity<>("Sorry! An error happened.\n" + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    @GetMapping(produces = "application/json")
+    public Mono<String> getStats() {
+        return Mono.fromCallable(this::buildStats);
     }
 
-
-    @GetMapping(path = "/stats")
-    public Object getStats(HttpServletResponse response) {
-        response.setContentType("application/json");
-
+    private String buildStats() {
         JSONObject root = new JSONObject();
         JSONArray a = new JSONArray();
 
@@ -97,11 +84,5 @@ public class API {
         root.put("global", g);
 
         return root.toString();
-    }
-
-    @GetMapping(path = "/metrics")
-    public void getMetrics(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        metricsServlet.servletGet(request, response);
     }
 }

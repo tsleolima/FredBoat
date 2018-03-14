@@ -48,7 +48,7 @@ dependencies {
         compile(group: 'com.github.Frederikam', name: 'Lavalink', version: lavalinkVersion)
     }
 
-    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion) {
+    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: springBootVersion) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat' //we're using undertow instead
     }
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: springBootVersion

@@ -15,7 +15,6 @@ import fredboat.config.SentryConfiguration;
 import fredboat.config.property.ConfigPropertiesProvider;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.BotMetrics;
-import fredboat.feature.metrics.MetricsServletAdapter;
 import fredboat.jda.GuildProvider;
 import fredboat.jda.ShardProvider;
 import fredboat.util.AppInfo;
@@ -80,7 +79,6 @@ public class Launcher implements ApplicationRunner {
     private static BotController BC; //temporary hack access to the bot context
     private final ConfigPropertiesProvider configProvider;
     private final ExecutorService executor;
-    private final MetricsServletAdapter metricsServlet;
     private final CacheMetricsCollector cacheMetrics;
     private final PlayerRegistry playerRegistry;
     private final StatsAgent statsAgent;
@@ -132,7 +130,7 @@ public class Launcher implements ApplicationRunner {
     }
 
     public Launcher(BotController botController, ConfigPropertiesProvider configProvider, ExecutorService executor,
-                    MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
+                    CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
                     StatsAgent statsAgent, BotMetrics botMetrics, Weather weather,
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
                     VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider,
@@ -140,7 +138,6 @@ public class Launcher implements ApplicationRunner {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
-        this.metricsServlet = metricsServlet;
         this.cacheMetrics = cacheMetrics;
         this.playerRegistry = playerRegistry;
         this.statsAgent = statsAgent;

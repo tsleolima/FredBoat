@@ -25,43 +25,76 @@
 package fredboat.config;
 
 import fredboat.feature.metrics.Metrics;
+import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.filter.AbstractRequestLoggingFilter;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created by napster on 17.02.18.
+ *
+ * Part of the code adapted from https://stackoverflow.com/a/45877770, many thanks!
  */
 @Configuration
 public class RequestLoggerConfiguration {
 
     @Bean
-    public AbstractRequestLoggingFilter logFilter() {
-        RequestLogger filter = new RequestLogger();
-        filter.setIncludeQueryString(true);
-        filter.setIncludePayload(true);
-        filter.setMaxPayloadLength(10000);
-        filter.setIncludeHeaders(true);
-        filter.setAfterMessagePrefix("REQUEST DATA : ");
-        return filter;
+    public RequestLogger logFilter() {
+        return new RequestLogger();
     }
 
-    private static class RequestLogger extends AbstractRequestLoggingFilter {
+    private static class RequestLogger implements WebFilter {
         private static final Logger log = LoggerFactory.getLogger(RequestLogger.class);
 
         @Override
-        protected void beforeRequest(HttpServletRequest request, String message) {
-            log.debug(message);
+        public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+            countAndLogRequest(exchange);
+            Mono<Void> filter = chain.filter(exchange);
+            exchange.getResponse().beforeCommit(() -> {
+                logResponse(exchange);
+                return Mono.empty();
+            });
+            return filter;
         }
 
-        @Override
-        protected void afterRequest(HttpServletRequest request, String message) {
-            Metrics.apiServed.labels(request.getServletPath()).inc();
-            log.debug(message);
+        private void countAndLogRequest(ServerWebExchange exchange) {
+            ServerHttpRequest request = exchange.getRequest();
+            HttpMethod method = request.getMethod();
+            String path = request.getURI().getPath();
+            List<MediaType> acceptableMediaTypes = request.getHeaders().getAccept();
+            MediaType contentType = request.getHeaders().getContentType();
+
+            Metrics.apiServed.labels(path).inc();
+            log.debug(">>> {} {} {}: {} {}: {}", method, path, HttpHeaders.ACCEPT, acceptableMediaTypes, HttpHeaders.CONTENT_TYPE, contentType);
+        }
+
+        private void logResponse(ServerWebExchange exchange) {
+            ServerHttpRequest request = exchange.getRequest();
+            ServerHttpResponse response = exchange.getResponse();
+            HttpMethod method = request.getMethod();
+            String path = request.getURI().getPath();
+            HttpStatus statusCode = getStatus(response);
+            MediaType contentType = response.getHeaders().getContentType();
+
+            log.debug("<<< {} {} HTTP{} {} {}: {}", method, path, statusCode.value(), statusCode.getReasonPhrase(),
+                    HttpHeaders.CONTENT_TYPE, contentType);
+        }
+
+        private HttpStatus getStatus(ServerHttpResponse response) {
+            HttpStatus statusCode = response.getStatusCode();
+            return statusCode != null ? statusCode : HttpStatus.CONTINUE;
         }
     }
 }

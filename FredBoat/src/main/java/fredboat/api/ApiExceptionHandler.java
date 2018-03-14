@@ -1,8 +1,7 @@
 /*
- *
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +22,29 @@
  * SOFTWARE.
  */
 
-package fredboat.feature.metrics;
+package fredboat.api;
 
-import io.prometheus.client.exporter.MetricsServlet;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Created by napster on 18.10.17.
- * <p>
- * used to expose the prometheus metrics with a spark api
+ * Created by napster on 14.03.18.
  */
-@Component
-public class MetricsServletAdapter extends MetricsServlet {
-    private static final long serialVersionUID = -442447083882925873L;
+@ControllerAdvice
+public class ApiExceptionHandler {
 
-    //wrapping http methods
-    public HttpServletResponse servletGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
-        return resp;
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+    @ExceptionHandler
+    public ResponseEntity<String> onException(Exception exception, ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        log.error(request.getMethod() + " " + request.getURI().getPath(), exception);
+        return new ResponseEntity<>("Sorry! An error happened.\n" + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
