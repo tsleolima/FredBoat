@@ -251,7 +251,7 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //quick n dirty bot admin / owner check
-        if (appConfig.getAdminIds().contains(event.getAuthor().getId())
+        if (appConfig.getAdminIds().contains(event.getAuthor().getIdLong())
                 || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
 
             //hack in / hardcode some commands; this is not meant to look clean
