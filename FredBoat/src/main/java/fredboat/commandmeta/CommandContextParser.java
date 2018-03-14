@@ -27,8 +27,8 @@ package fredboat.commandmeta;
 import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
+import fredboat.config.property.AppConfig;
 import fredboat.feature.metrics.Metrics;
-import fredboat.main.Launcher;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +50,11 @@ public class CommandContextParser {
     // https://regex101.com/r/ceFMeF/6
     //group 1 is the mention, group 2 is the id of the mention, group 3 is the rest of the input including new lines
     public static final Pattern MENTION_PREFIX = Pattern.compile("^(<@!?([0-9]+)>)(.*)$", Pattern.DOTALL);
+    private final AppConfig appConfig;
+
+    public CommandContextParser(AppConfig appConfig) {
+        this.appConfig = appConfig;
+    }
 
     /**
      * @param event the event to be parsed
@@ -70,7 +75,7 @@ public class CommandContextParser {
         // or starts with a custom/default prefix
         else {
             String prefix = PrefixCommand.giefPrefix(event.getGuild());
-            String defaultPrefix = Launcher.getBotController().getAppConfig().getPrefix();
+            String defaultPrefix = appConfig.getPrefix();
             if (raw.startsWith(prefix)) {
                 input = raw.substring(prefix.length());
                 if (prefix.equals(defaultPrefix)) {

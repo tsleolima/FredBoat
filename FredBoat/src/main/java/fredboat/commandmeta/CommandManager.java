@@ -31,11 +31,11 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
+import fredboat.config.property.Credentials;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.PatronageChecker;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
-import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.shared.constant.BotConstants;
@@ -59,10 +59,13 @@ public class CommandManager {
     public static final AtomicInteger totalCommandsExecuted = new AtomicInteger(0);
     private final PatronageChecker patronageChecker;
     private final MusicTextChannelProvider musicTextChannelProvider;
+    private final Credentials credentials;
 
-    public CommandManager(PatronageChecker patronageChecker, MusicTextChannelProvider musicTextChannelProvider) {
+    public CommandManager(PatronageChecker patronageChecker, MusicTextChannelProvider musicTextChannelProvider,
+                          Credentials credentials) {
         this.patronageChecker = patronageChecker;
         this.musicTextChannelProvider = musicTextChannelProvider;
+        this.credentials = credentials;
     }
 
     public void prefixCalled(CommandContext context) {
@@ -88,7 +91,7 @@ public class CommandManager {
         }
 
         //Hardcode music commands in FredBoatHangout. Blacklist any channel that isn't #spam_and_music or #staff, but whitelist Admins
-        if (guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID && DiscordUtil.isOfficialBot(Launcher.getBotController().getCredentials())) {
+        if (guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID && DiscordUtil.isOfficialBot(credentials)) {
             if (!channel.getId().equals("174821093633294338") // #spam_and_music
                     && !channel.getId().equals("217526705298866177") // #staff
                     && !PermsUtil.checkPerms(PermissionLevel.ADMIN, invoker)) {

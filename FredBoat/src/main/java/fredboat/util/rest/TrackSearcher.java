@@ -32,12 +32,13 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
+import fredboat.config.property.AppConfig;
 import fredboat.db.DatabaseNotReadyException;
+import fredboat.db.api.SearchResultService;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.definitions.SearchProvider;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
-import fredboat.main.Launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -68,11 +70,18 @@ public class TrackSearcher {
 
     private final AudioPlayerManager audioPlayerManager;
     private final YoutubeAPI youtubeAPI;
+    private final SearchResultService searchResultService;
+    private final AppConfig appConfig;
+    private final ExecutorService executor;
 
     public TrackSearcher(@Qualifier("searchAudioPlayerManager") AudioPlayerManager audioPlayerManager,
-                         YoutubeAPI youtubeAPI) {
+                         YoutubeAPI youtubeAPI, SearchResultService searchResultService, AppConfig appConfig,
+                         ExecutorService executor) {
         this.audioPlayerManager = audioPlayerManager;
         this.youtubeAPI = youtubeAPI;
+        this.searchResultService = searchResultService;
+        this.appConfig = appConfig;
+        this.executor = executor;
     }
 
     public AudioPlaylist searchForTracks(String query, List<SearchProvider> providers) throws SearchingException {
@@ -120,7 +129,7 @@ public class TrackSearcher {
                     if (!lavaplayerResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from lavaplayer", provider, query);
                         // got a search result? cache and return it
-                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getSearchResultService()
+                        executor.execute(() -> searchResultService
                                 .merge(new SearchResult(audioPlayerManager, provider, query, lavaplayerResult)));
                         Metrics.searchHits.labels("lavaplayer-" + provider.name().toLowerCase()).inc();
                         return lavaplayerResult;
@@ -137,15 +146,14 @@ public class TrackSearcher {
             }
 
             //3. optional: youtube api
-            if (provider == SearchProvider.YOUTUBE &&
-                    (Launcher.getBotController().getAppConfig().isPatronDistribution()
-                            || Launcher.getBotController().getAppConfig().isDevDistribution())) {
+            if (provider == SearchProvider.YOUTUBE
+                    && (appConfig.isPatronDistribution() || appConfig.isDevDistribution())) {
                 try {
                     AudioPlaylist youtubeApiResult = youtubeAPI.search(query, MAX_RESULTS, audioPlayerManager.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it
-                        Launcher.getBotController().getExecutor().execute(() -> Launcher.getBotController().getSearchResultService()
+                        executor.execute(() -> searchResultService
                                 .merge(new SearchResult(audioPlayerManager, provider, query, youtubeApiResult)));
                         Metrics.searchHits.labels("youtube-api").inc();
                         return youtubeApiResult;
@@ -174,7 +182,7 @@ public class TrackSearcher {
     private AudioPlaylist fromCache(SearchProvider provider, String searchTerm, long cacheMaxAge) {
         try {
             SearchResult.SearchResultId id = new SearchResult.SearchResultId(provider, searchTerm);
-            SearchResult searchResult = Launcher.getBotController().getSearchResultService().getSearchResult(id, cacheMaxAge);
+            SearchResult searchResult = searchResultService.getSearchResult(id, cacheMaxAge);
             return searchResult != null ? searchResult.getSearchResult(audioPlayerManager) : null;
         } catch (DatabaseNotReadyException ignored) {
             log.warn("Could not retrieve cached search result from database.");
