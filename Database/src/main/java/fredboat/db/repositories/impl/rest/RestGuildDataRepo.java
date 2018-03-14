@@ -23,29 +23,28 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
+package fredboat.db.repositories.impl.rest;
 
-import net.dv8tion.jda.core.entities.Guild;
+import com.google.gson.Gson;
+import fredboat.db.entity.main.GuildData;
+import fredboat.db.repositories.api.GuildDataRepo;
+import fredboat.util.rest.Http;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
 /**
- * Created by napster on 05.02.18.
- * <p>
- * As soon as the db backend is released, entities using this should be migrated to use long ids instead of strings
+ * Created by napster on 17.02.18.
  */
-@Deprecated
-public interface LegacyGuildBasedRepo<E> extends Repo<String, E> {
+public class RestGuildDataRepo extends CachedRestRepo<Long, GuildData> implements GuildDataRepo {
 
-    /**
-     * Type safety on top of {@link Repo#delete(Object)} for entities based on guilds.
-     */
-    default void delete(Guild guild) {
-        delete(guild.getId());
+    public static final String PATH = "guilddata/";
+
+    public RestGuildDataRepo(String apiBasePath, Http http, Gson gson, String auth) {
+        super(apiBasePath + VERSION_PATH + PATH, GuildData.class, http, gson, auth);
     }
 
-    /**
-     * Type safety on top of {@link Repo#fetch(Object)} for entities based on guilds.
-     */
-    default E fetch(Guild guild) {
-        return fetch(guild.getId());
+    @Override
+    public RestGuildDataRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+        super.registerCacheStats(cacheMetrics, name);
+        return this;
     }
 }

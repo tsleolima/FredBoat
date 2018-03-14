@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -22,48 +23,19 @@
  * SOFTWARE.
  */
 
-package fredboat.config.property;
+package fredboat.db.api;
 
-import org.springframework.stereotype.Component;
+import fredboat.db.entity.main.GuildPermissions;
+import net.dv8tion.jda.core.entities.Guild;
+
+import java.util.function.Function;
 
 /**
- * Created by napster on 23.02.18.
- * <p>
- * Proxy calls to our reloading property configs
+ * Created by napster on 07.02.18.
  */
-@Component
-public class FilePropertyConfigProvider implements PropertyConfigProvider {
+public interface GuildPermsService {
 
-    public FilePropertyConfigProvider() {
-    }
+    GuildPermissions fetchGuildPermissions(Guild guild);
 
-    @Override
-    public AppConfig getAppConfig() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public AudioSourcesConfig getAudioSourcesConfig() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public Credentials getCredentials() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public DatabaseConfig getDatabaseConfig() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public EventLoggerConfig getEventLoggerConfig() {
-        return FileConfig.get();
-    }
-
-    @Override
-    public LavalinkConfig getLavalinkConfig() {
-        return FileConfig.get();
-    }
+    GuildPermissions transformGuildPerms(Guild guild, Function<GuildPermissions, GuildPermissions> transformation);
 }

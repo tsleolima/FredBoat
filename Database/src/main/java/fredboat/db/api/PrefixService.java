@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -22,24 +23,21 @@
  * SOFTWARE.
  */
 
-package fredboat.config.property;
+package fredboat.db.api;
+
+import fredboat.db.entity.main.Prefix;
+import net.dv8tion.jda.core.entities.Guild;
+import space.npstr.sqlsauce.entities.GuildBotComposite;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
- * Created by napster on 23.02.18.
- * <p>
- * Provide access to our property based configs
+ * Created by napster on 07.02.18.
  */
-public interface PropertyConfigProvider {
+public interface PrefixService {
 
-    AppConfig getAppConfig();
+    Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation);
 
-    AudioSourcesConfig getAudioSourcesConfig();
-
-    Credentials getCredentials();
-
-    DatabaseConfig getDatabaseConfig();
-
-    EventLoggerConfig getEventLoggerConfig();
-
-    LavalinkConfig getLavalinkConfig();
+    Optional<String> getPrefix(GuildBotComposite id);
 }

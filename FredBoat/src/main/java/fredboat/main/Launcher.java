@@ -12,7 +12,7 @@ import fredboat.audio.player.VideoSelectionCache;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.config.SentryConfiguration;
-import fredboat.config.property.PropertyConfigProvider;
+import fredboat.config.property.ConfigPropertiesProvider;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.MetricsServletAdapter;
@@ -32,6 +32,7 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -45,7 +46,6 @@ import org.springframework.context.annotation.ComponentScan;
 import space.npstr.sqlsauce.DatabaseException;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -77,7 +77,7 @@ public class Launcher implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(Launcher.class);
     public static final long START_TIME = System.currentTimeMillis();
     private static BotController BC; //temporary hack access to the bot context
-    private final PropertyConfigProvider configProvider;
+    private final ConfigPropertiesProvider configProvider;
     private final ExecutorService executor;
     private final MetricsServletAdapter metricsServlet;
     private final CacheMetricsCollector cacheMetrics;
@@ -90,6 +90,7 @@ public class Launcher implements ApplicationRunner {
     private final VideoSelectionCache videoSelectionCache;
     private final ShardProvider shardProvider;
     private final GuildProvider guildProvider;
+    private final int apiPort;
     private final SentryConfiguration sentryConfiguration;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
@@ -105,21 +106,22 @@ public class Launcher implements ApplicationRunner {
         }
         log.info(getVersionInfo());
 
-        String javaVersionMinor = null;
+        int javaVersionMajor = -1;
         try {
-            javaVersionMinor = System.getProperty("java.version").split("\\.")[1];
+            javaVersionMajor = Runtime.version().major();
         } catch (Exception e) {
-            log.error("Exception while checking if java 8", e);
+            log.error("Exception while checking if java 9", e);
         }
-        if (!Objects.equals(javaVersionMinor, "8")) {
+        if (javaVersionMajor != 9) {
             log.warn("\n\t\t __      ___   ___ _  _ ___ _  _  ___ \n" +
                     "\t\t \\ \\    / /_\\ | _ \\ \\| |_ _| \\| |/ __|\n" +
                     "\t\t  \\ \\/\\/ / _ \\|   / .` || || .` | (_ |\n" +
                     "\t\t   \\_/\\_/_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\n" +
                     "\t\t                                      ");
-            log.warn("FredBoat only officially supports Java 8. You are running Java {}", System.getProperty("java.version"));
+            log.warn("FredBoat only officially supports Java 9. You are running Java {}", Runtime.version());
         }
 
+        System.setProperty("spring.config.name", "fredboat");
         System.setProperty("spring.main.web-application-type", "none"); //todo enable again after spark API is migrated
         SpringApplication.run(Launcher.class, args);
     }
@@ -128,12 +130,12 @@ public class Launcher implements ApplicationRunner {
         return BC;
     }
 
-    public Launcher(BotController botController, PropertyConfigProvider configProvider, ExecutorService executor,
+    public Launcher(BotController botController, ConfigPropertiesProvider configProvider, ExecutorService executor,
                     MetricsServletAdapter metricsServlet, CacheMetricsCollector cacheMetrics, PlayerRegistry playerRegistry,
                     StatsAgent statsAgent, BotMetrics botMetrics, Weather weather,
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
                     VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider,
-                    SentryConfiguration sentryConfiguration) {
+                    @Value("${server.port:" + API.DEFAULT_PORT + "}") int apiPort, SentryConfiguration sentryConfiguration) {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
@@ -148,6 +150,7 @@ public class Launcher implements ApplicationRunner {
         this.videoSelectionCache = videoSelectionCache;
         this.shardProvider = shardProvider;
         this.guildProvider = guildProvider;
+        this.apiPort = apiPort;
         this.sentryConfiguration = sentryConfiguration;
     }
 
@@ -157,7 +160,7 @@ public class Launcher implements ApplicationRunner {
         I18n.start();
 
         try {
-            API.start(playerRegistry, botMetrics, shardProvider);
+            API.start(playerRegistry, botMetrics, shardProvider, apiPort);
         } catch (Exception e) {
             log.info("Failed to ignite Spark, FredBoat API unavailable", e);
         }

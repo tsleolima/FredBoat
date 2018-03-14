@@ -30,7 +30,7 @@ import fredboat.command.music.control.SkipCommand;
 import fredboat.command.util.WeatherCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.config.property.AppConfig;
-import fredboat.db.api.BlacklistIO;
+import fredboat.db.api.BlacklistService;
 import fredboat.feature.metrics.Metrics;
 import fredboat.messaging.internal.Context;
 import fredboat.util.Tuple2;
@@ -59,19 +59,17 @@ public class Ratelimiter {
     @Nullable
     private Blacklist autoBlacklist = null;
 
-    public Ratelimiter(AppConfig appConfig, ExecutorService executor, BlacklistIO blacklistIO) {
+    public Ratelimiter(AppConfig appConfig, ExecutorService executor, BlacklistService blacklistService) {
         Set<Long> whitelist = ConcurrentHashMap.newKeySet();
 
         //only works for those admins who are added with their userId and not through a roleId
-        for (String admin : appConfig.getAdminIds()) {
-            whitelist.add(Long.valueOf(admin));
-        }
+        whitelist.addAll(appConfig.getAdminIds());
 
         //Create all the rate limiters we want
         ratelimits = new ArrayList<>();
 
         if (appConfig.useAutoBlacklist()) {
-            autoBlacklist = new Blacklist(blacklistIO, whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
+            autoBlacklist = new Blacklist(blacklistService, whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
         }
 
         //sort these by harsher limits coming first

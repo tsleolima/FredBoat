@@ -33,7 +33,7 @@ import java.util.function.Function;
 /**
  * Created by napster on 07.02.18.
  */
-public interface GuildConfigIO {
+public interface GuildConfigService {
 
     GuildConfig fetchGuildConfig(Guild guild);
 

@@ -23,29 +23,20 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
+package fredboat.db.api;
 
+import fredboat.db.entity.main.GuildData;
 import net.dv8tion.jda.core.entities.Guild;
 
+import java.util.function.Function;
+
 /**
- * Created by napster on 05.02.18.
- * <p>
- * As soon as the db backend is released, entities using this should be migrated to use long ids instead of strings
+ * Created by napster on 07.02.18.
  */
-@Deprecated
-public interface LegacyGuildBasedRepo<E> extends Repo<String, E> {
+public interface GuildDataService {
 
-    /**
-     * Type safety on top of {@link Repo#delete(Object)} for entities based on guilds.
-     */
-    default void delete(Guild guild) {
-        delete(guild.getId());
-    }
+    GuildData fetchGuildData(Guild guild);
 
-    /**
-     * Type safety on top of {@link Repo#fetch(Object)} for entities based on guilds.
-     */
-    default E fetch(Guild guild) {
-        return fetch(guild.getId());
-    }
+    GuildData transformGuildData(Guild guild, Function<GuildData, GuildData> transformation);
+
 }

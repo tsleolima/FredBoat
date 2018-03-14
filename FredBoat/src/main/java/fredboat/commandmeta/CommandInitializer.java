@@ -89,7 +89,6 @@ public class CommandInitializer {
         adminModule.registerCommand(new ReviveCommand("revive"));
         adminModule.registerCommand(new SentryDsnCommand(sentryConfiguration, "sentrydsn"));
         adminModule.registerCommand(new SetAvatarCommand("setavatar"));
-        adminModule.registerCommand(new TestCommand("test"));
         adminModule.registerCommand(new UnblacklistCommand("unblacklist", "unlimit"));
 
 
@@ -175,7 +174,7 @@ public class CommandInitializer {
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/93VahIh.png", "anime"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/qz6g1vj.gif", "explosion"));
         funModule.registerCommand(new RemoteFileCommand("http://i.imgur.com/84nbpQe.png", "internetspeed"));
-        
+
         /* Text Faces & Unicode 'Art' & ASCII 'Art' and Stuff */
         funModule.registerCommand(new TextCommand("¯\\_(ツ)_/¯", "shrug", "shr"));
         funModule.registerCommand(new TextCommand("ಠ_ಠ", "faceofdisapproval", "fod", "disapproving"));

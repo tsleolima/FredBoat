@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,19 +22,37 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
+package fredboat.config.property;
 
-import fredboat.db.entity.main.GuildPermissions;
-import net.dv8tion.jda.core.entities.Guild;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by napster on 07.02.18.
+ * Created by napster on 03.03.18.
  */
-public interface GuildPermsIO {
+@Component
+@ConfigurationProperties(prefix = "lavalink")
+public class LavalinkConfigProperties implements LavalinkConfig {
 
-    GuildPermissions fetchGuildPermissions(Guild guild);
+    private static final Logger log = LoggerFactory.getLogger(LavalinkConfigProperties.class);
 
-    GuildPermissions transformGuildPerms(Guild guild, Function<GuildPermissions, GuildPermissions> transformation);
+    private List<LavalinkNode> nodes = new ArrayList<>();
+
+
+    @Override
+    public List<LavalinkNode> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(List<LavalinkNode> nodes) {
+        this.nodes = nodes;
+        for (LavalinkNode node : nodes) {
+            log.info("Lavalink node added: {} {}", node.getName(), node.getUri());
+        }
+    }
 }

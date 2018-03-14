@@ -29,8 +29,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
 import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.config.PersistenceConfiguration;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.flywaydb.core.Flyway;
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import space.npstr.sqlsauce.DatabaseConnection;
 import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.DatabaseWrapper;
-import space.npstr.sqlsauce.ssh.SshTunnel;
 
 import javax.annotation.Nullable;
 import java.util.Properties;
@@ -62,11 +59,7 @@ public class DatabaseManager {
     private final boolean migrateAndValidate;
     private final String mainJdbc;
     @Nullable
-    private final SshTunnel.SshDetails mainTunnel;
-    @Nullable
     private final String cacheJdbc;
-    @Nullable
-    private final SshTunnel.SshDetails cacheTunnel;
     @Nullable
     private final DatabaseConnection.EntityManagerFactoryBuilder entityManagerFactoryBuilder;
 
@@ -92,9 +85,7 @@ public class DatabaseManager {
                            String appName,
                            boolean migrateAndValidate,
                            String mainJdbc,
-                           @Nullable SshTunnel.SshDetails mainTunnel,
                            @Nullable String cacheJdbc,
-                           @Nullable SshTunnel.SshDetails cacheTunnel,
                            @Nullable DatabaseConnection.EntityManagerFactoryBuilder entityManagerFactoryBuilder) {
         this.hibernateStats = hibernateStats;
         this.hikariStats = hikariStats;
@@ -102,10 +93,15 @@ public class DatabaseManager {
         this.appName = appName;
         this.migrateAndValidate = migrateAndValidate;
         this.mainJdbc = mainJdbc;
-        this.mainTunnel = mainTunnel;
         this.cacheJdbc = cacheJdbc;
-        this.cacheTunnel = cacheTunnel;
         this.entityManagerFactoryBuilder = entityManagerFactoryBuilder;
+
+        if (mainJdbc.isEmpty()) {
+            log.error("Main jdbc url is empty - database creation will fail");
+        }
+        if (cacheJdbc != null && cacheJdbc.isEmpty()) {
+            log.error("Cache jdbc url is empty - database creation will fail");
+        }
     }
 
     public DatabaseConnection getMainDbConn() {
@@ -138,7 +134,7 @@ public class DatabaseManager {
 
     @Nullable //may return null if no cache db is configured
     public DatabaseConnection getCacheDbConn() {
-        if (cacheJdbc == null) {
+        if (cacheJdbc == null || cacheJdbc.isEmpty()) {
             return null;
         }
         DatabaseConnection singleton = cacheDbConn;
@@ -192,15 +188,9 @@ public class DatabaseManager {
         DatabaseConnection databaseConnection = getBasicConnectionBuilder(MAIN_PERSISTENCE_UNIT_NAME, mainJdbc)
                 .setHibernateProps(buildHibernateProps("ehcache_main.xml"))
                 .addEntityPackage("fredboat.db.entity.main")
-                .setSshDetails(mainTunnel)
                 .setFlyway(flyway)
                 .build();
 
-        //adjusting the ehcache config
-        if (mainTunnel == null && cacheTunnel == null) {
-            //local database: turn off overflow to disk of the cache
-            turnOffLocalStorageForEhcacheManager("MAIN_CACHEMANAGER");
-        }
         log.debug(CacheManager.getCacheManager("MAIN_CACHEMANAGER").getActiveConfigurationText());
 
         return databaseConnection;
@@ -217,15 +207,9 @@ public class DatabaseManager {
         DatabaseConnection databaseConnection = getBasicConnectionBuilder(CACHE_PERSISTENCE_UNIT_NAME, jdbc)
                 .setHibernateProps(buildHibernateProps("ehcache_cache.xml"))
                 .addEntityPackage("fredboat.db.entity.cache")
-                .setSshDetails(cacheTunnel)
                 .setFlyway(flyway)
                 .build();
 
-        //adjusting the ehcache config
-        if (mainTunnel == null && cacheTunnel == null) {
-            //local database: turn off overflow to disk of the cache
-            turnOffLocalStorageForEhcacheManager("CACHE_CACHEMANAGER");
-        }
         log.debug(CacheManager.getCacheManager("CACHE_CACHEMANAGER").getActiveConfigurationText());
 
         return databaseConnection;
@@ -282,13 +266,5 @@ public class DatabaseManager {
         }
 
         return hibernateProps;
-    }
-
-    private void turnOffLocalStorageForEhcacheManager(String cacheManagerName) {
-        CacheManager cacheManager = CacheManager.getCacheManager(cacheManagerName);
-        for (String cacheName : cacheManager.getCacheNames()) {
-            CacheConfiguration cacheConfig = cacheManager.getCache(cacheName).getCacheConfiguration();
-            cacheConfig.getPersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE);
-        }
     }
 }

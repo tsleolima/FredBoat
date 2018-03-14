@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -22,46 +23,25 @@
  * SOFTWARE.
  */
 
-package fredboat.config.property;
+package fredboat.db.api;
 
-import space.npstr.sqlsauce.ssh.SshTunnel;
+import fredboat.db.entity.main.BlacklistEntry;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 /**
- * Created by napster on 19.02.18.
+ * Created by napster on 07.02.18.
  */
-public interface DatabaseConfig {
+public interface BlacklistService {
 
     /**
-     * JdbcUrl of the main database
+     * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
+     * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
      */
-    String getMainJdbcUrl();
+    List<BlacklistEntry> loadBlacklist();
 
-    /**
-     * @return may return null if no tunnel shall be created for the main database connection
-     */
-    @Nullable
-    SshTunnel.SshDetails getMainSshTunnelConfig();
+    BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry);
 
-    /**
-     * @return JdbcUrl of the cache database, may return null if no cache database was provided.
-     */
-    @Nullable
-    String getCacheJdbcUrl();
+    void deleteBlacklistEntry(long id);
 
-    /**
-     * @return may return null if no tunnel shall be created for the cache database connection
-     */
-    @Nullable
-    SshTunnel.SshDetails getCacheSshTunnelConfig();
-
-    /**
-     * @return database connection poolsize
-     */
-    default int getHikariPoolSize() {
-        //more database connections don't help with performance, so use a value based on available cores, but not too low
-        //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
-        return Math.max(4, Runtime.getRuntime().availableProcessors());
-    }
 }

@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,29 +22,24 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
-
-import net.dv8tion.jda.core.entities.Guild;
+package fredboat.config.property;
 
 /**
- * Created by napster on 05.02.18.
+ * Created by napster on 23.02.18.
  * <p>
- * As soon as the db backend is released, entities using this should be migrated to use long ids instead of strings
+ * Provide access to our property based configs
  */
-@Deprecated
-public interface LegacyGuildBasedRepo<E> extends Repo<String, E> {
+public interface ConfigPropertiesProvider {
 
-    /**
-     * Type safety on top of {@link Repo#delete(Object)} for entities based on guilds.
-     */
-    default void delete(Guild guild) {
-        delete(guild.getId());
-    }
+    AppConfig getAppConfig();
 
-    /**
-     * Type safety on top of {@link Repo#fetch(Object)} for entities based on guilds.
-     */
-    default E fetch(Guild guild) {
-        return fetch(guild.getId());
-    }
+    AudioSourcesConfig getAudioSourcesConfig();
+
+    BackendConfig getBackendConfig();
+
+    Credentials getCredentials();
+
+    EventLoggerConfig getEventLoggerConfig();
+
+    LavalinkConfig getLavalinkConfig();
 }

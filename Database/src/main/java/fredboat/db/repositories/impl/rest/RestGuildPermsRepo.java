@@ -23,31 +23,28 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
+package fredboat.db.repositories.impl.rest;
 
-import fredboat.db.entity.cache.SearchResult;
-
-import javax.annotation.Nullable;
+import com.google.gson.Gson;
+import fredboat.db.entity.main.GuildPermissions;
+import fredboat.db.repositories.api.GuildPermsRepo;
+import fredboat.util.rest.Http;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
 /**
- * Created by napster on 07.02.18.
+ * Created by napster on 17.02.18.
  */
-public interface SearchResultIO {
+public class RestGuildPermsRepo extends CachedRestRepo<String, GuildPermissions> implements GuildPermsRepo {
 
-    /**
-     * Merge a search result into the database.
-     *
-     * @return the merged SearchResult object, or null when there is no cache database
-     */
-    @Nullable
-    SearchResult merge(SearchResult searchResult);
+    public static final String PATH = "guildperms/";
 
-    /**
-     * @param maxAgeMillis the maximum age of the cached search result; provide a negative value for eternal cache
-     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
-     * cache database
-     */
-    @Nullable
-    SearchResult getSearchResult(SearchResult.SearchResultId id, long maxAgeMillis);
+    public RestGuildPermsRepo(String apiBasePath, Http http, Gson gson, String auth) {
+        super(apiBasePath + VERSION_PATH + PATH, GuildPermissions.class, http, gson, auth);
+    }
 
+    @Override
+    public RestGuildPermsRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+        super.registerCacheStats(cacheMetrics, name);
+        return this;
+    }
 }

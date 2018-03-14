@@ -24,6 +24,7 @@
 
 package fredboat.config.property;
 
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.shared.constant.DistributionEnum;
 
 import java.util.List;
@@ -55,11 +56,25 @@ public interface AppConfig {
 
     boolean isRestServerEnabled();
 
-    List<String> getAdminIds();
+    List<Long> getAdminIds();
 
     boolean useAutoBlacklist();
 
+    int getPlayerLimit();
+
+    /**
+     * @return empty string for default status
+     */
     String getGame();
+
+    default String getStatus() {
+        String game = getGame();
+        if (game.isEmpty()) {
+            return "Say " + getPrefix() + CommandInitializer.HELP_COMM_NAME;
+        } else {
+            return game;
+        }
+    }
 
     boolean getContinuePlayback();
 }

@@ -38,7 +38,7 @@
                   diskExpiryThreadIntervalSeconds="120"
                   memoryStoreEvictionPolicy="LRU"
                   statistics="true">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </defaultCache>
 
     <cache name="guild_config"
@@ -46,7 +46,7 @@
            eternal="false"
            timeToIdleSeconds="60"
            timeToLiveSeconds="120">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </cache>
 
     <cache name="guild_data"
@@ -54,7 +54,7 @@
            eternal="false"
            timeToIdleSeconds="60"
            timeToLiveSeconds="120">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </cache>
 
     <cache name="guild_modules"
@@ -62,7 +62,7 @@
            eternal="false"
            timeToIdleSeconds="60"
            timeToLiveSeconds="120">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </cache>
 
     <cache name="guild_permissions"
@@ -70,19 +70,19 @@
            eternal="false"
            timeToIdleSeconds="60"
            timeToLiveSeconds="120">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </cache>
 
     <cache name="org.hibernate.cache.internal.StandardQueryCache"
            maxEntriesLocalHeap="5"
            eternal="false"
            timeToLiveSeconds="120">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </cache>
 
     <cache name="org.hibernate.cache.spi.UpdateTimestampsCache"
            maxEntriesLocalHeap="5000"
            eternal="true">
-        <persistence strategy="localTempSwap"/>
+        <persistence strategy="none"/>
     </cache>
 </ehcache>

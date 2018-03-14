@@ -30,9 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
-import space.npstr.sqlsauce.ssh.SshTunnel;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +41,7 @@ import java.util.Map;
  * <p>
  * A default fake config to be used in tests.
  */
-public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, DatabaseConfig, EventLoggerConfig,
+public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, EventLoggerConfig,
         LavalinkConfig, TestingConfig {
 
     private static final Logger log = LoggerFactory.getLogger(MockConfig.class);
@@ -56,7 +54,7 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, D
     public MockConfig() {
         try {
             Yaml yaml = new Yaml();
-            String credsFileStr = FileUtils.readFileToString(new File("credentials.yaml"), "UTF-8");
+            String credsFileStr = FileUtils.readFileToString(new File("fredboat.yaml"), "UTF-8");
             Map<String, Object> creds = yaml.load(credsFileStr);
             creds.keySet().forEach((String key) -> creds.putIfAbsent(key, ""));
 
@@ -95,7 +93,7 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, D
     }
 
     @Override
-    public List<String> getAdminIds() {
+    public List<Long> getAdminIds() {
         return Collections.emptyList();
     }
 
@@ -112,6 +110,11 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, D
     @Override
     public boolean getContinuePlayback() {
         return false;
+    }
+
+    @Override
+    public int getPlayerLimit() {
+        return -1;
     }
 
     @Override
@@ -205,30 +208,7 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, D
     }
 
     @Override
-    public String getMainJdbcUrl() {
-        return "";
-    }
-
-    @Nullable
-    @Override
-    public SshTunnel.SshDetails getMainSshTunnelConfig() {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public String getCacheJdbcUrl() {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public SshTunnel.SshDetails getCacheSshTunnelConfig() {
-        return null;
-    }
-
-    @Override
-    public List<LavalinkHost> getLavalinkHosts() {
+    public List<LavalinkNode> getNodes() {
         return Collections.emptyList();
     }
 
@@ -250,11 +230,6 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, D
     @Override
     public int getGuildStatsInterval() {
         return 1;
-    }
-
-    @Override
-    public int getHikariPoolSize() {
-        return 4;
     }
 
     @Override

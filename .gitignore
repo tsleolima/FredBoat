@@ -141,3 +141,8 @@ gc-*.log
 .gradle/*
 */out/*
 VERSION.txt
+fredboat.yaml
+fredboat.yml
+application.yaml
+application.yml
+backend.yaml

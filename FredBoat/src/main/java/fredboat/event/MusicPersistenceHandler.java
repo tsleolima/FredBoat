@@ -39,6 +39,7 @@ import fredboat.config.property.Credentials;
 import fredboat.feature.I18n;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
+import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -189,7 +190,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     @Override
     public void onReady(ReadyEvent event) {
         //the current implementation of music persistence is not a good idea on big bots
-        if (credentials.getRecommendedShardCount() <= 10) {
+        if (credentials.getRecommendedShardCount() <= 10 && appConfig.getDistribution() != DistributionEnum.MUSIC) {
             try {
                 reloadPlaylists(event.getJDA());
             } catch (Exception e) {

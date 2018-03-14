@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,29 +22,22 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.api;
-
-import net.dv8tion.jda.core.entities.Guild;
+package fredboat.config.property;
 
 /**
- * Created by napster on 05.02.18.
- * <p>
- * As soon as the db backend is released, entities using this should be migrated to use long ids instead of strings
+ * Created by napster on 27.02.18.
  */
-@Deprecated
-public interface LegacyGuildBasedRepo<E> extends Repo<String, E> {
+public interface BackendConfig {
 
-    /**
-     * Type safety on top of {@link Repo#delete(Object)} for entities based on guilds.
-     */
-    default void delete(Guild guild) {
-        delete(guild.getId());
-    }
+    Quarterdeck getQuarterdeck();
 
-    /**
-     * Type safety on top of {@link Repo#fetch(Object)} for entities based on guilds.
-     */
-    default E fetch(Guild guild) {
-        return fetch(guild.getId());
+    interface Quarterdeck {
+        String getHost();
+
+        String getUser();
+
+        String getPass();
+
+        String getBasicAuth();
     }
 }

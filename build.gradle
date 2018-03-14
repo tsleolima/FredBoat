@@ -20,7 +20,6 @@ subprojects {
 
             //plugin versions
             gradleGitVersion        = '1.4.21'
-            jdactionVersion         = '1.0.2'
             shadowVersion           = '2.0.2'
             springBootVersion       = '2.0.0.RELEASE'
             propDepsVersion         = '0.0.9.RELEASE'
@@ -36,7 +35,6 @@ subprojects {
         }
         dependencies {
             classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${gradleGitVersion}"
-            classpath "gradle.plugin.com.sedmelluq:jdaction:${jdactionVersion}"
             classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
             classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
             classpath "io.spring.gradle:propdeps-plugin:${propDepsVersion}"
@@ -44,8 +42,8 @@ subprojects {
     }
     apply plugin: 'java'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 9
+    targetCompatibility = 9
 
     compileJava.dependsOn 'clean'
     compileJava.options.encoding = 'UTF-8'
@@ -82,6 +80,7 @@ subprojects {
         togglzVersion               = '2.5.0.Final'
         guavaVersion                = '24.0-jre'
         bucket4jVersion             = '3.1.1'
+        gsonVersion                 = '2.8.2'
 
         //logging / monitoring deps
         logbackVersion              = '1.2.3'
@@ -97,10 +96,11 @@ subprojects {
         napsterAnnotations          = '0.0.1'
 
         //database deps
-        sqlsauceVersion             = '0.0.11'
+        sqlsauceVersion             = '0.0.13'
         hibernateVersion            = '5.2.14.Final'
         flywayVersion               = '5.0.7'
         dsProxyVersion              = '1.4.7'
+        jaxbApiVersion              = '2.3.0'
 
         //testing deps
         junitVersion                = '5.1.0'
@@ -111,7 +111,7 @@ subprojects {
     }
 }
 
-version = '2.3'
+version = '3.0'
 ext {
     moduleName = 'FredBoat-Root'
 }
