@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fredboat.db.api.GuildConfigService;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.util.ratelimit.Ratelimiter;
+import fredboat.util.rest.YoutubeAPI;
 import net.dv8tion.jda.core.entities.Guild;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -51,18 +52,20 @@ public class PlayerRegistry {
     private final GuildConfigService guildConfigService;
     private final AudioPlayerManager audioPlayerManager;
     private final Ratelimiter ratelimiter;
+    private final YoutubeAPI youtubeAPI;
     private final MusicTextChannelProvider musicTextChannelProvider;
 
     public PlayerRegistry(MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                           AudioConnectionFacade audioConnectionFacade, GuildConfigService guildConfigService,
                           @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
-                          Ratelimiter ratelimiter) {
+                          Ratelimiter ratelimiter, YoutubeAPI youtubeAPI) {
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.guildConfigService = guildConfigService;
         this.audioPlayerManager = audioPlayerManager;
         this.ratelimiter = ratelimiter;
+        this.youtubeAPI = youtubeAPI;
     }
 
     @Nonnull
@@ -70,7 +73,7 @@ public class PlayerRegistry {
         return registry.computeIfAbsent(
                 guild.getIdLong(), guildId -> {
                     GuildPlayer p = new GuildPlayer(guild, musicTextChannelProvider, jdaEntityProvider,
-                            audioConnectionFacade, audioPlayerManager, guildConfigService, ratelimiter);
+                            audioConnectionFacade, audioPlayerManager, guildConfigService, ratelimiter, youtubeAPI);
                     p.setVolume(DEFAULT_VOLUME);
                     return p;
                 });

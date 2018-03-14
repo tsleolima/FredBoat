@@ -55,8 +55,11 @@ import java.io.IOException;
 
 public class NowplayingCommand extends Command implements IMusicCommand {
 
-    public NowplayingCommand(String name, String... aliases) {
+    private final YoutubeAPI youtubeAPI;
+
+    public NowplayingCommand(YoutubeAPI youtubeAPI, String name, String... aliases) {
         super(name, aliases);
+        this.youtubeAPI = youtubeAPI;
     }
 
     @Override
@@ -97,7 +100,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
     }
 
     private EmbedBuilder getYoutubeEmbed(AudioTrackContext atc, GuildPlayer player, YoutubeAudioTrack at) {
-        YoutubeVideo yv = YoutubeAPI.getVideoFromID(at.getIdentifier(), true);
+        YoutubeVideo yv = youtubeAPI.getVideoFromID(at.getIdentifier(), true);
         String timeField = "["
                 + TextUtils.formatTime(atc.getEffectivePosition(player))
                 + "/"

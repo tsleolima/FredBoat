@@ -40,6 +40,7 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.TextUtils;
 import fredboat.util.ratelimit.Ratelimiter;
+import fredboat.util.rest.YoutubeAPI;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -70,12 +71,14 @@ public class GuildPlayer extends AbstractPlayer {
     private final JdaEntityProvider jdaEntityProvider;
     private final AudioConnectionFacade audioConnectionFacade;
     private final GuildConfigService guildConfigService;
+    private final YoutubeAPI youtubeAPI;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GuildPlayer(Guild guild, MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                        AudioConnectionFacade audioConnectionFacade, AudioPlayerManager audioPlayerManager,
-                       GuildConfigService guildConfigService, Ratelimiter ratelimiter) {
+                       GuildConfigService guildConfigService, Ratelimiter ratelimiter, YoutubeAPI youtubeAPI) {
         super(guild.getId(), audioConnectionFacade);
+        this.youtubeAPI = youtubeAPI;
         log.debug("Constructing GuildPlayer({})", guild.getIdLong());
 
         this.jdaEntityProvider = jdaEntityProvider;
@@ -88,7 +91,8 @@ public class GuildPlayer extends AbstractPlayer {
         this.guildId = guild.getIdLong();
 
         audioTrackProvider = new SimpleTrackProvider();
-        audioLoader = new AudioLoader(jdaEntityProvider, ratelimiter, audioTrackProvider, audioPlayerManager, this);
+        audioLoader = new AudioLoader(jdaEntityProvider, ratelimiter, audioTrackProvider, audioPlayerManager,
+                this, youtubeAPI);
     }
 
     private void announceTrack(AudioTrackContext atc) {

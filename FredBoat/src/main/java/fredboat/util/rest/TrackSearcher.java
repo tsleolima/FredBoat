@@ -67,9 +67,12 @@ public class TrackSearcher {
     private static long youtubeCooldownUntil;
 
     private final AudioPlayerManager audioPlayerManager;
+    private final YoutubeAPI youtubeAPI;
 
-    public TrackSearcher(@Qualifier("searchAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
+    public TrackSearcher(@Qualifier("searchAudioPlayerManager") AudioPlayerManager audioPlayerManager,
+                         YoutubeAPI youtubeAPI) {
         this.audioPlayerManager = audioPlayerManager;
+        this.youtubeAPI = youtubeAPI;
     }
 
     public AudioPlaylist searchForTracks(String query, List<SearchProvider> providers) throws SearchingException {
@@ -138,7 +141,7 @@ public class TrackSearcher {
                     (Launcher.getBotController().getAppConfig().isPatronDistribution()
                             || Launcher.getBotController().getAppConfig().isDevDistribution())) {
                 try {
-                    AudioPlaylist youtubeApiResult = YoutubeAPI.search(query, MAX_RESULTS, audioPlayerManager.source(YoutubeAudioSourceManager.class));
+                    AudioPlaylist youtubeApiResult = youtubeAPI.search(query, MAX_RESULTS, audioPlayerManager.source(YoutubeAudioSourceManager.class));
                     if (!youtubeApiResult.getTracks().isEmpty()) {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it

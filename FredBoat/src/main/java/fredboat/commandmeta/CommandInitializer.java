@@ -50,6 +50,7 @@ import fredboat.shared.constant.BotConstants;
 import fredboat.util.AsciiArtConstant;
 import fredboat.util.rest.TrackSearcher;
 import fredboat.util.rest.Weather;
+import fredboat.util.rest.YoutubeAPI;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
 import javax.annotation.Nullable;
@@ -73,7 +74,7 @@ public class CommandInitializer {
 
     public static void initCommands(@Nullable CacheMetricsCollector cacheMetrics, Weather weather, TrackSearcher trackSearcher,
                                     VideoSelectionCache videoSelectionCache, SentryConfiguration sentryConfiguration,
-                                    PlayerLimiter playerLimiter) {
+                                    PlayerLimiter playerLimiter, YoutubeAPI youtubeAPI) {
 
         // Administrative Module - always on (as in, essential commands for BOT_ADMINs and BOT_OWNER)
         CommandRegistry adminModule = new CommandRegistry(Module.ADMIN);
@@ -241,7 +242,7 @@ public class CommandInitializer {
         musicModule.registerCommand(new GensokyoRadioCommand("gensokyo", "gr", "gensokyoradio"));
         musicModule.registerCommand(new HistoryCommand("history", "hist", "h"));
         musicModule.registerCommand(new ListCommand("list", "queue", "q", "l"));
-        musicModule.registerCommand(new NowplayingCommand("nowplaying", "np"));
+        musicModule.registerCommand(new NowplayingCommand(youtubeAPI, "nowplaying", "np"));
 
         /* Seeking */
         musicModule.registerCommand(new ForwardCommand("forward", "fwd"));

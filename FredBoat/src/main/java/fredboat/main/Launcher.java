@@ -25,6 +25,7 @@ import fredboat.util.TextUtils;
 import fredboat.util.rest.Http;
 import fredboat.util.rest.TrackSearcher;
 import fredboat.util.rest.Weather;
+import fredboat.util.rest.YoutubeAPI;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
@@ -94,6 +95,7 @@ public class Launcher implements ApplicationRunner {
     private final int apiPort;
     private final SentryConfiguration sentryConfiguration;
     private final PlayerLimiter playerLimiter;
+    private final YoutubeAPI youtubeAPI;
 
     public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
         //just post the info to the console
@@ -138,7 +140,7 @@ public class Launcher implements ApplicationRunner {
                     AudioConnectionFacade audioConnectionFacade, TrackSearcher trackSearcher,
                     VideoSelectionCache videoSelectionCache, ShardProvider shardProvider, GuildProvider guildProvider,
                     @Value("${server.port:" + API.DEFAULT_PORT + "}") int apiPort, SentryConfiguration sentryConfiguration,
-                    PlayerLimiter playerLimiter) {
+                    PlayerLimiter playerLimiter, YoutubeAPI youtubeAPI) {
         Launcher.BC = botController;
         this.configProvider = configProvider;
         this.executor = executor;
@@ -156,6 +158,7 @@ public class Launcher implements ApplicationRunner {
         this.apiPort = apiPort;
         this.sentryConfiguration = sentryConfiguration;
         this.playerLimiter = playerLimiter;
+        this.youtubeAPI = youtubeAPI;
     }
 
     @Override
@@ -171,7 +174,7 @@ public class Launcher implements ApplicationRunner {
 
         //Commands
         CommandInitializer.initCommands(cacheMetrics, weather, trackSearcher, videoSelectionCache, sentryConfiguration,
-                playerLimiter);
+                playerLimiter, youtubeAPI);
         log.info("Loaded commands, registry size is " + CommandRegistry.getTotalSize());
 
         if (!configProvider.getAppConfig().isPatronDistribution()) {

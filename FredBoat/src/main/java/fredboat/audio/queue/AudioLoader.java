@@ -67,17 +67,19 @@ public class AudioLoader implements AudioLoadResultHandler {
     private final ITrackProvider trackProvider;
     private final AudioPlayerManager playerManager;
     private final GuildPlayer gplayer;
+    private final YoutubeAPI youtubeAPI;
     private final ConcurrentLinkedQueue<IdentifierContext> identifierQueue = new ConcurrentLinkedQueue<>();
     private IdentifierContext context = null;
     private volatile boolean isLoading = false;
 
     public AudioLoader(JdaEntityProvider jdaEntityProvider, Ratelimiter ratelimiter, ITrackProvider trackProvider,
-                       AudioPlayerManager playerManager, GuildPlayer gplayer) {
+                       AudioPlayerManager playerManager, GuildPlayer gplayer, YoutubeAPI youtubeAPI) {
         this.jdaEntityProvider = jdaEntityProvider;
         this.ratelimiter = ratelimiter;
         this.trackProvider = trackProvider;
         this.playerManager = playerManager;
         this.gplayer = gplayer;
+        this.youtubeAPI = youtubeAPI;
     }
 
     public void loadAsync(IdentifierContext ic) {
@@ -252,7 +254,7 @@ public class AudioLoader implements AudioLoadResultHandler {
         }
         YoutubeAudioTrack yat = (YoutubeAudioTrack) at;
 
-        YoutubeVideo yv = YoutubeAPI.getVideoFromID(yat.getIdentifier(), true);
+        YoutubeVideo yv = youtubeAPI.getVideoFromID(yat.getIdentifier(), true);
         String desc = yv.getDescription();
         Matcher m = SPLIT_DESCRIPTION_PATTERN.matcher(desc);
 
