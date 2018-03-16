@@ -36,11 +36,6 @@ import org.togglz.core.annotation.Label;
  */
 public enum FeatureFlags implements Feature {
 
-    //ratelimiter + auto blacklisting features
-    @Label("Rate Limiter")
-    @EnabledByDefault
-    RATE_LIMITER,
-
     @Label("Permissions")
     @EnabledByDefault
     PERMISSIONS,

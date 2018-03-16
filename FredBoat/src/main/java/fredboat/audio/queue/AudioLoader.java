@@ -36,7 +36,6 @@ import fredboat.audio.source.PlaylistImportSourceManager;
 import fredboat.audio.source.PlaylistImporter;
 import fredboat.audio.source.SpotifyPlaylistSourceManager;
 import fredboat.feature.metrics.Metrics;
-import fredboat.feature.togglz.FeatureFlags;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.util.TextUtils;
@@ -127,10 +126,7 @@ public class AudioLoader implements AudioLoadResultHandler {
         if (playlistInfo == null) //not a slow loading playlist
             return true;
         else {
-            boolean result = true;
-            if (FeatureFlags.RATE_LIMITER.isActive()) {
-                result = ratelimiter.isAllowed(ic, playlistInfo, playlistInfo.getTotalTracks()).a;
-            }
+            boolean result = ratelimiter.isAllowed(ic, playlistInfo, playlistInfo.getTotalTracks()).a;
 
             if (result) {
                 //inform user we are possibly about to do nasty time consuming work

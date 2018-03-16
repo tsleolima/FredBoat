@@ -47,7 +47,6 @@ import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.metrics.ShardStatsCounterProvider;
-import fredboat.feature.togglz.FeatureFlags;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -131,11 +130,9 @@ public class EventListenerBoat extends AbstractEventListener {
     }
 
     private void doOnMessageReceived(MessageReceivedEvent event) {
-        if (FeatureFlags.RATE_LIMITER.isActive()) {
-            if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
-                Metrics.blacklistedMessagesReceived.inc();
-                return;
-            }
+        if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
+            Metrics.blacklistedMessagesReceived.inc();
+            return;
         }
 
         if (event.getPrivateChannel() != null) {
@@ -195,10 +192,7 @@ public class EventListenerBoat extends AbstractEventListener {
      * @param context Command context of the command to be invoked.
      */
     private void limitOrExecuteCommand(CommandContext context) {
-        Tuple2<Boolean, Class> ratelimiterResult = new Tuple2<>(true, null);
-        if (FeatureFlags.RATE_LIMITER.isActive()) {
-            ratelimiterResult = ratelimiter.isAllowed(context, context.command, 1);
-        }
+        Tuple2<Boolean, Class> ratelimiterResult = ratelimiter.isAllowed(context, context.command, 1);
 
         if (ratelimiterResult.a) {
             try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
@@ -229,12 +223,10 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
 
-        if (FeatureFlags.RATE_LIMITER.isActive()) {
-            if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
-                //dont need to inc() the metrics counter here, because private message events are a subset of
-                // MessageReceivedEvents where we inc() the blacklisted messages counter already
-                return;
-            }
+        if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
+            //dont need to inc() the metrics counter here, because private message events are a subset of
+            // MessageReceivedEvents where we inc() the blacklisted messages counter already
+            return;
         }
 
         //technically not possible anymore to receive private messages from bots but better safe than sorry

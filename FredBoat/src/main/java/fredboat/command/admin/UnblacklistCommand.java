@@ -29,7 +29,6 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.definitions.PermissionLevel;
-import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.entities.User;
@@ -49,11 +48,6 @@ public class UnblacklistCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (!FeatureFlags.RATE_LIMITER.isActive()) {
-            context.replyWithName("The rate limiter feature has not been turned on.");
-            return;
-        }
-
         if (context.getMentionedUsers().isEmpty()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
