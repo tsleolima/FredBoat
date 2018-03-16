@@ -28,7 +28,6 @@ package fredboat.perms;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.entity.main.GuildPermissions;
 import fredboat.definitions.PermissionLevel;
-import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
 import fredboat.util.DiscordUtil;
 import net.dv8tion.jda.core.Permission;
@@ -49,10 +48,6 @@ public class PermsUtil {
             return PermissionLevel.BOT_ADMIN;
         } else if (member.hasPermission(Permission.ADMINISTRATOR)) {
             return PermissionLevel.ADMIN;
-        }
-
-        if (!FeatureFlags.PERMISSIONS.isActive()) {
-            return member.hasPermission(Permission.MESSAGE_MANAGE) ? PermissionLevel.DJ : PermissionLevel.USER;
         }
 
         GuildPermissions gp = Launcher.getBotController().getGuildPermsService().fetchGuildPermissions(member.getGuild());

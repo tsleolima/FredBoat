@@ -31,7 +31,6 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
 import fredboat.db.entity.main.GuildPermissions;
 import fredboat.definitions.PermissionLevel;
-import fredboat.feature.togglz.FeatureFlags;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
@@ -59,10 +58,6 @@ public class PermissionsCommand extends Command implements IConfigCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (!FeatureFlags.PERMISSIONS.isActive()) {
-            context.reply("Permissions are currently disabled.");
-            return;
-        }
         if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;

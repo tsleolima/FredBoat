@@ -26,7 +26,6 @@
 package fredboat.feature.togglz;
 
 import org.togglz.core.Feature;
-import org.togglz.core.annotation.EnabledByDefault;
 import org.togglz.core.annotation.Label;
 
 /**
@@ -35,10 +34,6 @@ import org.togglz.core.annotation.Label;
  * Implementation of the feature flag pattern
  */
 public enum FeatureFlags implements Feature {
-
-    @Label("Permissions")
-    @EnabledByDefault
-    PERMISSIONS,
 
     @Label("Patron validation")
     PATRON_VALIDATION,
