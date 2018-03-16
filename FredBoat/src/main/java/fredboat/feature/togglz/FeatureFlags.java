@@ -41,11 +41,6 @@ public enum FeatureFlags implements Feature {
     @EnabledByDefault
     RATE_LIMITER,
 
-    //using the chatbot class
-    @Label("Chatbot")
-    @EnabledByDefault
-    CHATBOT,
-
     @Label("Permissions")
     @EnabledByDefault
     PERMISSIONS,
