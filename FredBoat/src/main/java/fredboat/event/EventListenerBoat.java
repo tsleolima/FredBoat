@@ -201,17 +201,10 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         if (ratelimiterResult.a) {
-            Histogram.Timer executionTimer = null;
-            if (FeatureFlags.FULL_METRICS.isActive()) {
-                executionTimer = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer();
-            }
-            try {
+            try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
+                 Histogram.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
+            ) {
                 commandManager.prefixCalled(context);
-            } finally {
-                //NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
-                if (FeatureFlags.FULL_METRICS.isActive() && executionTimer != null) {
-                    executionTimer.observeDuration();
-                }
             }
         } else {
             String out = context.i18n("ratelimitedGeneralInfo");
