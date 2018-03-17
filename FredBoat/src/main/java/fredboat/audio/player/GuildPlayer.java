@@ -101,7 +101,7 @@ public class GuildPlayer extends AbstractPlayer {
             if (activeTextChannel != null) {
                 CentralMessaging.message(activeTextChannel,
                         atc.i18nFormat("trackAnnounce", TextUtils.escapeAndDefuse(atc.getEffectiveTitle())))
-                        .send();
+                        .send(null);
             }
         }
     }
@@ -112,7 +112,7 @@ public class GuildPlayer extends AbstractPlayer {
         }
         TextChannel activeTextChannel = getActiveTextChannel();
         if (activeTextChannel != null) {
-            CentralMessaging.message(activeTextChannel, "Something went wrong!\n" + t.getMessage()).send();
+            CentralMessaging.message(activeTextChannel, "Something went wrong!\n" + t.getMessage()).send(null);
         }
     }
 

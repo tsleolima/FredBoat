@@ -70,14 +70,14 @@ public abstract class Context {
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(String message) {
-        return CentralMessaging.message(getTextChannel(), message).send();
+        return CentralMessaging.message(getTextChannel(), message).send(this);
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(String message, Consumer<Message> onSuccess) {
         return CentralMessaging.message(getTextChannel(), message)
                 .success(onSuccess)
-                .send();
+                .send(this);
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -85,19 +85,19 @@ public abstract class Context {
         return CentralMessaging.message(getTextChannel(), message)
                 .success(onSuccess)
                 .failure(onFail)
-                .send();
+                .send(this);
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(Message message) {
-        return CentralMessaging.message(getTextChannel(), message).send();
+        return CentralMessaging.message(getTextChannel(), message).send(this);
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(Message message, Consumer<Message> onSuccess) {
         return CentralMessaging.message(getTextChannel(), message)
                 .success(onSuccess)
-                .send();
+                .send(this);
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -117,7 +117,7 @@ public abstract class Context {
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(MessageEmbed embed) {
-        return CentralMessaging.message(getTextChannel(), embed).send();
+        return CentralMessaging.message(getTextChannel(), embed).send(this);
     }
 
 
@@ -135,7 +135,7 @@ public abstract class Context {
                         .append(message != null ? message : "")
                         .build())
                 .success(onSuccess)
-                .send();
+                .send(this);
     }
 
 
@@ -160,7 +160,7 @@ public abstract class Context {
                     CentralMessaging.message(privateChannel, message)
                             .success(onSuccess)
                             .failure(onFail)
-                            .send();
+                            .send(this);
                 },
                 onFail != null ? onFail : CentralMessaging.NOOP_EXCEPTION_HANDLER //dun care logging about ppl that we cant message
         );

@@ -184,6 +184,22 @@ public class Metrics {
             .labelNames("class") // use the simple name of the command class: PlayCommand, DanceCommand, ShardsCommand etc
             .register();
 
+    //total commands response time: delta between the message creation times of the triggering command and our answer message
+    //this can be slowed down by several factors:
+    // - we do slow things while processing the command
+    // - our net is bad when replying
+    // - or we are hitting rate limits
+    //there is an additional factor which is important for user experience, but which we can't measure:
+    // - the time between a user sending their message and discord receiving it
+    //and another additional factor which we can't influence:
+    // - discord being slow publishing our answer / the user's connection being slow receiving the published answer
+    //keep these in mind when analyzing this metric
+    public static final Histogram totalResponseTime = Histogram.build()
+            .name("fredboat_total_message_response_duration_seconds")
+            .help("Response duration between command message and answer message creation times.")
+            .labelNames("class") // use the simple name of the command class: PlayCommand, DanceCommand, ShardsCommand etc
+            .register();
+
     public static final Counter handledExceptions = Counter.build()
             .name("fredboat_handled_exceptions_total")
             .help("Total uncaught exceptions bubbled up by command invocation or other moving parts")

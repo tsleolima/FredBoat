@@ -87,7 +87,7 @@ public class AnnounceCommand extends Command implements ICommandRestricted {
                             CentralMessaging.message(activeTextChannel, msg)
                                     .success(__ -> phaser.arrive())
                                     .failure(__ -> phaser.arriveAndDeregister())
-                                    .send();
+                                    .send(null);//this message was not triggered by a user
                         } else {
                             phaser.arriveAndDeregister();
                         }

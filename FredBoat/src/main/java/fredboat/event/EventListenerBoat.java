@@ -243,12 +243,12 @@ public class EventListenerBoat extends AbstractEventListener {
             String raw = event.getMessage().getContentRaw().toLowerCase();
             if (raw.contains("shard")) {
                 for (Message message : ShardsCommand.getShardStatus(event.getMessage())) {
-                    CentralMessaging.message(event.getChannel(), message).send();
+                    CentralMessaging.message(event.getChannel(), message).send(null);
                 }
                 return;
             } else if (raw.contains("stats")) {
                 CentralMessaging.message(event.getChannel(), StatsCommand.getStats(null, event.getJDA()))
-                        .send();
+                        .send(null);
                 return;
             }
         }
@@ -297,7 +297,7 @@ public class EventListenerBoat extends AbstractEventListener {
             TextChannel activeTextChannel = player.getActiveTextChannel();
             if (activeTextChannel != null) {
                 CentralMessaging.message(activeTextChannel, I18n.get(guild).getString("eventAutoResumed"))
-                        .send();
+                        .send(null);
             }
         }
     }
@@ -332,7 +332,7 @@ public class EventListenerBoat extends AbstractEventListener {
             TextChannel activeTextChannel = player.getActiveTextChannel();
             if (activeTextChannel != null) {
                 CentralMessaging.message(activeTextChannel, I18n.get(guild).getString("eventUsersLeftVC"))
-                        .send();
+                        .send(null);
             }
         }
     }
@@ -397,6 +397,6 @@ public class EventListenerBoat extends AbstractEventListener {
         //send actual hello message and persist on success
         CentralMessaging.message(channel, HelloCommand.getHello(guild))
                 .success(__ -> guildDataService.transformGuildData(guild, GuildData::helloSent))
-                .send();
+                .send(null);
     }
 }

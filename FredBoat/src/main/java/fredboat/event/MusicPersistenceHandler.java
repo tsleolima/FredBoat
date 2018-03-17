@@ -126,7 +126,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                 TextChannel activeTextChannel = player.getActiveTextChannel();
                 List<CompletableFuture> announcements = new ArrayList<>();
                 if (activeTextChannel != null && player.isPlaying()) {
-                    announcements.add(CentralMessaging.message(activeTextChannel, msg).send());
+                    announcements.add(CentralMessaging.message(activeTextChannel, msg).send(null));
                 }
                 for (Future announcement : announcements) {
                     try {
@@ -179,7 +179,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                         CentralMessaging.message(activeTextChannel,
                                 MessageFormat.format(I18n.get(player.getGuild()).getString("shutdownPersistenceFail"),
                                         ex.getMessage()))
-                                .send();
+                                .send(null);
                     }
                 }
             } catch (Exception ex) {
@@ -312,7 +312,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                     }
                     if (tc != null) {
                         CentralMessaging.message(tc, MessageFormat.format(I18n.get(guild).getString("reloadSuccess"), sources.length()))
-                                .send();
+                                .send(null);
                     }
                 }
             } catch (Exception ex) {

@@ -134,7 +134,7 @@ public class HelpCommand extends Command implements IInfoCommand {
             public User getUser() {
                 return event.getAuthor();
             }
-        })).send();
+        })).send(null);
     }
 
     public static String getFormattedCommandHelp(Context context, Command command, String commandOrAlias) {

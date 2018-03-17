@@ -25,9 +25,12 @@
 
 package fredboat.messaging;
 
+import fredboat.commandmeta.abs.CommandContext;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
+import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
+import io.prometheus.client.Collector;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.Permission;
@@ -394,7 +397,7 @@ public class CentralMessaging {
 
     //class internal message sending method
     @Nonnull
-    private static MessageFuture sendMessage0(JdaMessageActionBuilder messageActionBuilder) {
+    private static MessageFuture sendMessage0(JdaMessageActionBuilder messageActionBuilder, @Nullable Context source) {
         MessageChannel channel = messageActionBuilder.getTargetChannel();
         Message message = messageActionBuilder.getContent();
         Consumer<Message> onSuccess = messageActionBuilder.getSuccess();
@@ -404,6 +407,13 @@ public class CentralMessaging {
         Consumer<Message> successWrapper = m -> {
             result.complete(m);
             Metrics.successfulRestActions.labels("sendMessage").inc();
+            if (source instanceof CommandContext) {
+                CommandContext context = (CommandContext) source;
+                long in = context.msg.getCreationTime().toInstant().toEpochMilli();
+                long out = m.getCreationTime().toInstant().toEpochMilli();
+                String label = context.command.getClass().getSimpleName();
+                Metrics.totalResponseTime.labels(label).observe((out - in) / Collector.MILLISECONDS_PER_SECOND);
+            }
             if (onSuccess != null) {
                 onSuccess.accept(m);
             }
@@ -524,7 +534,7 @@ public class CentralMessaging {
         }
         //only ever try sending a simple string from here so we don't end up handling a loop of insufficient permissions
         message(channel, i18n.getString("permissionMissingBot") + " **" + e.getPermission().getName() + "**")
-                .send();
+                .send(null);
     }
 
 
@@ -569,8 +579,11 @@ public class CentralMessaging {
             this.content = content;
         }
 
-        public MessageFuture send() {
-            return sendMessage0(this);
+        /**
+         * @param context Pass the context of the place calling this. This is used for instrumentation for example
+         */
+        public MessageFuture send(@Nullable Context context) {
+            return sendMessage0(this, context);
         }
 
         /**
