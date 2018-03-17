@@ -38,15 +38,12 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.ErrorResponseException;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.requests.ErrorResponse;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ResourceBundle;
@@ -153,92 +150,6 @@ public class CentralMessaging {
     public static JdaMessageActionBuilder message(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed) {
         return new JdaMessageActionBuilder(channel, from(embed));
     }
-
-    // ********************************************************************************
-    //                            File sending methods
-    // ********************************************************************************
-
-    /**
-     * Combines the benefits of JDAs RestAction#queue and returning a Future that can be get() if necessary
-     *
-     * @param channel   The channel that should be messaged
-     * @param file      File to be sent
-     * @param message   Optional message
-     * @param onSuccess Optional success handler
-     * @param onFail    Optional exception handler
-     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#complete,
-     * avoid usage where not absolutely needed.
-     */
-    @Nonnull
-    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
-                                         @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        return sendFile0(
-                channel,
-                file,
-                message,
-                onSuccess,
-                onFail
-        );
-    }
-
-    @Nonnull
-    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
-                                         @Nullable Consumer<Message> onSuccess) {
-        return sendFile0(
-                channel,
-                file,
-                message,
-                onSuccess,
-                null
-        );
-    }
-
-    @Nonnull
-    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message) {
-        return sendFile0(
-                channel,
-                file,
-                message,
-                null,
-                null
-        );
-    }
-
-    @Nonnull
-    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file,
-                                         @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        return sendFile0(
-                channel,
-                file,
-                null,
-                onSuccess,
-                onFail
-        );
-    }
-
-    @Nonnull
-    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file,
-                                         @Nullable Consumer<Message> onSuccess) {
-        return sendFile0(
-                channel,
-                file,
-                null,
-                onSuccess,
-                null
-        );
-    }
-
-    @Nonnull
-    public static MessageFuture sendFile(@Nonnull MessageChannel channel, @Nonnull File file) {
-        return sendFile0(
-                channel,
-                file,
-                null,
-                null,
-                null
-        );
-    }
-
 
     // ********************************************************************************
     //                            Message editing methods
@@ -442,47 +353,6 @@ public class CentralMessaging {
                 //do not call CentralMessaging#handleInsufficientPermissionsException() from here as that will result in a loop
                 log.warn("Could not send message to channel {} due to missing permission {}", channel.getIdLong(), e.getPermission().getName(), e);
             }
-        }
-        return result;
-    }
-
-    //class internal file sending method
-    @Nonnull
-    private static MessageFuture sendFile0(@Nonnull MessageChannel channel, @Nonnull File file, @Nullable Message message,
-                                           @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-
-        MessageFuture result = new MessageFuture();
-        Consumer<Message> successWrapper = m -> {
-            result.complete(m);
-            Metrics.successfulRestActions.labels("sendFile").inc();
-            if (onSuccess != null) {
-                onSuccess.accept(m);
-            }
-        };
-        Consumer<Throwable> failureWrapper = t -> {
-            result.completeExceptionally(t);
-            if (onFail != null) {
-                onFail.accept(t);
-            } else {
-                String info = String.format("Could not send file %s to channel %s in guild %s",
-                        file.getAbsolutePath(), channel.getId(),
-                        (channel instanceof TextChannel) ? ((TextChannel) channel).getGuild().getIdLong() : "null");
-                getJdaRestActionFailureHandler(info).accept(t);
-            }
-        };
-
-        try {
-            // ATTENTION: Do not use JDA's MessageChannel#sendFile(File file, Message message)
-            // as it will skip permission checks, since TextChannel does not override that method
-            // this is scheduled to be fixed through JDA's message-rw branch
-            channel.sendFile(FileUtils.readFileToByteArray(file), file.getName(), message).queue(successWrapper, failureWrapper);
-        } catch (InsufficientPermissionException e) {
-            if (onFail != null) {
-                onFail.accept(e);
-            }
-            handleInsufficientPermissionsException(channel, e);
-        } catch (IOException e) {
-            log.error("Could not send file {}, it appears to be borked", file.getAbsolutePath(), e);
         }
         return result;
     }

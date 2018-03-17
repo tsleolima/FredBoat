@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.File;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -118,12 +117,6 @@ public abstract class Context {
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(MessageEmbed embed) {
         return CentralMessaging.message(getTextChannel(), embed).send(this);
-    }
-
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyFile(@Nonnull File file, @Nullable Message message) {
-        return CentralMessaging.sendFile(getTextChannel(), file, message);
     }
 
     @SuppressWarnings("UnusedReturnValue")
