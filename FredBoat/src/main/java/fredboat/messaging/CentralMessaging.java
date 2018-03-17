@@ -31,11 +31,7 @@ import fredboat.shared.constant.BotConstants;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.MessageEmbed;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.ErrorResponseException;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.requests.ErrorResponse;
@@ -43,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
@@ -131,121 +128,27 @@ public class CentralMessaging {
 
 
     // ********************************************************************************
-    //       Convenience methods that convert input to Message objects and send it
+    //                     Entry methods for message sending
     // ********************************************************************************
 
-    /**
-     * Combines the benefits of JDAs RestAction#queue and returning a Future that can be get() if necessary
-     *
-     * @param channel   The channel that should be messaged
-     * @param message   Message to be sent
-     * @param onSuccess Optional success handler
-     * @param onFail    Optional exception handler
-     * @return Future that can be waited on in case the code requires completion. Similar to JDA's RestAction#complete,
-     * avoid usage where not absolutely needed.
-     */
     @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message,
-                                            @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        return sendMessage0(
-                channel,
-                message,
-                onSuccess,
-                onFail
-        );
-    }
-
-    // Message
-    @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message,
-                                            @Nullable Consumer<Message> onSuccess) {
-        return sendMessage0(
-                channel,
-                message,
-                onSuccess,
-                null
-        );
-    }
-
-    // Message
-    @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull Message message) {
-        return sendMessage0(
-                channel,
-                message,
-                null,
-                null
-        );
-    }
-
-    // Embed
-    @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed,
-                                            @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        return sendMessage0(
-                channel,
-                from(embed),
-                onSuccess,
-                onFail
-        );
-    }
-
-    // Embed
-    @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed,
-                                            @Nullable Consumer<Message> onSuccess) {
-        return sendMessage0(
-                channel,
-                from(embed),
-                onSuccess,
-                null
-        );
-    }
-
-    // Embed
-    @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed) {
-        return sendMessage0(
-                channel,
-                from(embed),
-                null,
-                null
-        );
+    @CheckReturnValue
+    public static JdaMessageActionBuilder message(@Nonnull MessageChannel channel, @Nonnull Message message) {
+        return new JdaMessageActionBuilder(channel, message);
     }
 
     // String
     @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull String content,
-                                            @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        return sendMessage0(
-                channel,
-                from(content),
-                onSuccess,
-                onFail
-        );
+    @CheckReturnValue
+    public static JdaMessageActionBuilder message(@Nonnull MessageChannel channel, @Nonnull String content) {
+        return new JdaMessageActionBuilder(channel, from(content));
     }
 
-    // String
+    // Embed
     @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull String content,
-                                            @Nullable Consumer<Message> onSuccess) {
-        return sendMessage0(
-                channel,
-                from(content),
-                onSuccess,
-                null
-        );
-    }
-
-    // String
-    @Nonnull
-    public static MessageFuture sendMessage(@Nonnull MessageChannel channel, @Nonnull String content) {
-        return sendMessage0(
-                channel,
-                from(content),
-                null,
-                null
-        );
+    @CheckReturnValue
+    public static JdaMessageActionBuilder message(@Nonnull MessageChannel channel, @Nonnull MessageEmbed embed) {
+        return new JdaMessageActionBuilder(channel, from(embed));
     }
 
     // ********************************************************************************
@@ -491,8 +394,12 @@ public class CentralMessaging {
 
     //class internal message sending method
     @Nonnull
-    private static MessageFuture sendMessage0(@Nonnull MessageChannel channel, @Nonnull Message message,
-                                              @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
+    private static MessageFuture sendMessage0(JdaMessageActionBuilder messageActionBuilder) {
+        MessageChannel channel = messageActionBuilder.getTargetChannel();
+        Message message = messageActionBuilder.getContent();
+        Consumer<Message> onSuccess = messageActionBuilder.getSuccess();
+        Consumer<Throwable> onFail = messageActionBuilder.getFailure();
+
         MessageFuture result = new MessageFuture();
         Consumer<Message> successWrapper = m -> {
             result.complete(m);
@@ -616,7 +523,8 @@ public class CentralMessaging {
             i18n = I18n.DEFAULT.getProps();
         }
         //only ever try sending a simple string from here so we don't end up handling a loop of insufficient permissions
-        sendMessage(channel, i18n.getString("permissionMissingBot") + " **" + e.getPermission().getName() + "**");
+        message(channel, i18n.getString("permissionMissingBot") + " **" + e.getPermission().getName() + "**")
+                .send();
     }
 
 
@@ -636,4 +544,88 @@ public class CentralMessaging {
         };
     }
 
+    /**
+     * Created by napster on 17.03.18.
+     * <p>
+     * Container class to tame the bouquet of overloaded message sending methods of {@link CentralMessaging}
+     */
+    @space.npstr.annotations.FieldsAreNonNullByDefault
+    @space.npstr.annotations.ParametersAreNonnullByDefault
+    @space.npstr.annotations.ReturnTypesAreNonNullByDefault
+    public static class JdaMessageActionBuilder {
+
+        private MessageChannel targetChannel;
+
+        private Message content;
+
+        @Nullable
+        private Consumer<Message> success;
+
+        @Nullable
+        private Consumer<Throwable> failure;
+
+        public JdaMessageActionBuilder(MessageChannel targetChannel, Message content) {
+            this.targetChannel = targetChannel;
+            this.content = content;
+        }
+
+        public MessageFuture send() {
+            return sendMessage0(this);
+        }
+
+        /**
+         * @param targetChannel The channel that should be messaged
+         */
+        @CheckReturnValue
+        public JdaMessageActionBuilder channel(MessageChannel targetChannel) {
+            this.targetChannel = targetChannel;
+            return this;
+        }
+
+        public MessageChannel getTargetChannel() {
+            return targetChannel;
+        }
+
+        /**
+         * @param content Message to be sent
+         */
+        @CheckReturnValue
+        public JdaMessageActionBuilder content(Message content) {
+            this.content = content;
+            return this;
+        }
+
+        public Message getContent() {
+            return content;
+        }
+
+        /**
+         * @param success Optional success handler
+         */
+        @CheckReturnValue
+        public JdaMessageActionBuilder success(@Nullable Consumer<Message> success) {
+            this.success = success;
+            return this;
+        }
+
+        @Nullable
+        public Consumer<Message> getSuccess() {
+            return success;
+        }
+
+        /**
+         * @param failure Optional exception handler
+         */
+        @CheckReturnValue
+        public JdaMessageActionBuilder failure(@Nullable Consumer<Throwable> failure) {
+            this.failure = failure;
+            return this;
+        }
+
+        @Nullable
+        public Consumer<Throwable> getFailure() {
+            return failure;
+        }
+
+    }
 }

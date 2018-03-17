@@ -84,9 +84,10 @@ public class AnnounceCommand extends Command implements ICommandRestricted {
                     for (GuildPlayer player : players) {
                         TextChannel activeTextChannel = player.getActiveTextChannel();
                         if (activeTextChannel != null) {
-                            CentralMessaging.sendMessage(activeTextChannel, msg,
-                                    __ -> phaser.arrive(),
-                                    __ -> phaser.arriveAndDeregister());
+                            CentralMessaging.message(activeTextChannel, msg)
+                                    .success(__ -> phaser.arrive())
+                                    .failure(__ -> phaser.arriveAndDeregister())
+                                    .send();
                         } else {
                             phaser.arriveAndDeregister();
                         }

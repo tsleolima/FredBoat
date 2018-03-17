@@ -114,7 +114,7 @@ public class HelpCommand extends Command implements IInfoCommand {
         }
 
         HELP_RECEIVED_RECENTLY.put(event.getAuthor().getIdLong(), true);
-        CentralMessaging.sendMessage(event.getChannel(), getHelpDmMsg(new Context() { //yeah this is ugly ¯\_(ツ)_/¯
+        CentralMessaging.message(event.getChannel(), getHelpDmMsg(new Context() { //yeah this is ugly ¯\_(ツ)_/¯
             @Override
             public TextChannel getTextChannel() {
                 return null;
@@ -134,7 +134,7 @@ public class HelpCommand extends Command implements IInfoCommand {
             public User getUser() {
                 return event.getAuthor();
             }
-        }));
+        })).send();
     }
 
     public static String getFormattedCommandHelp(Context context, Command command, String commandOrAlias) {

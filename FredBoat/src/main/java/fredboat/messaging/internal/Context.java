@@ -70,27 +70,34 @@ public abstract class Context {
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(String message) {
-        return CentralMessaging.sendMessage(getTextChannel(), message);
+        return CentralMessaging.message(getTextChannel(), message).send();
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(String message, Consumer<Message> onSuccess) {
-        return CentralMessaging.sendMessage(getTextChannel(), message, onSuccess);
+        return CentralMessaging.message(getTextChannel(), message)
+                .success(onSuccess)
+                .send();
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(String message, Consumer<Message> onSuccess, Consumer<Throwable> onFail) {
-        return CentralMessaging.sendMessage(getTextChannel(), message, onSuccess, onFail);
+        return CentralMessaging.message(getTextChannel(), message)
+                .success(onSuccess)
+                .failure(onFail)
+                .send();
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(Message message) {
-        return CentralMessaging.sendMessage(getTextChannel(), message);
+        return CentralMessaging.message(getTextChannel(), message).send();
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(Message message, Consumer<Message> onSuccess) {
-        return CentralMessaging.sendMessage(getTextChannel(), message, onSuccess);
+        return CentralMessaging.message(getTextChannel(), message)
+                .success(onSuccess)
+                .send();
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -110,7 +117,7 @@ public abstract class Context {
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(MessageEmbed embed) {
-        return CentralMessaging.sendMessage(getTextChannel(), embed);
+        return CentralMessaging.message(getTextChannel(), embed).send();
     }
 
 
@@ -121,14 +128,14 @@ public abstract class Context {
 
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture replyImage(@Nonnull String url, @Nullable String message, @Nullable Consumer<Message> onSuccess) {
-        return CentralMessaging.sendMessage(
+        return CentralMessaging.message(
                 getTextChannel(),
                 CentralMessaging.getClearThreadLocalMessageBuilder()
                         .setEmbed(embedImage(url))
                         .append(message != null ? message : "")
-                        .build(),
-                onSuccess
-        );
+                        .build())
+                .success(onSuccess)
+                .send();
     }
 
 
@@ -150,7 +157,10 @@ public abstract class Context {
         getMember().getUser().openPrivateChannel().queue(
                 privateChannel -> {
                     Metrics.successfulRestActions.labels("openPrivateChannel").inc();
-                    CentralMessaging.sendMessage(privateChannel, message, onSuccess, onFail);
+                    CentralMessaging.message(privateChannel, message)
+                            .success(onSuccess)
+                            .failure(onFail)
+                            .send();
                 },
                 onFail != null ? onFail : CentralMessaging.NOOP_EXCEPTION_HANDLER //dun care logging about ppl that we cant message
         );

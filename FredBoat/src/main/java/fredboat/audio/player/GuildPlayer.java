@@ -99,8 +99,9 @@ public class GuildPlayer extends AbstractPlayer {
         if (getRepeatMode() != RepeatMode.SINGLE && isTrackAnnounceEnabled() && !isPaused()) {
             TextChannel activeTextChannel = getActiveTextChannel();
             if (activeTextChannel != null) {
-                CentralMessaging.sendMessage(activeTextChannel,
-                        atc.i18nFormat("trackAnnounce", TextUtils.escapeAndDefuse(atc.getEffectiveTitle())));
+                CentralMessaging.message(activeTextChannel,
+                        atc.i18nFormat("trackAnnounce", TextUtils.escapeAndDefuse(atc.getEffectiveTitle())))
+                        .send();
             }
         }
     }
@@ -111,7 +112,7 @@ public class GuildPlayer extends AbstractPlayer {
         }
         TextChannel activeTextChannel = getActiveTextChannel();
         if (activeTextChannel != null) {
-            CentralMessaging.sendMessage(activeTextChannel, "Something went wrong!\n" + t.getMessage());
+            CentralMessaging.message(activeTextChannel, "Something went wrong!\n" + t.getMessage()).send();
         }
     }
 

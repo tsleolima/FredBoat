@@ -243,11 +243,12 @@ public class EventListenerBoat extends AbstractEventListener {
             String raw = event.getMessage().getContentRaw().toLowerCase();
             if (raw.contains("shard")) {
                 for (Message message : ShardsCommand.getShardStatus(event.getMessage())) {
-                    CentralMessaging.sendMessage(event.getChannel(), message);
+                    CentralMessaging.message(event.getChannel(), message).send();
                 }
                 return;
             } else if (raw.contains("stats")) {
-                CentralMessaging.sendMessage(event.getChannel(), StatsCommand.getStats(null, event.getJDA()));
+                CentralMessaging.message(event.getChannel(), StatsCommand.getStats(null, event.getJDA()))
+                        .send();
                 return;
             }
         }
@@ -295,7 +296,8 @@ public class EventListenerBoat extends AbstractEventListener {
             player.setPause(false);
             TextChannel activeTextChannel = player.getActiveTextChannel();
             if (activeTextChannel != null) {
-                CentralMessaging.sendMessage(activeTextChannel, I18n.get(guild).getString("eventAutoResumed"));
+                CentralMessaging.message(activeTextChannel, I18n.get(guild).getString("eventAutoResumed"))
+                        .send();
             }
         }
     }
@@ -329,7 +331,8 @@ public class EventListenerBoat extends AbstractEventListener {
             player.pause();
             TextChannel activeTextChannel = player.getActiveTextChannel();
             if (activeTextChannel != null) {
-                CentralMessaging.sendMessage(activeTextChannel, I18n.get(guild).getString("eventUsersLeftVC"));
+                CentralMessaging.message(activeTextChannel, I18n.get(guild).getString("eventUsersLeftVC"))
+                        .send();
             }
         }
     }
@@ -392,7 +395,8 @@ public class EventListenerBoat extends AbstractEventListener {
         }
 
         //send actual hello message and persist on success
-        CentralMessaging.sendMessage(channel, HelloCommand.getHello(guild),
-                __ -> guildDataService.transformGuildData(guild, GuildData::helloSent));
+        CentralMessaging.message(channel, HelloCommand.getHello(guild))
+                .success(__ -> guildDataService.transformGuildData(guild, GuildData::helloSent))
+                .send();
     }
 }
