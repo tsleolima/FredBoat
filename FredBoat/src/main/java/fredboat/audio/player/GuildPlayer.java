@@ -217,7 +217,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public List<AudioTrackContext> getTracksInRange(int start, int end) {
-        log.debug("getTracksInRange({} {})", start, end);
+        log.trace("getTracksInRange({} {})", start, end);
 
         List<AudioTrackContext> result = new ArrayList<>();
 
@@ -242,7 +242,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     //similar to getTracksInRange, but only gets the trackIds
     public List<Long> getTrackIdsInRange(int start, int end) {
-        log.debug("getTrackIdsInRange({} {})", start, end);
+        log.trace("getTrackIdsInRange({} {})", start, end);
 
         return getTracksInRange(start, end).stream().map(AudioTrackContext::getTrackId).collect(Collectors.toList());
     }

@@ -75,7 +75,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     public void play() {
-        log.debug("play()");
+        log.trace("play()");
 
         if (player.isPaused()) {
             player.setPaused(false);
@@ -87,7 +87,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     public void setPause(boolean pause) {
-        log.debug("setPause({})", pause);
+        log.trace("setPause({})", pause);
 
         if (pause) {
             player.setPaused(true);
@@ -101,7 +101,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
      * Pause the player
      */
     public void pause() {
-        log.debug("pause()");
+        log.trace("pause()");
 
         player.setPaused(true);
     }
@@ -110,7 +110,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
      * Clear the tracklist and stop the current track
      */
     public void stop() {
-        log.debug("stop()");
+        log.trace("stop()");
 
         audioTrackProvider.clear();
         stopTrack();
@@ -120,7 +120,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
      * Skip the current track
      */
     public void skip() {
-        log.debug("skip()");
+        log.trace("skip()");
 
         audioTrackProvider.skipped();
         stopTrack();
@@ -130,14 +130,14 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
      * Stop the current track.
      */
     public void stopTrack() {
-        log.debug("stopTrack()");
+        log.trace("stopTrack()");
 
         context = null;
         player.stopTrack();
     }
 
     public boolean isQueueEmpty() {
-        log.debug("isQueueEmpty()");
+        log.trace("isQueueEmpty()");
 
         return player.getPlayingTrack() == null && audioTrackProvider.isEmpty();
     }
@@ -163,7 +163,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     public AudioTrackContext getPlayingTrack() {
-        log.debug("getPlayingTrack()");
+        log.trace("getPlayingTrack()");
 
         if (player.getPlayingTrack() == null && context == null) {
             return audioTrackProvider.peek();
@@ -175,7 +175,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     //the unshuffled playlist
     public List<AudioTrackContext> getRemainingTracks() {
-        log.debug("getRemainingTracks()");
+        log.trace("getRemainingTracks()");
 
         //Includes currently playing track, which comes first
         List<AudioTrackContext> list = new ArrayList<>();
@@ -198,7 +198,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        log.debug("onTrackEnd({} {} {}) called", track.getInfo().title, endReason.name(), endReason.mayStartNext);
+        log.trace("onTrackEnd({} {} {}) called", track.getInfo().title, endReason.name(), endReason.mayStartNext);
 
         if (endReason == AudioTrackEndReason.FINISHED || endReason == AudioTrackEndReason.STOPPED) {
             updateHistoryQueue();
@@ -217,7 +217,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
 
     //request the next track from the track provider and start playing it
     private void loadAndPlay() {
-        log.debug("loadAndPlay()");
+        log.trace("loadAndPlay()");
 
         AudioTrackContext atc = null;
         if (audioTrackProvider != null) {
@@ -245,7 +245,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
      * Silently playing a track will not trigger the onPlayHook (which announces the track usually)
      */
     private void playTrack(AudioTrackContext trackContext, boolean... silent) {
-        log.debug("playTrack({})", trackContext.getEffectiveTitle());
+        log.trace("playTrack({})", trackContext.getEffectiveTitle());
 
         context = trackContext;
         player.playTrack(trackContext.getTrack());
@@ -266,7 +266,7 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     void destroy() {
-        log.debug("destroy()");
+        log.trace("destroy()");
         stop();
         player.removeListener(this);
         if (player instanceof LavalinkPlayer) {
@@ -303,13 +303,13 @@ public abstract class AbstractPlayer extends AudioEventAdapterWrapped implements
     }
 
     public boolean isPlaying() {
-        log.debug("isPlaying()");
+        log.trace("isPlaying()");
 
         return player.getPlayingTrack() != null && !player.isPaused();
     }
 
     public boolean isPaused() {
-        log.debug("isPaused()");
+        log.trace("isPaused()");
 
         return player.isPaused();
     }
