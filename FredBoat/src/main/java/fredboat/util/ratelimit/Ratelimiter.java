@@ -57,7 +57,7 @@ public class Ratelimiter {
 
     private final List<Ratelimit> ratelimits;
     @Nullable
-    private Blacklist autoBlacklist = null;
+    private final Blacklist autoBlacklist;
 
     public Ratelimiter(AppConfig appConfig, ExecutorService executor, BlacklistService blacklistService) {
         Set<Long> whitelist = ConcurrentHashMap.newKeySet();
@@ -70,6 +70,8 @@ public class Ratelimiter {
 
         if (appConfig.useAutoBlacklist()) {
             autoBlacklist = new Blacklist(blacklistService, whitelist, RATE_LIMIT_HITS_BEFORE_BLACKLIST);
+        } else {
+            autoBlacklist = null;
         }
 
         //sort these by harsher limits coming first

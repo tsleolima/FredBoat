@@ -41,7 +41,6 @@ import space.npstr.sqlsauce.DatabaseException;
 import space.npstr.sqlsauce.entities.GuildBotComposite;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -123,14 +122,9 @@ public class EntityService implements BlacklistService, GuildConfigService, Guil
 
 
     // Blacklist stuff
-
-    /**
-     * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
-     * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
-     */
     @Override
-    public List<BlacklistEntry> loadBlacklist() {
-        return fetchUserFriendly(blacklistRepo::loadBlacklist);
+    public BlacklistEntry fetchBlacklistEntry(long id) {
+        return fetchUserFriendly(() -> blacklistRepo.fetch(id));
     }
 
     @Override
