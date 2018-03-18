@@ -34,17 +34,11 @@ import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 
 public class PlayerDebugCommand extends Command implements ICommandRestricted {
-
-    private static final Logger log = LoggerFactory.getLogger(PlayerDebugCommand.class);
 
     public PlayerDebugCommand(String name, String... aliases) {
         super(name, aliases);
@@ -65,14 +59,9 @@ public class PlayerDebugCommand extends Command implements ICommandRestricted {
             
             a.put(data);
         }
-        
-        try {
-            context.reply(TextUtils.postToPasteService(a.toString()));
-        } catch (IOException | JSONException e) {
-            String message = "Failed to upload to any pasteservice.";
-            log.error(message, e);
-            context.reply(message);
-        }
+        TextUtils.postToPasteService(a.toString())
+                .thenApply(pasteUrl -> pasteUrl.orElse("Failed to upload to any pasteservice."))
+                .thenAccept(context::reply);
     }
 
     @Nonnull
