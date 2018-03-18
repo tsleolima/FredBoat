@@ -83,11 +83,12 @@ public class Blacklist {
         if (userWhiteList.contains(id)) return false;
 
         BlacklistEntry blEntry = blacklistService.fetchBlacklistEntry(id);
-        if (blEntry.level < 0) return false;   //blacklist entry exists, but id hasn't actually been blacklisted yet
+        if (blEntry.getLevel() < 0) return false; //blacklist entry exists, but id hasn't actually been blacklisted yet
+
 
         //id was a blacklisted, but it has run out
         //noinspection RedundantIfStatement
-        if (System.currentTimeMillis() > blEntry.blacklistedTimestamp + (getBlacklistTimeLength(blEntry.level))) {
+        if (System.currentTimeMillis() > blEntry.getBlacklistedTimestamp() + (getBlacklistTimeLength(blEntry.getLevel()))) {
             return false;
         }
 
@@ -111,20 +112,20 @@ public class Blacklist {
             long now = System.currentTimeMillis();
 
             //is the last ratelimit hit a long time away (1 hour)? then reset the ratelimit hits
-            if (now - blEntry.rateLimitReachedTimestamp > 60 * 60 * 1000) {
-                blEntry.rateLimitReached = 0;
+            if (now - blEntry.getRateLimitReachedTimestamp() > 60 * 60 * 1000) {
+                blEntry.setRateLimitReached(0);
             }
-            blEntry.rateLimitReached++;
-            blEntry.rateLimitReachedTimestamp = now;
-            if (blEntry.rateLimitReached >= rateLimitHitsBeforeBlacklist) {
+            blEntry.incRateLimitReached();
+            blEntry.setRateLimitReachedTimestamp(now);
+            if (blEntry.getRateLimitReached() >= rateLimitHitsBeforeBlacklist) {
                 //issue blacklist incident
-                blEntry.level++;
-                Metrics.autoBlacklistsIssued.labels(Integer.toString(blEntry.level)).inc();
-                if (blEntry.level < 0) blEntry.level = 0;
-                blEntry.blacklistedTimestamp = now;
-                blEntry.rateLimitReached = 0; //reset these for the next time
+                blEntry.incLevel();
+                if (blEntry.getLevel() < 0) blEntry.setLevel(0);
+                Metrics.autoBlacklistsIssued.labels(Integer.toString(blEntry.getLevel())).inc();
+                blEntry.setBlacklistedTimestamp(now);
+                blEntry.setRateLimitReached(0); //reset these for the next time
 
-                blacklistingLength = getBlacklistTimeLength(blEntry.level);
+                blacklistingLength = getBlacklistTimeLength(blEntry.getLevel());
             }
             //persist it
             //if this turns up to be a performance bottleneck, have an agent run that persists the blacklist occasionally

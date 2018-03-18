@@ -45,24 +45,24 @@ public class BlacklistEntry extends SaucedEntity<Long, BlacklistEntry> {
     //id of the user or guild that this blacklist entry belongs to
     @Id
     @Column(name = "id", nullable = false)
-    public long id;
+    private long id;
 
     //blacklist level that the user or guild is on
     //this should increase every time progressively
     @Column(name = "level", nullable = false)
-    public int level = -1;
+    private int level = -1;
 
     //keeps track of how many times a user or guild reached the rate limit on the current blacklist level
     @Column(name = "rate_limit_reached", nullable = false)
-    public int rateLimitReached;
+    private int rateLimitReached;
 
     //when was the ratelimit hit the last time?
     @Column(name = "rate_limit_timestamp", nullable = false)
-    public long rateLimitReachedTimestamp;
+    private long rateLimitReachedTimestamp;
 
     //time when the id was blacklisted
     @Column(name = "blacklisted_timestamp", nullable = false)
-    public long blacklistedTimestamp;
+    private long blacklistedTimestamp;
 
     @Nonnull
     @Override
@@ -92,12 +92,20 @@ public class BlacklistEntry extends SaucedEntity<Long, BlacklistEntry> {
         return level;
     }
 
+    public void incLevel() {
+        level++;
+    }
+
     public void setLevel(int level) {
         this.level = level;
     }
 
     public int getRateLimitReached() {
         return rateLimitReached;
+    }
+
+    public void incRateLimitReached() {
+        rateLimitReached++;
     }
 
     public void setRateLimitReached(int rateLimitReached) {
