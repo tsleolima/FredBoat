@@ -109,6 +109,10 @@ public class Ratelimiter {
         return new Tuple2<>(true, null);
     }
 
+    public Tuple2<Boolean, Class> isAllowed(Context context, Object command) {
+        return isAllowed(context, command, 1);
+    }
+
     /**
      * @param id Id of the object whose blacklist status is to be checked, for example a userId or a guildId
      * @return true if the id is blacklisted, false if it's not

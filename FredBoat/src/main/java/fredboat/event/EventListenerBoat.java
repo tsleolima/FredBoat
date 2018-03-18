@@ -192,7 +192,7 @@ public class EventListenerBoat extends AbstractEventListener {
      * @param context Command context of the command to be invoked.
      */
     private void limitOrExecuteCommand(CommandContext context) {
-        Tuple2<Boolean, Class> ratelimiterResult = ratelimiter.isAllowed(context, context.command, 1);
+        Tuple2<Boolean, Class> ratelimiterResult = ratelimiter.isAllowed(context, context.command);
 
         if (ratelimiterResult.a) {
             try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
