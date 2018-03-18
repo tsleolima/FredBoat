@@ -33,7 +33,6 @@ import fredboat.db.repositories.api.BlacklistRepo;
 import fredboat.util.rest.Http;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
@@ -66,17 +65,5 @@ public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> impl
         } catch (IOException | JsonSyntaxException e) {
             throw new BackendException("Could not load the blacklist", e);
         }
-    }
-
-    @Nullable
-    @Override
-    public BlacklistEntry getEntry(long id) {
-        return null; //todo implementation
-//        try {
-//            Http.SimpleRequest fetch = http.post(path + "get", gson.toJson(id), "application/json");
-//            return gson.fromJson(auth(fetch).asString(), BlacklistEntry.class); //todo how is null handled?
-//        } catch (IOException | JsonSyntaxException e) {
-//            throw new BackendException(String.format("Could not get blacklist entry with id %s", id), e);
-//        }
     }
 }

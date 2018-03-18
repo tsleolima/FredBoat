@@ -28,9 +28,7 @@ package fredboat.db.repositories.impl;
 import fredboat.db.entity.main.BlacklistEntry;
 import fredboat.db.repositories.api.BlacklistRepo;
 import space.npstr.sqlsauce.DatabaseWrapper;
-import space.npstr.sqlsauce.fp.types.EntityKey;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -47,9 +45,4 @@ public class SqlSauceBlacklistRepo extends SqlSauceRepo<Long, BlacklistEntry> im
         return dbWrapper.loadAll(BlacklistEntry.class);
     }
 
-    @Nullable
-    @Override
-    public BlacklistEntry getEntry(long id) {
-        return dbWrapper.getEntity(EntityKey.of(id, BlacklistEntry.class));
-    }
 }
