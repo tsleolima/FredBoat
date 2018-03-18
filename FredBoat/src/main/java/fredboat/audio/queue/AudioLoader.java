@@ -126,19 +126,16 @@ public class AudioLoader implements AudioLoadResultHandler {
         if (playlistInfo == null) //not a slow loading playlist
             return true;
         else {
-            boolean result = ratelimiter.isAllowed(ic, playlistInfo, playlistInfo.getTotalTracks()).a;
-
-            if (result) {
-                //inform user we are possibly about to do nasty time consuming work
-                if (playlistInfo.getTotalTracks() > 50) {
-                    ic.replyWithName(ic.i18nFormat("loadAnnouncePlaylist",
-                            playlistInfo.getName(), playlistInfo.getTotalTracks()));
-                }
-                return true;
-            } else {
-                ic.replyWithMention(ic.i18n("ratelimitedGuildSlowLoadingPlaylist"));
+            if (ratelimiter.isRatelimited(ic, playlistInfo, playlistInfo.getTotalTracks())) {
                 return false;
             }
+
+            //inform user we are possibly about to do nasty time consuming work
+            if (playlistInfo.getTotalTracks() > 50) {
+                ic.replyWithName(ic.i18nFormat("loadAnnouncePlaylist",
+                        playlistInfo.getName(), playlistInfo.getTotalTracks()));
+            }
+            return true;
         }
     }
 

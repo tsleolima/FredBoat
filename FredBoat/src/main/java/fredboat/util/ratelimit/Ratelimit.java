@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Created by napster on 17.04.17.
@@ -70,20 +71,31 @@ public class Ratelimit {
     //creative use allows usage of other classes
     private final Class clazz;
 
+    //show this to the user when they hit the ratelimit
+    private final Function<Context, String> message;
+
     public Class getClazz() {
         return clazz;
     }
 
+    public Function<Context, String> getMessage() {
+        return message;
+    }
+
     /**
+     * @param name          name of this ratelimit, will be used to register at the cache metrics
+     * @param cacheMetrics  metrics collector to register the rates cache of this ratelimit with
      * @param executorService executor to issue bans with (which may result in a database access, so they are kept off main thread)
      * @param userWhiteList whitelist of user that should never be rate limited or blacklisted by this object
      * @param scope         on which scope this rate limiter shall operate
      * @param maxRequests   how many maxRequests shall be possible in the specified time
      * @param milliseconds  time in milliseconds, in which maxRequests shall be allowed
      * @param clazz         the optional (=can be null) clazz of commands to be ratelimited by this ratelimiter
+     * @param message       message to show to users that hit a ratelimit. accept a context which can be used for i18ning the message
      */
     public Ratelimit(String name, CacheMetricsCollector cacheMetrics, ExecutorService executorService,
-                     Set<Long> userWhiteList, Scope scope, long maxRequests, long milliseconds, Class clazz) {
+                     Set<Long> userWhiteList, Scope scope, long maxRequests, long milliseconds, Class clazz,
+                     Function<Context, String> message) {
         this.executorService = executorService;
         rates = CacheBuilder.newBuilder()
                 .recordStats()
@@ -97,6 +109,7 @@ public class Ratelimit {
         this.maxRequests = maxRequests;
         this.timeSpan = milliseconds;
         this.clazz = clazz;
+        this.message = message;
     }
 
     public boolean isAllowed(Context context, int weight) {

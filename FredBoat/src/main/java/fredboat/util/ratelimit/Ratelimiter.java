@@ -28,12 +28,13 @@ import fredboat.audio.queue.PlaylistInfo;
 import fredboat.command.info.ShardsCommand;
 import fredboat.command.music.control.SkipCommand;
 import fredboat.command.util.WeatherCommand;
+import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.abs.Command;
 import fredboat.config.property.AppConfig;
 import fredboat.db.api.BlacklistService;
 import fredboat.feature.metrics.Metrics;
 import fredboat.messaging.internal.Context;
-import fredboat.util.Tuple2;
+import fredboat.util.TextUtils;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 /**
  * Created by napster on 17.04.17.
@@ -76,29 +78,38 @@ public class Ratelimiter {
             autoBlacklist = null;
         }
 
+        Function<Context, String> defaultUserMessage = context -> context.i18n("ratelimitedCommandsUser");
+        Function<Context, String> defaultGuildMessage = context -> context.i18n("ratelimitedCommandsGuild");
+        Function<Context, String> skipMessage = context -> context.i18n("ratelimitedCommandsUser") + "\n"
+                + context.i18nFormat("ratelimitedSkipCommand",
+                "`" + TextUtils.escapeMarkdown(context.getPrefix()) + CommandInitializer.SKIP_COMM_NAME + " n-m`");
+        Function<Context, String> playlistMessage = context -> context.i18n("ratelimitedGuildSlowLoadingPlaylist");
+
         //sort these by harsher limits coming first
         ratelimits.add(new Ratelimit("userShardsComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
-                2, 30000, ShardsCommand.class));
+                2, 30000, ShardsCommand.class, defaultUserMessage));
         ratelimits.add(new Ratelimit("userSkipComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
-                5, 20000, SkipCommand.class));
+                5, 20000, SkipCommand.class, skipMessage));
         ratelimits.add(new Ratelimit("userAllComms", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
-                5, 10000, Command.class));
+                5, 10000, Command.class, defaultUserMessage));
 
         ratelimits.add(new Ratelimit("guildWeatherComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.GUILD,
-                30, 180000, WeatherCommand.class));
+                30, 180000, WeatherCommand.class, defaultGuildMessage));
         ratelimits.add(new Ratelimit("guildSongsAdded", cacheMetrics, executor, whitelist, Ratelimit.Scope.GUILD,
-                1000, 120000, PlaylistInfo.class));
+                1000, 120000, PlaylistInfo.class, playlistMessage));
         ratelimits.add(new Ratelimit("guildAllComms", cacheMetrics, executor, whitelist, Ratelimit.Scope.GUILD,
-                10, 10000, Command.class));
+                10, 10000, Command.class, defaultGuildMessage));
     }
 
     /**
      * @param context           the context of the request
      * @param command           the command or other kind of object to be used
      * @param weight            how heavy the request is, default should be 1
-     * @return a result object containing further information
+     *
+     * @return Whether this user is allowed to proceed. (true if they are ratelimited, false if everythign is fine).
+     * If they happen to be ratelimited, they will be messaged, so the caller of this can just return.
      */
-    public Tuple2<Boolean, Class> isAllowed(Context context, Object command, int weight) {
+    public boolean isRatelimited(Context context, Object command, int weight) {
         for (Ratelimit ratelimit : ratelimits) {
             if (ratelimit.getClazz().isInstance(command)) {
                 boolean allowed;
@@ -110,15 +121,16 @@ public class Ratelimiter {
                 }
                 if (!allowed) {
                     Metrics.commandsRatelimited.labels(command.getClass().getSimpleName()).inc();
-                    return new Tuple2<>(false, ratelimit.getClazz());
+                    context.replyWithMention(ratelimit.getMessage().apply(context));
+                    return true;
                 }
             }
         }
-        return new Tuple2<>(true, null);
+        return false;
     }
 
-    public Tuple2<Boolean, Class> isAllowed(Context context, Object command) {
-        return isAllowed(context, command, 1);
+    public boolean isRatelimited(Context context, Object command) {
+        return isRatelimited(context, command, 1);
     }
 
     /**

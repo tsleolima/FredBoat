@@ -32,7 +32,6 @@ import fredboat.command.info.HelloCommand;
 import fredboat.command.info.HelpCommand;
 import fredboat.command.info.ShardsCommand;
 import fredboat.command.info.StatsCommand;
-import fredboat.command.music.control.SkipCommand;
 import fredboat.commandmeta.CommandContextParser;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.CommandManager;
@@ -51,8 +50,6 @@ import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
-import fredboat.util.TextUtils;
-import fredboat.util.Tuple2;
 import fredboat.util.ratelimit.Ratelimiter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
@@ -192,22 +189,15 @@ public class EventListenerBoat extends AbstractEventListener {
      * @param context Command context of the command to be invoked.
      */
     private void limitOrExecuteCommand(CommandContext context) {
-        Tuple2<Boolean, Class> ratelimiterResult = ratelimiter.isAllowed(context, context.command);
+        if (ratelimiter.isRatelimited(context, context.command)) {
+            return;
+        }
 
-        if (ratelimiterResult.a) {
-            try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
-                 Histogram.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
-            ) {
-                commandManager.prefixCalled(context);
-            }
-        } else {
-            String out = context.i18n("ratelimitedGeneralInfo");
-            if (ratelimiterResult.b == SkipCommand.class) { //we can compare classes with == as long as we are using the same classloader (which we are)
-                //add a nice reminder on how to skip more than 1 song
-                out += "\n" + context.i18nFormat("ratelimitedSkipCommand",
-                        "`" + TextUtils.escapeMarkdown(context.getPrefix()) + CommandInitializer.SKIP_COMM_NAME + " n-m`");
-            }
-            context.replyWithMention(out);
+        try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
+             // their performance should be judged by the totalResponseTime metric instead
+             Histogram.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
+        ) {
+            commandManager.prefixCalled(context);
         }
     }
 
