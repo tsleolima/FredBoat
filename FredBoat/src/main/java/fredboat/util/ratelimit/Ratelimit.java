@@ -24,14 +24,21 @@
 
 package fredboat.util.ratelimit;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import fredboat.messaging.internal.Context;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import fredboat.util.rest.CacheUtil;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by napster on 17.04.17.
@@ -43,11 +50,13 @@ import java.util.concurrent.ExecutorService;
  */
 public class Ratelimit {
 
+    private final static Logger log = LoggerFactory.getLogger(Ratelimit.class);
+
     private final ExecutorService executorService;
 
     public enum Scope {USER, GUILD}
 
-    private final Long2ObjectOpenHashMap<Rate> limits;
+    private final LoadingCache<Long, Rate> rates;
     private final long maxRequests;
     private final long timeSpan;
 
@@ -73,9 +82,15 @@ public class Ratelimit {
      * @param milliseconds  time in milliseconds, in which maxRequests shall be allowed
      * @param clazz         the optional (=can be null) clazz of commands to be ratelimited by this ratelimiter
      */
-    public Ratelimit(ExecutorService executorService, Set<Long> userWhiteList, Scope scope, long maxRequests, long milliseconds, Class clazz) {
+    public Ratelimit(String name, CacheMetricsCollector cacheMetrics, ExecutorService executorService,
+                     Set<Long> userWhiteList, Scope scope, long maxRequests, long milliseconds, Class clazz) {
         this.executorService = executorService;
-        this.limits = new Long2ObjectOpenHashMap<>();
+        rates = CacheBuilder.newBuilder()
+                .recordStats()
+                //we can completely forget the object after this period, the rates would be reset anyways
+                .expireAfterAccess(milliseconds, TimeUnit.MILLISECONDS)
+                .build(CacheLoader.from(Rate::new));
+        cacheMetrics.addCache(name + "Ratelimit", rates);
 
         this.userWhiteList = Collections.unmodifiableSet(userWhiteList);
         this.scope = scope;
@@ -106,11 +121,15 @@ public class Ratelimit {
             id = context.getGuild().getIdLong();
         }
 
-        Rate rate = limits.get(id);
-        if (rate == null)
-            rate = getOrCreateRate(id);
+        Rate rate = CacheUtil.getUncheckedUnwrapped(rates, id);
+        if (rate == null) {
+            log.warn("Shiver me timbers, cache calling new Rate({}) returned null", id);
+            return true; //not expected to happen, let it slip in a user friendly way
+        }
 
         //synchronize on the individual rate objects since we are about to change and save them
+        // we can use these to synchronize because they are backed by a cache, subsequent calls to fetch them
+        // will return the same object
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (rate) {
             long now = System.currentTimeMillis();
@@ -156,26 +175,11 @@ public class Ratelimit {
         context.replyWithMention(out);
     }
 
-
-    /**
-     * synchronize the creation of new Rate objects
-     */
-    private synchronized Rate getOrCreateRate(long id) {
-        //was one created on the meantime? use that
-        Rate result = limits.get(id);
-        if (result != null) return result;
-
-        //create, save and return it
-        result = new Rate(id);
-        limits.put(id, result);
-        return result;
-    }
-
     /**
      * completely resets a limit for an id (user or guild for example)
      */
     public synchronized void liftLimit(long id) {
-        limits.remove(id);
+        rates.invalidate(id);
     }
 
     class Rate {

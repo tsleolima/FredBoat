@@ -34,6 +34,7 @@ import fredboat.db.api.BlacklistService;
 import fredboat.feature.metrics.Metrics;
 import fredboat.messaging.internal.Context;
 import fredboat.util.Tuple2;
+import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -59,7 +60,8 @@ public class Ratelimiter {
     @Nullable
     private final Blacklist autoBlacklist;
 
-    public Ratelimiter(AppConfig appConfig, ExecutorService executor, BlacklistService blacklistService) {
+    public Ratelimiter(AppConfig appConfig, ExecutorService executor, BlacklistService blacklistService,
+                       CacheMetricsCollector cacheMetrics) {
         Set<Long> whitelist = ConcurrentHashMap.newKeySet();
 
         //only works for those admins who are added with their userId and not through a roleId
@@ -75,13 +77,19 @@ public class Ratelimiter {
         }
 
         //sort these by harsher limits coming first
-        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.USER, 2, 30000, ShardsCommand.class));
-        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.USER, 5, 20000, SkipCommand.class));
-        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.USER, 5, 10000, Command.class));
+        ratelimits.add(new Ratelimit("userShardsComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
+                2, 30000, ShardsCommand.class));
+        ratelimits.add(new Ratelimit("userSkipComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
+                5, 20000, SkipCommand.class));
+        ratelimits.add(new Ratelimit("userAllComms", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
+                5, 10000, Command.class));
 
-        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.GUILD, 30, 180000, WeatherCommand.class));
-        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.GUILD, 1000, 120000, PlaylistInfo.class));
-        ratelimits.add(new Ratelimit(executor, whitelist, Ratelimit.Scope.GUILD, 10, 10000, Command.class));
+        ratelimits.add(new Ratelimit("guildWeatherComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.GUILD,
+                30, 180000, WeatherCommand.class));
+        ratelimits.add(new Ratelimit("guildSongsAdded", cacheMetrics, executor, whitelist, Ratelimit.Scope.GUILD,
+                1000, 120000, PlaylistInfo.class));
+        ratelimits.add(new Ratelimit("guildAllComms", cacheMetrics, executor, whitelist, Ratelimit.Scope.GUILD,
+                10, 10000, Command.class));
     }
 
     /**
