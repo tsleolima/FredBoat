@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,7 +55,7 @@ public class Stats {
     }
 
 
-    @GetMapping(produces = "application/json")
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<String> getStats() {
         return Mono.fromCallable(this::buildStats);
     }
