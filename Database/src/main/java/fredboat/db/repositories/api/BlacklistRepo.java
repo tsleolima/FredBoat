@@ -27,6 +27,7 @@ package fredboat.db.repositories.api;
 
 import fredboat.db.entity.main.BlacklistEntry;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -37,6 +38,16 @@ public interface BlacklistRepo extends Repo<Long, BlacklistEntry> {
     /**
      * @return the whole blacklist aka all entries. Not a lightweight operation, and shouldn't be called outside
      * of initial population of the blacklist (and probably not even then, reworking the ratelimiter is planned).
+     *
+     * @deprecated This loads a ton of data all at once. A better endpoint will be provided in the future, if a
+     * legitimate use case can be found. Meanwhile, {@link BlacklistRepo#getEntry(long)} + a cache are good enough.
      */
+    @Deprecated
     List<BlacklistEntry> loadBlacklist();
+
+    /**
+     * @return existing BlacklistEnty or null if none exists
+     */
+    @Nullable
+    BlacklistEntry getEntry(long id);
 }
