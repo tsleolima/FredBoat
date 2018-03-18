@@ -27,6 +27,7 @@ package fredboat.util.ratelimit;
 import fredboat.audio.queue.PlaylistInfo;
 import fredboat.command.info.ShardsCommand;
 import fredboat.command.music.control.SkipCommand;
+import fredboat.command.music.info.ExportCommand;
 import fredboat.command.util.WeatherCommand;
 import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.abs.Command;
@@ -90,6 +91,8 @@ public class Ratelimiter {
                 2, 30000, ShardsCommand.class, defaultUserMessage));
         ratelimits.add(new Ratelimit("userSkipComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
                 5, 20000, SkipCommand.class, skipMessage));
+        ratelimits.add(new Ratelimit("userExportComm", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
+                2, 60000, ExportCommand.class, defaultUserMessage));
         ratelimits.add(new Ratelimit("userAllComms", cacheMetrics, executor, whitelist, Ratelimit.Scope.USER,
                 5, 10000, Command.class, defaultUserMessage));
 
