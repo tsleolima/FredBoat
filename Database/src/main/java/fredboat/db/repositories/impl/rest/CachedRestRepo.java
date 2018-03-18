@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class CachedRestRepo<I extends Serializable, E extends SaucedEntity<I, E>> extends RestRepo<I, E> {
 
-    private final LoadingCache<I, E> cache;
+    protected final LoadingCache<I, E> cache;
 
     /**
      * Create the CachedRestRepo using a default cache
