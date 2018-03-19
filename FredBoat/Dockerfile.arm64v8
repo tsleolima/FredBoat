@@ -1,4 +1,4 @@
-FROM openjdk:9-jdk-slim
+FROM arm64v8/openjdk:9-jdk-slim
 
 ENV ENV docker
 

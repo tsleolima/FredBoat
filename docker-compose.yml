@@ -18,7 +18,8 @@ services:
   ##                               Database
   ################################################################################
   db:
-    image: fredboat/postgres
+    image: fredboat/postgres:latest
+    #image: fredboat/postgres:arm64v8   #for (some) arm based machines
     #build: ./FredBoat/docker/database/ #useful alternative for developers
     restart: always
     labels:
@@ -43,6 +44,7 @@ services:
     # (example: going from v2 to v3) usually requires manual migration. what exactly is needed is published on the
     # FredBoat selfhosting website and/or the selfhosters channel (see top of this file for how to get to these places)
     # Once you use the dev branch, you may not be able to go back to stable without deleting your database.
+    # To run on (some) arm based machines, prepend the tag with arm64v8-, for example: fredboat/quarterdeck:arm64v8-dev-v1
     image: fredboat/quarterdeck:stable-v1
     #image: fredboat/quarterdeck:dev-v1
     restart: always
@@ -62,6 +64,7 @@ services:
   bot:
     # for choosing between stable or dev, read the paragraph above in the Quarterdeck section
     # IMPORTANT: both quarterdeck and fredboat need to either be on the stable, or on the dev branch
+    # To run on (some) arm based machines, prepend the tag with arm64v8-, for example: fredboat/fredboat:arm64v8-dev-v3
     image: fredboat/fredboat:stable-v3
     #image: fredboat/fredboat:dev-v3
     #build: ./FredBoat #useful alternative for developers
@@ -93,6 +96,8 @@ services:
   ##                         Automatic updates
   ################################################################################
   # if you want automatic updates, uncomment the watchtower lines below
+  # watchtower is not yet officially available for arm64v8. See https://github.com/v2tec/watchtower/pull/178 for progress
+  # but you can try using napstr/watchtower:arm64v8-latest
 
   #watchtower:
   #  image: v2tec/watchtower
