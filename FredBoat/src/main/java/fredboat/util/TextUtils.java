@@ -159,7 +159,7 @@ public class TextUtils {
      *
      * @param body the content that should be uploaded to a paste service
      * @return the url of the uploaded paste, or null if there was an exception doing so. This is represented by the
-     * Optional retrun type
+     * Optional return type
      */
     public static CompletableFuture<Optional<String>> postToPasteService(String body) {
         return postToHastebin(body)

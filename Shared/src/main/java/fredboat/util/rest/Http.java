@@ -182,31 +182,31 @@ public class Http {
 
         /**
          * Enqueue this request with okhttp. This is a non-blocking alternative to {@link SimpleRequest#execute},
-         * callbacks will be called from okhttp internal thread pool.
+         * callbacks will be called from okhttp's internal thread pool.
          *
          * @return A Callback enhanced as CompletableFuture, that takes care of closing the Response and provides
-         * convenience transformations of the response body to string an json representations.
+         * convenience transformations of the response body to string and json representations.
          */
         @CheckReturnValue
         public CompletableCallback enqueue() {
-            CompletableCallback completableCallback = new CompletableCallback();
-            enqueue(completableCallback);
-            return completableCallback;
+            return enqueue(new CompletableCallback());
         }
 
         /**
          * Enqueue this request with okhttp. This is a non-blocking alternative to {@link SimpleRequest#execute},
-         * callbacks will be called from okhttp internal thread pool.
+         * callbacks will be called from okhttp's internal thread pool.
          * <p>
-         * Make sure to also have a look at {@link SimpleRequest#enqueue()} that provides a basic Callback
+         * Make sure to also have a look at {@link SimpleRequest#enqueue()} that makes use of our own default Callback
          * implementation.
          *
          * @param callback success and failure callback
+         * @return the callback that was passed in, for chaining
          */
-        public void enqueue(Callback callback) {
+        public <T extends Callback> T enqueue(T callback) {
             Request req = requestBuilder.build();
             log.debug("{} {} {}", req.method(), req.url().toString(), req.body() != null ? req.body() : "");
             httpClient.newCall(req).enqueue(callback);
+            return callback;
         }
 
         //give me the content, don't care about error handling
