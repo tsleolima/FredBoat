@@ -16,7 +16,6 @@ import fredboat.jda.JdaEntityProvider;
 import fredboat.metrics.OkHttpEventMetrics;
 import fredboat.util.ratelimit.Ratelimiter;
 import fredboat.util.rest.Http;
-import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -53,8 +52,7 @@ public class BotController {
 
 
     public BotController(ConfigPropertiesProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
-                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler,
-                         ExecutorService executor, HibernateStatisticsCollector hibernateStats,
+                         EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler, ExecutorService executor,
                          PlayerRegistry playerRegistry, JdaEntityProvider jdaEntityProvider, BotMetrics botMetrics,
                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
                          Ratelimiter ratelimiter, GuildConfigService guildConfigService, GuildModulesService guildModulesService,
@@ -64,9 +62,6 @@ public class BotController {
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
-        try {
-            hibernateStats.register(); //call this exactly once after all db connections have been created
-        } catch (IllegalStateException ignored) {}//can happen when using the REST repos
         this.executor = executor;
         this.playerRegistry = playerRegistry;
         this.jdaEntityProvider = jdaEntityProvider;

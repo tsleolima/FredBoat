@@ -24,9 +24,7 @@
 
 package fredboat.config;
 
-import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import io.prometheus.client.hibernate.HibernateStatisticsCollector;
 import io.prometheus.client.logback.InstrumentedAppender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,17 +39,6 @@ public class MetricsConfiguration {
     @Bean
     public CacheMetricsCollector cacheMetrics() {
         return new CacheMetricsCollector().register();
-    }
-
-    //challenge: call register on the hibernate stats after all database connections are set up
-    @Bean
-    public HibernateStatisticsCollector hibernateStatisticsCollector() {
-        return new HibernateStatisticsCollector();
-    }
-
-    @Bean
-    public PrometheusMetricsTrackerFactory prometheusMetricsTrackerFactory() {
-        return new PrometheusMetricsTrackerFactory();
     }
 
     @Bean

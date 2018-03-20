@@ -42,7 +42,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import space.npstr.sqlsauce.DatabaseException;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -81,7 +80,7 @@ public class Launcher implements ApplicationRunner {
     private final PlayerLimiter playerLimiter;
     private final YoutubeAPI youtubeAPI;
 
-    public static void main(String[] args) throws IllegalArgumentException, DatabaseException {
+    public static void main(String[] args) throws IllegalArgumentException {
         //just post the info to the console
         if (args.length > 0 &&
                 (args[0].equalsIgnoreCase("-v")
