@@ -33,7 +33,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.config.property.AppConfig;
-import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.api.SearchResultService;
 import fredboat.db.transfer.SearchResult;
 import fredboat.definitions.SearchProvider;
@@ -185,8 +184,9 @@ public class TrackSearcher {
             return searchResultService.getSearchResult(id, cacheMaxAge)
                     .map(searchResult -> searchResult.getSearchResult(audioPlayerManager))
                     .orElse(null);
-        } catch (DatabaseNotReadyException ignored) {
-            log.warn("Could not retrieve cached search result from database.");
+        } catch (Exception e) {
+            //could be a database issue, could be a serialization issue. better to catch them all here and "orderly" return
+            log.warn("Could not retrieve cached search result from database.", e);
             return null;
         }
     }
