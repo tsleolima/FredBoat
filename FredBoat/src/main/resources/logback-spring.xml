@@ -100,19 +100,27 @@
         </encoder>
     </appender>
 
+    <!-- the level can be overridden via the fredboat.yaml file-->
+    <logger name="com.fredboat" level="DEBUG" additivity="true">
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="ERROR"/>
+        <appender-ref ref="FB_STDOUT_DEBUG"/>
+    </logger>
+
+    <!-- the level can be overridden via the fredboat.yaml file-->
     <logger name="fredboat" level="DEBUG" additivity="true">
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="ERROR"/>
-        <!-- enable this appender to see fredboats debug logs in your console / IDE
-             if you enable it in the root logger further below you will see the debug logs of all the other libraries too -->
-        <!--<appender-ref ref="FB_STDOUT_DEBUG"/>-->
+        <appender-ref ref="FB_STDOUT_DEBUG"/>
     </logger>
 
     <!-- Gives us a nice JDA log with only JDA output -->
+    <!-- the level can be overridden via the fredboat.yaml file-->
     <logger name="net.dv8tion" level="DEBUG" additivity="true">
         <appender-ref ref="JDA"/>
     </logger>
 
+    <!-- the level can be overridden via the fredboat.yaml file-->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>

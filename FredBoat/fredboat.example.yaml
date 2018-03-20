@@ -63,6 +63,9 @@ server:
 spring:
   main:
     web-application-type: none    # Set this to "servlet", "reactive" or "none", whichever ends up working, to enable/disable the FredBoat API.
+  output:
+    ansi:
+      enabled: detect             # for developers: setting this to "always" will force colored logs in your console
 
 
 audio-sources:
@@ -150,6 +153,18 @@ event-logger:
   guildStatsInterval:         60 # interval at which guild stats are posted in minutes
 
 
+# tune these according to your needs, or just leave them as is.
+logging:
+  file:
+    max-history: 30
+    max-size: 1GB
+  path: ./logs/
+
+  level:
+    root: INFO
+    fredboat: DEBUG
+    com.fredboat: DEBUG
+    net.dv8tion: DEBUG
 
 # If you are running lavalink nodes this is the place to add them.
 # Examples shown below, don't forget to uncomment them properly.
