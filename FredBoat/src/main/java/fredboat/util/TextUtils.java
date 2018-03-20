@@ -51,6 +51,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,18 +138,18 @@ public class TextUtils {
         context.replyWithMention(SORRY + "\n" + BotConstants.hangoutInvite);
     }
 
-    private static CompletableFuture<String> postToHasteBasedService(String baseUrl, String body) {
+    private static CompletionStage<String> postToHasteBasedService(String baseUrl, String body) {
         return BotController.HTTP.post(baseUrl, body, "text/plain")
                 .enqueue()
                 .asJson()
                 .thenApply(json -> json.getString("key"));
     }
 
-    private static CompletableFuture<String> postToHastebin(String body) {
+    private static CompletionStage<String> postToHastebin(String body) {
         return postToHasteBasedService("https://hastebin.com/documents", body);
     }
 
-    private static CompletableFuture<String> postToWastebin(String body) {
+    private static CompletionStage<String> postToWastebin(String body) {
         return postToHasteBasedService("https://wastebin.party/documents", body);
     }
 
@@ -161,7 +162,7 @@ public class TextUtils {
      * @return the url of the uploaded paste, or null if there was an exception doing so. This is represented by the
      * Optional return type
      */
-    public static CompletableFuture<Optional<String>> postToPasteService(String body) {
+    public static CompletionStage<Optional<String>> postToPasteService(String body) {
         return postToHastebin(body)
                 .thenApply(key -> Optional.of("https://hastebin.com/" + key))
                 .exceptionally(t -> {

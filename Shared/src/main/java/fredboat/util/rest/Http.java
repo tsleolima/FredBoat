@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -184,7 +185,7 @@ public class Http {
          * Enqueue this request with okhttp. This is a non-blocking alternative to {@link SimpleRequest#execute},
          * callbacks will be called from okhttp's internal thread pool.
          *
-         * @return A Callback enhanced as CompletableFuture, that takes care of closing the Response and provides
+         * @return A Callback enhanced as CompletionStage, that takes care of closing the Response and provides
          * convenience transformations of the response body to string and json representations.
          */
         @CheckReturnValue
@@ -278,7 +279,7 @@ public class Http {
         /**
          * @return transform the body of the {@link okhttp3.Response} into it's String representation
          */
-        public CompletableFuture<String> asString() {
+        public CompletionStage<String> asString() {
             return this.thenApply(response -> {
                 try {
                     //noinspection ConstantConditions
@@ -293,7 +294,7 @@ public class Http {
         /**
          * @return transform the body of the {@link okhttp3.Response} into it's JSONObject representation
          */
-        public CompletableFuture<JSONObject> asJson() {
+        public CompletionStage<JSONObject> asJson() {
             return asString().thenApply(JSONObject::new);
         }
     }
