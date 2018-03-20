@@ -143,8 +143,7 @@ public class OpenWeatherAPI implements Weather {
                         .url(url)
                         .build();
 
-                try {
-                    Response response = client.newCall(request).execute();
+                try (Response response = client.newCall(request).execute()) {
                     ResponseBody responseBody = response.body();
 
                     switch (response.code()) {
