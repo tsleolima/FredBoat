@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,16 +22,15 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.rest;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.gson.Gson;
+import fredboat.db.transfer.TransferObject;
 import fredboat.util.rest.CacheUtil;
-import fredboat.util.rest.Http;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import space.npstr.sqlsauce.entities.SaucedEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
@@ -40,15 +38,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by napster on 18.02.18.
  */
-public abstract class CachedRestRepo<I extends Serializable, E extends SaucedEntity<I, E>> extends RestRepo<I, E> {
+public abstract class CachedRestService<I extends Serializable, E extends TransferObject<I>> extends RestService<I, E> {
 
     protected final LoadingCache<I, E> cache;
 
     /**
      * Create the CachedRestRepo using a default cache
      */
-    public CachedRestRepo(String path, Class<E> entityClass, Http http, Gson gson, String auth) {
-        this(path, entityClass, http, gson, auth,
+    public CachedRestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate) {
+        this(path, entityClass, backendRestTemplate,
                 CacheBuilder.newBuilder()
                         .expireAfterAccess(60, TimeUnit.SECONDS)
                         .expireAfterWrite(120, TimeUnit.SECONDS)
@@ -56,8 +54,8 @@ public abstract class CachedRestRepo<I extends Serializable, E extends SaucedEnt
         );
     }
 
-    public CachedRestRepo(String path, Class<E> entityClass, Http http, Gson gson, String auth, CacheBuilder<Object, Object> cacheBuilder) {
-        super(path, entityClass, http, gson, auth);
+    public CachedRestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate, CacheBuilder<Object, Object> cacheBuilder) {
+        super(path, entityClass, backendRestTemplate);
         this.cache = cacheBuilder.build(CacheLoader.from(super::fetch));
     }
 
@@ -66,15 +64,18 @@ public abstract class CachedRestRepo<I extends Serializable, E extends SaucedEnt
      *
      * @return itself for chaining calls
      */
-    public CachedRestRepo<I, E> registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+    public CachedRestService<I, E> registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
         cacheMetrics.addCache(name, cache);
         return this;
     }
 
     @Override
-    public void delete(I id) {
-        super.delete(id);
-        cache.invalidate(id);
+    protected void delete(I id) {
+        try {
+            super.delete(id);
+        } finally {
+            cache.invalidate(id);
+        }
     }
 
     @Override

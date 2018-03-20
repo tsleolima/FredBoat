@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,46 +22,44 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import fredboat.db.entity.main.Prefix;
-import fredboat.db.repositories.api.PrefixRepo;
-import fredboat.util.rest.Http;
+import fredboat.config.property.BackendConfig;
+import fredboat.db.api.GuildDataService;
+import fredboat.db.transfer.GuildData;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import space.npstr.sqlsauce.entities.GuildBotComposite;
+import net.dv8tion.jda.core.entities.Guild;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
+import java.util.function.Function;
 
+import static fredboat.db.FriendlyEntityService.fetchUserFriendly;
 /**
  * Created by napster on 17.02.18.
  */
-public class RestPrefixRepo extends CachedRestRepo<GuildBotComposite, Prefix> implements PrefixRepo {
+@Component
+public class RestGuildDataService extends CachedRestService<Long, GuildData> implements GuildDataService {
 
-    public static final String PATH = "prefix/";
+    public static final String PATH = "guilddata/";
 
-    public RestPrefixRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + VERSION_PATH + PATH, Prefix.class, http, gson, auth);
+    public RestGuildDataService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildData.class, quarterdeckRestTemplate);
     }
 
     @Override
-    public RestPrefixRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+    public RestGuildDataService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
         super.registerCacheStats(cacheMetrics, name);
         return this;
     }
 
-    @Nullable
     @Override
-    public String getPrefix(GuildBotComposite id) {
-        try {
-            String payload = gson.toJson(id);
-            log.debug("Payload: " + payload);
-            Http.SimpleRequest getRaw = http.post(path + "getraw", payload, "application/json");
-            return gson.fromJson(auth(getRaw).asString(), String.class);
-        } catch (IOException | JsonSyntaxException e) {
-            throw new BackendException("Could not get prefix for guild " + id.getGuildId(), e);
-        }
+    public GuildData fetchGuildData(Guild guild) {
+        return fetchUserFriendly(() -> fetch(guild.getIdLong()));
+    }
+
+    @Override
+    public GuildData transformGuildData(Guild guild, Function<GuildData, GuildData> transformation) {
+        return fetchUserFriendly(() -> merge(transformation.apply(fetchGuildData(guild))));
     }
 }

@@ -31,7 +31,7 @@ import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
-import fredboat.db.entity.main.GuildModules;
+import fredboat.db.transfer.GuildModules;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
 import fredboat.main.Launcher;

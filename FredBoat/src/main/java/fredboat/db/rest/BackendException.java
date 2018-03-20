@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,20 +22,29 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
-
-import fredboat.db.entity.main.GuildData;
-import net.dv8tion.jda.core.entities.Guild;
-
-import java.util.function.Function;
+package fredboat.db.rest;
 
 /**
- * Created by napster on 07.02.18.
+ * Created by napster on 28.02.18.
+ * <p>
+ * Usually wraps another exception so look for the cause.
  */
-public interface GuildDataService {
+public class BackendException extends RuntimeException {
 
-    GuildData fetchGuildData(Guild guild);
+    private static final long serialVersionUID = -2936856678286772706L;
 
-    GuildData transformGuildData(Guild guild, Function<GuildData, GuildData> transformation);
+    public BackendException() {//force creation with a message / cause
+    }
 
+    public BackendException(String message) {
+        super(message);
+    }
+
+    public BackendException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BackendException(Throwable cause) {
+        super(cause);
+    }
 }

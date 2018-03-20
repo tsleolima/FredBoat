@@ -25,19 +25,18 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.Prefix;
+import fredboat.db.transfer.GuildData;
 import net.dv8tion.jda.core.entities.Guild;
-import space.npstr.sqlsauce.entities.GuildBotComposite;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface PrefixService {
+public interface GuildDataService {
 
-    Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation);
+    GuildData fetchGuildData(Guild guild);
 
-    Optional<String> getPrefix(GuildBotComposite id);
+    GuildData transformGuildData(Guild guild, Function<GuildData, GuildData> transformation);
+
 }

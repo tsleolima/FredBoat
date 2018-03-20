@@ -22,29 +22,55 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.transfer;
 
 /**
- * Created by napster on 28.02.18.
+ * Created by napster on 20.03.18.
  * <p>
- * Usually wraps another exception so look for the cause.
+ * Transfer object for the {@link fredboat.db.entity.main.GuildConfig}
  */
-public class BackendException extends RuntimeException {
+//todo move ""business"" logic to the backend
+public class GuildConfig implements TransferObject<String> {
 
-    private static final long serialVersionUID = -2936856678286772706L;
+    private String guildId = "";
+    private boolean trackAnnounce = false;
+    private boolean autoResume = false;
+    private String lang = "en_US";
 
-    public BackendException() {//force creation with a message / cause
+    @Override
+    public void setId(String id) {
+        this.guildId = id;
     }
 
-    public BackendException(String message) {
-        super(message);
+    @Override
+    public String getId() {
+        return this.guildId;
     }
 
-    public BackendException(String message, Throwable cause) {
-        super(message, cause);
+    public boolean isTrackAnnounce() {
+        return trackAnnounce;
     }
 
-    public BackendException(Throwable cause) {
-        super(cause);
+    public GuildConfig setTrackAnnounce(boolean trackAnnounce) {
+        this.trackAnnounce = trackAnnounce;
+        return this;
+    }
+
+    public boolean isAutoResume() {
+        return autoResume;
+    }
+
+    public GuildConfig setAutoResume(boolean autoplay) {
+        this.autoResume = autoplay;
+        return this;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public GuildConfig setLang(String lang) {
+        this.lang = lang;
+        return this;
     }
 }

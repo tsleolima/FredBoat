@@ -40,7 +40,7 @@ import fredboat.config.SentryConfiguration;
 import fredboat.config.property.AppConfig;
 import fredboat.db.api.GuildConfigService;
 import fredboat.db.api.GuildDataService;
-import fredboat.db.entity.main.GuildData;
+import fredboat.db.transfer.GuildData;
 import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;

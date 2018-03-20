@@ -24,20 +24,15 @@
 
 package fredboat.config;
 
-import com.google.gson.Gson;
 import fredboat.config.property.BackendConfig;
-import fredboat.db.repositories.api.*;
-import fredboat.db.repositories.impl.rest.*;
-import fredboat.main.BotController;
+import fredboat.db.rest.RestService;
 import fredboat.main.ShutdownHandler;
 import fredboat.shared.constant.ExitCodes;
-import fredboat.util.rest.Http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,16 +43,14 @@ import java.util.stream.Collectors;
  * Create our entity repositories
  */
 @Configuration
-public class RepoConfiguration {
+public class QuarterdeckConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(RepoConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(QuarterdeckConfiguration.class);
 
-    private final BackendConfig.Quarterdeck quarterdeckConfig;
-    private final Gson gson = new Gson();
-    private final Http http = BotController.HTTP; //todo replace
-
-    public RepoConfiguration(BackendConfig backendConfig, ShutdownHandler shutdownHandler) throws InterruptedException {
-        this.quarterdeckConfig = backendConfig.getQuarterdeck();
+    public QuarterdeckConfiguration(BackendConfig backendConfig, ShutdownHandler shutdownHandler,
+                                    RestTemplate quarterdeckRestTemplate)
+            throws InterruptedException {
+        BackendConfig.Quarterdeck quarterdeck = backendConfig.getQuarterdeck();
 
         log.info("Contacting the quarterdeck backend");
         String[] apiVersions = null;
@@ -65,8 +58,7 @@ public class RepoConfiguration {
         Exception lastException = null;
         while ((apiVersions == null || apiVersions.length < 1) && attempts < 100) { //total time is 100 sec
             try {
-                String s = http.get(quarterdeckConfig.getHost() + "info/api/versions").auth(quarterdeckConfig.getBasicAuth()).asString();
-                apiVersions = gson.fromJson(s, String[].class);
+                apiVersions = quarterdeckRestTemplate.getForObject(quarterdeck.getHost() + "info/api/versions", String[].class);
             } catch (Exception ignored) {
                 lastException = ignored;
                 attempts++;
@@ -87,7 +79,7 @@ public class RepoConfiguration {
         log.info("Supported Quarterdeck API versions: {}", String.join(", ", supportedApiVersions));
 
 
-        String ourVersion = Integer.toString(RestRepo.API_VERSION);
+        String ourVersion = Integer.toString(RestService.API_VERSION);
         if (supportedApiVersions.contains(ourVersion)
                 || supportedApiVersions.contains("v" + ourVersion)) {
             log.info("Using Quarterdeck API v{}", ourVersion);
@@ -95,41 +87,5 @@ public class RepoConfiguration {
             log.error("Quarterdeck API does not support our expected version v{}. Update quarterdeck, or roll back this FredBoat version!", ourVersion);
             shutdownHandler.shutdown(ExitCodes.EXIT_CODE_ERROR);
         }
-    }
-
-    @Bean
-    public BlacklistRepo blacklistRepo() {
-        return new RestBlacklistRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
-    }
-
-    @Bean
-    public GuildConfigRepo guildConfigRepo() {
-        return new RestGuildConfigRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
-    }
-
-    @Bean
-    public GuildDataRepo guildDataRepo() {
-        return new RestGuildDataRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
-    }
-
-    @Bean
-    public GuildModulesRepo guildModulesRepo() {
-        return new RestGuildModulesRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
-    }
-
-    @Bean
-    public GuildPermsRepo guildPermsRepo() {
-        return new RestGuildPermsRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
-    }
-
-    @Bean
-    public PrefixRepo prefixRepo() {
-        return new RestPrefixRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
-    }
-
-    @Nullable
-    @Bean
-    public SearchResultRepo searchResultRepo() {
-        return new RestSearchResultRepo(quarterdeckConfig.getHost(), http, gson, quarterdeckConfig.getBasicAuth());
     }
 }

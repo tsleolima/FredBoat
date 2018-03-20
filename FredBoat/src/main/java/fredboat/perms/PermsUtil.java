@@ -26,7 +26,7 @@
 package fredboat.perms;
 
 import fredboat.commandmeta.abs.CommandContext;
-import fredboat.db.entity.main.GuildPermissions;
+import fredboat.db.transfer.GuildPermissions;
 import fredboat.definitions.PermissionLevel;
 import fredboat.main.Launcher;
 import fredboat.util.DiscordUtil;

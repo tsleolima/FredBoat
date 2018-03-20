@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,28 +22,48 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.rest;
 
-import com.google.gson.Gson;
-import fredboat.db.entity.main.GuildPermissions;
-import fredboat.db.repositories.api.GuildPermsRepo;
-import fredboat.util.rest.Http;
+import fredboat.config.property.BackendConfig;
+import fredboat.db.api.BlacklistService;
+import fredboat.db.transfer.BlacklistEntry;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import static fredboat.db.FriendlyEntityService.doUserFriendly;
+import static fredboat.db.FriendlyEntityService.fetchUserFriendly;
 
 /**
  * Created by napster on 17.02.18.
  */
-public class RestGuildPermsRepo extends CachedRestRepo<String, GuildPermissions> implements GuildPermsRepo {
+@Component
+public class RestBlacklistService extends CachedRestService<Long, BlacklistEntry> implements BlacklistService {
 
-    public static final String PATH = "guildperms/";
+    public static final String PATH = "blacklist/";
 
-    public RestGuildPermsRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + VERSION_PATH + PATH, GuildPermissions.class, http, gson, auth);
+    public RestBlacklistService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, BlacklistEntry.class, quarterdeckRestTemplate);
     }
 
     @Override
-    public RestGuildPermsRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+    public RestBlacklistService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
         super.registerCacheStats(cacheMetrics, name);
         return this;
+    }
+
+    @Override
+    public BlacklistEntry fetchBlacklistEntry(long id) {
+        return fetchUserFriendly(() -> fetch(id));
+    }
+
+    @Override
+    public BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry) {
+        return fetchUserFriendly(() -> merge(entry));
+    }
+
+    @Override
+    public void deleteBlacklistEntry(long id) {
+        doUserFriendly(() -> delete(id));
     }
 }

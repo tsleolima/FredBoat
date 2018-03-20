@@ -31,6 +31,7 @@ import com.google.common.cache.LoadingCache;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
+import fredboat.db.transfer.Prefix;
 import fredboat.definitions.PermissionLevel;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
@@ -39,7 +40,6 @@ import fredboat.util.DiscordUtil;
 import fredboat.util.rest.CacheUtil;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.Guild;
-import space.npstr.sqlsauce.entities.GuildBotComposite;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,7 +69,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
             .expireAfterAccess(1, TimeUnit.MINUTES) //evict inactive guilds
             .concurrencyLevel(Launcher.getBotController().getCredentials().getRecommendedShardCount())  //each shard has a thread (main JDA thread) accessing this cache many times
             .build(CacheLoader.asyncReloading(CacheLoader.from(
-                    guildId -> Launcher.getBotController().getPrefixService().getPrefix(new GuildBotComposite(guildId, DiscordUtil.getBotId(Launcher.getBotController().getCredentials())))),
+                    guildId -> Launcher.getBotController().getPrefixService().getPrefix(new Prefix.GuildBotId(guildId, DiscordUtil.getBotId(Launcher.getBotController().getCredentials())))),
                     Launcher.getBotController().getExecutor()));
 
     @Nonnull

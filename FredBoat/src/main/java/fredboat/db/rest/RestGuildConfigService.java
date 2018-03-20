@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,47 +22,45 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-import fredboat.db.entity.main.BlacklistEntry;
-import fredboat.db.repositories.api.BlacklistRepo;
-import fredboat.util.rest.Http;
+import fredboat.config.property.BackendConfig;
+import fredboat.db.api.GuildConfigService;
+import fredboat.db.transfer.GuildConfig;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import net.dv8tion.jda.core.entities.Guild;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.function.Function;
+
+import static fredboat.db.FriendlyEntityService.fetchUserFriendly;
 
 /**
  * Created by napster on 17.02.18.
  */
-public class RestBlacklistRepo extends CachedRestRepo<Long, BlacklistEntry> implements BlacklistRepo {
+@Component
+public class RestGuildConfigService extends CachedRestService<String, GuildConfig> implements GuildConfigService {
 
-    public static final String PATH = "blacklist/";
+    public static final String PATH = "guildconfig/";
 
-    public RestBlacklistRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + VERSION_PATH + PATH, BlacklistEntry.class, http, gson, auth);
+    public RestGuildConfigService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildConfig.class, quarterdeckRestTemplate);
     }
 
-
     @Override
-    public RestBlacklistRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+    public RestGuildConfigService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
         super.registerCacheStats(cacheMetrics, name);
         return this;
     }
 
     @Override
-    public List<BlacklistEntry> loadBlacklist() {
-        try {
-            Http.SimpleRequest get = http.get(path + "loadall");
-            String answer = auth(get).asString();
-            log.debug(answer);
-            return gson.fromJson(answer, new TypeToken<List<BlacklistEntry>>() {
-            }.getType());
-        } catch (IOException | JsonSyntaxException e) {
-            throw new BackendException("Could not load the blacklist", e);
-        }
+    public GuildConfig fetchGuildConfig(Guild guild) {
+        return fetchUserFriendly(() -> fetch(guild.getId()));
+    }
+
+    @Override
+    public GuildConfig transformGuildConfig(Guild guild, Function<GuildConfig, GuildConfig> transformation) {
+        return fetchUserFriendly(() -> merge(transformation.apply(fetchGuildConfig(guild))));
     }
 }

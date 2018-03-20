@@ -25,7 +25,7 @@
 package fredboat.util.ratelimit;
 
 import fredboat.db.api.BlacklistService;
-import fredboat.db.entity.main.BlacklistEntry;
+import fredboat.db.transfer.BlacklistEntry;
 import fredboat.feature.metrics.Metrics;
 
 import java.util.Collections;

@@ -25,17 +25,27 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.GuildPermissions;
-import net.dv8tion.jda.core.entities.Guild;
+import fredboat.db.transfer.SearchResult;
 
-import java.util.function.Function;
+import java.util.Optional;
 
 /**
  * Created by napster on 07.02.18.
  */
-public interface GuildPermsService {
+public interface SearchResultService {
 
-    GuildPermissions fetchGuildPermissions(Guild guild);
+    /**
+     * Merge a search result into the database.
+     *
+     * @return the merged SearchResult object, or null when there is no cache database
+     */
+    Optional<SearchResult> mergeSearchResult(SearchResult searchResult);
 
-    GuildPermissions transformGuildPerms(Guild guild, Function<GuildPermissions, GuildPermissions> transformation);
+    /**
+     * @param maxAgeMillis the maximum age of the cached search result; provide a negative value for eternal cache
+     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
+     * cache database
+     */
+    Optional<SearchResult> getSearchResult(SearchResult.SearchResultId id, long maxAgeMillis);
+
 }

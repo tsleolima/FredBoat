@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,31 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
-
-import fredboat.db.entity.cache.SearchResult;
-
-import javax.annotation.Nullable;
-
-/**
- * Created by napster on 07.02.18.
- */
-public interface SearchResultService {
-
-    /**
-     * Merge a search result into the database.
-     *
-     * @return the merged SearchResult object, or null when there is no cache database
-     */
-    @Nullable
-    SearchResult merge(SearchResult searchResult);
-
-    /**
-     * @param maxAgeMillis the maximum age of the cached search result; provide a negative value for eternal cache
-     * @return the cached search result; may return null for a non-existing or outdated search, or when there is no
-     * cache database
-     */
-    @Nullable
-    SearchResult getSearchResult(SearchResult.SearchResultId id, long maxAgeMillis);
-
-}
+@space.npstr.annotations.FieldsAreNonNullByDefault
+@space.npstr.annotations.ParametersAreNonnullByDefault
+@space.npstr.annotations.ReturnTypesAreNonNullByDefault
+package fredboat.db.transfer;

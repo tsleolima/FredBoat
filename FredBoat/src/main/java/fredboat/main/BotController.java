@@ -5,8 +5,10 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.audio.player.AudioConnectionFacade;
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.config.property.*;
-import fredboat.db.EntityService;
-import fredboat.db.api.*;
+import fredboat.db.api.GuildConfigService;
+import fredboat.db.api.GuildModulesService;
+import fredboat.db.api.GuildPermsService;
+import fredboat.db.api.PrefixService;
 import fredboat.event.EventListenerBoat;
 import fredboat.feature.metrics.BotMetrics;
 import fredboat.feature.metrics.Metrics;
@@ -38,7 +40,10 @@ public class BotController {
     //central event listener that all events by all shards pass through
     private final EventListenerBoat mainEventListener;
     private final ShutdownHandler shutdownHandler;
-    private final EntityService entityService;
+    private final GuildConfigService guildConfigService;
+    private final GuildModulesService guildModulesService;
+    private final GuildPermsService guildPermsService;
+    private final PrefixService prefixService;
     private final PlayerRegistry playerRegistry;
     private final JdaEntityProvider jdaEntityProvider;
     private final BotMetrics botMetrics;
@@ -49,16 +54,16 @@ public class BotController {
 
     public BotController(ConfigPropertiesProvider configProvider, AudioConnectionFacade audioConnectionFacade, ShardManager shardManager,
                          EventListenerBoat eventListenerBoat, ShutdownHandler shutdownHandler,
-                         EntityService entityService, ExecutorService executor, HibernateStatisticsCollector hibernateStats,
+                         ExecutorService executor, HibernateStatisticsCollector hibernateStats,
                          PlayerRegistry playerRegistry, JdaEntityProvider jdaEntityProvider, BotMetrics botMetrics,
                          @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
-                         Ratelimiter ratelimiter) {
+                         Ratelimiter ratelimiter, GuildConfigService guildConfigService, GuildModulesService guildModulesService,
+                         GuildPermsService guildPermsService, PrefixService prefixService) {
         this.configProvider = configProvider;
         this.audioConnectionFacade = audioConnectionFacade;
         this.shardManager = shardManager;
         this.mainEventListener = eventListenerBoat;
         this.shutdownHandler = shutdownHandler;
-        this.entityService = entityService;
         try {
             hibernateStats.register(); //call this exactly once after all db connections have been created
         } catch (IllegalStateException ignored) {}//can happen when using the REST repos
@@ -68,6 +73,10 @@ public class BotController {
         this.botMetrics = botMetrics;
         this.audioPlayerManager = audioPlayerManager;
         this.ratelimiter = ratelimiter;
+        this.guildConfigService = guildConfigService;
+        this.guildModulesService = guildModulesService;
+        this.guildPermsService = guildPermsService;
+        this.prefixService = prefixService;
 
         Runtime.getRuntime().addShutdownHook(new Thread(createShutdownHook(), "FredBoat main shutdownhook"));
     }
@@ -110,23 +119,19 @@ public class BotController {
     }
 
     public GuildConfigService getGuildConfigService() {
-        return entityService;
+        return guildConfigService;
     }
 
     public GuildModulesService getGuildModulesService() {
-        return entityService;
+        return guildModulesService;
     }
 
     public GuildPermsService getGuildPermsService() {
-        return entityService;
+        return guildPermsService;
     }
 
     public PrefixService getPrefixService() {
-        return entityService;
-    }
-
-    public SearchResultService getSearchResultService() {
-        return entityService;
+        return prefixService;
     }
 
     public PlayerRegistry getPlayerRegistry() {

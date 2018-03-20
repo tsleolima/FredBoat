@@ -23,28 +23,19 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.api;
 
-import com.google.gson.Gson;
-import fredboat.db.entity.main.GuildData;
-import fredboat.db.repositories.api.GuildDataRepo;
-import fredboat.util.rest.Http;
-import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import fredboat.db.transfer.GuildConfig;
+import net.dv8tion.jda.core.entities.Guild;
+
+import java.util.function.Function;
 
 /**
- * Created by napster on 17.02.18.
+ * Created by napster on 07.02.18.
  */
-public class RestGuildDataRepo extends CachedRestRepo<Long, GuildData> implements GuildDataRepo {
+public interface GuildConfigService {
 
-    public static final String PATH = "guilddata/";
+    GuildConfig fetchGuildConfig(Guild guild);
 
-    public RestGuildDataRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + VERSION_PATH + PATH, GuildData.class, http, gson, auth);
-    }
-
-    @Override
-    public RestGuildDataRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        super.registerCacheStats(cacheMetrics, name);
-        return this;
-    }
+    GuildConfig transformGuildConfig(Guild guild, Function<GuildConfig, GuildConfig> transformation);
 }

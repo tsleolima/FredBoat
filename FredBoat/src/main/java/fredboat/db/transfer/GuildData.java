@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,28 +22,38 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.transfer;
 
-import com.google.gson.Gson;
-import fredboat.db.entity.main.GuildModules;
-import fredboat.db.repositories.api.GuildModulesRepo;
-import fredboat.util.rest.Http;
-import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import javax.annotation.CheckReturnValue;
 
 /**
- * Created by napster on 17.02.18.
+ * Created by napster on 20.03.18.
+ * <p>
+ * Transfer object for the {@link fredboat.db.entity.main.GuildData}
  */
-public class RestGuildModulesRepo extends CachedRestRepo<Long, GuildModules> implements GuildModulesRepo {
+//todo move ""business"" logic to the backend
+public class GuildData implements TransferObject<Long> {
 
-    public static final String PATH = "guildmodules/";
+    private long guildId;
+    private long timestampHelloSent;
 
-    public RestGuildModulesRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + VERSION_PATH + PATH, GuildModules.class, http, gson, auth);
+    @Override
+    public void setId(Long guildId) {
+        this.guildId = guildId;
     }
 
     @Override
-    public RestGuildModulesRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        super.registerCacheStats(cacheMetrics, name);
+    public Long getId() {
+        return guildId;
+    }
+
+    public long getTimestampHelloSent() {
+        return timestampHelloSent;
+    }
+
+    @CheckReturnValue
+    public GuildData helloSent() {
+        this.timestampHelloSent = System.currentTimeMillis();
         return this;
     }
 }

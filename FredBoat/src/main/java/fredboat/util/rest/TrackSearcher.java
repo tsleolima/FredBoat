@@ -35,7 +35,7 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import fredboat.config.property.AppConfig;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.db.api.SearchResultService;
-import fredboat.db.entity.cache.SearchResult;
+import fredboat.db.transfer.SearchResult;
 import fredboat.definitions.SearchProvider;
 import fredboat.feature.metrics.Metrics;
 import fredboat.feature.togglz.FeatureFlags;
@@ -130,7 +130,7 @@ public class TrackSearcher {
                         log.debug("Loaded search result {} {} from lavaplayer", provider, query);
                         // got a search result? cache and return it
                         executor.execute(() -> searchResultService
-                                .merge(new SearchResult(audioPlayerManager, provider, query, lavaplayerResult)));
+                                .mergeSearchResult(new SearchResult(audioPlayerManager, provider, query, lavaplayerResult)));
                         Metrics.searchHits.labels("lavaplayer-" + provider.name().toLowerCase()).inc();
                         return lavaplayerResult;
                     }
@@ -154,7 +154,7 @@ public class TrackSearcher {
                         log.debug("Loaded search result {} {} from Youtube API", provider, query);
                         // got a search result? cache and return it
                         executor.execute(() -> searchResultService
-                                .merge(new SearchResult(audioPlayerManager, provider, query, youtubeApiResult)));
+                                .mergeSearchResult(new SearchResult(audioPlayerManager, provider, query, youtubeApiResult)));
                         Metrics.searchHits.labels("youtube-api").inc();
                         return youtubeApiResult;
                     }
@@ -182,8 +182,9 @@ public class TrackSearcher {
     private AudioPlaylist fromCache(SearchProvider provider, String searchTerm, long cacheMaxAge) {
         try {
             SearchResult.SearchResultId id = new SearchResult.SearchResultId(provider, searchTerm);
-            SearchResult searchResult = searchResultService.getSearchResult(id, cacheMaxAge);
-            return searchResult != null ? searchResult.getSearchResult(audioPlayerManager) : null;
+            return searchResultService.getSearchResult(id, cacheMaxAge)
+                    .map(searchResult -> searchResult.getSearchResult(audioPlayerManager))
+                    .orElse(null);
         } catch (DatabaseNotReadyException ignored) {
             log.warn("Could not retrieve cached search result from database.");
             return null;

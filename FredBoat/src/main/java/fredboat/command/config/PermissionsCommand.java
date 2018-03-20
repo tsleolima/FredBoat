@@ -29,7 +29,7 @@ import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IConfigCommand;
-import fredboat.db.entity.main.GuildPermissions;
+import fredboat.db.transfer.GuildPermissions;
 import fredboat.definitions.PermissionLevel;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;

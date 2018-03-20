@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -25,17 +24,18 @@
 
 package fredboat.db.api;
 
-import fredboat.db.entity.main.BlacklistEntry;
+
+import fredboat.db.rest.BackendException;
+import fredboat.db.transfer.BlacklistEntry;
 
 /**
  * Created by napster on 07.02.18.
  */
 public interface BlacklistService {
 
-    BlacklistEntry fetchBlacklistEntry(long id);
+    BlacklistEntry fetchBlacklistEntry(long id) throws BackendException;
 
-    BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry);
+    BlacklistEntry mergeBlacklistEntry(BlacklistEntry entry) throws BackendException;
 
-    void deleteBlacklistEntry(long id);
-
+    void deleteBlacklistEntry(long id) throws BackendException;
 }

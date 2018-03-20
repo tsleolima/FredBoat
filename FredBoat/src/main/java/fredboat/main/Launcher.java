@@ -58,19 +58,7 @@ import java.util.concurrent.ExecutorService;
         FlywayAutoConfiguration.class
 })
 @ComponentScan(basePackages = {
-        "fredboat.api",
-        "fredboat.audio.player",
-        "fredboat.audio.queue",
-        "fredboat.commandmeta",
-        "fredboat.config",
-        "fredboat.db",
-        "fredboat.event",
-        "fredboat.feature",
-        "fredboat.feature.metrics",
-        "fredboat.jda",
-        "fredboat.main",
-        "fredboat.util.ratelimit",
-        "fredboat.util.rest",
+        "fredboat",
 })
 public class Launcher implements ApplicationRunner {
 

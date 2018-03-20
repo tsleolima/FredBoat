@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,88 +22,76 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import fredboat.db.repositories.api.Repo;
-import fredboat.util.rest.Http;
+import fredboat.db.transfer.TransferObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import space.npstr.sqlsauce.entities.SaucedEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
  * Created by napster on 17.02.18.
  *
  * Counterpart to the EntityController of the Quarterdeck module.
+ * The calls to methods of this class are expected to be wrapped by the service implementations
  */
-public abstract class RestRepo<I extends Serializable, E extends SaucedEntity<I, E>> implements Repo<I, E> {
+public abstract class RestService<I extends Serializable, E extends TransferObject<I>> {
 
-    protected static final Logger log = LoggerFactory.getLogger(RestRepo.class);
+    protected static final Logger log = LoggerFactory.getLogger(RestService.class);
 
     public static final int API_VERSION = 0;
     public static final String VERSION_PATH = "v" + API_VERSION + "/";
 
     protected final String path;
     protected final Class<E> entityClass;
-    protected final Http http;
-    protected final Gson gson;
-    protected final String auth;
+    protected final RestTemplate backendRestTemplate;
 
     /**
      * @param path base path of this resource, including the version and a trailing slash
      *             Example: http://quarterdeck:4269/v1/blacklist/
      */
-    public RestRepo(String path, Class<E> entityClass, Http http, Gson gson, String auth) {
+    protected RestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate) {
         this.path = path;
         this.entityClass = entityClass;
-        this.http = http;
-        this.gson = gson;
-        this.auth = auth;
+        this.backendRestTemplate = backendRestTemplate;
     }
 
-    public Class<E> getEntityClass() {
+    protected Class<E> getEntityClass() {
         return entityClass;
     }
 
-    @Override
-    public void delete(I id) { //todo success handling?
+    protected void delete(I id) { //todo success handling?
         try {
-            Http.SimpleRequest delete = http.post(path + "delete", gson.toJson(id), "application/json");
-            //noinspection ResultOfMethodCallIgnored
-            auth(delete).execute();
-        } catch (IOException | JsonSyntaxException e) {
+            backendRestTemplate.postForObject(path + "delete", id, Void.class);
+        } catch (RestClientException e) {
             throw new BackendException(String.format("Could not delete entity with id %s of class %s", id, entityClass), e);
         }
     }
 
-    @Override
-    public E fetch(I id) {
+    protected E fetch(I id) {
         try {
-            Http.SimpleRequest fetch = http.post(path + "fetch", gson.toJson(id), "application/json");
-            return gson.fromJson(auth(fetch).asString(), entityClass);
-        } catch (IOException | JsonSyntaxException e) {
+            E result = backendRestTemplate.postForObject(path + "fetch", id, entityClass);
+            if (result == null) {
+                throw new BackendException(String.format("Fetched entity with id %s of class %s is null", id, entityClass));
+            }
+            return result;
+        } catch (RestClientException e) {
             throw new BackendException(String.format("Could not fetch entity with id %s of class %s", id, entityClass), e);
         }
     }
 
-    @Override
-    public E merge(E entity) {
+    protected E merge(E entity) {
         try {
-            Http.SimpleRequest merge = http.post(path + "merge", gson.toJson(entity), "application/json");
-            return gson.fromJson(auth(merge).asString(), entityClass);
-        } catch (IOException | JsonSyntaxException e) {
+            E result = backendRestTemplate.postForObject(path + "merge", entity, entityClass);
+            if (result == null) {
+                throw new BackendException(String.format("Merged entity with id %s of class %s is null", entity.getId(), entityClass));
+            }
+            return result;
+        } catch (RestClientException e) {
             throw new BackendException(String.format("Could not merge entity with id %s of class %s", entity.getId(), entityClass), e);
         }
-    }
-
-    /**
-     * @return the provided request but authed
-     */
-    protected Http.SimpleRequest auth(Http.SimpleRequest request) {
-        return request.auth(auth);
     }
 }

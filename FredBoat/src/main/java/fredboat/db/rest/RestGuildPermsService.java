@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,28 +22,45 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.rest;
 
-import com.google.gson.Gson;
-import fredboat.db.entity.main.GuildConfig;
-import fredboat.db.repositories.api.GuildConfigRepo;
-import fredboat.util.rest.Http;
+import fredboat.config.property.BackendConfig;
+import fredboat.db.api.GuildPermsService;
+import fredboat.db.transfer.GuildPermissions;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
+import net.dv8tion.jda.core.entities.Guild;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.function.Function;
+
+import static fredboat.db.FriendlyEntityService.fetchUserFriendly;
 
 /**
  * Created by napster on 17.02.18.
  */
-public class RestGuildConfigRepo extends CachedRestRepo<String, GuildConfig> implements GuildConfigRepo {
+@Component
+public class RestGuildPermsService extends CachedRestService<String, GuildPermissions> implements GuildPermsService {
 
-    public static final String PATH = "guildconfig/";
+    public static final String PATH = "guildperms/";
 
-    public RestGuildConfigRepo(String apiBasePath, Http http, Gson gson, String auth) {
-        super(apiBasePath + VERSION_PATH + PATH, GuildConfig.class, http, gson, auth);
+    public RestGuildPermsService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildPermissions.class, quarterdeckRestTemplate);
     }
 
     @Override
-    public RestGuildConfigRepo registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
+    public RestGuildPermsService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
         super.registerCacheStats(cacheMetrics, name);
         return this;
+    }
+
+    @Override
+    public GuildPermissions fetchGuildPermissions(Guild guild) {
+        return fetchUserFriendly(() -> fetch(guild.getId()));
+    }
+
+    @Override
+    public GuildPermissions transformGuildPerms(Guild guild, Function<GuildPermissions, GuildPermissions> transformation) {
+        return fetchUserFriendly(() -> merge(transformation.apply(fetchGuildPermissions(guild))));
     }
 }

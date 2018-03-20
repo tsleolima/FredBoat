@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,20 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat.db.api;
-
-import fredboat.db.entity.main.GuildModules;
-import net.dv8tion.jda.core.entities.Guild;
-
-import java.util.function.Function;
-
-/**
- * Created by napster on 07.02.18.
- */
-public interface GuildModulesService {
-
-    GuildModules fetchGuildModules(Guild guild);
-
-    GuildModules transformGuildModules(Guild guild, Function<GuildModules, GuildModules> transformation);
-
-}
+@space.npstr.annotations.FieldsAreNonNullByDefault
+@space.npstr.annotations.ParametersAreNonnullByDefault
+@space.npstr.annotations.ReturnTypesAreNonNullByDefault
+package fredboat.db.rest;

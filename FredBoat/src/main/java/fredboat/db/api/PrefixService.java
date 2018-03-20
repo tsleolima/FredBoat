@@ -23,7 +23,20 @@
  * SOFTWARE.
  */
 
-@space.npstr.annotations.FieldsAreNonNullByDefault
-@space.npstr.annotations.ParametersAreNonnullByDefault
-@space.npstr.annotations.ReturnTypesAreNonNullByDefault
-package fredboat.db.repositories.impl.rest;
+package fredboat.db.api;
+
+import fredboat.db.transfer.Prefix;
+import net.dv8tion.jda.core.entities.Guild;
+
+import java.util.Optional;
+import java.util.function.Function;
+
+/**
+ * Created by napster on 07.02.18.
+ */
+public interface PrefixService {
+
+    Prefix transformPrefix(Guild guild, Function<Prefix, Prefix> transformation);
+
+    Optional<String> getPrefix(Prefix.GuildBotId id);
+}
