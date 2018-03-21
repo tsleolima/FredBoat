@@ -41,6 +41,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.context.annotation.ComponentScan;
 
 import java.io.IOException;
@@ -109,7 +110,14 @@ public class Launcher implements ApplicationRunner {
         }
 
         System.setProperty("spring.config.name", "fredboat");
-        SpringApplication.run(Launcher.class, args);
+        SpringApplication app = new SpringApplication(Launcher.class);
+        app.addListeners(event -> {
+            if (event instanceof ApplicationFailedEvent) {
+                ApplicationFailedEvent failed = (ApplicationFailedEvent) event;
+                log.error("Application failed", failed.getException());
+            }
+        });
+        app.run(args);
     }
 
     public static BotController getBotController() {
