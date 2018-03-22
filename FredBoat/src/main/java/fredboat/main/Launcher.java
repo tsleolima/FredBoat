@@ -258,7 +258,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         //force some metrics to be populated, then turn on metrics to be served
-        botMetrics.start(shardProvider, configProvider.getCredentials());
+        botMetrics.start(shardProvider, configProvider.getCredentials(), guildProvider);
         FredBoatAgent.start(statsAgent);
     }
 
