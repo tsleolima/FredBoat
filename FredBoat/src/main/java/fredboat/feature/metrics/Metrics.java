@@ -212,6 +212,18 @@ public class Metrics {
             .labelNames("class") //subclass of the messaging exception
             .register();
 
+    public static final Counter selectionChoiceChosen = Counter.build()
+            .name("fredboat_selection_choice_chosen_total")
+            .help("Which number the user picked after being presented with search results")
+            .labelNames("number") //1, 2, 3, 4, 5
+            .register();
+
+    public static final Counter multiSelections = Counter.build()
+            .name("fredboat_multiselections_total")
+            .help("Each time a user used multiselection")
+            .labelNames("total_amount") //how many choices were multiselected, e.g. 2, 3, 4, 5
+            .register();
+
     // ################################################################################
     // ##                           Http stats
     // ################################################################################

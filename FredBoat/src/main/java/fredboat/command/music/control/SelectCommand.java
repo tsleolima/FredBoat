@@ -35,6 +35,7 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
 import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.definitions.PermissionLevel;
+import fredboat.feature.metrics.Metrics;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
@@ -94,6 +95,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
             for (Integer value : requestChoices) {
                 if (1 <= value && value <= selection.choices.size()) {
                     validChoices.add(value);
+                    Metrics.selectionChoiceChosen.labels(value.toString()).inc();
                 }
             }
 
@@ -103,6 +105,9 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
             if (validChoices.isEmpty()) {
                 throw new NumberFormatException();
             } else {
+                if (validChoices.size() > 1) {
+                    Metrics.multiSelections.labels(Integer.toString(validChoices.size())).inc();
+                }
                 AudioTrack[] selectedTracks = new AudioTrack[validChoices.size()];
                 StringBuilder outputMsgBuilder = new StringBuilder();
                 GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
