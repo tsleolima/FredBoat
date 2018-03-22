@@ -70,6 +70,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -342,6 +343,9 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
         playerRegistry.destroyPlayer(event.getGuild());
+
+        long lifespan = OffsetDateTime.now().toEpochSecond() - event.getGuild().getSelfMember().getJoinDate().toEpochSecond();
+        Metrics.guildLifespan.observe(lifespan);
     }
 
     @Override

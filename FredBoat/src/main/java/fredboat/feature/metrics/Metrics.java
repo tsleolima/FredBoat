@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by napster on 08.09.17.
@@ -250,6 +251,27 @@ public class Metrics {
     public static final Counter databaseExceptionsCreated = Counter.build()
             .name("fredboat_db_exceptions_created_total")
             .help("Total database exceptions created")
+            .register();
+
+    public static final Histogram guildLifespan = Histogram.build()
+            .name("fredboat_guild_lifespan_seconds")
+            .help("How long were we part of a guild when leaving it")
+            .buckets(
+                    TimeUnit.MINUTES.toSeconds(1),
+                    TimeUnit.MINUTES.toSeconds(10),
+                    TimeUnit.MINUTES.toSeconds(30),
+                    TimeUnit.HOURS.toSeconds(1),
+                    TimeUnit.HOURS.toSeconds(6),
+                    TimeUnit.HOURS.toSeconds(12),
+                    TimeUnit.DAYS.toSeconds(1),
+                    TimeUnit.DAYS.toSeconds(2),
+                    TimeUnit.DAYS.toSeconds(7),
+                    TimeUnit.DAYS.toSeconds(14),
+                    TimeUnit.DAYS.toSeconds(30),
+                    TimeUnit.DAYS.toSeconds(90),
+                    TimeUnit.DAYS.toSeconds(180),
+                    TimeUnit.DAYS.toSeconds(365)
+            )
             .register();
 
 }
