@@ -34,6 +34,7 @@ import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 
+import javax.annotation.CheckReturnValue;
 import java.util.List;
 
 /**
@@ -62,6 +63,7 @@ public class PermsUtil {
     /**
      * @return True if the provided member has at least the requested PermissionLevel or higher. False if not.
      */
+    @CheckReturnValue
     public static boolean checkPerms(PermissionLevel minLevel, Member member) {
         return getPerms(member).getLevel() >= minLevel.getLevel();
     }
@@ -69,13 +71,24 @@ public class PermsUtil {
     /**
      * Check whether the invoker has at least the provided minimum permissions level
      */
+    @CheckReturnValue
     public static boolean checkPermsWithFeedback(PermissionLevel minLevel, CommandContext context) {
         PermissionLevel actual = getPerms(context.invoker);
 
         if (actual.getLevel() >= minLevel.getLevel()) {
             return true;
         } else {
-            context.replyWithName(context.i18nFormat("cmdPermsTooLow", minLevel, actual));
+            if (minLevel.getLevel() >= PermissionLevel.BOT_ADMIN.getLevel()) {
+                if (actual.getLevel() >= PermissionLevel.BOT_ADMIN.getLevel()) {
+                    //fredboat admin tried running administrative command which requires higher administrative level
+                    context.replyImage("https://i.imgur.com/zZQRlCk.png",
+                            "Ahoy fellow bot admin this command is reserved for the bot owner alone.");
+                } else {//regular user tried running administrative command
+                    context.reply("Sorry! That command is reserved for Fredboat administration. Please try something else."); //todo i18n
+                }
+            } else {//regular user tried running command that requires a higher regular user permission level
+                context.replyWithName(context.i18nFormat("cmdPermsTooLow", minLevel, actual));
+            }
             return false;
         }
     }

@@ -109,12 +109,7 @@ public class CommandManager {
         }
 
         if (invoked instanceof ICommandRestricted) {
-            //Check if invoker actually has perms
-            PermissionLevel minPerms = ((ICommandRestricted) invoked).getMinimumPerms();
-            PermissionLevel actual = PermsUtil.getPerms(invoker);
-
-            if(actual.getLevel() < minPerms.getLevel()) {
-                context.replyWithName(context.i18nFormat("cmdPermsTooLow", minPerms, actual));
+            if (!PermsUtil.checkPermsWithFeedback(((ICommandRestricted) invoked).getMinimumPerms(), context)) {
                 return;
             }
         }
