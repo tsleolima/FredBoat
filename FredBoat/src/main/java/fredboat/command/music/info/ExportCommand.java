@@ -33,17 +33,11 @@ import fredboat.commandmeta.abs.IMusicCommand;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
-import org.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class ExportCommand extends Command implements IMusicCommand {
-
-    private static final Logger log = LoggerFactory.getLogger(ExportCommand.class);
 
     public ExportCommand(String name, String... aliases) {
         super(name, aliases);
@@ -61,15 +55,15 @@ public class ExportCommand extends Command implements IMusicCommand {
                 .map(atc -> atc.getTrack().getInfo().uri)
                 .collect(Collectors.joining("\n"));
 
-        try {
-            String url = TextUtils.postToPasteService(out) + ".fredboat";
-            context.reply(context.i18nFormat("exportPlaylistResulted", url));
-        } catch (IOException | JSONException e) {
-            log.error("Failed to upload to any pasteservice.", e);
-            throw new MessagingException(context.i18n("exportPlaylistFail"));
-        }
-        
-        
+        TextUtils.postToPasteService(out)
+                .thenApply(pasteUrl -> {
+                    if (pasteUrl.isPresent()) {
+                        String url = pasteUrl.get() + ".fredboat";
+                        return context.i18nFormat("exportPlaylistResulted", url);
+                    } else {
+                        return context.i18n("exportPlaylistFail") + "\n" + context.i18n("tryLater");
+                    }
+                }).thenAccept(context::reply);
     }
 
     @Nonnull

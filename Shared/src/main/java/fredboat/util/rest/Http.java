@@ -37,6 +37,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -179,6 +181,35 @@ public class Http {
             return httpClient.newCall(req).execute();
         }
 
+        /**
+         * Enqueue this request with okhttp. This is a non-blocking alternative to {@link SimpleRequest#execute},
+         * callbacks will be called from okhttp's internal thread pool.
+         *
+         * @return A Callback enhanced as CompletionStage, that takes care of closing the Response and provides
+         * convenience transformations of the response body to string and json representations.
+         */
+        @CheckReturnValue
+        public CompletableCallback enqueue() {
+            return enqueue(new CompletableCallback());
+        }
+
+        /**
+         * Enqueue this request with okhttp. This is a non-blocking alternative to {@link SimpleRequest#execute},
+         * callbacks will be called from okhttp's internal thread pool.
+         * <p>
+         * Make sure to also have a look at {@link SimpleRequest#enqueue()} that makes use of our own default Callback
+         * implementation.
+         *
+         * @param callback success and failure callback
+         * @return the callback that was passed in, for chaining
+         */
+        public <T extends Callback> T enqueue(T callback) {
+            Request req = requestBuilder.build();
+            log.debug("{} {} {}", req.method(), req.url().toString(), req.body() != null ? req.body() : "");
+            httpClient.newCall(req).enqueue(callback);
+            return callback;
+        }
+
         //give me the content, don't care about error handling
         @Nonnull
         @CheckReturnValue
@@ -224,5 +255,47 @@ public class Http {
                 || type.equals("image/png")
                 || type.equals("image/gif")
                 || type.equals("image/webp"));
+    }
+
+    /**
+     * Callback + CompletableFuture that also takes care of closing the response after the callback processes it
+     */
+    public static class CompletableCallback extends CompletableFuture<Response> implements Callback {
+
+        @Override
+        public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
+            completeExceptionally(e);
+        }
+
+        @Override
+        public void onResponse(@Nonnull Call call, @Nonnull Response response) {
+            try (response) {
+                complete(response);
+            } catch (Exception e) {
+                completeExceptionally(new RuntimeException("Uncaught exception in CompletableCallback success handler", e));
+            }
+        }
+
+        /**
+         * @return transform the body of the {@link okhttp3.Response} into it's String representation
+         */
+        public CompletionStage<String> asString() {
+            return this.thenApply(response -> {
+                try {
+                    //noinspection ConstantConditions
+                    return response.body().string();
+                } catch (IOException | NullPointerException e) {
+                    throw new RuntimeException("Failed to get body of response for request to "
+                            + response.request().method() + " " + response.request().url());
+                }
+            });
+        }
+
+        /**
+         * @return transform the body of the {@link okhttp3.Response} into it's JSONObject representation
+         */
+        public CompletionStage<JSONObject> asJson() {
+            return asString().thenApply(JSONObject::new);
+        }
     }
 }

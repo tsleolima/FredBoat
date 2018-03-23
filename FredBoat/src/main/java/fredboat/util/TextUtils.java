@@ -41,17 +41,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.text.CharacterPredicates;
 import org.apache.commons.text.RandomStringGenerator;
-import org.json.JSONException;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,30 +138,49 @@ public class TextUtils {
         context.replyWithMention(SORRY + "\n" + BotConstants.hangoutInvite);
     }
 
-    private static String postToHastebin(String body) throws IOException {
-        return BotController.HTTP.post("https://hastebin.com/documents", body, "text/plain")
+    private static CompletionStage<String> postToHasteBasedService(String baseUrl, String body) {
+        return BotController.HTTP.post(baseUrl, body, "text/plain")
+                .enqueue()
                 .asJson()
-                .getString("key");
+                .thenApply(json -> json.getString("key"));
     }
 
-    private static String postToWastebin(String body) throws IOException {
-        return BotController.HTTP.post("https://wastebin.party/documents", body, "text/plain")
-                .asJson()
-                .getString("key");
+    private static CompletionStage<String> postToHastebin(String body) {
+        return postToHasteBasedService("https://hastebin.com/documents", body);
+    }
+
+    private static CompletionStage<String> postToWastebin(String body) {
+        return postToHasteBasedService("https://wastebin.party/documents", body);
     }
 
     /**
+     * This method will call all available paste services to attempt to upload the body, and take care of logging any
+     * issues with those underlying paste services, callers only have to handle success or failure (the latter
+     * represented by an empty Optional)
+     *
      * @param body the content that should be uploaded to a paste service
-     * @return the url of the uploaded paste
-     * @throws IOException if none of the paste services allowed a successful upload
+     * @return the url of the uploaded paste, or null if there was an exception doing so. This is represented by the
+     * Optional return type
      */
-    public static String postToPasteService(String body) throws IOException, JSONException {
-        try {
-            return "https://hastebin.com/" + postToHastebin(body);
-        } catch (IOException | JSONException e) {
-            log.warn("Could not post to hastebin, trying backup", e);
-            return "https://wastebin.party/" + postToWastebin(body);
-        }
+    public static CompletionStage<Optional<String>> postToPasteService(String body) {
+        return postToHastebin(body)
+                .thenApply(key -> Optional.of("https://hastebin.com/" + key))
+                .exceptionally(t -> {
+                    log.info("Could not post to hastebin", t);
+                    return Optional.empty();
+                })
+                .thenCompose(url -> {
+                    if (!url.isPresent()) {
+                        return postToWastebin(body)
+                                .thenApply(key -> Optional.of("https://wastebin.party/" + key))
+                                .exceptionally(t -> {
+                                    log.error("Could not post to wastebin either", t);
+                                    return Optional.empty();
+                                });
+                    } else {
+                        return CompletableFuture.completedFuture(url);
+                    }
+                });
     }
 
     public static String formatTime(long millis) {

@@ -32,17 +32,11 @@ import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.messaging.internal.Context;
 import fredboat.util.BrainfuckException;
 import fredboat.util.TextUtils;
-import org.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class BrainfuckCommand extends Command implements IUtilCommand {
-
-    private static final Logger log = LoggerFactory.getLogger(BrainfuckCommand.class);
 
     public BrainfuckCommand(String name, String... aliases) {
         super(name, aliases);
@@ -159,19 +153,16 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
         }
 
         String output = " " + out + "\n-------\n" + out2.substring(1);
-        if (output.length() >= 2000) {
-            String message = "The output of your brainfuck code is too long to be displayed on Discord";//todo i18n
-            try {
-                String pasteUrl = TextUtils.postToPasteService(output);
-                context.reply(message + " and has been uploaded to " + pasteUrl); //todo i18n
-            } catch (IOException | JSONException e) {
-                log.error("Failed to upload to any pasteservice.", e);
-                context.reply(message);
-            }
+        if (output.length() < 2000) {
+            context.reply(output);
             return;
         }
 
-        context.reply(output);
+        String message = "The output of your brainfuck code is too long to be displayed on Discord";//todo i18n
+        TextUtils.postToPasteService(output)
+                .thenApply(pasteUrl -> {
+                    return pasteUrl.map(url -> message + " and has been uploaded to " + url).orElse(message);//todo i18n
+                }).thenAccept(context::reply);
     }
 
     @Nonnull
