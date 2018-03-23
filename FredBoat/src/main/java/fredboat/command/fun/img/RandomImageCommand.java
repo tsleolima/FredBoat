@@ -28,9 +28,11 @@ package fredboat.command.fun.img;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
+import fredboat.definitions.PermissionLevel;
 import fredboat.main.BotController;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
+import fredboat.perms.PermsUtil;
 import fredboat.util.rest.CacheUtil;
 import fredboat.util.rest.Http;
 import okhttp3.Response;
@@ -62,6 +64,7 @@ public class RandomImageCommand extends Command implements IFunCommand {
     //https://regex101.com/r/0TDxsu/2
     private static final Pattern IMGUR_ALBUM = Pattern.compile("^https?://imgur\\.com/a/([a-zA-Z0-9]+)$");
 
+    private final String imgurAlbumUrl;
     private volatile String etag = "";
 
     //contains the images that this class randomly serves, default entry is a "my body is not ready" gif
@@ -69,10 +72,11 @@ public class RandomImageCommand extends Command implements IFunCommand {
 
     public RandomImageCommand(@Nonnull String imgurAlbumUrl, String name, String... aliases) {
         super(name, aliases);
+        this.imgurAlbumUrl = imgurAlbumUrl;
         //update the album every hour
         imgurRefresher.scheduleAtFixedRate(() -> {
             try {
-                populateItems(imgurAlbumUrl);
+                populateItems(true);
             } catch (Exception e) {
                 log.error("Populating imgur album {} failed", imgurAlbumUrl, e);
             }
@@ -81,6 +85,15 @@ public class RandomImageCommand extends Command implements IFunCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+
+        if (context.rawArgs.contains("reload")) {
+            if (PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
+                populateItems(false);
+                context.reply("Reloaded imgur album.");
+                return;
+            }
+        }
+
         context.replyImage(getRandomImageUrl());
     }
 
@@ -101,19 +114,21 @@ public class RandomImageCommand extends Command implements IFunCommand {
     /**
      * Updates the imgur backed images managed by this object
      */
-    private void populateItems(String imgurAlbumUrl) {
+    private void populateItems(boolean useEtag) {
 
-        Matcher m = IMGUR_ALBUM.matcher(imgurAlbumUrl);
+        Matcher m = IMGUR_ALBUM.matcher(this.imgurAlbumUrl);
 
         if (!m.find()) {
-            log.error("Not a valid imgur album url {}", imgurAlbumUrl);
+            log.error("Not a valid imgur album url {}", this.imgurAlbumUrl);
             return;
         }
 
         String albumId = m.group(1);
         Http.SimpleRequest request = BotController.HTTP.get("https://api.imgur.com/3/album/" + albumId)
-                .auth("Client-ID " + Launcher.getBotController().getCredentials().getImgurClientId())
-                .header("If-None-Match", etag);
+                .auth("Client-ID " + Launcher.getBotController().getCredentials().getImgurClientId());
+        if (useEtag) {
+            request = request.header("If-None-Match", etag);
+        }
 
         try (Response response = request.execute()) {
             //etag implementation: nothing has changed
@@ -122,7 +137,7 @@ public class RandomImageCommand extends Command implements IFunCommand {
             // data change, and on the next fetch they will return the old Etag again.
             if (response.code() == 304) {
                 //nothing to do here
-                log.info("Refreshed imgur album {}, no update.", imgurAlbumUrl);
+                log.info("Refreshed imgur album {}, no update.", this.imgurAlbumUrl);
             } else if (response.isSuccessful()) {
                 //noinspection ConstantConditions
                 JSONArray images = new JSONObject(response.body().string()).getJSONObject("data").getJSONArray("images");
@@ -133,16 +148,16 @@ public class RandomImageCommand extends Command implements IFunCommand {
                     urls = imageUrls.toArray(urls);
                     etag = response.header("ETag");
                 }
-                log.info("Refreshed imgur album {}, new data found.", imgurAlbumUrl);
+                log.info("Refreshed imgur album {}, new data found.", this.imgurAlbumUrl);
             } else {
                 //some other status
                 //noinspection ConstantConditions
                 log.warn("Unexpected http status for imgur album request {}, response: {}\n{}",
-                        imgurAlbumUrl, response.toString(), response.body().string());
+                        this.imgurAlbumUrl, response.toString(), response.body().string());
             }
 
         } catch (IOException e) {
-            log.error("Imgur down? Could not fetch imgur album {}", imgurAlbumUrl, e);
+            log.error("Imgur down? Could not fetch imgur album {}", this.imgurAlbumUrl, e);
         }
     }
 
