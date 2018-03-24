@@ -110,6 +110,7 @@ public class Launcher implements ApplicationRunner {
         }
 
         System.setProperty("spring.config.name", "fredboat");
+        System.setProperty("spring.http.converters.preferred-json-mapper", "gson");
         SpringApplication app = new SpringApplication(Launcher.class);
         app.addListeners(event -> {
             if (event instanceof ApplicationFailedEvent) {
