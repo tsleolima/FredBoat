@@ -67,7 +67,7 @@ public class ShardManagerConfiguration {
                 : new DikeSessionController(credentials);
     }
 
-    @Bean
+    @Bean(destroyMethod = "") //we manage the lifecycle ourselves tyvm, see shutdown hook below
     public ShardManager buildShardManager(ConfigPropertiesProvider configProvider, EventListenerBoat mainEventListener,
                                           AudioConnectionFacade audioConnectionFacade, SessionController sessionController,
                                           EventLogger eventLogger, JdaEventsMetricsListener jdaEventsMetricsListener,
