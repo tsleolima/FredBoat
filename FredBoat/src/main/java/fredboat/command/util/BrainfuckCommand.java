@@ -30,7 +30,6 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.messaging.internal.Context;
-import fredboat.util.BrainfuckException;
 import fredboat.util.TextUtils;
 
 import javax.annotation.Nonnull;
@@ -46,7 +45,7 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
     char[] code;
     public static final int MAX_CYCLE_COUNT = 10000;
 
-    public String process(@Nonnull String input, @Nonnull Context context) {
+    public String process(@Nonnull String input, @Nonnull Context context) throws BrainfuckException {
         int data = 0;
         char[] inChars = input.toCharArray();
         int inChar = 0;
@@ -82,7 +81,7 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
                         bytes.put(data, (byte) inChars[inChar++]);
                         break;
                     } catch (IndexOutOfBoundsException ex) {
-                        throw new BrainfuckException(context.i18nFormat("brainfuckInputOOB", inChar - 1), ex);
+                        throw new BrainfuckException(context.i18nFormat("brainfuckInputOOB", inChar - 1));
                     }
                 case '[':
                     if (bytes.get(data) == 0) {
@@ -140,7 +139,13 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
 
         inputArg = inputArg.replaceAll("ZERO", String.valueOf((char) 0));
 
-        String out = process(inputArg, context);
+        String out;
+        try {
+            out = process(inputArg, context);
+        } catch (BrainfuckException e) {
+            context.reply(e.getMessage());
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         for (char c : out.toCharArray()) {
             int sh = (short) c;
@@ -171,5 +176,14 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
         String usage = "{0}{1} <code> [input]\n#";
         String example = " {0}{1} ,.+.+. a";
         return usage + context.i18n("helpBrainfuckCommand") + example;
+    }
+
+    //communicate various brainfuck related issues to the user running this command
+    private static class BrainfuckException extends Exception {
+        private static final long serialVersionUID = -3341995397075703335L;
+
+        public BrainfuckException(String string) {
+            super(string);
+        }
     }
 }
