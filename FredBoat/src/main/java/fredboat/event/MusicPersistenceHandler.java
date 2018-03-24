@@ -67,6 +67,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -81,23 +82,30 @@ public class MusicPersistenceHandler extends ListenerAdapter {
     private final JdaEntityProvider jdaEntityProvider;
     private final AudioPlayerManager audioPlayerManager;
     private final AppConfig appConfig;
+    private final Set<AudioPlayerManager> allPlayerManagers;
 
     public MusicPersistenceHandler(PlayerRegistry playerRegistry, Credentials credentials,
                                    MusicTextChannelProvider musicTextChannelProvider, JdaEntityProvider jdaEntityProvider,
                                    @Qualifier("loadAudioPlayerManager") AudioPlayerManager audioPlayerManager,
-                                   AppConfig appConfig) {
+                                   AppConfig appConfig, Set<AudioPlayerManager> allPlayerManagers) {
         this.playerRegistry = playerRegistry;
         this.credentials = credentials;
         this.musicTextChannelProvider = musicTextChannelProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.audioPlayerManager = audioPlayerManager;
         this.appConfig = appConfig;
+        this.allPlayerManagers = allPlayerManagers;
     }
 
     //this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
     public void handlePreShutdown(int code) {
         if (!appConfig.isMusicDistribution()) {
             persist(code);
+        }
+
+        //will also shutdown all AudioSourceManagers registered with the AudioPlayerManagers
+        for (AudioPlayerManager playerManager : allPlayerManagers) {
+            playerManager.shutdown();
         }
     }
 

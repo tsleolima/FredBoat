@@ -51,6 +51,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Created by napster on 25.02.18.
@@ -62,15 +63,28 @@ import java.util.ArrayList;
  * request (either returns with success or throws a failure)
  * - the paste service AudioPlayerManager should not contain the paste playlist importer to avoid recursion / users
  * abusing fredboat into paste file chains
+ *
+ *
+ * We manage the lifecycles of these Beans ourselves. See {@link fredboat.event.MusicPersistenceHandler}
  */
 @Configuration
 public class AudioPlayerManagerConfiguration {
 
 
     /**
-     * @return the AudioPlayerManager to be used for loading the tracks
+     * @return all AudioPlayerManagers
      */
     @Bean
+    public Set<AudioPlayerManager> allPlayerManagers(@Qualifier("loadAudioPlayerManager") AudioPlayerManager load,
+                                                     @Qualifier("searchAudioPlayerManager") AudioPlayerManager search,
+                                                     @Qualifier("pasteAudioPlayerManager") AudioPlayerManager paste) {
+        return Set.of(load, search, paste);
+    }
+
+    /**
+     * @return the AudioPlayerManager to be used for loading the tracks
+     */
+    @Bean(destroyMethod = "")
     public AudioPlayerManager loadAudioPlayerManager(@Qualifier("preconfiguredAudioPlayerManager") AudioPlayerManager playerManager,
                                                      ArrayList<AudioSourceManager> audioSourceManagers,
                                                      PlaylistImportSourceManager playlistImportSourceManager) {
@@ -84,7 +98,7 @@ public class AudioPlayerManagerConfiguration {
     /**
      * @return the AudioPlayerManager to be used for searching
      */
-    @Bean
+    @Bean(destroyMethod = "")
     public AudioPlayerManager searchAudioPlayerManager(@Qualifier("preconfiguredAudioPlayerManager") AudioPlayerManager playerManager,
                                                        YoutubeAudioSourceManager youtubeAudioSourceManager,
                                                        SoundCloudAudioSourceManager soundCloudAudioSourceManager) {
@@ -96,7 +110,7 @@ public class AudioPlayerManagerConfiguration {
     /**
      * @return audioPlayerManager to load from paste lists
      */
-    @Bean
+    @Bean(destroyMethod = "")
     public AudioPlayerManager pasteAudioPlayerManager(@Qualifier("preconfiguredAudioPlayerManager") AudioPlayerManager playerManager,
                                                       ArrayList<AudioSourceManager> audioSourceManagers) {
         for (AudioSourceManager audioSourceManager : audioSourceManagers) {
@@ -157,7 +171,7 @@ public class AudioPlayerManagerConfiguration {
     /**
      * @return a preconfigured AudioPlayerManager, no AudioSourceManagers set
      */
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public AudioPlayerManager preconfiguredAudioPlayerManager(AppConfig appConfig) {
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
@@ -177,13 +191,13 @@ public class AudioPlayerManagerConfiguration {
     }
 
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public PlaylistImportSourceManager playlistImportSourceManager(@Qualifier("pasteAudioPlayerManager") AudioPlayerManager audioPlayerManager) {
         return new PlaylistImportSourceManager(audioPlayerManager);
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public YoutubeAudioSourceManager youtubeAudioSourceManager() {
         YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
@@ -194,50 +208,50 @@ public class AudioPlayerManagerConfiguration {
         return youtubeAudioSourceManager;
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public SoundCloudAudioSourceManager soundCloudAudioSourceManager() {
         return new SoundCloudAudioSourceManager();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public BandcampAudioSourceManager bandcampAudioSourceManager() {
         return new BandcampAudioSourceManager();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public TwitchStreamAudioSourceManager twitchStreamAudioSourceManager() {
         return new TwitchStreamAudioSourceManager();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public VimeoAudioSourceManager vimeoAudioSourceManager() {
         return new VimeoAudioSourceManager();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public BeamAudioSourceManager beamAudioSourceManager() {
         return new BeamAudioSourceManager();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public SpotifyPlaylistSourceManager spotifyPlaylistSourceManager(TrackSearcher trackSearcher,
                                                                      SpotifyAPIWrapper spotifyAPIWrapper) {
         return new SpotifyPlaylistSourceManager(trackSearcher, spotifyAPIWrapper);
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public LocalAudioSourceManager localAudioSourceManager() {
         return new LocalAudioSourceManager();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public HttpSourceManager httpSourceManager() {
         return new HttpSourceManager();
