@@ -24,13 +24,18 @@
 
 package fredboat.jda;
 
+import com.google.common.base.Suppliers;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.Advised;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -42,32 +47,52 @@ import java.util.stream.Stream;
 public class JdaEntityProvider implements EmoteProvider, GuildProvider, MemberProvider, RoleProvider, ShardProvider,
         TextChannelProvider, UserProvider, VoiceChannelProvider {
 
-    private final ShardManager shardManager;
+    private static final Logger log = LoggerFactory.getLogger(JdaEntityProvider.class);
 
-    public JdaEntityProvider(@Lazy ShardManager shardManager) {
-        this.shardManager = shardManager;
+    private final Supplier<ShardManager> shardManager;
+
+    public JdaEntityProvider(@Lazy ShardManager shardManagerProxy) {
+
+        //unwrap the spring proxy of the shard manager
+        // we require the raw shardManager, because the proxy will error out when accessed during shutdown hooks, but
+        // we manage the lifecycle of the shardManager singleton ourselves, so we don't need spring refusing us to serve
+        // a perfectly fine bean during shutdown hooks.
+        this.shardManager = Suppliers.memoize(() -> {
+            try {
+                ShardManager target = (ShardManager) ((Advised) shardManagerProxy).getTargetSource().getTarget();
+                if (target == null) {
+                    throw new IllegalStateException();
+                }
+                return target;
+            } catch (Exception e) {
+                log.error("Failed to unproxy the shard manager", e);
+                //this should not happen but if it does, just work with the proxy. however we might error out during
+                // execution of shutdown handlers that rely on fetching jdaentities
+                return shardManagerProxy;
+            }
+        });
     }
 
     @Nullable
     @Override
     public Emote getEmoteById(long emoteId) {
-        return shardManager.getEmoteById(emoteId);
+        return shardManager.get().getEmoteById(emoteId);
     }
 
     @Override
     public Stream<Emote> streamEmotes() {
-        return shardManager.getEmoteCache().stream();
+        return shardManager.get().getEmoteCache().stream();
     }
 
     @Override
     @Nullable
     public Guild getGuildById(long guildId) {
-        return shardManager.getGuildById(guildId);
+        return shardManager.get().getGuildById(guildId);
     }
 
     @Override
     public Stream<Guild> streamGuilds() {
-        return shardManager.getGuildCache().stream();
+        return shardManager.get().getGuildCache().stream();
     }
 
     @Override
@@ -80,54 +105,54 @@ public class JdaEntityProvider implements EmoteProvider, GuildProvider, MemberPr
     @Override
     @Nullable
     public Role getRoleById(long roleId) {
-        return shardManager.getRoleById(roleId);
+        return shardManager.get().getRoleById(roleId);
     }
 
     @Override
     public Stream<Role> streamRoles() {
-        return shardManager.getRoleCache().stream();
+        return shardManager.get().getRoleCache().stream();
     }
 
     @Override
     public JDA getShardById(int shardId) {
-        return shardManager.getShardById(shardId);
+        return shardManager.get().getShardById(shardId);
     }
 
     @Override
     public Stream<JDA> streamShards() {
-        return shardManager.getShardCache().stream();
+        return shardManager.get().getShardCache().stream();
     }
 
     @Override
     @Nullable
     public TextChannel getTextChannelById(long textChannelId) {
-        return shardManager.getTextChannelById(textChannelId);
+        return shardManager.get().getTextChannelById(textChannelId);
     }
 
     @Override
     public Stream<TextChannel> streamTextChannels() {
-        return shardManager.getTextChannelCache().stream();
+        return shardManager.get().getTextChannelCache().stream();
     }
 
     @Override
     @Nullable
     public User getUserById(long userId) {
-        return shardManager.getUserById(userId);
+        return shardManager.get().getUserById(userId);
     }
 
     @Override
     public Stream<User> streamUsers() {
-        return shardManager.getUserCache().stream();
+        return shardManager.get().getUserCache().stream();
     }
 
     @Override
     @Nullable
     public VoiceChannel getVoiceChannelById(long voiceChannelId) {
-        return shardManager.getVoiceChannelById(voiceChannelId);
+        return shardManager.get().getVoiceChannelById(voiceChannelId);
     }
 
     @Override
     public Stream<VoiceChannel> streamVoiceChannels() {
-        return shardManager.getVoiceChannelCache().stream();
+        return shardManager.get().getVoiceChannelCache().stream();
     }
 }
