@@ -54,6 +54,7 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: springBootVersion
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion
     compile group: 'com.google.code.gson', name: 'gson', version: gsonVersion
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     compile group: 'org.togglz', name: 'togglz-core', version: togglzVersion
     compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: bucket4jVersion
@@ -65,7 +66,6 @@ dependencies {
     testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: apiGuardianVersion
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
     optional group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: springBootVersion
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 //required by spring boot configuration processor
@@ -84,18 +84,7 @@ processResources {
         ]
     }
 }
-buildscript {
-    ext.kotlin_version = '1.2.31'
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-repositories {
-    mavenCentral()
-}
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"

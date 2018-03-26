@@ -12,9 +12,9 @@ allprojects {
     apply plugin: 'idea'
     group = 'com.fredboat'
 }
-
 subprojects {
     buildscript {
+        ext.kotlin_version = '1.2.31'
         ext {
             //@formatter:off
 
@@ -38,6 +38,7 @@ subprojects {
             classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
             classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
             classpath "io.spring.gradle:propdeps-plugin:${propDepsVersion}"
+            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         }
     }
     apply plugin: 'java'
