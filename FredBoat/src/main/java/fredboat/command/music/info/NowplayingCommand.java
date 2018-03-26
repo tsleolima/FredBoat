@@ -164,7 +164,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     private EmbedBuilder getBeamEmbed(AudioTrackContext atc, BeamAudioTrack at) {
         try {
-            JSONObject json = BotController.HTTP.get("https://beam.pro/api/v1/channels/" + at.getInfo().author).asJson();
+            JSONObject json = BotController.Companion.getHTTP().get("https://beam.pro/api/v1/channels/" + at.getInfo().author).asJson();
 
             return CentralMessaging.getClearThreadLocalEmbedBuilder()
                     .setAuthor(at.getInfo().author, "https://beam.pro/" + at.getInfo().author, json.getJSONObject("user").getString("avatarUrl"))
@@ -180,7 +180,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     static EmbedBuilder getGensokyoRadioEmbed(Context context) {
         try {
-            JSONObject data = XML.toJSONObject(BotController.HTTP.get("https://gensokyoradio.net/xml/").asString()).getJSONObject("GENSOKYORADIODATA");
+            JSONObject data = XML.toJSONObject(BotController.Companion.getHTTP().get("https://gensokyoradio.net/xml/").asString()).getJSONObject("GENSOKYORADIODATA");
 
             String rating = data.getJSONObject("MISC").getInt("TIMESRATED") == 0 ?
                     context.i18n("noneYet") :

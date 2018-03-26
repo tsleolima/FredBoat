@@ -58,7 +58,7 @@ public class YoutubeAPI {
     }
 
     private YoutubeVideo getVideoFromID(String id) {
-        Http.SimpleRequest simpleRequest = BotController.HTTP.get(YOUTUBE_VIDEO, Http.Params.of(
+        Http.SimpleRequest simpleRequest = BotController.Companion.getHTTP().get(YOUTUBE_VIDEO, Http.Params.of(
                 "id", id,
                 "key", credentials.getRandomGoogleKey()
         ));
@@ -83,7 +83,7 @@ public class YoutubeAPI {
     public YoutubeVideo getVideoFromID(String id, boolean verbose) {
         if(verbose){
             String gkey = credentials.getRandomGoogleKey();
-            Http.SimpleRequest request = BotController.HTTP.get(YOUTUBE_VIDEO_VERBOSE, Http.Params.of(
+            Http.SimpleRequest request = BotController.Companion.getHTTP().get(YOUTUBE_VIDEO_VERBOSE, Http.Params.of(
                     "id", id,
                     "key", gkey
             ));
@@ -128,7 +128,7 @@ public class YoutubeAPI {
         JSONObject data;
         String gkey = credentials.getRandomGoogleKey();
 
-        Http.SimpleRequest request = BotController.HTTP.get(YOUTUBE_SEARCH, Http.Params.of(
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get(YOUTUBE_SEARCH, Http.Params.of(
                 "key", gkey,
                 "type", "video",
                 "maxResults", Integer.toString(maxResults),

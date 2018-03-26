@@ -76,7 +76,7 @@ public final class AkinatorListener extends UserListener {
         context.sendTyping();
 
         //Start new session
-        Http.SimpleRequest request = BotController.HTTP.get(NEW_SESSION_URL, Http.Params.of(
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get(NEW_SESSION_URL, Http.Params.of(
                 "player", userId
         ));
 
@@ -111,7 +111,7 @@ public final class AkinatorListener extends UserListener {
     }
 
     private void answerQuestion(byte answer) {
-        Http.SimpleRequest request = BotController.HTTP.get(ANSWER_URL, Http.Params.of(
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get(ANSWER_URL, Http.Params.of(
                 "session", session,
                 "signature", signature,
                 "step", String.valueOf(stepInfo.getStepNum()),
@@ -141,7 +141,7 @@ public final class AkinatorListener extends UserListener {
     private void answerGuess(byte answer) {
         try {
             if (answer == 0) {
-                BotController.HTTP.get(CHOICE_URL,
+                BotController.Companion.getHTTP().get(CHOICE_URL,
                         Http.Params.of(
                                 "session", session,
                                 "signature", signature,
@@ -156,7 +156,7 @@ public final class AkinatorListener extends UserListener {
                         + "<http://akinator.com>");
                 Launcher.getBotController().getMainEventListener().removeListener(userId);
             } else if (answer == 1) {
-                BotController.HTTP.get(EXCLUSION_URL,
+                BotController.Companion.getHTTP().get(EXCLUSION_URL,
                         Http.Params.of(
                                 "session", session,
                                 "signature", signature,
@@ -298,7 +298,7 @@ public final class AkinatorListener extends UserListener {
         private final String imgPath;
 
         Guess() throws IOException, JSONException {
-            Http.SimpleRequest request = BotController.HTTP.get(GET_GUESS_URL, Http.Params.of(
+            Http.SimpleRequest request = BotController.Companion.getHTTP().get(GET_GUESS_URL, Http.Params.of(
                     "session", session,
                     "signature", signature,
                     "step", Integer.toString(stepInfo.getStepNum())

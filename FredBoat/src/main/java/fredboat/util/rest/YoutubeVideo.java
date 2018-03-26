@@ -133,7 +133,7 @@ public class YoutubeVideo {
     }
 
     public String getChannelThumbUrl() {
-        Http.SimpleRequest request = BotController.HTTP.get(YoutubeAPI.YOUTUBE_CHANNEL,
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get(YoutubeAPI.YOUTUBE_CHANNEL,
                 Http.Params.of(
                         "id", channelId,
                         "key", credentials.getRandomGoogleKey()

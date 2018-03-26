@@ -156,7 +156,7 @@ public class PlaylistImportSourceManager implements AudioSourceManager, Playlist
     private List<String> loadAndParseTrackIds(String serviceName, String pasteId) {
         String response;
         try {
-            response = BotController.HTTP.get(PasteServiceConstants.PASTE_SERVICE_URLS.get(serviceName) + pasteId).asString();
+            response = BotController.Companion.getHTTP().get(PasteServiceConstants.PASTE_SERVICE_URLS.get(serviceName) + pasteId).asString();
         } catch (IOException ex) {
             throw new FriendlyException(
                     "Couldn't load playlist. Either " + serviceName + " is down or the playlist does not exist.",

@@ -139,7 +139,7 @@ public class TextUtils {
     }
 
     private static CompletionStage<String> postToHasteBasedService(String baseUrl, String body) {
-        return BotController.HTTP.post(baseUrl, body, "text/plain")
+        return BotController.Companion.getHTTP().post(baseUrl, body, "text/plain")
                 .enqueue()
                 .asJson()
                 .thenApply(json -> json.getString("key"));

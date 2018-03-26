@@ -91,7 +91,7 @@ public class MALCommand extends Command implements IUtilCommand {
 
     //attempts to find an anime with the provided search term, and if that's not possible looks for a user
     private void requestAsync(String term, CommandContext context) {
-        Http.SimpleRequest request = BotController.HTTP.get("https://myanimelist.net/api/anime/search.xml",
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get("https://myanimelist.net/api/anime/search.xml",
                 Http.Params.of(
                         "q", term
                 ))

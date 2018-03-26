@@ -49,7 +49,7 @@ public class JokeCommand extends Command implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         try {
-            JSONObject object = BotController.HTTP.get("http://api.icndb.com/jokes/random").asJson();
+            JSONObject object = BotController.Companion.getHTTP().get("http://api.icndb.com/jokes/random").asJson();
 
             if (!"success".equals(object.getString("type"))) {
                 throw new RuntimeException("Couldn't gather joke ;|");

@@ -117,7 +117,7 @@ public class PatronageChecker {
             //TODO prevent selfhosters from running this?
             try {
                 return new Status(
-                        BotController.HTTP.get(appConfig.isPatronDistribution()
+                        BotController.Companion.getHTTP().get(appConfig.isPatronDistribution()
                                 ? "https://patronapi.fredboat.com/api/drm/" + key
                                 : "http://localhost:4500/api/drm/" + key)
                                 .asJson()

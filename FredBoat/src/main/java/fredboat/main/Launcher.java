@@ -193,7 +193,7 @@ public class Launcher implements ApplicationRunner {
             return false;
         }
 
-        Http.SimpleRequest request = BotController.HTTP.get("https://myanimelist.net/api/account/verify_credentials.xml")
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get("https://myanimelist.net/api/account/verify_credentials.xml")
                 .auth(Credentials.basic(malUser, malPassWord));
 
         try (Response response = request.execute()) {
@@ -216,7 +216,7 @@ public class Launcher implements ApplicationRunner {
             log.info("Imgur credentials not found. Commands relying on Imgur will not work properly.");
             return false;
         }
-        Http.SimpleRequest request = BotController.HTTP.get("https://api.imgur.com/3/credits")
+        Http.SimpleRequest request = BotController.Companion.getHTTP().get("https://api.imgur.com/3/credits")
                 .auth("Client-ID " + imgurClientId);
         try (Response response = request.execute()) {
             //noinspection ConstantConditions

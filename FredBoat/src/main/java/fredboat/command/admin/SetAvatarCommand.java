@@ -127,7 +127,7 @@ public class SetAvatarCommand extends Command implements ICommandRestricted {
     }
 
     private static Icon fetchRemote(URI uri) {
-        try (Response response = BotController.HTTP.get(uri.toString()).execute()) {
+        try (Response response = BotController.Companion.getHTTP().get(uri.toString()).execute()) {
             if (Http.isImage(response)) {
                 //noinspection ConstantConditions
                 InputStream avatarData = response.body().byteStream();

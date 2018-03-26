@@ -224,8 +224,8 @@ public class BotMetrics {
 
         protected void fetch() {
             try {
-                dockerPullsBot = BotController.HTTP.get(BOT_IMAGE_STATS_URL).asJson().getInt("pull_count");
-                dockerPullsDb = BotController.HTTP.get(DB_IMAGE_STATS_URL).asJson().getInt("pull_count");
+                dockerPullsBot = BotController.Companion.getHTTP().get(BOT_IMAGE_STATS_URL).asJson().getInt("pull_count");
+                dockerPullsDb = BotController.Companion.getHTTP().get(DB_IMAGE_STATS_URL).asJson().getInt("pull_count");
             } catch (IOException e) {
                 log.error("Failed to fetch docker stats", e);
             }

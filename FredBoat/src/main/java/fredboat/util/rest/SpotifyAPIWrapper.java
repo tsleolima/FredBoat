@@ -80,7 +80,7 @@ public class SpotifyAPIWrapper {
             return; //no spotify credentials configured, dont throw unnecessary errors
         }
         try {
-            JSONObject jsonClientCredentials = BotController.HTTP.post(URL_SPOTIFY_AUTHENTICATION_HOST + "/api/token",
+            JSONObject jsonClientCredentials = BotController.Companion.getHTTP().post(URL_SPOTIFY_AUTHENTICATION_HOST + "/api/token",
                     Http.Params.of(
                             "grant_type", "client_credentials"
                     ))
@@ -117,7 +117,7 @@ public class SpotifyAPIWrapper {
     public PlaylistInfo getPlaylistDataBlocking(String userId, String playlistId) throws IOException, JSONException {
         refreshTokenIfNecessary();
 
-        JSONObject jsonPlaylist = BotController.HTTP.get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId)
+        JSONObject jsonPlaylist = BotController.Companion.getHTTP().get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId)
                 .auth("Bearer " + accessToken)
                 .asJson();
 
@@ -163,7 +163,7 @@ public class SpotifyAPIWrapper {
             }
 
             //request a page of tracks
-            jsonPage = BotController.HTTP.get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
+            jsonPage = BotController.Companion.getHTTP().get(URL_SPOTIFY_API + "/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
                     Http.Params.of(
                             "offset", offset,
                             "limit", limit
