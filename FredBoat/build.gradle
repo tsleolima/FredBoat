@@ -1,4 +1,5 @@
 apply plugin: 'com.gorylenko.gradle-git-properties'
+apply plugin: 'kotlin'
 apply plugin: 'application'
 apply plugin: 'propdeps'
 apply plugin: 'propdeps-idea'
@@ -64,6 +65,7 @@ dependencies {
     testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: apiGuardianVersion
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
     optional group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: springBootVersion
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 //required by spring boot configuration processor
@@ -80,5 +82,27 @@ processResources {
                 "project.artifactId": project.ext.moduleName,
                 "env.BUILD_NUMBER"  : (System.getenv('CI') ? System.getenv('BUILD_NUMBER') : 'DEV')
         ]
+    }
+}
+buildscript {
+    ext.kotlin_version = '1.2.31'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+repositories {
+    mavenCentral()
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
