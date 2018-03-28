@@ -25,6 +25,8 @@
 
 package fredboat.audio.queue;
 
+import fredboat.definitions.RepeatMode;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

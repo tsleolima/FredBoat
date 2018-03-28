@@ -34,6 +34,7 @@ import fredboat.commandmeta.MessagingException;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.db.api.GuildConfigService;
 import fredboat.definitions.PermissionLevel;
+import fredboat.definitions.RepeatMode;
 import fredboat.feature.I18n;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;

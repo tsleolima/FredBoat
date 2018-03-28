@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Frederik Ar. Mikkelsen
+ * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package fredboat.audio.queue;
+package fredboat.definitions;
 
 /**
  * Created by napster on 11.03.17.
@@ -32,6 +32,9 @@ package fredboat.audio.queue;
  * OFF = no repeat is happening
  * SINGLE = the top most song in the queue is repeated
  * ALL = the whole queue is repeated.
+ * <p>
+ * Attention: This class or a copy of it might be mapped to a postgres enum in the backend. Make sure to write a
+ * migration when changing it.
  */
 public enum RepeatMode {
     OFF, SINGLE, ALL
