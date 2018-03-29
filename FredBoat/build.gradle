@@ -54,7 +54,7 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: springBootVersion
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion
     compile group: 'com.google.code.gson', name: 'gson', version: gsonVersion
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
 
     compile group: 'org.togglz', name: 'togglz-core', version: togglzVersion
     compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: bucket4jVersion
