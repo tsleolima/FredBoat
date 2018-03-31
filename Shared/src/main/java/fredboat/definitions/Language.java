@@ -117,7 +117,8 @@ public enum Language {
      */
     public static Optional<Language> parse(String input) {
         for (Language language : Language.values()) {
-            if (language.getCode().equalsIgnoreCase(input)
+            if (language.name().equalsIgnoreCase(input)
+                    || language.getCode().equalsIgnoreCase(input)
                     || language.getNativeName().equalsIgnoreCase(input)
                     || language.getEnglishName().equalsIgnoreCase(input)
                     || language.other.contains(input)) {

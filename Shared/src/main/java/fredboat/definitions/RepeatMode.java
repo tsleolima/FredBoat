@@ -24,6 +24,8 @@
 
 package fredboat.definitions;
 
+import java.util.Optional;
+
 /**
  * Created by napster on 11.03.17.
  * <p>
@@ -37,5 +39,20 @@ package fredboat.definitions;
  * migration when changing it.
  */
 public enum RepeatMode {
-    OFF, SINGLE, ALL
+    OFF, SINGLE, ALL;
+
+    /**
+     * This method tries to parse an input into a repeat mode that we recognize.
+     *
+     * @param input input to be parsed into a repeat mode known to us (= defined in this enum)
+     * @return the optional repeat mode identified from the input.
+     */
+    public static Optional<RepeatMode> parse(String input) {
+        for (RepeatMode repeatMode : RepeatMode.values()) {
+            if (repeatMode.name().equalsIgnoreCase(input)) {
+                return Optional.of(repeatMode);
+            }
+        }
+        return Optional.empty();
+    }
 }
