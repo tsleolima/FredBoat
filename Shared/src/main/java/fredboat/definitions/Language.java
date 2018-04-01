@@ -101,12 +101,6 @@ public enum Language {
         return englishName;
     }
 
-    @Override
-    public String toString() {
-        return "[" + code + " " + nativeName + " " + englishName + "]";
-    }
-
-
     /**
      * This method tries to parse an input into a language that we recognize.
      * It will try to make use of the language code, the native language name, and the english name of a language to

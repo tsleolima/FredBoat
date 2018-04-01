@@ -108,7 +108,7 @@ public class I18n {
 
         @Override
         public String toString() {
-            return "[" + getNativeName() + "]";
+            return "[" + getCode() + " " + getNativeName() + "]";
         }
     }
 
