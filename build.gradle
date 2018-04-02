@@ -108,7 +108,8 @@ ext {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.6'
-    distributionType = DistributionType.ALL
+    //noinspection UnnecessaryQualifiedReference
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 //create a simple version file that we will be reading to create appropriate docker tags
