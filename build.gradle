@@ -65,7 +65,7 @@ subprojects {
         //audio deps
         lavaplayerVersion           = '1.2.58'
         jdaNasVersion               = '1.0.6'
-        lavalinkVersion             = 'cd200267d90d83512148b9db88617de68fcec158'
+        lavalinkVersion             = 'eb36c7df6e8a43c92c2d5ca6a4b72d75aa18efaa'
 
         //utility deps
         jsonOrgVersion              = '20180130'
@@ -105,8 +105,6 @@ version = '3.0'
 ext {
     moduleName = 'FredBoat-Root'
 }
-
-import org.gradle.api.tasks.wrapper.Wrapper.DistributionType
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.6'
