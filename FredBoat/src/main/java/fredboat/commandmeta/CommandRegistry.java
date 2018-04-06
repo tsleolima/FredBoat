@@ -128,7 +128,7 @@ public class CommandRegistry {
         String lowerInput = input.toLowerCase();
         for (Module module : Module.values()) {
             if (lowerInput.contains(module.name().toLowerCase())
-                    || lowerInput.contains(context.i18n(module.translationKey).toLowerCase())) {
+                    || lowerInput.contains(context.i18n(module.getTranslationKey()).toLowerCase())) {
                 return module;
             }
         }

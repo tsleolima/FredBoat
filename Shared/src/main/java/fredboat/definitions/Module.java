@@ -27,11 +27,12 @@ package fredboat.definitions;
 
 import fredboat.util.Emojis;
 
-import javax.annotation.Nonnull;
 
 /**
  * Created by napster on 15.02.18.
- */ //a locked module cannot be enabled/disabled
+ * <p>
+ * A user should not be able to enable/disable a locked module
+ */
 public enum Module {
 
     //@formatter:off                               locked
@@ -46,17 +47,31 @@ public enum Module {
     ;
     //@formatter:on
 
-    @Nonnull
-    public final String translationKey;
-    @Nonnull
-    public final String emoji;
-    public final boolean enabledByDefault;
-    public final boolean lockedModule;
+    private final String translationKey;
+    private final String emoji;
+    private final boolean enabledByDefault;
+    private final boolean lockedModule;
 
-    Module(@Nonnull String translationKey, @Nonnull String emoji, boolean enabledByDefault, boolean lockedModule) {
+    Module(String translationKey, String emoji, boolean enabledByDefault, boolean lockedModule) {
         this.translationKey = translationKey;
         this.emoji = emoji;
         this.enabledByDefault = enabledByDefault;
         this.lockedModule = lockedModule;
+    }
+
+    public String getTranslationKey() {
+        return translationKey;
+    }
+
+    public String getEmoji() {
+        return emoji;
+    }
+
+    public boolean isEnabledByDefault() {
+        return enabledByDefault;
+    }
+
+    public boolean isLockedModule() {
+        return lockedModule;
     }
 }

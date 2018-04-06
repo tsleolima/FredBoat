@@ -34,8 +34,8 @@ public enum PermissionLevel {
     USER(1, "User"),
     BASE(0, "Base");
 
-    private int level;
-    private String name;
+    private final int level;
+    private final String name;
 
     PermissionLevel(int level, String name) {
         this.level = level;

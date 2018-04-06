@@ -73,7 +73,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
 
             String prefixAndCommand = "`" + context.getPrefix() + CommandInitializer.COMMANDS_COMM_NAME;
             List<String> translatedModuleNames = enabledModules.stream()
-                    .map(module -> context.i18n(module.translationKey))
+                    .map(module -> context.i18n(module.getTranslationKey()))
                     .collect(Collectors.toList());
             context.reply(context.i18nFormat("modulesCommands", prefixAndCommand + " <module>`", prefixAndCommand + " " + ALL + "`")
                     + "\n\n" + context.i18nFormat("musicCommandsPromotion", "`" + context.getPrefix() + CommandInitializer.MUSICHELP_COMM_NAME + "`")
@@ -141,7 +141,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
             }
 
             return embedBuilder
-                    .addField(context.i18n(module.module.translationKey), sbs[0].toString(), true)
+                    .addField(context.i18n(module.module.getTranslationKey()), sbs[0].toString(), true)
                     .addField("", sbs[1].toString(), true)
                     .addField("", sbs[2].toString(), true)
                     ;
@@ -151,7 +151,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
                 sb.append(prefix).append(c.name).append("\n");
             }
             return embedBuilder
-                    .addField(context.i18n(module.module.translationKey), sb.toString(), true)
+                    .addField(context.i18n(module.module.getTranslationKey()), sb.toString(), true)
                     .addBlankField(true)
                     .addBlankField(true)
                     ;

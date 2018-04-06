@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 Frederik Ar. Mikkelsen
@@ -23,22 +22,7 @@
  * SOFTWARE.
  */
 
+@space.npstr.annotations.FieldsAreNonNullByDefault
+@space.npstr.annotations.ParametersAreNonnullByDefault
+@space.npstr.annotations.ReturnTypesAreNonNullByDefault
 package fredboat.definitions;
-
-/**
- * Created by napster on 15.02.18.
- */
-public enum SearchProvider {
-    YOUTUBE("ytsearch:"),
-    SOUNDCLOUD("scsearch:");
-
-    private final String prefix;
-
-    SearchProvider(String prefix) {
-        this.prefix = prefix;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-}

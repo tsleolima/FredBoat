@@ -89,8 +89,8 @@ public class ModulesCommand extends Command implements IConfigCommand {
             context.reply(context.i18nFormat("moduleCantParse",
                     context.getPrefix() + context.command.name));
             return;
-        } else if (module.lockedModule) {
-            context.reply(context.i18nFormat("moduleLocked", context.i18n(module.translationKey))
+        } else if (module.isLockedModule()) {
+            context.reply(context.i18nFormat("moduleLocked", context.i18n(module.getTranslationKey()))
                     + "\n" + MAGICAL_LENNY);
             return;
         }
@@ -99,13 +99,13 @@ public class ModulesCommand extends Command implements IConfigCommand {
         String output;
         if (enable) {
             transform = gm -> gm.enableModule(module);
-            output = context.i18nFormat("moduleEnable", "**" + context.i18n(module.translationKey) + "**")
+            output = context.i18nFormat("moduleEnable", "**" + context.i18n(module.getTranslationKey()) + "**")
                     + "\n" + context.i18nFormat("moduleShowCommands",
                     "`" + context.getPrefix() + CommandInitializer.COMMANDS_COMM_NAME
-                            + " " + context.i18n(module.translationKey) + "`");
+                            + " " + context.i18n(module.getTranslationKey()) + "`");
         } else {
             transform = gm -> gm.disableModule(module);
-            output = context.i18nFormat("moduleDisable", "**" + context.i18n(module.translationKey) + "**");
+            output = context.i18nFormat("moduleDisable", "**" + context.i18n(module.getTranslationKey()) + "**");
         }
 
         Launcher.getBotController().getGuildModulesService().transformGuildModules(context.guild, transform);
@@ -143,10 +143,10 @@ public class ModulesCommand extends Command implements IConfigCommand {
     @Nonnull
     //nicely format modules for displaying to users
     private static Function<Module, String> moduleStatusLine(@Nonnull GuildModules gm, @Nonnull Context context) {
-        return (module) -> (gm.isModuleEnabled(module, module.enabledByDefault) ? Emojis.OK : Emojis.BAD)
-                + module.emoji
+        return (module) -> (gm.isModuleEnabled(module, module.isEnabledByDefault()) ? Emojis.OK : Emojis.BAD)
+                + module.getEmoji()
                 + " "
-                + context.i18n(module.translationKey);
+                + context.i18n(module.getTranslationKey());
     }
 
     @Nonnull

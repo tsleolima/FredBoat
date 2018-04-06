@@ -160,7 +160,7 @@ public class GuildModules implements TransferObject<Long> {
     public List<Module> getEnabledModules() {
         List<Module> enabledModules = new ArrayList<>();
         for (Module module : Module.values()) {
-            if (isModuleEnabled(module, module.enabledByDefault)) {
+            if (isModuleEnabled(module, module.isEnabledByDefault())) {
                 enabledModules.add(module);
             }
         }
