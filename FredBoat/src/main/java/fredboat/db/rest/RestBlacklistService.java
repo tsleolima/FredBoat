@@ -42,14 +42,9 @@ public class RestBlacklistService extends CachedRestService<Long, BlacklistEntry
 
     public static final String PATH = "blacklist/";
 
-    public RestBlacklistService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
-        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, BlacklistEntry.class, quarterdeckRestTemplate);
-    }
-
-    @Override
-    public RestBlacklistService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        super.registerCacheStats(cacheMetrics, name);
-        return this;
+    public RestBlacklistService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate, CacheMetricsCollector cacheMetrics) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, BlacklistEntry.class,
+                quarterdeckRestTemplate, cacheMetrics, RestBlacklistService.class.getSimpleName());
     }
 
     @Override

@@ -41,14 +41,10 @@ public class RestSearchResultService extends CachedRestService<SearchResult.Sear
 
     public static final String PATH = "searchresult/";
 
-    public RestSearchResultService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
-        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, SearchResult.class, quarterdeckRestTemplate);
-    }
-
-    @Override
-    public RestSearchResultService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        super.registerCacheStats(cacheMetrics, name);
-        return this;
+    public RestSearchResultService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate,
+                                   CacheMetricsCollector cacheMetrics) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, SearchResult.class,
+                quarterdeckRestTemplate, cacheMetrics, RestSearchResultService.class.getSimpleName());
     }
 
     /**

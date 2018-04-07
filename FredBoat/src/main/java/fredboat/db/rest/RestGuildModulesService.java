@@ -45,14 +45,10 @@ public class RestGuildModulesService extends CachedRestService<Long, GuildModule
 
     public static final String PATH = "guildmodules/";
 
-    public RestGuildModulesService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
-        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildModules.class, quarterdeckRestTemplate);
-    }
-
-    @Override
-    public RestGuildModulesService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        super.registerCacheStats(cacheMetrics, name);
-        return this;
+    public RestGuildModulesService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate,
+                                   CacheMetricsCollector cacheMetrics) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildModules.class,
+                quarterdeckRestTemplate, cacheMetrics, RestGuildModulesService.class.getSimpleName());
     }
 
     @Override

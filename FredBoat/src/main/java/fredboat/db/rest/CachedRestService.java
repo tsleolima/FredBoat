@@ -45,28 +45,21 @@ public abstract class CachedRestService<I extends Serializable, E extends Transf
     /**
      * Create the CachedRestRepo using a default cache
      */
-    public CachedRestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate) {
+    public CachedRestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate,
+                             CacheMetricsCollector cacheMetrics, String cacheName) {
         this(path, entityClass, backendRestTemplate,
                 CacheBuilder.newBuilder()
                         .expireAfterAccess(60, TimeUnit.SECONDS)
-                        .expireAfterWrite(120, TimeUnit.SECONDS)
-                        .recordStats()
+                        .expireAfterWrite(120, TimeUnit.SECONDS),
+                cacheMetrics, cacheName
         );
     }
 
-    public CachedRestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate, CacheBuilder<Object, Object> cacheBuilder) {
+    public CachedRestService(String path, Class<E> entityClass, RestTemplate backendRestTemplate,
+                             CacheBuilder<Object, Object> cacheBuilder, CacheMetricsCollector cacheMetrics, String cacheName) {
         super(path, entityClass, backendRestTemplate);
-        this.cache = cacheBuilder.build(CacheLoader.from(super::fetch));
-    }
-
-    /**
-     * Add the cache of this CachedRestRepo to the provided metrics under the provided name
-     *
-     * @return itself for chaining calls
-     */
-    public CachedRestService<I, E> registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        cacheMetrics.addCache(name, cache);
-        return this;
+        this.cache = cacheBuilder.recordStats().build(CacheLoader.from(super::fetch));
+        cacheMetrics.addCache(cacheName, cache);
     }
 
     @Override

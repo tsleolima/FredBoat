@@ -44,14 +44,10 @@ public class RestGuildPermsService extends CachedRestService<String, GuildPermis
 
     public static final String PATH = "guildperms/";
 
-    public RestGuildPermsService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate) {
-        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildPermissions.class, quarterdeckRestTemplate);
-    }
-
-    @Override
-    public RestGuildPermsService registerCacheStats(CacheMetricsCollector cacheMetrics, String name) {
-        super.registerCacheStats(cacheMetrics, name);
-        return this;
+    public RestGuildPermsService(BackendConfig backendConfig, RestTemplate quarterdeckRestTemplate,
+                                 CacheMetricsCollector cacheMetrics) {
+        super(backendConfig.getQuarterdeck().getHost() + VERSION_PATH + PATH, GuildPermissions.class,
+                quarterdeckRestTemplate, cacheMetrics, RestGuildPermsService.class.getSimpleName());
     }
 
     @Override
