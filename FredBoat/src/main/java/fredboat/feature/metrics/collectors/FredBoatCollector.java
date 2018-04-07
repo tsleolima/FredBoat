@@ -27,7 +27,6 @@ package fredboat.feature.metrics.collectors;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
-import fredboat.jda.ShardProvider;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
@@ -47,13 +46,11 @@ public class FredBoatCollector extends Collector {
 
     private final PlayerRegistry playerRegistry;
     private final BotMetrics botMetrics;
-    private final ShardProvider shardProvider;
 
-    public FredBoatCollector(PlayerRegistry playerRegistry, BotMetrics botMetrics, ShardProvider shardProvider) {
+    public FredBoatCollector(PlayerRegistry playerRegistry, BotMetrics botMetrics) {
         super();
         this.playerRegistry = playerRegistry;
         this.botMetrics = botMetrics;
-        this.shardProvider = shardProvider;
     }
 
     @Override
@@ -93,19 +90,6 @@ public class FredBoatCollector extends Collector {
         if (dockerPullsDbCount > 0) {
             dockerPulls.addMetric(Arrays.asList("total", "Db"), dockerPullsDbCount);
         }
-
-
-        //per shard stats
-        shardProvider.streamShards().forEach(shard -> {
-            String shardId = Integer.toString(shard.getShardInfo().getShardId());
-            jdaEntities.addMetric(Arrays.asList(shardId, "User"), shard.getUserCache().size());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Guild"), shard.getGuildCache().size());
-            jdaEntities.addMetric(Arrays.asList(shardId, "TextChannel"), shard.getTextChannelCache().size());
-            jdaEntities.addMetric(Arrays.asList(shardId, "VoiceChannel"), shard.getVoiceChannelCache().size());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Category"), shard.getCategoryCache().size());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Emote"), shard.getEmoteCache().size());
-            jdaEntities.addMetric(Arrays.asList(shardId, "Role"), shard.getRoleCache().size());
-        });
 
         return mfs;
     }

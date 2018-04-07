@@ -45,7 +45,6 @@ import fredboat.definitions.Module;
 import fredboat.definitions.PermissionLevel;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.Metrics;
-import fredboat.feature.metrics.ShardStatsCounterProvider;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
@@ -88,7 +87,6 @@ public class EventListenerBoat extends AbstractEventListener {
     private final CommandManager commandManager;
     private final CommandContextParser commandContextParser;
     private final PlayerRegistry playerRegistry;
-    private final ShardStatsCounterProvider shardStatsCounterProvider;
     private final JdaEntityProvider jdaEntityProvider;
     private final Ratelimiter ratelimiter;
     private final AppConfig appConfig;
@@ -97,13 +95,11 @@ public class EventListenerBoat extends AbstractEventListener {
 
     public EventListenerBoat(CommandManager commandManager, CommandContextParser commandContextParser,
                              PlayerRegistry playerRegistry, CacheMetricsCollector cacheMetrics,
-                             ShardStatsCounterProvider shardStatsCounterProvider, JdaEntityProvider jdaEntityProvider,
-                             Ratelimiter ratelimiter, AppConfig appConfig, GuildDataService guildDataService,
-                             GuildConfigService guildConfigService) {
+                             JdaEntityProvider jdaEntityProvider, Ratelimiter ratelimiter, AppConfig appConfig,
+                             GuildDataService guildDataService, GuildConfigService guildConfigService) {
         this.commandManager = commandManager;
         this.commandContextParser = commandContextParser;
         this.playerRegistry = playerRegistry;
-        this.shardStatsCounterProvider = shardStatsCounterProvider;
         this.jdaEntityProvider = jdaEntityProvider;
         this.ratelimiter = ratelimiter;
         this.appConfig = appConfig;
@@ -360,9 +356,7 @@ public class EventListenerBoat extends AbstractEventListener {
     @Override
     public void onReady(ReadyEvent event) {
         log.info("Received ready event for {}", event.getJDA().getShardInfo().toString());
-
-        shardStatsCounterProvider.registerShard(event.getJDA().getShardInfo());
-    }
+        }
 
     private void sendHelloOnJoin(@Nonnull Guild guild) {
         //filter guilds that already received a hello message
