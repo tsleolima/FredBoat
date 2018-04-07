@@ -51,7 +51,7 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.ratelimit.Ratelimiter;
-import io.prometheus.client.Histogram;
+import io.prometheus.client.Summary;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -196,7 +196,7 @@ public class EventListenerBoat extends AbstractEventListener {
 
         try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
              // their performance should be judged by the totalResponseTime metric instead
-             Histogram.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
+             Summary.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
         ) {
             commandManager.prefixCalled(context);
         }

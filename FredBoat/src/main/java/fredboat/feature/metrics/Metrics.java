@@ -33,6 +33,7 @@ import fredboat.feature.metrics.collectors.GuildSizesCollector;
 import fredboat.feature.metrics.collectors.ThreadPoolCollector;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
+import io.prometheus.client.Summary;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
 import io.prometheus.client.hotspot.DefaultExports;
 import io.prometheus.client.logback.InstrumentedAppender;
@@ -182,7 +183,7 @@ public class Metrics {
             .labelNames("class") // use the simple name of the command class: PlayCommand, DanceCommand, ShardsCommand etc
             .register();
 
-    public static final Histogram executionTime = Histogram.build()//commands execution time, excluding ratelimited ones
+    public static final Summary executionTime = Summary.build()//commands execution time, excluding ratelimited ones
             .name("fredboat_command_execution_duration_seconds")
             .help("Command execution time, excluding handling ratelimited commands.")
             .labelNames("class") // use the simple name of the command class: PlayCommand, DanceCommand, ShardsCommand etc
@@ -198,7 +199,7 @@ public class Metrics {
     //and another additional factor which we can't influence:
     // - discord being slow publishing our answer / the user's connection being slow receiving the published answer
     //keep these in mind when analyzing this metric
-    public static final Histogram totalResponseTime = Histogram.build()
+    public static final Summary totalResponseTime = Summary.build()
             .name("fredboat_total_message_response_duration_seconds")
             .help("Response duration between command message and answer message creation times.")
             .labelNames("class") // use the simple name of the command class: PlayCommand, DanceCommand, ShardsCommand etc
