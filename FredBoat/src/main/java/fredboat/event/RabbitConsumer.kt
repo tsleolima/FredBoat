@@ -64,7 +64,7 @@ class RabbitConsumer {
         // TODO
     }
 
-    /* Voice events */
+    /* Message events */
 
     fun receive(event: MessageReceivedEvent) {
         // TODO
