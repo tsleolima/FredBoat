@@ -26,8 +26,6 @@ package fredboat.api;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,11 +56,11 @@ public class MetricsController {
     }
 
     @GetMapping(produces = TextFormat.CONTENT_TYPE_004)
-    public Mono<ResponseEntity<String>> getMetrics(@RequestParam(name = "name[]", required = false) String[] includedParam) {
+    public Mono<String> getMetrics(@RequestParam(name = "name[]", required = false) String[] includedParam) {
         return Mono.fromCallable(() -> buildAnswer(includedParam));
     }
 
-    private ResponseEntity<String> buildAnswer(String[] includedParam) throws IOException {
+    private String buildAnswer(String[] includedParam) throws IOException {
         Set<String> params;
         if (includedParam == null) {
             params = Collections.emptySet();
@@ -78,6 +76,6 @@ public class MetricsController {
             writer.close();
         }
 
-        return new ResponseEntity<>(writer.toString(), HttpStatus.OK);
+        return writer.toString();
     }
 }
