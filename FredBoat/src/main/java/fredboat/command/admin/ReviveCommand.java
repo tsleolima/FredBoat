@@ -69,7 +69,7 @@ public class ReviveCommand extends Command implements ICommandRestricted {
         }
 
         context.replyWithName("Queued shard revive for shard " + shardId);
-        Launcher.getBotController().getShardManager().restart(shardId); // If not found it will just function like #start()
+        // TODO Launcher.getBotController().getShardManager().restart(shardId); // If not found it will just function like #start()
     }
 
     @Nonnull

@@ -24,14 +24,11 @@
 
 package fredboat.jda;
 
-import com.google.common.base.Suppliers;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.framework.Advised;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -49,9 +46,9 @@ public class JdaEntityProvider implements EmoteProvider, GuildProvider, MemberPr
 
     private static final Logger log = LoggerFactory.getLogger(JdaEntityProvider.class);
 
-    private final Supplier<ShardManager> shardManager;
+    private final Supplier<ShardManager> shardManager = null;
 
-    public JdaEntityProvider(@Lazy ShardManager shardManagerProxy) {
+    /* todo public JdaEntityProvider(@Lazy ShardManager shardManagerProxy) {
 
         //unwrap the spring proxy of the shard manager
         // we require the raw shardManager, because the proxy will error out when accessed during shutdown hooks, but
@@ -71,7 +68,7 @@ public class JdaEntityProvider implements EmoteProvider, GuildProvider, MemberPr
                 return shardManagerProxy;
             }
         });
-    }
+    }*/
 
     @Nullable
     @Override

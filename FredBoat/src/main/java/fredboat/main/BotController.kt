@@ -16,7 +16,6 @@ import fredboat.jda.JdaEntityProvider
 import fredboat.metrics.OkHttpEventMetrics
 import fredboat.util.ratelimit.Ratelimiter
 import fredboat.util.rest.Http
-import net.dv8tion.jda.bot.sharding.ShardManager
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
@@ -27,7 +26,6 @@ import java.util.concurrent.ExecutorService
 @Component
 class BotController(private val configProvider: ConfigPropertiesProvider,
                     val audioConnectionFacade: AudioConnectionFacade,
-                    val shardManager: ShardManager,
                     //central event listener that all events by all shards pass through
                     val mainEventListener: EventListenerBoat,
                     val shutdownHandler: ShutdownHandler,

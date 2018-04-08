@@ -25,7 +25,6 @@ import fredboat.util.rest.TrackSearcher;
 import fredboat.util.rest.Weather;
 import fredboat.util.rest.YoutubeAPI;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDAInfo;
 import okhttp3.Credentials;
 import okhttp3.Response;
@@ -248,8 +247,10 @@ public class Launcher implements ApplicationRunner {
 
     //returns true if all registered shards are reporting back as CONNECTED, false otherwise
     private boolean areThereNotConnectedShards() {
-        return shardProvider.streamShards()
-                .anyMatch(shard -> shard.getStatus() != JDA.Status.CONNECTED);
+        // todo
+        return false;
+        //return shardProvider.streamShards()
+        //        .anyMatch(shard -> shard.getStatus() != JDA.Status.CONNECTED);
     }
 
     //wait for all shards to ready up before requesting a total count of jda entities and enabling further stats counts
