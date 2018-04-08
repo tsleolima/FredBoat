@@ -37,6 +37,7 @@ bootJar {
 
 dependencies {
     compile project(':Shared')
+    compile group: 'com.github.FredBoat.sentinel', name: 'sentinel-shared', version: sentinelVersion
     compile group: 'net.dv8tion', name: 'JDA', version: jdaVersion
     compile group: 'com.sedmelluq', name: 'lavaplayer', version: lavaplayerVersion
     compile group: 'com.sedmelluq', name: 'jda-nas', version: jdaNasVersion
@@ -52,6 +53,8 @@ dependencies {
     compile group: 'it.unimi.dsi', name: 'fastutil', version: fastUtilVersion
     compile group: 'com.google.code.gson', name: 'gson', version: gsonVersion
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    compile group: 'org.springframework.amqp', name: 'spring-rabbit', version: amqpVersion
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jacksonKotlinVersion
 
     compile group: 'org.togglz', name: 'togglz-core', version: togglzVersion
     compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: bucket4jVersion
