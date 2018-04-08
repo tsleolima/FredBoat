@@ -18,7 +18,7 @@ subprojects {
             //plugin versions
             gradleGitVersion        = '1.4.21'
             shadowVersion           = '2.0.3'
-            springBootVersion       = '2.0.0.RELEASE'
+            springBootVersion       = '2.0.1.RELEASE'
             propDepsVersion         = '0.0.9.RELEASE'
             kotlinVersion           = '1.2.31'
 
@@ -63,7 +63,7 @@ subprojects {
         jdaVersion                  = '3.6.0_354'
 
         //audio deps
-        lavaplayerVersion           = '1.2.58'
+        lavaplayerVersion           = '1.2.62'
         jdaNasVersion               = '1.0.6'
         lavalinkVersion             = '7f656c3ba664c26641bba61a2a40b22c67b4dff2'
 
