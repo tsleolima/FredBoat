@@ -31,6 +31,7 @@ import net.dv8tion.jda.core.entities.IMentionable;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class ArgumentUtil {
     private ArgumentUtil() {
     }
 
+    @CheckReturnValue
     public static List<Member> fuzzyMemberSearch(Guild guild, String term, boolean includeBots) {
         ArrayList<Member> list = new ArrayList<>();
 
@@ -62,6 +64,7 @@ public class ArgumentUtil {
         return list;
     }
 
+    @CheckReturnValue
     public static List<Role> fuzzyRoleSearch(Guild guild, String term) {
         ArrayList<Role> list = new ArrayList<>();
 
@@ -77,10 +80,12 @@ public class ArgumentUtil {
         return list;
     }
 
+    @CheckReturnValue
     public static Member checkSingleFuzzyMemberSearchResult(CommandContext context, String term) {
         return checkSingleFuzzyMemberSearchResult(context, term, false);
     }
 
+    @CheckReturnValue
     public static Member checkSingleFuzzyMemberSearchResult(CommandContext context, String term, boolean includeBots) {
         List<Member> list = fuzzyMemberSearch(context.guild, term, includeBots);
 
@@ -103,6 +108,7 @@ public class ArgumentUtil {
      * @param maxLines  How many results to display. Pass Integer.MAX_VALUE to use as many as possible.
      * @param maxLength How many characters the resulting string may have as a max.
      */
+    @CheckReturnValue
     @Nonnull
     public static String formatFuzzyMemberResult(@Nonnull List<Member> list, int maxLines, int maxLength) {
 
@@ -166,6 +172,7 @@ public class ArgumentUtil {
      * Replies in the context of there are none / more than one mentionable and returns null, otherwise returns the
      * single mentionable.
      */
+    @CheckReturnValue
     @Nullable
     public static IMentionable checkSingleFuzzySearchResult(@Nonnull List<IMentionable> list,
                                                             @Nonnull CommandContext context, @Nonnull String term) {
