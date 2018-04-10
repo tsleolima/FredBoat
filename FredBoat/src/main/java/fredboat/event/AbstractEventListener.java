@@ -48,10 +48,10 @@ public abstract class AbstractEventListener extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         UserListener listener = userListener.get(event.getAuthor().getId());
         if (listener != null) {
-            try{
-            listener.onGuildMessageReceived(event);
-            } catch(Exception ex){
-                TextUtils.handleException(ex, new Context() {
+            try {
+                listener.onGuildMessageReceived(event);
+            } catch (Exception ex) {
+                TextUtils.handleException("Caught exception in user listener", ex, new Context() {
                     @Override
                     public TextChannel getTextChannel() {
                         return event.getChannel();

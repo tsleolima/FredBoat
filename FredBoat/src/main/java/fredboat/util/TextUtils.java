@@ -112,7 +112,17 @@ public class TextUtils {
     private static final String SORRY = "An error occurred " + Emojis.ANGER + "\nPlease try again later. If the issue"
             + " persists please join our support chat and explain what steps you took to receive this response."; //todo i18n?
 
-    public static void handleException(Throwable e, Context context) {
+    /**
+     * This method takes care of all exceptions when a {@link Context} is present. If it is an expected exception, like
+     * {@link MessagingException} or any subclass of it, the message of the exception with be shown to the user.
+     * If it is an unexpected exception, a generic message is shown to the user, and the exception is logged with the
+     * passed log message.
+     *
+     * @param logMessage a log message with possible futher clues as to what could have gone wrong
+     * @param e          the exception that happened
+     * @param context    current context, used to send a message to the user
+     */
+    public static void handleException(String logMessage, Throwable e, Context context) {
         String label;
         if (e instanceof MessagingException) {
             Metrics.messagingExceptions.labels(e.getClass().getSimpleName()).inc();
@@ -128,7 +138,7 @@ public class TextUtils {
             return;
         }
 
-        log.error("Caught exception while executing a command", e);
+        log.error(logMessage, e);
 
         if (e instanceof InsufficientPermissionException) { //log these to find the real source (see line above, but handle them more user friendly)
             CentralMessaging.handleInsufficientPermissionsException(context.getTextChannel(), (InsufficientPermissionException) e);
