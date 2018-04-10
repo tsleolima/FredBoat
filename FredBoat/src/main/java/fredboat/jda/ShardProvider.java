@@ -24,6 +24,7 @@
 
 package fredboat.jda;
 
+import fredboat.commandmeta.MessagingException;
 import net.dv8tion.jda.core.JDA;
 
 import java.util.stream.Stream;
@@ -39,4 +40,13 @@ public interface ShardProvider {
      * @return all shards
      */
     Stream<JDA> streamShards();
+
+    /**
+     * @return any shard. useful when you just need one JDA instance
+     */
+    default JDA anyShard() {
+        return streamShards().findFirst().orElseThrow(
+                () -> new MessagingException("No shards available. Please try again later.") //yeah...dont ask how this message is sent when no shards are available.
+        );
+    }
 }
