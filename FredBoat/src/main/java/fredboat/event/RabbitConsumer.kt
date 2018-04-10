@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.annotation.RabbitHandler
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 @RabbitListener(queues = [QueueNames.JDA_EVENTS_QUEUE])
@@ -15,27 +16,16 @@ class RabbitConsumer {
     companion object {
         private val log: Logger = LoggerFactory.getLogger(RabbitConsumer::class.java)
     }
+    private val shardStatuses = ConcurrentHashMap<Int, ShardStatus>()
 
     /* Shard lifecycle */
 
     @RabbitHandler
-    fun receive(event: ShardReadyEvent) {
-        log.info("Shard $event readied")
-    }
-
-    @RabbitHandler
-    fun receive(event: ShardDisconnectedEvent) {
-        log.info("Shard $event disconnected")
-    }
-
-    @RabbitHandler
-    fun receive(event: ShardResumedEvent) {
-        log.info("Shard $event resumed")
-    }
-
-    @RabbitHandler
-    fun receive(event: ShardReconnectedEvent) {
-        log.info("Shard $event reconnected")
+    fun receive(event: ShardStatusChange) {
+        event.shard.apply {
+            log.info("Shard [$id / $total] status ${shardStatuses.getOrDefault(id, "<new>")} => $status")
+            shardStatuses[id] = status
+        }
     }
 
     /* Guild events */
