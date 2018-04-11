@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Cache and provide video selections (aka seach results shown to users, for them to select from)
+ * Cache and provide video selections (aka search results shown to users, for them to select from)
  */
 @Component
 public class VideoSelectionCache {
