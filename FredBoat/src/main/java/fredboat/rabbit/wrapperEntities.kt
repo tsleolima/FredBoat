@@ -1,7 +1,5 @@
 package fredboat.rabbit
 
-import java.time.Duration
-
 typealias RawGuild = com.fredboat.sentinel.entities.Guild
 typealias RawMember = com.fredboat.sentinel.entities.Member
 typealias RawUser = com.fredboat.sentinel.entities.User
@@ -10,16 +8,12 @@ typealias RawVoiceChannel = com.fredboat.sentinel.entities.VoiceChannel
 
 
 class Guild(
-        val id: String,
-        private var _raw: RawGuild? = null
+        val id: String
 ) {
-    val raw: RawGuild?
-        get() {
-            if (_raw != null) return _raw
-            return Sentinel.INSTANCE.getGuild(id).block(Duration.ofSeconds(2))
-        }
+    val raw: RawGuild
+        get() = Sentinel.INSTANCE.getGuild(id)
     val name: String?
-        get() = raw?.name
+        get() = raw.name
 }
 
 class Member(val raw: RawMember) {
