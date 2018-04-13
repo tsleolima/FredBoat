@@ -49,9 +49,7 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
-    fun getGuild(id: String): RawGuild {
-        return guildCache.get(id)
-    }
+    fun getGuild(id: String) = guildCache.get(id)!!
 
     fun sendMessage(channel: RawTextChannel, message: String): Mono<SendMessageResponse> = Mono.create {
         val req = SendMessageRequest(channel.id, message)
