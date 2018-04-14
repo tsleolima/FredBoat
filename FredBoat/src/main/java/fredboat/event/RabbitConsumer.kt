@@ -2,6 +2,10 @@ package fredboat.event
 
 import com.fredboat.sentinel.QueueNames
 import com.fredboat.sentinel.entities.*
+import fredboat.command.CommandContext
+import fredboat.rabbit.Member
+import fredboat.rabbit.Message
+import fredboat.rabbit.TextChannel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.annotation.RabbitHandler
@@ -57,7 +61,16 @@ class RabbitConsumer {
     /* Message events */
 
     fun receive(event: MessageReceivedEvent) {
-        // TODO
+        if(!event.content.startsWith(";;sentinel")) return
+
+        val ctx = CommandContext(
+                fredboat.rabbit.Guild(event.guildId),
+                Member(event.author),
+                TextChannel(event.channel),
+                Message(event)
+        )
+
+        TestCommand().invoke(ctx)
     }
 
     fun receive(event: PrivateMessageReceivedEvent) {
