@@ -71,6 +71,14 @@ class Member(val raw: RawMember) {
         }
 
     fun asMention() = "<@$id>"
+    fun asUser(): User {
+        return User(RawUser(
+                id,
+                name,
+                discrim,
+                bot
+        ))
+    }
 }
 
 class User(val raw: RawUser) {

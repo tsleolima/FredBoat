@@ -27,10 +27,8 @@ package fredboat.commandmeta.abs;
 
 import fredboat.definitions.Module;
 import fredboat.main.Launcher;
-import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
+import fredboat.rabbit.*;
 import space.npstr.annotations.FieldsAreNonNullByDefault;
 import space.npstr.annotations.ParametersAreNonnullByDefault;
 import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
@@ -81,11 +79,13 @@ public class CommandContext extends Context {
      * Deletes the users message that triggered this command, if we have the permissions to do so
      */
     public void deleteMessage() {
-        TextChannel tc = msg.getTextChannel();
+        TextChannel tc = msg.getChannel();
 
+        // TODO
+        /*
         if (tc != null && hasPermissions(tc, Permission.MESSAGE_MANAGE)) {
             CentralMessaging.deleteMessage(msg);
-        }
+        }*/
     }
 
     /**
@@ -133,6 +133,6 @@ public class CommandContext extends Context {
 
     @Override
     public User getUser() {
-        return invoker.getUser();
+        return invoker.asUser();
     }
 }
