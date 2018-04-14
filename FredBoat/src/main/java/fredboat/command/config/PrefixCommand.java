@@ -79,7 +79,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
     }
 
     @Nonnull
-    public static String giefPrefix(@Nullable Guild guild) {
+    public static String giefPrefix(@Nullable fredboat.rabbit.Guild guild) {
         if (guild == null) {
             return Launcher.getBotController().getAppConfig().getPrefix();
         }

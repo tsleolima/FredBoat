@@ -25,10 +25,10 @@
 
 package fredboat.feature;
 
+import fredboat.rabbit.Guild;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.definitions.Language;
 import fredboat.main.Launcher;
-import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

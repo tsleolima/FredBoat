@@ -1,6 +1,8 @@
 package fredboat.rabbit
 
 import com.fredboat.sentinel.entities.MessageReceivedEvent
+import com.fredboat.sentinel.entities.SendMessageResponse
+import reactor.core.publisher.Mono
 
 typealias RawGuild = com.fredboat.sentinel.entities.Guild
 typealias RawMember = com.fredboat.sentinel.entities.Member
@@ -54,6 +56,8 @@ class Member(val raw: RawMember) {
         get() = raw.id.toLong()
     val name: String
         get() = raw.name
+    val effectiveName: String
+        get() = raw.name //TODO
     val discrim: Short
         get() = raw.discrim
     val guild: RawGuild
@@ -65,6 +69,8 @@ class Member(val raw: RawMember) {
             if (raw.voiceChannel != null) return VoiceChannel(raw.voiceChannel!!)
             return null
         }
+
+    fun asMention() = "<@$id>"
 }
 
 class User(val raw: RawUser) {
@@ -89,18 +95,33 @@ class TextChannel(val raw: RawTextChannel) {
         get() = raw.name
     val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
+
+    fun send(str: String): Mono<SendMessageResponse> {
+        return Sentinel.INSTANCE.sendMessage(raw, str)
+    }
+
+    fun sendTyping() {
+        Sentinel.INSTANCE.sendTyping(raw)
+    }
 }
 
-class VoiceChannel(val raw: RawVoiceChannel) {
+interface MessageChannel {
+    val id: String
+    val idLong: Long
+    val name: String
+    val ourEffectivePermissions: Long
+}
+
+class VoiceChannel(val raw: RawVoiceChannel) : MessageChannel {
     // TODO: List of members
 
-    val id: String
+    override val id: String
         get() = raw.id
-    val idLong: Long
+    override val idLong: Long
         get() = raw.id.toLong()
-    val name: String
+    override val name: String
         get() = raw.name
-    val ourEffectivePermissions: Long
+    override val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
 }
 

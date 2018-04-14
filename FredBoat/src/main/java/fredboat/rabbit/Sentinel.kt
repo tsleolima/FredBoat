@@ -6,6 +6,8 @@ import com.google.common.base.Function
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.AsyncRabbitTemplate
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -21,6 +23,7 @@ class Sentinel(private val template: AsyncRabbitTemplate,
     companion object {
         // This may be static abuse. Consider refactoring
         lateinit var INSTANCE: Sentinel
+        private val log: Logger = LoggerFactory.getLogger(Sentinel::class.java)
     }
 
     init {
@@ -59,11 +62,11 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
-    fun sendTyping(channel: RawTextChannel): Mono<Unit> = Mono.create {
+    fun sendTyping(channel: RawTextChannel) {
         val req = SendTypingRequest(channel.id)
         template.convertSendAndReceive<Unit>(req).addCallback(
-                { _ -> it.success() },
-                { exc -> it.error(exc) }
+                {},
+                { exc -> log.error("Failed sendTyping in channel {}", exc) }
         )
     }
 

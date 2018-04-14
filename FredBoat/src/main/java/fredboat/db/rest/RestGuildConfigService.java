@@ -24,11 +24,11 @@
 
 package fredboat.db.rest;
 
+import fredboat.rabbit.Guild;
 import fredboat.config.property.BackendConfig;
 import fredboat.db.api.GuildConfigService;
 import fredboat.db.transfer.GuildConfig;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import net.dv8tion.jda.core.entities.Guild;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 

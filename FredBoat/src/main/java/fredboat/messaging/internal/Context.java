@@ -25,28 +25,25 @@
 
 package fredboat.messaging.internal;
 
+import com.fredboat.sentinel.entities.SendMessageResponse;
 import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.MessagingException;
 import fredboat.feature.I18n;
-import fredboat.feature.metrics.Metrics;
-import fredboat.messaging.CentralMessaging;
-import fredboat.messaging.MessageFuture;
+import fredboat.rabbit.Guild;
+import fredboat.rabbit.Member;
+import fredboat.rabbit.TextChannel;
+import fredboat.rabbit.User;
 import fredboat.util.TextUtils;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 /**
- * Created by napster on 10.09.17.
- * <p>
  * Provides a context to whats going on. Where is it happening, who caused it?
  * Also home to a bunch of convenience methods
  */
@@ -68,52 +65,21 @@ public abstract class Context {
     // ********************************************************************************
 
     @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture reply(String message) {
-        return CentralMessaging.message(getTextChannel(), message).send(this);
+    public Mono<SendMessageResponse> reply(String message) {
+        return getTextChannel().send(message);
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture reply(String message, Consumer<Message> onSuccess) {
-        return CentralMessaging.message(getTextChannel(), message)
-                .success(onSuccess)
-                .send(this);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture reply(String message, Consumer<Message> onSuccess, Consumer<Throwable> onFail) {
-        return CentralMessaging.message(getTextChannel(), message)
-                .success(onSuccess)
-                .failure(onFail)
-                .send(this);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture reply(Message message) {
-        return CentralMessaging.message(getTextChannel(), message).send(this);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture reply(Message message, Consumer<Message> onSuccess) {
-        return CentralMessaging.message(getTextChannel(), message)
-                .success(onSuccess)
-                .send(this);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyWithName(String message) {
+    public Mono<SendMessageResponse> replyWithName(String message) {
         return reply(TextUtils.prefaceWithName(getMember(), message));
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyWithName(String message, Consumer<Message> onSuccess) {
-        return reply(TextUtils.prefaceWithName(getMember(), message), onSuccess);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyWithMention(String message) {
+    public Mono<SendMessageResponse> replyWithMention(String message) {
         return reply(TextUtils.prefaceWithMention(getMember(), message));
     }
 
+    /* //TODO: Add support for in sentinel
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture reply(MessageEmbed embed) {
         return CentralMessaging.message(getTextChannel(), embed).send(this);
@@ -140,12 +106,14 @@ public abstract class Context {
     @SuppressWarnings("UnusedReturnValue")
     public MessageFuture replyImage(@Nonnull String url) {
         return replyImage(url, null);
-    }
+    }*/
 
     public void sendTyping() {
-        CentralMessaging.sendTyping(getTextChannel());
+        getTextChannel().sendTyping();
     }
 
+    //TODO: Add support for in sentinel
+    /*
     public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
         getMember().getUser().openPrivateChannel().queue(
                 privateChannel -> {
@@ -157,8 +125,10 @@ public abstract class Context {
                 },
                 onFail != null ? onFail : CentralMessaging.NOOP_EXCEPTION_HANDLER //dun care logging about ppl that we cant message
         );
-    }
+    }*/
 
+    //TODO: Add support for in sentinel
+    /*
     //checks whether we have the provided permissions for the channel of this context
     @CheckReturnValue
     public boolean hasPermissions(Permission... permissions) {
@@ -169,7 +139,7 @@ public abstract class Context {
     @CheckReturnValue
     public boolean hasPermissions(@Nonnull TextChannel tc, Permission... permissions) {
         return getGuild().getSelfMember().hasPermission(tc, permissions);
-    }
+    }*/
 
     /**
      * Return a single translated string.
@@ -233,9 +203,11 @@ public abstract class Context {
         return this.i18n;
     }
 
+    //TODO: Add support for in sentinel
+    /*
     private static MessageEmbed embedImage(String url) {
         return CentralMessaging.getColoredEmbedBuilder()
                 .setImage(url)
                 .build();
-    }
+    }*/
 }

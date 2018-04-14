@@ -31,12 +31,9 @@ import com.google.common.collect.Streams;
 import fredboat.commandmeta.MessagingException;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
-import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
+import fredboat.rabbit.Member;
 import fredboat.shared.constant.BotConstants;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.text.CharacterPredicates;
@@ -87,22 +84,16 @@ public class TextUtils {
     private TextUtils() {
     }
 
-    public static Message prefaceWithName(Member member, String msg) {
-        msg = ensureSpace(msg);
-        return CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(escapeAndDefuse(member.getEffectiveName()))
-                .append(": ")
-                .append(msg)
-                .build();
+    public static String prefaceWithName(Member member, String msg) {
+        return escapeAndDefuse(member.getEffectiveName())
+                + ": "
+                + ensureSpace(msg);
     }
 
-    public static Message prefaceWithMention(Member member, String msg) {
-        msg = ensureSpace(msg);
-        return CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(member.getAsMention())
-                .append(": ")
-                .append(msg)
-                .build();
+    public static String prefaceWithMention(Member member, String msg) {
+        return member.asMention()
+                + ": "
+                + ensureSpace(msg);
     }
 
     private static String ensureSpace(String msg){
@@ -130,10 +121,12 @@ public class TextUtils {
 
         log.error("Caught exception while executing a command", e);
 
+        // TODO handle InsufficientPermissionException
+        /*
         if (e instanceof InsufficientPermissionException) { //log these to find the real source (see line above, but handle them more user friendly)
             CentralMessaging.handleInsufficientPermissionsException(context.getTextChannel(), (InsufficientPermissionException) e);
             return;
-        }
+        }*/
 
         context.replyWithMention(SORRY + "\n" + BotConstants.hangoutInvite);
     }
