@@ -30,13 +30,19 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         INSTANCE = this
     }
 
-    private val guildCache: LoadingCache<String, RawGuild> = CacheBuilder
+    val guildCache: LoadingCache<String, RawGuild> = CacheBuilder
             .newBuilder()
             .recordStats()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build<String, RawGuild>(
                     CacheLoader.from(Function {
-                        blockingTemplate.convertSendAndReceive(GuildRequest(it!!)) as RawGuild
+                        val result = blockingTemplate.convertSendAndReceive(QueueNames.SENTINEL_REQUESTS_QUEUE, GuildRequest(it!!))
+
+                        if (result == null) {
+                            log.warn("Requested guild $it but got null in response!")
+                        }
+
+                        return@Function result as? RawGuild
                     })
             )
 
@@ -56,7 +62,7 @@ class Sentinel(private val template: AsyncRabbitTemplate,
 
     fun sendMessage(channel: RawTextChannel, message: String): Mono<SendMessageResponse> = Mono.create {
         val req = SendMessageRequest(channel.id, message)
-        template.convertSendAndReceive<SendMessageResponse?>(req).addCallback(
+        template.convertSendAndReceive<SendMessageResponse?>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
                 { res -> it.success(res) },
                 { exc -> it.error(exc) }
         )
@@ -64,19 +70,12 @@ class Sentinel(private val template: AsyncRabbitTemplate,
 
     fun sendTyping(channel: RawTextChannel) {
         val req = SendTypingRequest(channel.id)
-        template.convertSendAndReceive<Unit>(req).addCallback(
+        template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
                 {},
-                { exc -> log.error("Failed sendTyping in channel {}", exc) }
+                { exc -> log.error("Failed sendTyping in channel {}", channel, exc) }
         )
     }
 
     fun getApplicationInfo() = blockingTemplate.convertSendAndReceive(ApplicationInfoRequest()) as ApplicationInfo
-
-    /* Events */
-
-    @RabbitListener
-    fun guildInvalidate(event: GuildInvalidation) {
-        guildCache.invalidate(event.id)
-    }
 
 }
