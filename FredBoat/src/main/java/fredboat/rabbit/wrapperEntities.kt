@@ -149,7 +149,7 @@ class Message(val raw: MessageReceivedEvent) {
     val member: Member
         get() = Member(raw.author)
     val guild: Guild
-        get() = Guild(id)
+        get() = Guild(raw.guildId)
     val channel: TextChannel
         get() = TextChannel(raw.channel)
     val mentionedMembers: List<Member>
