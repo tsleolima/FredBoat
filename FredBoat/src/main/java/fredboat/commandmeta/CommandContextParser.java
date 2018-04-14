@@ -29,11 +29,13 @@ import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.config.property.AppConfig;
+import fredboat.config.property.Credentials;
 import fredboat.feature.metrics.Metrics;
 import fredboat.rabbit.Guild;
 import fredboat.rabbit.Member;
 import fredboat.rabbit.Message;
 import fredboat.rabbit.TextChannel;
+import fredboat.util.DiscordUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -55,9 +57,11 @@ public class CommandContextParser {
     //group 1 is the mention, group 2 is the id of the mention, group 3 is the rest of the input including new lines
     private static final Pattern MENTION_PREFIX = Pattern.compile("^(<@!?([0-9]+)>)(.*)$", Pattern.DOTALL);
     private final AppConfig appConfig;
+    private final Credentials credentials;
 
-    public CommandContextParser(AppConfig appConfig) {
+    public CommandContextParser(AppConfig appConfig, Credentials credentials) {
         this.appConfig = appConfig;
+        this.credentials = credentials;
     }
 
     /**
@@ -71,7 +75,8 @@ public class CommandContextParser {
         boolean isMention = false;
         Matcher mentionMatcher = MENTION_PREFIX.matcher(raw);
         // either starts with a mention of us
-        if (mentionMatcher.find() && mentionMatcher.group(2).equals(event.getJDA().getSelfUser().getId())) {
+        String botId = Long.toString(DiscordUtil.getBotId(credentials));
+        if (mentionMatcher.find() && mentionMatcher.group(2).equals(botId)) {
             input = mentionMatcher.group(3).trim();
             isMention = true;
         }
