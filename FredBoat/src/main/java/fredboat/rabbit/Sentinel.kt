@@ -70,6 +70,8 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
+    fun getApplicationInfo() = blockingTemplate.convertSendAndReceive(ApplicationInfoRequest()) as ApplicationInfo
+
     /* Events */
 
     @RabbitListener
