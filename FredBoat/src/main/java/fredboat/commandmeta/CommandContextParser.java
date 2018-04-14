@@ -24,12 +24,16 @@
 
 package fredboat.commandmeta;
 
+import com.fredboat.sentinel.entities.MessageReceivedEvent;
 import fredboat.command.config.PrefixCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.config.property.AppConfig;
 import fredboat.feature.metrics.Metrics;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import fredboat.rabbit.Guild;
+import fredboat.rabbit.Member;
+import fredboat.rabbit.Message;
+import fredboat.rabbit.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -62,8 +66,7 @@ public class CommandContextParser {
      */
     @Nullable
     public CommandContext parse(MessageReceivedEvent event) {
-        String raw = event.getMessage().getContentRaw();
-
+        String raw = event.getContent();
         String input;
         boolean isMention = false;
         Matcher mentionMatcher = MENTION_PREFIX.matcher(raw);
@@ -74,7 +77,7 @@ public class CommandContextParser {
         }
         // or starts with a custom/default prefix
         else {
-            String prefix = PrefixCommand.giefPrefix(event.getGuild());
+            String prefix = PrefixCommand.giefPrefix(new Guild(event.getGuildId()));
             String defaultPrefix = appConfig.getPrefix();
             if (raw.startsWith(prefix)) {
                 input = raw.substring(prefix.length());
@@ -117,11 +120,13 @@ public class CommandContextParser {
             log.info("Unknown command:\t{}", commandTrigger);
             return null;
         } else {
+
+
             return new CommandContext(
-                    event.getGuild(),
-                    event.getTextChannel(),
-                    event.getMember(),
-                    event.getMessage(),
+                    new Guild(event.getGuildId()),
+                    new TextChannel(event.getChannel()),
+                    new Member(event.getAuthor()),
+                    new Message(event),
                     isMention,
                     commandTrigger,
                     Arrays.copyOfRange(args, 1, args.length),//exclude args[0] that contains the command trigger
