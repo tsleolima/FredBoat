@@ -85,8 +85,8 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
             skipGivenIndex(player, context);
         } else if (context.hasArguments() && trackRangePattern.matcher(context.args[0]).matches()) {
             skipInRange(player, context);
-        } else if (!context.getMentionedUsers().isEmpty()) {
-            skipUser(player, context, context.getMentionedUsers());
+        } else if (!context.getMentionedMembers().isEmpty()) {
+            skipUser(player, context, context.getMentionedMembers());
         } else {
             HelpCommand.sendFormattedCommandHelp(context);
         }

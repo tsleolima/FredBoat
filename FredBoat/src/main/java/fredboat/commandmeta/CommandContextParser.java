@@ -49,7 +49,7 @@ public class CommandContextParser {
 
     // https://regex101.com/r/ceFMeF/6
     //group 1 is the mention, group 2 is the id of the mention, group 3 is the rest of the input including new lines
-    public static final Pattern MENTION_PREFIX = Pattern.compile("^(<@!?([0-9]+)>)(.*)$", Pattern.DOTALL);
+    private static final Pattern MENTION_PREFIX = Pattern.compile("^(<@!?([0-9]+)>)(.*)$", Pattern.DOTALL);
     private final AppConfig appConfig;
 
     public CommandContextParser(AppConfig appConfig) {

@@ -40,12 +40,12 @@ public class PatCommand extends RandomImageCommand implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         String patMessage = null;
-        if (!context.getMentionedUsers().isEmpty()) {
-            if (context.getMentionedUsers().get(0).getIdLong() == context.msg.getJDA().getSelfUser().getIdLong()) {
+        if (!context.getMentionedMembers().isEmpty()) {
+            if (context.getMentionedMembers().get(0).getIdLong() == context.msg.getJDA().getSelfUser().getIdLong()) {
                 patMessage = context.i18n("patBot");
             } else {
                 patMessage = "_"
-                        + context.i18nFormat("patSuccess", context.getMentionedUsers().get(0).getAsMention())
+                        + context.i18nFormat("patSuccess", context.getMentionedMembers().get(0).getAsMention())
                         + "_";
             }
         }

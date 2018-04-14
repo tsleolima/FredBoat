@@ -90,8 +90,8 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
 
 
         Member member = guild.getSelfMember();
-        if (!context.getMentionedUsers().isEmpty()) {
-            Member m = guild.getMember(context.getMentionedUsers().get(0));
+        if (!context.getMentionedMembers().isEmpty()) {
+            Member m = guild.getMember(context.getMentionedMembers().get(0));
             if (m != null) {
                 member = m;
             }

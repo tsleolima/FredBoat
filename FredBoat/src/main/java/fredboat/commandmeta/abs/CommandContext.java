@@ -33,7 +33,6 @@ import space.npstr.annotations.FieldsAreNonNullByDefault;
 import space.npstr.annotations.ParametersAreNonnullByDefault;
 import space.npstr.annotations.ReturnTypesAreNonNullByDefault;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -92,10 +91,10 @@ public class CommandContext extends Context {
      * @return an adjusted list of mentions in case the prefix mention is used to exclude it. This method should always
      * be used over Message#getMentions()
      */
-    public List<User> getMentionedUsers() {
+    public List<Member> getMentionedMembers() {
         if (isMention) {
             //remove the first mention
-            List<User> mentions = new ArrayList<>(msg.getMentionedUsers());
+            List<Member> mentions = msg.getMentionedMembers();
             if (!mentions.isEmpty()) {
                 mentions.remove(0);
                 //FIXME: this will mess with the mentions if the bot was mentioned at a later place in the messagea second time,
@@ -104,7 +103,7 @@ public class CommandContext extends Context {
             }
             return mentions;
         } else {
-            return msg.getMentionedUsers();
+            return msg.getMentionedMembers();
         }
     }
 

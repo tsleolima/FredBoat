@@ -26,7 +26,7 @@
 package fredboat.db.api;
 
 import fredboat.db.transfer.GuildModules;
-import net.dv8tion.jda.core.entities.Guild;
+import fredboat.rabbit.Guild;
 
 import java.util.function.Function;
 

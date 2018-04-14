@@ -41,11 +41,11 @@ public class AvatarCommand extends Command implements IUtilCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (context.getMentionedUsers().isEmpty()) {
+        if (context.getMentionedMembers().isEmpty()) {
             HelpCommand.sendFormattedCommandHelp(context);
         } else {
             context.replyWithName(context.i18nFormat("avatarSuccess",
-                    context.getMentionedUsers().get(0).getAvatarUrl()));
+                    context.getMentionedMembers().get(0).getAvatarUrl()));
         }
     }
 
