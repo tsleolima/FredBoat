@@ -93,7 +93,7 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "\n----------\n\n";
 
         content += "Sharding:                       " + jda.getShardInfo().getShardString() + "\n";
-        content += "Players playing:                " + Launcher.getBotController().getPlayerRegistry().getPlayingPlayers().size() + "\n";
+        content += "Music players playing:          " + Launcher.getBotController().getPlayerRegistry().playingCount() + "\n";
         content += "Known servers:                  " + botMetrics.getTotalGuildsCount() + "\n";
         content += "Known users in servers:         " + botMetrics.getTotalUniqueUsersCount() + "\n";
         content += "Distribution:                   " + Launcher.getBotController().getAppConfig().getDistribution() + "\n";

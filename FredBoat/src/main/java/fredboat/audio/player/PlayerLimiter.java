@@ -23,7 +23,7 @@ public class PlayerLimiter {
             return true;
 
         return limit < 0
-                || playerRegistry.getPlayingPlayers().size() < limit;
+                || playerRegistry.playingCount() < limit;
 
     }
 

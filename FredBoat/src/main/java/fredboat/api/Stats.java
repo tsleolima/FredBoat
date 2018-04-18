@@ -75,8 +75,8 @@ public class Stats {
         });
 
         JSONObject g = new JSONObject();
-        g.put("playingPlayers", playerRegistry.getPlayingPlayers().size())
-                .put("totalPlayers", playerRegistry.getRegistry().size())
+        g.put("playingPlayers", playerRegistry.playingCount())
+                .put("totalPlayers", playerRegistry.totalCount())
                 .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
                 .put("guilds", botMetrics.getTotalGuildsCount())
                 .put("users", botMetrics.getTotalUniqueUsersCount());
