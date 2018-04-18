@@ -173,12 +173,18 @@ public class Launcher implements ApplicationRunner {
         //Check imgur creds
         executor.submit(this::hasValidImgurCredentials);
 
-        enableMetrics();
+        FredBoatAgent.start(statsAgent);
 
         String carbonKey = configProvider.getCredentials().getCarbonKey();
         if (configProvider.getAppConfig().isMusicDistribution() && !carbonKey.isEmpty()) {
             FredBoatAgent.start(new CarbonitexAgent(configProvider.getCredentials(), botMetrics, shardProvider));
         }
+
+        //force a count once all shards are up, this speeds up the stats availability on small boats
+        while (areThereNotConnectedShards()) {
+            Thread.sleep(1000);
+        }
+        statsAgent.run();
     }
 
     // ################################################################################
@@ -250,17 +256,6 @@ public class Launcher implements ApplicationRunner {
     private boolean areThereNotConnectedShards() {
         return shardProvider.streamShards()
                 .anyMatch(shard -> shard.getStatus() != JDA.Status.CONNECTED);
-    }
-
-    //wait for all shards to ready up before requesting a total count of jda entities and enabling further stats counts
-    private void enableMetrics() throws InterruptedException {
-        while (areThereNotConnectedShards()) {
-            Thread.sleep(1000);
-        }
-
-        //force some metrics to be populated, then turn on metrics to be served
-        botMetrics.start(shardProvider, configProvider.getCredentials(), guildProvider);
-        FredBoatAgent.start(statsAgent);
     }
 
     private static String getVersionInfo() {

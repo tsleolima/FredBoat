@@ -27,6 +27,7 @@ package fredboat.api;
 
 import fredboat.audio.player.PlayerRegistry;
 import fredboat.feature.metrics.BotMetrics;
+import fredboat.feature.metrics.JdaEntityStats;
 import fredboat.jda.ShardProvider;
 import fredboat.main.Launcher;
 import org.json.JSONArray;
@@ -75,11 +76,12 @@ public class Stats {
         });
 
         JSONObject g = new JSONObject();
+        JdaEntityStats entityStats = botMetrics.getJdaEntityStatsTotal();
         g.put("playingPlayers", playerRegistry.playingCount())
                 .put("totalPlayers", playerRegistry.totalCount())
                 .put("distribution", Launcher.getBotController().getAppConfig().getDistribution())
-                .put("guilds", botMetrics.getTotalGuildsCount())
-                .put("users", botMetrics.getTotalUniqueUsersCount());
+                .put("guilds", entityStats.getGuildsCount())
+                .put("users", entityStats.getUniqueUsersCount());
 
         root.put("shards", a);
         root.put("global", g);
