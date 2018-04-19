@@ -30,6 +30,7 @@ import fredboat.agent.FredBoatAgent;
 import fredboat.command.info.HelpCommand;
 import fredboat.feature.metrics.collectors.FredBoatCollector;
 import fredboat.feature.metrics.collectors.GuildSizesCollector;
+import fredboat.feature.metrics.collectors.ShardStatusCollector;
 import fredboat.feature.metrics.collectors.ThreadPoolCollector;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
@@ -56,7 +57,7 @@ public class Metrics {
 
     public Metrics(CacheMetricsCollector cacheMetrics, InstrumentedAppender prometheusAppender,
                    FredBoatCollector fredBoatCollector, ThreadPoolCollector threadPoolCollector,
-                   GuildSizesCollector guildSizesCollector) {
+                   GuildSizesCollector guildSizesCollector, ShardStatusCollector shardStatusCollector) {
         log.info("Setting up metrics");
 
         //log metrics
@@ -76,6 +77,7 @@ public class Metrics {
             fredBoatCollector.register();
             threadPoolCollector.register();
             guildSizesCollector.register();
+            shardStatusCollector.register();
         } catch (IllegalArgumentException e) {
             log.error("This should not happen outside of tests.", e);
         }
