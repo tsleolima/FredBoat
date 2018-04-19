@@ -33,12 +33,13 @@ import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.ArgumentUtil;
 import fredboat.util.TextUtils;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 
 import javax.annotation.Nonnull;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by midgard on 17/01/20.
@@ -51,9 +52,13 @@ public class UserInfoCommand extends Command implements IUtilCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+        //slow execution due to guilds traversal
+        Launcher.getBotController().getExecutor().execute(() -> invoke(context));
+    }
+
+    public void invoke(@Nonnull CommandContext context) {
         Member target;
         StringBuilder knownServers = new StringBuilder();
-        List<String> matchedGuildNames = new ArrayList<>();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
         if (!context.hasArguments()) {
             target = context.invoker;
@@ -61,11 +66,11 @@ public class UserInfoCommand extends Command implements IUtilCommand {
             target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.rawArgs, true);
         }
         if (target == null) return;
-        Launcher.getBotController().getJdaEntityProvider().streamGuilds().forEach(guild -> {
-            if (guild.getMemberById(target.getUser().getId()) != null) {
-                matchedGuildNames.add(guild.getName());
-            }
-        });
+        List<String> matchedGuildNames = Launcher.getBotController().getJdaEntityProvider().streamGuilds()
+                .filter(guild -> guild.isMember(target.getUser()))
+                .map(Guild::getName)
+                .collect(Collectors.toList());
+
         if (matchedGuildNames.size() >= 30) {
             knownServers.append(matchedGuildNames.size());
         } else {

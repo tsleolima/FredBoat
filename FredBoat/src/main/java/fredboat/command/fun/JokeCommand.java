@@ -29,6 +29,7 @@ import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IFunCommand;
 import fredboat.main.BotController;
+import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,6 +49,11 @@ public class JokeCommand extends Command implements IFunCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+        //slow execution due to http requests
+        Launcher.getBotController().getExecutor().execute(() -> invoke(context));
+    }
+
+    public void invoke(@Nonnull CommandContext context) {
         try {
             JSONObject object = BotController.Companion.getHTTP().get("http://api.icndb.com/jokes/random").asJson();
 

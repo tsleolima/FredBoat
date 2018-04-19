@@ -64,6 +64,11 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+        //slow execution due to http requests
+        Launcher.getBotController().getExecutor().execute(() -> invoke(context));
+    }
+
+    public void invoke(@Nonnull CommandContext context) {
         GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
         if (player != null && player.isPlaying()) {
