@@ -70,7 +70,12 @@ public class PlayerDebugCommand extends Command implements ICommandRestricted {
 
         TextUtils.postToPasteService(a.toString())
                 .thenApply(pasteUrl -> pasteUrl.orElse("Failed to upload to any pasteservice."))
-                .thenAccept(context::reply);
+                .thenAccept(context::reply)
+                .whenComplete((ignored, t) -> {
+                    if (t != null) {
+                        TextUtils.handleException("Failed to upload to any pasteservice.", t, context);
+                    }
+                });
     }
 
     @Nonnull
