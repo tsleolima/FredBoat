@@ -31,6 +31,7 @@ import fredboat.commandmeta.abs.IUtilCommand;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
+import fredboat.perms.PermsUtil;
 import fredboat.util.ArgumentUtil;
 import fredboat.util.TextUtils;
 import net.dv8tion.jda.core.entities.Guild;
@@ -98,6 +99,7 @@ public class UserInfoCommand extends Command implements IUtilCommand {
                 .addField(context.i18n("userinfoCreationTime"), target.getUser().getCreationTime().format(dtf), true)
                 .addField(context.i18n("userinfoBlacklisted"),
                         Boolean.toString(Launcher.getBotController().getRatelimiter().isBlacklisted(target.getUser().getIdLong())), true)
+                .addField("Permission Level", PermsUtil.getPerms(target).getName(), true) //todo i18n
                 .build()
         );
     }
