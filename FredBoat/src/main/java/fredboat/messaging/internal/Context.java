@@ -161,6 +161,20 @@ public abstract class Context {
      * Privately DM any user
      */
     public void sendPrivate(@Nonnull User user, @Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
+        if (user.isBot()) {
+            if (onFail != null) {
+                onFail.accept(new IllegalArgumentException("Cannot DM a bot user."));
+            }
+            return;
+        }
+
+        if (user.isFake()) {
+            if (onFail != null) {
+                onFail.accept(new IllegalArgumentException("Cannot DM a fake user."));
+            }
+            return;
+        }
+
         user.openPrivateChannel().queue(
                 privateChannel -> {
                     Metrics.successfulRestActions.labels("openPrivateChannel").inc();
