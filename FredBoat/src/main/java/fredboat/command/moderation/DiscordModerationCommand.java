@@ -314,7 +314,9 @@ public abstract class DiscordModerationCommand<T> extends Command implements IMo
 
                                     // dm the target about the action. do this before executing the action.
                                     Optional<String> dm = dmForTarget(modActionInfo);
-                                    if (dm.isPresent() && !modActionInfo.getTargetUser().isFake()) {
+                                    if (dm.isPresent()
+                                            && !modActionInfo.getTargetUser().isFake()
+                                            && !modActionInfo.getTargetUser().isBot()) {
                                         context.sendPrivate(modActionInfo.getTargetUser(), dm.get(),
                                                 //run the mod action no matter if the dm fails or succeeds
                                                 __ -> modAction.run(),
