@@ -1,4 +1,4 @@
-package fredboat.rabbit
+package fredboat.sentinel
 
 import com.fredboat.sentinel.entities.MessageReceivedEvent
 import com.fredboat.sentinel.entities.SendMessageResponse

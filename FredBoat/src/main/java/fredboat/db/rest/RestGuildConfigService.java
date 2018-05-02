@@ -24,7 +24,7 @@
 
 package fredboat.db.rest;
 
-import fredboat.rabbit.Guild;
+import fredboat.sentinel.Guild;
 import fredboat.config.property.BackendConfig;
 import fredboat.db.api.GuildConfigService;
 import fredboat.db.transfer.GuildConfig;

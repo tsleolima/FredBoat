@@ -39,7 +39,6 @@ import fredboat.perms.PermsUtil;
 import fredboat.util.DiscordUtil;
 import fredboat.util.rest.CacheUtil;
 import io.prometheus.client.guava.cache.CacheMetricsCollector;
-import net.dv8tion.jda.core.entities.Guild;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -79,7 +78,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
     }
 
     @Nonnull
-    public static String giefPrefix(@Nullable fredboat.rabbit.Guild guild) {
+    public static String giefPrefix(@Nullable fredboat.sentinel.Guild guild) {
         if (guild == null) {
             return Launcher.getBotController().getAppConfig().getPrefix();
         }

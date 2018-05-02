@@ -28,7 +28,7 @@ package fredboat.commandmeta.abs;
 import fredboat.definitions.Module;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
-import fredboat.rabbit.*;
+import fredboat.sentinel.*;
 import space.npstr.annotations.FieldsAreNonNullByDefault;
 import space.npstr.annotations.ParametersAreNonnullByDefault;
 import space.npstr.annotations.ReturnTypesAreNonNullByDefault;

@@ -25,7 +25,7 @@
 
 package fredboat.feature;
 
-import fredboat.rabbit.Guild;
+import fredboat.sentinel.Guild;
 import fredboat.db.DatabaseNotReadyException;
 import fredboat.definitions.Language;
 import fredboat.main.Launcher;

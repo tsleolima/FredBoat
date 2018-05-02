@@ -32,7 +32,7 @@ import fredboat.commandmeta.MessagingException;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
-import fredboat.rabbit.Member;
+import fredboat.sentinel.Member;
 import fredboat.shared.constant.BotConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
