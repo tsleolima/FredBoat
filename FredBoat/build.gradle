@@ -6,7 +6,7 @@ apply plugin: 'propdeps-idea'
 apply plugin: 'org.springframework.boot'
 
 description = 'FredBoat Discord Music Bot'
-mainClassName = "fredboat.main.Launcher"
+mainClassName = "fredboat.main.LauncherKt"
 version = rootProject.version
 ext {
     moduleName = 'FredBoat'
