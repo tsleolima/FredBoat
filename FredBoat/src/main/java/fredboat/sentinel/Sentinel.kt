@@ -31,11 +31,11 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         INSTANCE = this
     }
 
-    val guildCache: LoadingCache<String, RawGuild> = CacheBuilder
+    val guildCache: LoadingCache<Long, RawGuild> = CacheBuilder
             .newBuilder()
             .recordStats()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build<String, RawGuild>(
+            .build<Long, RawGuild>(
                     CacheLoader.from(Function {
                         val result = blockingTemplate.convertSendAndReceive(QueueNames.SENTINEL_REQUESTS_QUEUE, GuildRequest(it!!))
 
@@ -62,7 +62,7 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
-    fun getGuild(id: String) = guildCache.get(id)!!
+    fun getGuild(id: Long) = guildCache.get(id)!!
 
     fun sendMessage(channel: RawTextChannel, message: String): Mono<SendMessageResponse> = Mono.create {
         val req = SendMessageRequest(channel.id, message)

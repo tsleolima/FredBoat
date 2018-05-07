@@ -14,14 +14,12 @@ typealias RawVoiceChannel = com.fredboat.sentinel.entities.VoiceChannel
 private val MENTION_PATTERN = Pattern.compile("<@!?([0-9]+)>", Pattern.DOTALL)
 
 class Guild(
-        val id: String
+        val id: Long
 ) {
     // TODO: Roles
 
     val raw: RawGuild
         get() = Sentinel.INSTANCE.getGuild(id)
-    val idLong: Long
-        get() = id.toLong()
     val name: String
         get() = raw.name
     val owner: Member?
@@ -58,10 +56,8 @@ class Guild(
 class Member(val raw: RawMember) {
     // TODO: Roles property
 
-    val id: String
+    val id: Long
         get() = raw.id
-    val idLong: Long
-        get() = raw.id.toLong()
     val name: String
         get() = raw.name
     val effectiveName: String
@@ -90,10 +86,8 @@ class Member(val raw: RawMember) {
 }
 
 class User(val raw: RawUser) {
-    val id: String
+    val id: Long
         get() = raw.id
-    val idLong: Long
-        get() = raw.id.toLong()
     val name: String
         get() = raw.name
     val discrim: Short
@@ -103,10 +97,8 @@ class User(val raw: RawUser) {
 }
 
 class TextChannel(val raw: RawTextChannel) {
-    val id: String
+    val id: Long
         get() = raw.id
-    val idLong: Long
-        get() = raw.id.toLong()
     val name: String
         get() = raw.name
     val ourEffectivePermissions: Long
@@ -122,8 +114,7 @@ class TextChannel(val raw: RawTextChannel) {
 }
 
 interface MessageChannel {
-    val id: String
-    val idLong: Long
+    val id: Long
     val name: String
     val ourEffectivePermissions: Long
 }
@@ -131,10 +122,8 @@ interface MessageChannel {
 class VoiceChannel(val raw: RawVoiceChannel) : MessageChannel {
     // TODO: List of members
 
-    override val id: String
+    override val id: Long
         get() = raw.id
-    override val idLong: Long
-        get() = raw.id.toLong()
     override val name: String
         get() = raw.name
     override val ourEffectivePermissions: Long
@@ -142,10 +131,10 @@ class VoiceChannel(val raw: RawVoiceChannel) : MessageChannel {
 }
 
 class Message(val raw: MessageReceivedEvent) {
-    val id: String
+    val id: Long
         get() = raw.id
     val content: String
-        get() = raw.id
+        get() = raw.content
     val member: Member
         get() = Member(raw.author)
     val guild: Guild
