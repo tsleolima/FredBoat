@@ -31,14 +31,10 @@ class RabbitConsumer(private val sentinel: Sentinel) {
     /* Guild events */
 
     @RabbitHandler
-    fun receive(event: GuildJoinEvent) {
-        log.info("Joined guild ${event.guildId}")
-    }
+    fun receive(event: GuildJoinEvent) = log.info("Joined guild ${event.guildId}")
 
     @RabbitHandler
-    fun receive(event: GuildLeaveEvent) {
-        log.info("Left guild ${event.guildId}")
-    }
+    fun receive(event: GuildLeaveEvent) = log.info("Left guild ${event.guildId}")
 
     /* Voice events */
 
@@ -70,12 +66,8 @@ class RabbitConsumer(private val sentinel: Sentinel) {
     }
 
     @RabbitListener
-    fun guildInvalidate(event: GuildInvalidation) {
-        sentinel.guildCache.invalidate(event.id)
-    }
+    fun guildInvalidate(event: GuildInvalidation) = sentinel.guildCache.invalidate(event.id)
 
     @RabbitHandler(isDefault = true)
-    fun default(msg: Any) {
-        log.warn("Unhandled event $msg")
-    }
+    fun default(msg: Any) = log.warn("Unhandled event $msg")
 }
