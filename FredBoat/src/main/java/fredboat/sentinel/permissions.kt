@@ -41,20 +41,16 @@ enum class Permission(offset: Int, val uiName: String) : IPermissionSet {
     MANAGE_WEBHOOKS(29, "Manage Webhooks"),
     MANAGE_EMOTES(30, "Manage Emojis");
 
-    private val _raw: Long = 1L shl offset
+    override val raw: Long = 1L shl offset
 
-    override fun raw() = _raw
-    override fun plus(other: IPermissionSet) = PermissionSet(_raw or other.raw())
+    override fun plus(other: IPermissionSet) = PermissionSet(raw or other.raw)
 }
 
-class PermissionSet(private val _raw: Long) : IPermissionSet {
-    override fun raw(): Long = _raw
-    override fun plus(other: IPermissionSet) = PermissionSet(_raw or other.raw())
+class PermissionSet(override val raw: Long) : IPermissionSet {
+    override fun plus(other: IPermissionSet) = PermissionSet(raw or other.raw)
 }
 
 interface IPermissionSet {
-    fun raw(): Long
+    val raw: Long
     operator fun plus(other: IPermissionSet): PermissionSet
 }
-
-val test = (Permission.MESSAGE_READ + Permission.MESSAGE_READ).raw() == Permission.MESSAGE_READ.raw()
