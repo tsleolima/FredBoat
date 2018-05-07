@@ -96,12 +96,18 @@ class User(val raw: RawUser) {
         get() = raw.bot
 }
 
-class TextChannel(val raw: RawTextChannel) {
+interface Channel {
     val id: Long
-        get() = raw.id
     val name: String
-        get() = raw.name
     val ourEffectivePermissions: Long
+}
+
+class TextChannel(val raw: RawTextChannel) : Channel {
+    override val id: Long
+        get() = raw.id
+    override val name: String
+        get() = raw.name
+    override val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
 
     fun send(str: String): Mono<SendMessageResponse> {
@@ -113,13 +119,7 @@ class TextChannel(val raw: RawTextChannel) {
     }
 }
 
-interface MessageChannel {
-    val id: Long
-    val name: String
-    val ourEffectivePermissions: Long
-}
-
-class VoiceChannel(val raw: RawVoiceChannel) : MessageChannel {
+class VoiceChannel(val raw: RawVoiceChannel) : Channel {
     // TODO: List of members
 
     override val id: Long
