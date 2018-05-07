@@ -82,4 +82,38 @@ class Sentinel(private val template: AsyncRabbitTemplate,
 
     fun getApplicationInfo() = blockingTemplate.convertSendAndReceive(ApplicationInfoRequest()) as ApplicationInfo
 
+    /* Permissions */
+
+    private fun checkPermissions(guild: Guild, member: Member?, role: Role?, permissions: IPermissionSet):
+            Mono<PermissionCheckResponse> = Mono.create {
+
+        val req = GuildPermissionRequest(guild.id, member?.id, role?.id, permissions.raw)
+        template.convertSendAndReceive<PermissionCheckResponse>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
+                { r -> it.success(r) },
+                { exc -> it.error(RuntimeException("Failed checking permissions in $guild", exc)) }
+        )
+    }
+
+    // Role and member are mutually exclusive
+    fun checkPermissions(guild: Guild, member: Member, permissions: IPermissionSet)
+            = checkPermissions(guild, member, null, permissions)
+    fun checkPermissions(guild: Guild, role: Role, permissions: IPermissionSet)
+            = checkPermissions(guild, null, role, permissions)
+
+    private fun checkPermissions(channel: Channel, member: Member?, role: Role?, permissions: IPermissionSet):
+            Mono<PermissionCheckResponse> = Mono.create {
+
+        val req = ChannelPermissionRequest(channel.id, member?.id, role?.id, permissions.raw)
+        template.convertSendAndReceive<PermissionCheckResponse>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
+                { r -> it.success(r) },
+                { exc -> it.error(RuntimeException("Failed checking permissions in $channel", exc)) }
+        )
+    }
+
+    // Role and member are mutually exclusive
+    fun checkPermissions(channel: Channel, member: Member, permissions: IPermissionSet)
+            = checkPermissions(channel, member, null, permissions)
+    fun checkPermissions(channel: Channel, role: Role, permissions: IPermissionSet)
+            = checkPermissions(channel, null, role, permissions)
+
 }
