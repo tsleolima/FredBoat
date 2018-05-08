@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
 /**
  * Created by napster on 23.03.17.
- * <p>
- * classifies a commands as a fun command
+ *
+ * classifies a command as a moderation command
  */
-public interface IFunCommand {
-}
+interface IModerationCommand

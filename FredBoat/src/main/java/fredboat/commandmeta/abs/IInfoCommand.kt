@@ -22,17 +22,16 @@
  * SOFTWARE.
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
 /**
  * Created by napster on 23.03.17.
- * <p>
- * classifies a command as a info/debug command
+ *
+ * Classifies a command as a info/debug command
  *
  * These are commands that show information, be it debug or help or some links.
  * The fine difference to IUtil commands is that the IInfo commands are mostly meta - they provide help / information
  * that is needed to run / use FredBoat, while IUtil commands are meant to provide non-FredBoat related value and
  * information to users
  */
-public interface IInfoCommand {
-}
+interface IInfoCommand

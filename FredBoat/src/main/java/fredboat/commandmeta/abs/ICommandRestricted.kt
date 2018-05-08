@@ -20,14 +20,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
-/**
- * Created by napster on 23.03.17.
- * <p>
- * classifies a command as a moderation command
- */
-public interface IModerationCommand {
+import fredboat.definitions.PermissionLevel
+
+interface ICommandRestricted {
+    val minimumPerms: PermissionLevel
 }

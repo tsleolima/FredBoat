@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -23,12 +22,11 @@
  * SOFTWARE.
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
 /**
- * Created by napster on 09.11.17.
- * <p>
- * Commands that allow guilds / users to change any kind of FredBoat settings
+ * Created by napster on 23.03.17.
+ *
+ * classifies a command as a utility command
  */
-public interface IConfigCommand {
-}
+interface IUtilCommand

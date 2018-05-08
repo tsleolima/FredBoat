@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017 Frederik Ar. Mikkelsen
@@ -20,18 +21,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
-import fredboat.definitions.PermissionLevel;
-
-import javax.annotation.Nonnull;
-
-public interface ICommandRestricted {
-
-    @Nonnull
-    PermissionLevel getMinimumPerms();
-
-}
+/**
+ * Created by napster on 09.11.17.
+ *
+ * Commands that allow guilds / users to change any kind of FredBoat settings
+ */
+interface IConfigCommand
