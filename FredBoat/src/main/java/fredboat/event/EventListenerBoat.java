@@ -63,6 +63,7 @@ import net.dv8tion.jda.core.events.http.HttpRequestEvent;
 import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -73,7 +74,7 @@ import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class EventListenerBoat extends AbstractEventListener {
+public class EventListenerBoat extends ListenerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(EventListenerBoat.class);
 

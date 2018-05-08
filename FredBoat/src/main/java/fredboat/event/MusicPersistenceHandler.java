@@ -38,7 +38,6 @@ import fredboat.config.property.Credentials;
 import fredboat.definitions.RepeatMode;
 import fredboat.feature.I18n;
 import fredboat.jda.JdaEntityProvider;
-import fredboat.messaging.CentralMessaging;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.shared.constant.ExitCodes;
 import net.dv8tion.jda.core.JDA;
@@ -97,7 +96,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
         this.allPlayerManagers = allPlayerManagers;
     }
 
-    //this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
+    //TODO this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
     public void handlePreShutdown(int code) {
         if (!appConfig.isMusicDistribution()) {
             persist(code);
