@@ -45,7 +45,7 @@ public class HugCommand extends RandomImageCommand implements IFunCommand {
     public void onInvoke(@Nonnull CommandContext context) {
         String hugMessage = null;
         if (!context.getMentionedMembers().isEmpty()) {
-            if (context.getMentionedMembers().get(0).getIdLong() == context.getGuild().getJDA().getSelfUser().getIdLong()) {
+            if (context.getMentionedMembers().get(0).getIdLong() == context.guild.getJDA().getSelfUser().getIdLong()) {
                 hugMessage = context.i18n("hugBot");
             } else {
                 hugMessage = "_"

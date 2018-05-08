@@ -23,68 +23,60 @@
  * SOFTWARE.
  */
 
-package fredboat.messaging.internal
+package fredboat.messaging.internal;
 
-import com.fredboat.sentinel.entities.SendMessageResponse
-import fredboat.command.config.PrefixCommand
-import fredboat.commandmeta.MessagingException
-import fredboat.feature.I18n
-import fredboat.sentinel.Guild
-import fredboat.sentinel.Member
-import fredboat.sentinel.TextChannel
-import fredboat.sentinel.User
-import fredboat.util.TextUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import reactor.core.publisher.Mono
+import com.fredboat.sentinel.entities.SendMessageResponse;
+import fredboat.command.config.PrefixCommand;
+import fredboat.commandmeta.MessagingException;
+import fredboat.feature.I18n;
+import fredboat.sentinel.Guild;
+import fredboat.sentinel.Member;
+import fredboat.sentinel.TextChannel;
+import fredboat.sentinel.User;
+import fredboat.util.TextUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
-import javax.annotation.CheckReturnValue
-import java.text.MessageFormat
-import java.util.ResourceBundle
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 /**
  * Provides a context to whats going on. Where is it happening, who caused it?
  * Also home to a bunch of convenience methods
  */
-abstract class Context {
+public abstract class Context {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(Context::class.java)
-    }
+    private static final Logger log = LoggerFactory.getLogger(Context.class);
 
-    abstract val textChannel: TextChannel
-    abstract val guild: Guild
-    abstract val member: Member
-    abstract val user: User
+    public abstract TextChannel getTextChannel();
 
+    public abstract Guild getGuild();
 
-    /**
-     * Convenience method to get the prefix of the guild of this context.
-     */
-    val prefix: String
-        get() = PrefixCommand.giefPrefix(guild)
+    public abstract Member getMember();
 
-    // ********************************************************************************
-    //                         Internal context stuff
-    // ********************************************************************************
-
-    private var i18n: ResourceBundle? = null
+    public abstract User getUser();
 
 
     // ********************************************************************************
     //                         Convenience reply methods
     // ********************************************************************************
 
-    fun reply(message: String): Mono<SendMessageResponse> {
-        return textChannel.send(message)
+    @SuppressWarnings("UnusedReturnValue")
+    public Mono<SendMessageResponse> reply(String message) {
+        return getTextChannel().send(message);
     }
 
-    fun replyWithName(message: String): Mono<SendMessageResponse> {
-        return reply(TextUtils.prefaceWithName(member, message))
+    @SuppressWarnings("UnusedReturnValue")
+    public Mono<SendMessageResponse> replyWithName(String message) {
+        return reply(TextUtils.prefaceWithName(getMember(), message));
     }
 
-    fun replyWithMention(message: String): Mono<SendMessageResponse> {
-        return reply(TextUtils.prefaceWithMention(member, message))
+    @SuppressWarnings("UnusedReturnValue")
+    public Mono<SendMessageResponse> replyWithMention(String message) {
+        return reply(TextUtils.prefaceWithMention(getMember(), message));
     }
 
     /* //TODO: Add support for in sentinel
@@ -116,8 +108,8 @@ abstract class Context {
         return replyImage(url, null);
     }*/
 
-    fun sendTyping() {
-        textChannel.sendTyping()
+    public void sendTyping() {
+        getTextChannel().sendTyping();
     }
 
     //TODO: Add support for in sentinel
@@ -137,13 +129,13 @@ abstract class Context {
 
     //TODO: Add support for in sentinel
     /*
-    //checks whether we have the provided permissions for the textChannel of this context
+    //checks whether we have the provided permissions for the channel of this context
     @CheckReturnValue
     public boolean hasPermissions(Permission... permissions) {
         return hasPermissions(getTextChannel(), permissions);
     }
 
-    //checks whether we have the provided permissions for the provided textChannel
+    //checks whether we have the provided permissions for the provided channel
     @CheckReturnValue
     public boolean hasPermissions(@Nonnull TextChannel tc, Permission... permissions) {
         return getGuild().getSelfMember().hasPermission(tc, permissions);
@@ -156,12 +148,12 @@ abstract class Context {
      * @return Formatted i18n string, or a default language string if i18n is not found.
      */
     @CheckReturnValue
-    fun i18n(key: String): String {
+    public String i18n(@Nonnull String key) {
         if (getI18n().containsKey(key)) {
-            return getI18n().getString(key)
+            return getI18n().getString(key);
         } else {
-            log.warn("Missing language entry for key {} in language {}", key, I18n.getLocale(guild).code)
-            return I18n.DEFAULT.props.getString(key)
+            log.warn("Missing language entry for key {} in language {}", key, I18n.getLocale(getGuild()).getCode());
+            return I18n.DEFAULT.getProps().getString(key);
         }
     }
 
@@ -173,29 +165,42 @@ abstract class Context {
      * @return Formatted i18n string.
      */
     @CheckReturnValue
-    fun i18nFormat(key: String, vararg params: Any): String {
-        if (params.isEmpty()) {
+    public String i18nFormat(@Nonnull String key, Object... params) {
+        if (params == null || params.length == 0) {
             log.warn("Context#i18nFormat() called with empty or null params, this is likely a bug.",
-                    MessagingException("a stack trace to help find the source"))
+                    new MessagingException("a stack trace to help find the source"));
         }
         try {
-            return MessageFormat.format(this.i18n(key), *params)
-        } catch (e: IllegalArgumentException) {
+            return MessageFormat.format(this.i18n(key), params);
+        } catch (IllegalArgumentException e) {
             log.warn("Failed to format key '{}' for language '{}' with following parameters: {}",
-                    key, getI18n().baseBundleName, params, e)
+                    key, getI18n().getBaseBundleName(), params, e);
             //fall back to default props
-            return MessageFormat.format(I18n.DEFAULT.props.getString(key), *params)
+            return MessageFormat.format(I18n.DEFAULT.getProps().getString(key), params);
         }
-
     }
 
-    fun getI18n(): ResourceBundle {
-        var result = this.i18n
-        if (result == null) {
-            result = I18n.get(guild)
-            this.i18n = result
+
+    /**
+     * Convenience method to get the prefix of the guild of this context.
+     */
+    @Nonnull
+    public String getPrefix() {
+        return PrefixCommand.giefPrefix(getGuild());
+    }
+
+    // ********************************************************************************
+    //                         Internal context stuff
+    // ********************************************************************************
+
+    private ResourceBundle i18n;
+
+    @Nonnull
+    public ResourceBundle getI18n() {
+        if (this.i18n == null) {
+            this.i18n = I18n.get(getGuild());
         }
-        return result
+        return this.i18n;
     }
 
     //TODO: Add support for in sentinel

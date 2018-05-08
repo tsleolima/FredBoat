@@ -57,11 +57,11 @@ public class ReviveCommand extends Command implements ICommandRestricted {
         }
 
         try {
-            if (context.getArgs().length > 1 && context.getArgs()[0].equals("guild")) {
-                long guildId = Long.valueOf(context.getArgs()[1]);
+            if (context.args.length > 1 && context.args[0].equals("guild")) {
+                long guildId = Long.valueOf(context.args[1]);
                 shardId = DiscordUtil.getShardId(guildId, Launcher.getBotController().getCredentials());
             } else {
-                shardId = Integer.parseInt(context.getArgs()[0]);
+                shardId = Integer.parseInt(context.args[0]);
             }
         } catch (NumberFormatException e) {
             HelpCommand.sendFormattedCommandHelp(context);

@@ -54,7 +54,7 @@ public class ExitCommand extends Command implements ICommandRestricted {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (context.hasArguments()) {
-            if (context.getRawArgs().equals(code)) {
+            if (context.rawArgs.equals(code)) {
                 try {
                     context.replyWithName(":wave:").getWithDefaultTimeout();
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
@@ -63,7 +63,7 @@ public class ExitCommand extends Command implements ICommandRestricted {
                 return;
             } else {
                 context.reply(String.format("Your input `%s` did not fit the required code `%s`. A new code will be issued.",
-                        TextUtils.escapeMarkdown(context.getRawArgs()), code));
+                        TextUtils.escapeMarkdown(context.rawArgs), code));
             }
         }
         code = TextUtils.randomAlphaNumericString(4);

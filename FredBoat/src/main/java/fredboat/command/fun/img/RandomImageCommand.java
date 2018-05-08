@@ -86,7 +86,7 @@ public class RandomImageCommand extends Command implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.getRawArgs().contains("reload")) {
+        if (context.rawArgs.contains("reload")) {
             if (PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                 populateItems(false);
                 context.reply("Reloaded imgur album.");

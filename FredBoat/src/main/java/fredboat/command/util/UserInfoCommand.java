@@ -56,9 +56,9 @@ public class UserInfoCommand extends Command implements IUtilCommand {
         List<String> matchedGuildNames = new ArrayList<>();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
         if (!context.hasArguments()) {
-            target = context.getMember();
+            target = context.invoker;
         } else {
-            target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.getRawArgs(), true);
+            target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.rawArgs, true);
         }
         if (target == null) return;
         Launcher.getBotController().getJdaEntityProvider().streamGuilds().forEach(guild -> {

@@ -69,10 +69,10 @@ public class CommandManager {
     }
 
     public void prefixCalled(CommandContext context) {
-        Guild guild = context.getGuild();
-        Command invoked = context.getCommand();
-        TextChannel channel = context.getTextChannel();
-        Member invoker = context.getMember();
+        Guild guild = context.guild;
+        Command invoked = context.command;
+        TextChannel channel = context.channel;
+        Member invoker = context.invoker;
 
         totalCommandsExecuted.incrementAndGet();
         Metrics.commandsExecuted.labels(invoked.getClass().getSimpleName()).inc();
@@ -90,7 +90,7 @@ public class CommandManager {
             }
         }
 
-        //Hardcode music commands in FredBoatHangout. Blacklist any textChannel that isn't #spam_and_music or #staff, but whitelist Admins
+        //Hardcode music commands in FredBoatHangout. Blacklist any channel that isn't #spam_and_music or #staff, but whitelist Admins
         if (guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID && DiscordUtil.isOfficialBot(credentials)) {
             if (!channel.getId().equals("174821093633294338") // #spam_and_music
                     && !channel.getId().equals("217526705298866177") // #staff
@@ -104,7 +104,7 @@ public class CommandManager {
         }
 
         if (disabledCommands.contains(invoked)) {
-            context.replyWithName("Sorry the `" + context.getCommand().getName() + "` command is currently disabled. Please try again later");
+            context.replyWithName("Sorry the `" + context.command.name + "` command is currently disabled. Please try again later");
             return;
         }
 

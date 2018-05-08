@@ -26,7 +26,7 @@ public class PingCommand extends Command implements IInfoCommand {
     
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        long ping = context.getGuild().getJDA().getPing();
+        long ping = context.guild.getJDA().getPing();
         context.reply(ping + "ms");
     }
 }

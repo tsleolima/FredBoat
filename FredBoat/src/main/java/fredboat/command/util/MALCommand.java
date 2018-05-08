@@ -83,7 +83,7 @@ public class MALCommand extends Command implements IUtilCommand {
             return;
         }
 
-        String term = context.getRawArgs().replace(' ', '+').trim();
+        String term = context.rawArgs.replace(' ', '+').trim();
         log.debug("TERM:" + term);
 
         Launcher.getBotController().getExecutor().submit(() -> requestAsync(term, context));
@@ -121,11 +121,11 @@ public class MALCommand extends Command implements IUtilCommand {
             log.warn("MAL request blew up", e);
         }
 
-        context.reply(context.i18nFormat("malNoResults", TextUtils.escapeAndDefuse(context.getMember().getEffectiveName())));
+        context.reply(context.i18nFormat("malNoResults", TextUtils.escapeAndDefuse(context.invoker.getEffectiveName())));
     }
 
     private boolean handleAnime(CommandContext context, String terms, String body) {
-        String msg = context.i18nFormat("malRevealAnime", TextUtils.escapeAndDefuse(context.getMember().getEffectiveName()));
+        String msg = context.i18nFormat("malRevealAnime", TextUtils.escapeAndDefuse(context.invoker.getEffectiveName()));
 
         //Read JSON
         log.info(body);
@@ -188,13 +188,13 @@ public class MALCommand extends Command implements IUtilCommand {
     }
 
     private boolean handleUser(CommandContext context, String body) {
-        String msg = context.i18nFormat("malUserReveal", TextUtils.escapeAndDefuse(context.getMember().getEffectiveName()));
+        String msg = context.i18nFormat("malUserReveal", TextUtils.escapeAndDefuse(context.invoker.getEffectiveName()));
 
         //Read JSON
         JSONObject root = new JSONObject(body);
         JSONArray items = root.getJSONArray("categories").getJSONObject(0).getJSONArray("items");
         if (items.length() == 0) {
-            context.reply(context.i18nFormat("malNoResults", TextUtils.escapeAndDefuse(context.getMember().getEffectiveName())));
+            context.reply(context.i18nFormat("malNoResults", TextUtils.escapeAndDefuse(context.invoker.getEffectiveName())));
             return false;
         }
 

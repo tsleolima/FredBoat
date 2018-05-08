@@ -62,24 +62,24 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
     @Nonnull
     @Override
     public String help(@Nonnull Context context) {
-        return "{0}{1} [textChannel id or mention] [user id or mention]\n#Show permissions of a user and any roles they "
-                + "have for a textChannel and guild. If no user is provided, FredBoat shows permissions for itself. If no "
-                + "textChannel is provided, permissions for the textChannel where the command is issued are shown.";
+        return "{0}{1} [channel id or mention] [user id or mention]\n#Show permissions of a user and any roles they "
+                + "have for a channel and guild. If no user is provided, FredBoat shows permissions for itself. If no "
+                + "channel is provided, permissions for the channel where the command is issued are shown.";
     }
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        TextChannel tc = context.getTextChannel();
+        TextChannel tc = context.channel;
 
-        if (!context.getMsg().getMentionedChannels().isEmpty()) {
-            tc = context.getMsg().getMentionedChannels().get(0);
+        if (!context.msg.getMentionedChannels().isEmpty()) {
+            tc = context.msg.getMentionedChannels().get(0);
         } else if (context.hasArguments()) {
             try {
-                long channelId = Long.parseUnsignedLong(context.getArgs()[0]);
+                long channelId = Long.parseUnsignedLong(context.args[0]);
                 TextChannel textChannel = Launcher.getBotController().getJdaEntityProvider().getTextChannelById(channelId);
                 if (textChannel == null) {
-                    context.reply(String.format("No text textChannel with id `%s` found.", channelId));
+                    context.reply(String.format("No text channel with id `%s` found.", channelId));
                     return;
                 }
                 tc = textChannel;
@@ -95,9 +95,9 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
             if (m != null) {
                 member = m;
             }
-        } else if (context.getArgs().length > 1) {
+        } else if (context.args.length > 1) {
             try {
-                long userId = Long.parseUnsignedLong(context.getArgs()[1]);
+                long userId = Long.parseUnsignedLong(context.args[1]);
                 Member m = guild.getMemberById(userId);
                 if (m == null) {
                     context.reply("No member with id `%s` found in the specified guild.");
@@ -113,8 +113,8 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
         // server permissions for all roles of the member, including the @everyone role
         // category overrides for roles + @everyone
         // category override for member
-        // textChannel overrides for roles + @everyone
-        // textChannel override for member
+        // channel overrides for roles + @everyone
+        // channel override for member
 
         EmbedBuilder eb = CentralMessaging.getColoredEmbedBuilder();
         eb.setTitle("Full allowed/denied discord permissions");

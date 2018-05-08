@@ -43,7 +43,7 @@ public class DestroyCommand extends Command implements IMusicCommand, ICommandRe
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Launcher.getBotController().getPlayerRegistry().destroyPlayer(context.getGuild());
+        Launcher.getBotController().getPlayerRegistry().destroyPlayer(context.guild);
         context.replyWithName(context.i18n("destroySucc"));
     }
 

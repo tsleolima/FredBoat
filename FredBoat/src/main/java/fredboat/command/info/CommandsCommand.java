@@ -67,7 +67,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
         if (!context.hasArguments()) {
 
             Collection<Module> enabledModules = context.getEnabledModules();
-            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
+            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker)) {
                 enabledModules.remove(Module.ADMIN);//dont show admin commands/modules for non admins
             }
 
@@ -83,16 +83,16 @@ public class CommandsCommand extends Command implements IInfoCommand {
         }
 
         List<Module> showHelpFor;
-        if (context.getRawArgs().toLowerCase().contains(ALL.toLowerCase())) {
+        if (context.rawArgs.toLowerCase().contains(ALL.toLowerCase())) {
             showHelpFor = new ArrayList<>(Arrays.asList(Module.values()));
-            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
+            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker)) {
                 showHelpFor.remove(Module.ADMIN);//dont show admin commands/modules for non admins
             }
         } else {
-            Module module = CommandRegistry.whichModule(context.getRawArgs(), context);
+            Module module = CommandRegistry.whichModule(context.rawArgs, context);
             if (module == null) {
                 context.reply(context.i18nFormat("moduleCantParse",
-                        "`" + context.getPrefix() + context.getCommand().getName()) + "`");
+                        "`" + context.getPrefix() + context.command.name) + "`");
                 return;
             } else {
                 showHelpFor = Collections.singletonList(module);
@@ -117,7 +117,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
                 .filter(command -> {
                     if (command instanceof ICommandRestricted) {
                         if (((ICommandRestricted) command).getMinimumPerms().getLevel() >= PermissionLevel.BOT_ADMIN.getLevel()) {
-                            return PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember());
+                            return PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker);
                         }
                     }
                     return true;
@@ -137,7 +137,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
                 if (c instanceof DestroyCommand) {
                     continue;//dont want to publicly show this one
                 }
-                sbs[i++ % 3].append(prefix).append(c.getName()).append("\n");
+                sbs[i++ % 3].append(prefix).append(c.name).append("\n");
             }
 
             return embedBuilder
@@ -148,7 +148,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
         } else {
             StringBuilder sb = new StringBuilder();
             for (Command c : commands) {
-                sb.append(prefix).append(c.getName()).append("\n");
+                sb.append(prefix).append(c.name).append("\n");
             }
             return embedBuilder
                     .addField(context.i18n(module.module.getTranslationKey()), sb.toString(), true)

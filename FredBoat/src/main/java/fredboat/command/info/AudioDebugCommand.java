@@ -58,7 +58,7 @@ public class AudioDebugCommand extends Command implements IInfoCommand {
 
     private void handleLavaplayer(CommandContext context) {
         String msg = "";
-        GuildPlayer guildPlayer = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
+        GuildPlayer guildPlayer = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
         if(guildPlayer == null) {
             msg = msg + "No GuildPlayer found.\n";

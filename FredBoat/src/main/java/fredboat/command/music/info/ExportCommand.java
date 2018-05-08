@@ -45,7 +45,7 @@ public class ExportCommand extends Command implements IMusicCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
         if (player == null || player.isQueueEmpty()) {
             throw new MessagingException(context.i18n("exportEmpty"));

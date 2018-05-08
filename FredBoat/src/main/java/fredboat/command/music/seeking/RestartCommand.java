@@ -45,7 +45,7 @@ public class RestartCommand extends Command implements IMusicCommand, ICommandRe
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
         if (player != null && !player.isQueueEmpty()) {
             if (player.getPlayingTrack() == null) {

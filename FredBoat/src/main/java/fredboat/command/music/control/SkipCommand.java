@@ -66,24 +66,24 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
 
         if (player == null || player.isQueueEmpty()) {
             context.reply(context.i18n("skipEmpty"));
             return;
         }
 
-        if (isOnCooldown(context.getGuild())) {
+        if (isOnCooldown(context.guild)) {
             return;
         } else {
-            guildIdToLastSkip.put(context.getGuild().getId(), System.currentTimeMillis());
+            guildIdToLastSkip.put(context.guild.getId(), System.currentTimeMillis());
         }
 
         if (!context.hasArguments()) {
             skipNext(player, context);
-        } else if (context.hasArguments() && StringUtils.isNumeric(context.getArgs()[0])) {
+        } else if (context.hasArguments() && StringUtils.isNumeric(context.args[0])) {
             skipGivenIndex(player, context);
-        } else if (context.hasArguments() && trackRangePattern.matcher(context.getArgs()[0]).matches()) {
+        } else if (context.hasArguments() && trackRangePattern.matcher(context.args[0]).matches()) {
             skipInRange(player, context);
         } else if (!context.getMentionedMembers().isEmpty()) {
             skipUser(player, context, context.getMentionedMembers());
@@ -107,9 +107,9 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
     private void skipGivenIndex(GuildPlayer player, CommandContext context) {
         int givenIndex;
         try {
-            givenIndex = Integer.parseInt(context.getArgs()[0]);
+            givenIndex = Integer.parseInt(context.args[0]);
         } catch (NumberFormatException e) {
-            context.reply(context.i18nFormat("skipOutOfBounds", context.getArgs()[0], player.getTrackCount()));
+            context.reply(context.i18nFormat("skipOutOfBounds", context.args[0], player.getTrackCount()));
             return;
         }
 
@@ -134,7 +134,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
     }
 
     private void skipInRange(GuildPlayer player, CommandContext context) {
-        Matcher trackMatch = trackRangePattern.matcher(context.getArgs()[0]);
+        Matcher trackMatch = trackRangePattern.matcher(context.args[0]);
         if (!trackMatch.find()) return;
 
         int startTrackIndex;
@@ -171,12 +171,12 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
     private void skipUser(GuildPlayer player, CommandContext context, List<User> users) {
 
-        if (!PermsUtil.checkPerms(PermissionLevel.DJ, context.getMember())) {
+        if (!PermsUtil.checkPerms(PermissionLevel.DJ, context.invoker)) {
 
             if (users.size() == 1) {
                 User user = users.get(0);
 
-                if (context.getMember().getUser().getIdLong() != user.getIdLong()) {
+                if (context.invoker.getUser().getIdLong() != user.getIdLong()) {
                     context.reply(context.i18n("skipDeniedTooManyTracks"));
                     return;
                 }

@@ -45,7 +45,7 @@ public class AkinatorCommand extends Command implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         try {
-            String userId = context.getMember().getUser().getId();
+            String userId = context.invoker.getUser().getId();
             AkinatorListener akinator = new AkinatorListener(context);
             Launcher.getBotController().getMainEventListener().putListener(userId, akinator);
         } catch (IOException | JSONException e) {

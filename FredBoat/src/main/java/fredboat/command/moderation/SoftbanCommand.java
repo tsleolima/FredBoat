@@ -55,7 +55,7 @@ public class SoftbanCommand extends Command implements IModerationCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Guild guild = context.getGuild();
+        Guild guild = context.guild;
         //Ensure we have a search term
         if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
@@ -63,7 +63,7 @@ public class SoftbanCommand extends Command implements IModerationCommand {
         }
 
         //was there a target provided?
-        Member target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.getArgs()[0]);
+        Member target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.args[0]);
         if (target == null) return;
 
         //are we allowed to do that?
@@ -71,7 +71,7 @@ public class SoftbanCommand extends Command implements IModerationCommand {
 
         //putting together a reason
         String plainReason = DiscordUtil.getReasonForModAction(context);
-        String auditLogReason = DiscordUtil.formatReasonForAuditLog(plainReason, context.getMember());
+        String auditLogReason = DiscordUtil.formatReasonForAuditLog(plainReason, context.invoker);
 
         //putting together the action
         RestAction<Void> modAction = guild.getController().ban(target, 7, auditLogReason);
@@ -103,7 +103,7 @@ public class SoftbanCommand extends Command implements IModerationCommand {
     }
 
     private boolean checkAuthorization(CommandContext context, Member target) {
-        Member mod = context.getMember();
+        Member mod = context.invoker;
         if(mod == target) {
             context.replyWithName(context.i18n("softbanFailSelf"));
             return false;

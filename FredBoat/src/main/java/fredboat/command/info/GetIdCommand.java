@@ -40,12 +40,12 @@ public class GetIdCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        context.reply(context.i18nFormat("getidSuccess", context.getGuild().getId(), context.getTextChannel().getId()));
+        context.reply(context.i18nFormat("getidSuccess", context.guild.getId(), context.channel.getId()));
     }
 
     @Nonnull
     @Override
     public String help(@Nonnull Context context) {
-        return "{0}{1}\n#Show ids of the current guild and the current text textChannel.";
+        return "{0}{1}\n#Show ids of the current guild and the current text channel.";
     }
 }

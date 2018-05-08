@@ -72,7 +72,7 @@ public class ModulesCommand extends Command implements IConfigCommand {
 
         //editing module status happens here
 
-        String args = context.getRawArgs().toLowerCase();
+        String args = context.rawArgs.toLowerCase();
 
         boolean enable;
         if (args.contains("enable")) {
@@ -87,7 +87,7 @@ public class ModulesCommand extends Command implements IConfigCommand {
         Module module = CommandRegistry.whichModule(args, context);
         if (module == null) {
             context.reply(context.i18nFormat("moduleCantParse",
-                    context.getPrefix() + context.getCommand().getName()));
+                    context.getPrefix() + context.command.name));
             return;
         } else if (module.isLockedModule()) {
             context.reply(context.i18nFormat("moduleLocked", context.i18n(module.getTranslationKey()))
@@ -108,16 +108,16 @@ public class ModulesCommand extends Command implements IConfigCommand {
             output = context.i18nFormat("moduleDisable", "**" + context.i18n(module.getTranslationKey()) + "**");
         }
 
-        Launcher.getBotController().getGuildModulesService().transformGuildModules(context.getGuild(), transform);
+        Launcher.getBotController().getGuildModulesService().transformGuildModules(context.guild, transform);
         context.reply(output);//if the transaction right above this line fails, it won't be reached, which is intended
     }
 
     private static void displayModuleStatus(@Nonnull CommandContext context) {
-        GuildModules gm = Launcher.getBotController().getGuildModulesService().fetchGuildModules(context.getGuild());
+        GuildModules gm = Launcher.getBotController().getGuildModulesService().fetchGuildModules(context.guild);
         Function<Module, String> moduleStatusFormatter = moduleStatusLine(gm, context);
         String moduleStatus = "";
 
-        if (PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
+        if (PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker)) {
             moduleStatus
                     = moduleStatusFormatter.apply(Module.ADMIN) + " " + Emojis.LOCK + "\n"
                     + moduleStatusFormatter.apply(Module.INFO) + " " + Emojis.LOCK + "\n"

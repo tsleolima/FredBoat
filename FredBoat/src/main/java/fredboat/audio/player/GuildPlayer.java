@@ -125,7 +125,7 @@ public class GuildPlayer extends AbstractPlayer {
             throw new MessagingException(I18n.get(getGuild()).getString("playerUserNotInChannel"));
         }
         if (targetChannel.equals(getCurrentVoiceChannel())) {
-            // already connected to the textChannel
+            // already connected to the channel
             return;
         }
 
@@ -143,22 +143,22 @@ public class GuildPlayer extends AbstractPlayer {
         if (targetChannel.getUserLimit() > 0
                 && targetChannel.getUserLimit() <= targetChannel.getMembers().size()
                 && !guild.getSelfMember().hasPermission(Permission.VOICE_MOVE_OTHERS)) {
-            throw new MessagingException(String.format("The textChannel you want me to join is full!"
+            throw new MessagingException(String.format("The channel you want me to join is full!"
                             + " Please free up some space, or give me the permission to **%s** to bypass the limit.",//todo i18n
                     Permission.VOICE_MOVE_OTHERS.getName()));
         }
 
         try {
             audioConnectionFacade.openConnection(targetChannel, this);
-            log.info("Connected to voice textChannel " + targetChannel);
+            log.info("Connected to voice channel " + targetChannel);
         } catch (Exception e) {
-            log.error("Failed to join voice textChannel {}", targetChannel, e);
+            log.error("Failed to join voice channel {}", targetChannel, e);
         }
     }
 
     public void leaveVoiceChannelRequest(CommandContext commandContext, boolean silent) {
         if (!silent) {
-            VoiceChannel currentVc = commandContext.getGuild().getSelfMember().getVoiceState().getChannel();
+            VoiceChannel currentVc = commandContext.guild.getSelfMember().getVoiceState().getChannel();
             if (currentVc == null) {
                 commandContext.reply(commandContext.i18n("playerNotInChannel"));
             } else {
@@ -169,7 +169,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     /**
-     * May return null if the member is currently not in a textChannel
+     * May return null if the member is currently not in a channel
      */
     @Nullable
     public VoiceChannel getUserCurrentVoiceChannel(Member member) {
@@ -177,9 +177,9 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void queue(String identifier, CommandContext context) {
-        IdentifierContext ic = new IdentifierContext(jdaEntityProvider, identifier, context.getTextChannel(), context.getMember());
+        IdentifierContext ic = new IdentifierContext(jdaEntityProvider, identifier, context.channel, context.invoker);
 
-        joinChannel(context.getMember());
+        joinChannel(context.invoker);
 
         audioLoader.loadAsync(ic);
     }
@@ -273,9 +273,9 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     /**
-     * @return The text textChannel currently used for music commands.
+     * @return The text channel currently used for music commands.
      *
-     * May return null if the textChannel was deleted.
+     * May return null if the channel was deleted.
      */
     @Nullable
     public TextChannel getActiveTextChannel() {
@@ -385,7 +385,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void skipTracksForMemberPerms(CommandContext context, Collection<Long> trackIds, String successMessage) {
-        Pair<Boolean, String> pair = canMemberSkipTracks(context.getMember(), trackIds);
+        Pair<Boolean, String> pair = canMemberSkipTracks(context.invoker, trackIds);
 
         if (pair.getLeft()) {
             context.reply(successMessage);

@@ -82,9 +82,9 @@ public class CommandRegistry {
     }
 
     public void registerCommand(@Nonnull Command command) {
-        String name = command.getName().toLowerCase();
+        String name = command.name.toLowerCase();
         registry.put(name, command);
-        for (String alias : command.getAliases()) {
+        for (String alias : command.aliases) {
             registry.put(alias.toLowerCase(), command);
         }
         command.setModule(this.module);

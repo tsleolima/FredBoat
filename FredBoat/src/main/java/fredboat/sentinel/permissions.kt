@@ -11,7 +11,7 @@ enum class Permission(offset: Int, val uiName: String) : IPermissionSet {
     MESSAGE_ADD_REACTION(6, "Add Reactions"),
     VIEW_AUDIT_LOGS(7, "View Audit Logs"),
 
-    // Applicable to all textChannel types
+    // Applicable to all channel types
     VIEW_CHANNEL(10, "Read Text Channels & See Voice Channels"),
 
     // Text Permissions

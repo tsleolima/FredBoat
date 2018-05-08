@@ -51,7 +51,7 @@ public class ShardsCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        for (Message message : getShardStatus(context.getMsg())) {
+        for (Message message : getShardStatus(context.msg)) {
             context.reply(message);
         }
     }

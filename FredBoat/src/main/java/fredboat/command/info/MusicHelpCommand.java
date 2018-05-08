@@ -66,13 +66,13 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.getArgs().length > 2 && context.getArgs()[0].toLowerCase().contains(UPDATE)) {
+        if (context.args.length > 2 && context.args[0].toLowerCase().contains(UPDATE)) {
             updateMessage(context);
             return;
         }
 
         boolean postInDm = true;
-        if (context.getRawArgs().toLowerCase().contains(HERE)) {
+        if (context.rawArgs.toLowerCase().contains(HERE)) {
             postInDm = false;
         }
 
@@ -110,16 +110,16 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
         long channelId;
         long messageId;
         try {
-            channelId = Long.parseUnsignedLong(context.getArgs()[1]);
-            messageId = Long.parseUnsignedLong(context.getArgs()[2]);
+            channelId = Long.parseUnsignedLong(context.args[1]);
+            messageId = Long.parseUnsignedLong(context.args[2]);
         } catch (NumberFormatException e) {
-            context.reply("Could not parse the provided textChannel and/or message ids.");
+            context.reply("Could not parse the provided channel and/or message ids.");
             return;
         }
 
         TextChannel fbhMusicCommandsChannel = Launcher.getBotController().getJdaEntityProvider().getTextChannelById(channelId);
         if (fbhMusicCommandsChannel == null) {
-            context.reply("Could not find the requested textChannel with id " + channelId);
+            context.reply("Could not find the requested channel with id " + channelId);
             return;
         }
         List<String> messages = getMessages(context);
@@ -132,7 +132,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
                 t -> context.reply("Could not find the message with id " + messageId + " or it is not a message that I'm allowed to edit."));
     }
 
-    //returns the music commands ready to be posted to a textChannel
+    //returns the music commands ready to be posted to a channel
     // may return a list with more than one message if we hit the message size limit which might happen due to long
     // custom prefixes, or translations that take more letters than the stock english one
     // stock english commands with stock prefix should always aim to stay in one message
@@ -163,8 +163,8 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
         // of the play command, which is "good enough" for this list
         musicCommands = musicCommands.stream()
                 .filter(command -> !(command instanceof PlayCommand
-                        && (command.getName().equals(CommandInitializer.YOUTUBE_COMM_NAME)
-                        || command.getName().equals(CommandInitializer.SOUNDCLOUD_COMM_NAME))))
+                        && (command.name.equals(CommandInitializer.YOUTUBE_COMM_NAME)
+                        || command.name.equals(CommandInitializer.SOUNDCLOUD_COMM_NAME))))
                 .filter(command -> !(command instanceof DestroyCommand))
                 .collect(Collectors.toList());
 
@@ -172,7 +172,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
 
         List<String> musicComms = new ArrayList<>();
         for (Command command : musicCommands) {
-            String formattedHelp = HelpCommand.getFormattedCommandHelp(context, command, command.getName());
+            String formattedHelp = HelpCommand.getFormattedCommandHelp(context, command, command.name);
             musicComms.add(formattedHelp);
         }
 

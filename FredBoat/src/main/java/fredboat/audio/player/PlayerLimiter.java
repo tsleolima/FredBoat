@@ -28,7 +28,7 @@ public class PlayerLimiter {
     }
 
     public boolean checkLimitResponsive(CommandContext context, PlayerRegistry playerRegistry) {
-        boolean b = checkLimit(context.getGuild(), playerRegistry);
+        boolean b = checkLimit(context.guild, playerRegistry);
 
         if (!b) {
             String patronUrl = "<" + BotConstants.DOCS_DONATE_URL + ">";

@@ -89,7 +89,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.getRawArgs().isEmpty()) {
+        if (context.rawArgs.isEmpty()) {
             showPrefix(context, context.getPrefix());
             return;
         }
@@ -99,23 +99,23 @@ public class PrefixCommand extends Command implements IConfigCommand {
         }
 
         final String newPrefix;
-        if (context.getRawArgs().equalsIgnoreCase("no_prefix")) {
+        if (context.rawArgs.equalsIgnoreCase("no_prefix")) {
             newPrefix = ""; //allow users to set an empty prefix with a special keyword
-        } else if (context.getRawArgs().equalsIgnoreCase("reset")) {
+        } else if (context.rawArgs.equalsIgnoreCase("reset")) {
             newPrefix = null;
         } else {
             //considering this is an admin level command, we can allow users to do whatever they want with their guild
             // prefix, so no checks are necessary here
-            newPrefix = context.getRawArgs();
+            newPrefix = context.rawArgs;
         }
 
-        Launcher.getBotController().getPrefixService().transformPrefix(context.getGuild(), prefixEntity -> prefixEntity.setPrefix(newPrefix));
+        Launcher.getBotController().getPrefixService().transformPrefix(context.guild, prefixEntity -> prefixEntity.setPrefix(newPrefix));
 
         //we could do a put instead of invalidate here and probably safe one lookup, but that undermines the database
         // as being the single source of truth for prefixes
-        CUSTOM_PREFIXES.invalidate(context.getGuild().getIdLong());
+        CUSTOM_PREFIXES.invalidate(context.guild.getIdLong());
 
-        showPrefix(context, giefPrefix(context.getGuild()));
+        showPrefix(context, giefPrefix(context.guild));
     }
 
     public static void showPrefix(@Nonnull Context context, @Nonnull String prefix) {

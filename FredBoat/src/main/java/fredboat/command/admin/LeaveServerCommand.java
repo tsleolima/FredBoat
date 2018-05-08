@@ -48,9 +48,9 @@ public class LeaveServerCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Consumer<Message> callback = aVoid -> context.getGuild().leave().queue();
+        Consumer<Message> callback = aVoid -> context.guild.leave().queue();
         Consumer<Throwable> throwConsumer = ex -> log.error("Error leaving server.", ex);
-        context.getTextChannel().sendMessage("Thanks for having me!").queue(callback, throwConsumer);
+        context.channel.sendMessage("Thanks for having me!").queue(callback, throwConsumer);
     }
 
     @Nonnull

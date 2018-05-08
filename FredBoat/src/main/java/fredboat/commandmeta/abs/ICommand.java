@@ -23,18 +23,20 @@
  *
  */
 
-package fredboat.commandmeta.abs
+package fredboat.commandmeta.abs;
 
-import fredboat.definitions.Module
-import java.util.Arrays
+import fredboat.messaging.internal.Context;
 
-abstract class Command protected constructor(val name: String, vararg aliases: String) : ICommand {
-    val aliases: List<String> = Arrays.asList(*aliases)
-    var module: Module? = null
+import javax.annotation.Nonnull;
 
-    override fun equals(other: Any?): Boolean {
-        return other is Command && other.name == this.name
-    }
+public interface ICommand {
 
-    override fun hashCode(): Int = name.hashCode()
+    void onInvoke(@Nonnull CommandContext context);
+
+    /**
+     * @param context Context for where the help is going to be posted, mostly used for i18ning the help string
+     * @return an unformatted help string: convention {0} = prefix, {1} = command, fill these in by the running bot, more parameters can be present
+     */
+    @Nonnull
+    String help(@Nonnull Context context);
 }

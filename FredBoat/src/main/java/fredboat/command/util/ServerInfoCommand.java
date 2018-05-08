@@ -50,7 +50,7 @@ public class ServerInfoCommand extends Command implements IUtilCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Guild guild = context.getGuild();
+        Guild guild = context.guild;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
         EmbedBuilder eb = CentralMessaging.getColoredEmbedBuilder();
         eb.setTitle(context.i18nFormat("serverinfoTitle", guild.getName()), null);
