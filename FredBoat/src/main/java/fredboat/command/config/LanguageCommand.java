@@ -51,7 +51,7 @@ public class LanguageCommand extends Command implements IConfigCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Guild guild = context.guild;
+        Guild guild = context.getGuild();
         if (!context.hasArguments()) {
             handleNoArgs(context);
             return;
@@ -62,9 +62,9 @@ public class LanguageCommand extends Command implements IConfigCommand {
         
         //Assume proper usage and that we are about to set a new language
         try {
-            I18n.set(guild, context.args[0]);
+            I18n.set(guild, context.getArgs()[0]);
         } catch (I18n.LanguageNotSupportedException e) {
-            context.replyWithName(context.i18nFormat("langInvalidCode", context.args[0]));
+            context.replyWithName(context.i18nFormat("langInvalidCode", context.getArgs()[0]));
             return;
         }
 

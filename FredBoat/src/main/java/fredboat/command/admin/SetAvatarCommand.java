@@ -84,11 +84,11 @@ public class SetAvatarCommand extends Command implements ICommandRestricted {
         URI imageUrl = null;
 
         try {
-            if (!context.msg.getAttachments().isEmpty()) {
-                Attachment attachment = context.msg.getAttachments().get(0);
+            if (!context.getMsg().getAttachments().isEmpty()) {
+                Attachment attachment = context.getMsg().getAttachments().get(0);
                 imageUrl = new URI(attachment.getUrl());
             } else if (context.hasArguments()) {
-                imageUrl = AVATARS.containsKey(context.args[0]) ? AVATARS.get(context.args[0]) : new URI(context.args[0]);
+                imageUrl = AVATARS.containsKey(context.getArgs()[0]) ? AVATARS.get(context.getArgs()[0]) : new URI(context.getArgs()[0]);
             }
         } catch (URISyntaxException e) {
             context.reply("Not a valid link.");
@@ -149,7 +149,7 @@ public class SetAvatarCommand extends Command implements ICommandRestricted {
     }
 
     private void setBotAvatar(CommandContext context, Icon icon) {
-        context.guild.getJDA().getSelfUser().getManager().setAvatar(icon)
+        context.getGuild().getJDA().getSelfUser().getManager().setAvatar(icon)
                 .queue(__ -> {
                             Metrics.successfulRestActions.labels("setAvatar").inc();
                             context.reply("Avatar has been set successfully!");

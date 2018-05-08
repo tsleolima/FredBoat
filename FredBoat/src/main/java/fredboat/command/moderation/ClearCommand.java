@@ -54,9 +54,9 @@ public class ClearCommand extends Command implements IModerationCommand {
     //TODO: i18n this class
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        JDA jda = context.guild.getJDA();
-        TextChannel channel = context.channel;
-        Member invoker = context.invoker;
+        JDA jda = context.getGuild().getJDA();
+        TextChannel channel = context.getTextChannel();
+        Member invoker = context.getMember();
 
         if (!invoker.hasPermission(channel, Permission.MESSAGE_MANAGE)
                 && !PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, invoker)) {
@@ -64,7 +64,7 @@ public class ClearCommand extends Command implements IModerationCommand {
             return;
         }
 
-        if (!context.guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_HISTORY)) {
+        if (!context.getGuild().getSelfMember().hasPermission(channel, Permission.MESSAGE_HISTORY)) {
             context.reply(context.i18n("permissionMissingBot") + " **" + Permission.MESSAGE_HISTORY.getName() + "**");
             return;
         }
@@ -99,7 +99,7 @@ public class ClearCommand extends Command implements IModerationCommand {
                 },
                 CentralMessaging.getJdaRestActionFailureHandler(
                         String.format("Failed to retrieve message history in channel %s in guild %s",
-                                channel.getId(), context.guild.getId())
+                                channel.getId(), context.getGuild().getId())
                 )
         );
     }

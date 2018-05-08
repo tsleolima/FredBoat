@@ -74,7 +74,7 @@ public class AnnounceCommand extends Command implements ICommandRestricted {
             return;
         }
 
-        String msg = HEAD + context.rawArgs;
+        String msg = HEAD + context.getRawArgs();
 
         context.reply(String.format("[0/%d]", players.size()),
                 //success handler

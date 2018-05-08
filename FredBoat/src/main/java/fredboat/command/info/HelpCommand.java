@@ -68,7 +68,7 @@ public class HelpCommand extends Command implements IInfoCommand {
     public void onInvoke(@Nonnull CommandContext context) {
 
         if (context.hasArguments()) {
-            sendFormattedCommandHelp(context, context.args[0]);
+            sendFormattedCommandHelp(context, context.getArgs()[0]);
         } else {
             sendGeneralHelp(context);
         }
@@ -82,7 +82,7 @@ public class HelpCommand extends Command implements IInfoCommand {
 
     //for answering the help command from a guild
     public static void sendGeneralHelp(@Nonnull CommandContext context) {
-        long userId = context.invoker.getUser().getIdLong();
+        long userId = context.getMember().getUser().getIdLong();
         if (HELP_RECEIVED_RECENTLY.getIfPresent(userId) != null) {
             return;
         }
@@ -150,7 +150,7 @@ public class HelpCommand extends Command implements IInfoCommand {
     }
 
     public static void sendFormattedCommandHelp(CommandContext context) {
-        sendFormattedCommandHelp(context, context.trigger);
+        sendFormattedCommandHelp(context, context.getTrigger());
     }
 
     private static void sendFormattedCommandHelp(CommandContext context, String trigger) {

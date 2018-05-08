@@ -69,10 +69,10 @@ public class CommandManager {
     }
 
     public void prefixCalled(CommandContext context) {
-        Guild guild = context.guild;
-        Command invoked = context.command;
-        TextChannel channel = context.channel;
-        Member invoker = context.invoker;
+        Guild guild = context.getGuild();
+        Command invoked = context.getCommand();
+        TextChannel channel = context.getTextChannel();
+        Member invoker = context.getMember();
 
         totalCommandsExecuted.incrementAndGet();
         Metrics.commandsExecuted.labels(invoked.getClass().getSimpleName()).inc();
@@ -104,7 +104,7 @@ public class CommandManager {
         }
 
         if (disabledCommands.contains(invoked)) {
-            context.replyWithName("Sorry the `" + context.command.getName() + "` command is currently disabled. Please try again later");
+            context.replyWithName("Sorry the `" + context.getCommand().getName() + "` command is currently disabled. Please try again later");
             return;
         }
 

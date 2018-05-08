@@ -53,9 +53,9 @@ public class InviteCommand extends Command implements IInfoCommand {
         } else if (botId == BotConstants.PATRON_BOT_ID) {
             invite = BotConstants.DOCS_DONATE_URL;
         } else {
-            invite = context.guild.getJDA().asBot().getInviteUrl();
+            invite = context.getGuild().getJDA().asBot().getInviteUrl();
         }
-        User self = context.guild.getJDA().getSelfUser();
+        User self = context.getGuild().getJDA().getSelfUser();
         String header = context.i18nFormat("invite", TextUtils.escapeAndDefuse(self.getName()));
         context.reply(header + "\n" + invite);
     }

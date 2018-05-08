@@ -159,21 +159,21 @@ public class EventListenerBoat extends AbstractEventListener {
         log.info(event.getMessage().getContentRaw());
 
         //ignore all commands in channels where we can't write, except for the help command
-        if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
-            log.info("Ignoring command {} because this bot cannot write in that channel", context.command.getName());
+        if (!channel.canTalk() && !(context.getCommand() instanceof HelpCommand)) {
+            log.info("Ignoring command {} because this bot cannot write in that channel", context.getCommand().getName());
             return;
         }
 
-        Metrics.commandsReceived.labels(context.command.getClass().getSimpleName()).inc();
+        Metrics.commandsReceived.labels(context.getCommand().getClass().getSimpleName()).inc();
 
         //BOT_ADMINs can always use all commands everywhere
         if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, event.getMember())) {
 
             //ignore commands of disabled modules for plebs
-            Module module = context.command.getModule();
+            Module module = context.getCommand().getModule();
             if (module != null && !context.getEnabledModules().contains(module)) {
                 log.debug("Ignoring command {} because its module {} is disabled in guild {}",
-                        context.command.getName(), module.name(), event.getGuild().getIdLong());
+                        context.getCommand().getName(), module.name(), event.getGuild().getIdLong());
                 return;
             }
         }
@@ -186,13 +186,13 @@ public class EventListenerBoat extends AbstractEventListener {
      * @param context Command context of the command to be invoked.
      */
     private void limitOrExecuteCommand(CommandContext context) {
-        if (ratelimiter.isRatelimited(context, context.command)) {
+        if (ratelimiter.isRatelimited(context, context.getCommand())) {
             return;
         }
 
         try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
              // their performance should be judged by the totalResponseTime metric instead
-             Summary.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
+             Summary.Timer ignored = Metrics.executionTime.labels(context.getCommand().getClass().getSimpleName()).startTimer()
         ) {
             commandManager.prefixCalled(context);
         }

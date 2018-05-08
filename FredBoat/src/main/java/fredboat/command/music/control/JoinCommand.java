@@ -45,8 +45,8 @@ public class JoinCommand extends Command implements IMusicCommand, ICommandRestr
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
-        VoiceChannel vc = player.getUserCurrentVoiceChannel(context.invoker);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.getGuild());
+        VoiceChannel vc = player.getUserCurrentVoiceChannel(context.getMember());
         try {
             player.joinChannel(vc);
             if (vc != null) {

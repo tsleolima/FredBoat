@@ -40,7 +40,7 @@ public class FacedeskCommand extends RandomImageCommand implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         String facedeskMessage = "_"
-                + context.i18nFormat("facedeskSuccess", context.invoker.getAsMention())
+                + context.i18nFormat("facedeskSuccess", context.getMember().getAsMention())
                 + "_";
 
         context.replyImage(super.getRandomImageUrl(), facedeskMessage);

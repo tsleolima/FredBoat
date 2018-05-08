@@ -47,8 +47,8 @@ public class FuzzyUserSearchCommand extends Command implements IInfoCommand {
         if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
         } else {
-            String query = context.rawArgs;
-            List<Member> list = ArgumentUtil.fuzzyMemberSearch(context.guild, query, true);
+            String query = context.getRawArgs();
+            List<Member> list = ArgumentUtil.fuzzyMemberSearch(context.getGuild(), query, true);
 
             if(list.isEmpty()){
                 context.replyWithName(context.i18n("fuzzyNoResults"));

@@ -46,7 +46,7 @@ public class EnableCommandsCommand extends Command implements ICommandRestricted
     public void onInvoke(@Nonnull CommandContext context) {
 
         if (context.hasArguments()) {
-            Command command = CommandRegistry.findCommand(context.args[0]);
+            Command command = CommandRegistry.findCommand(context.getArgs()[0]);
             if (command == null) {
                 context.reply("This command doesn't exist!");
                 return;

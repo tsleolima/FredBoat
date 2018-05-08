@@ -63,7 +63,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
     }
 
     static void select(CommandContext context, VideoSelectionCache videoSelectionCache) {
-        Member invoker = context.invoker;
+        Member invoker = context.getMember();
         VideoSelection selection = videoSelectionCache.get(invoker);
         if (selection == null) {
             context.reply(context.i18n("selectSelectionNotGiven"));
@@ -77,9 +77,9 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
             LinkedHashSet<Integer> requestChoices = new LinkedHashSet<>();
 
             // Combine all args and the command trigger if it is numeric
-            String commandOptions = context.rawArgs;
-            if (StringUtils.isNumeric(context.trigger)) {
-                commandOptions = (context.trigger + " " + commandOptions).trim();
+            String commandOptions = context.getRawArgs();
+            if (StringUtils.isNumeric(context.getTrigger())) {
+                commandOptions = (context.getTrigger() + " " + commandOptions).trim();
             }
 
             if (StringUtils.isNumeric(commandOptions)) {
@@ -110,7 +110,7 @@ public class SelectCommand extends Command implements IMusicCommand, ICommandRes
                 }
                 AudioTrack[] selectedTracks = new AudioTrack[validChoices.size()];
                 StringBuilder outputMsgBuilder = new StringBuilder();
-                GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
+                GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.getGuild());
                 for (int i = 0; i < validChoices.size(); i++) {
                     selectedTracks[i] = selection.choices.get(validChoices.get(i) - 1);
 

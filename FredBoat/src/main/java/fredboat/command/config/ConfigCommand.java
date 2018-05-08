@@ -58,10 +58,10 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
     }
 
     private void printConfig(CommandContext context) {
-        GuildConfig gc = Launcher.getBotController().getGuildConfigService().fetchGuildConfig(context.guild);
+        GuildConfig gc = Launcher.getBotController().getGuildConfigService().fetchGuildConfig(context.getGuild());
 
         MessageBuilder mb = CentralMessaging.getClearThreadLocalMessageBuilder()
-                .append(context.i18nFormat("configNoArgs", context.guild.getName())).append("\n")
+                .append(context.i18nFormat("configNoArgs", context.getGuild().getName())).append("\n")
                 .append("track_announce = ").append(gc.isTrackAnnounce()).append("\n")
                 .append("auto_resume = ").append(gc.isAutoResume()).append("\n")
                 .append("```"); //opening ``` is part of the configNoArgs language string
@@ -70,24 +70,24 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
     }
 
     private void setConfig(CommandContext context) {
-        Member invoker = context.invoker;
+        Member invoker = context.getMember();
         if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
             return;
         }
 
-        if (context.args.length != 2) {
+        if (context.getArgs().length != 2) {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
 
-        String key = context.args[0];
-        String val = context.args[1];
+        String key = context.getArgs()[0];
+        String val = context.getArgs()[1];
 
         switch (key) {
             case "track_announce":
                 if (val.equalsIgnoreCase("true") | val.equalsIgnoreCase("false")) {
                     Launcher.getBotController().getGuildConfigService().transformGuildConfig(
-                            context.guild, gc -> gc.setTrackAnnounce(Boolean.valueOf(val)));
+                            context.getGuild(), gc -> gc.setTrackAnnounce(Boolean.valueOf(val)));
                     context.replyWithName("`track_announce` " + context.i18nFormat("configSetTo", val));
                 } else {
                     context.reply(context.i18nFormat("configMustBeBoolean", TextUtils.escapeAndDefuse(invoker.getEffectiveName())));
@@ -96,7 +96,7 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
             case "auto_resume":
                 if (val.equalsIgnoreCase("true") | val.equalsIgnoreCase("false")) {
                     Launcher.getBotController().getGuildConfigService().transformGuildConfig(
-                            context.guild, gc -> gc.setAutoResume(Boolean.valueOf(val)));
+                            context.getGuild(), gc -> gc.setAutoResume(Boolean.valueOf(val)));
                     context.replyWithName("`auto_resume` " + context.i18nFormat("configSetTo", val));
                 } else {
                     context.reply(context.i18nFormat("configMustBeBoolean", TextUtils.escapeAndDefuse(invoker.getEffectiveName())));

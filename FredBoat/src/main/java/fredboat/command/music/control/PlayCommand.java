@@ -73,17 +73,17 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        if (!context.invoker.getVoiceState().inVoiceChannel()) {
+        if (!context.getMember().getVoiceState().inVoiceChannel()) {
             context.reply(context.i18n("playerUserNotInChannel"));
             return;
         }
 
         if (!playerLimiter.checkLimitResponsive(context, Launcher.getBotController().getPlayerRegistry())) return;
 
-        if (!context.msg.getAttachments().isEmpty()) {
-            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
+        if (!context.getMsg().getAttachments().isEmpty()) {
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.getGuild());
 
-            for (Attachment atc : context.msg.getAttachments()) {
+            for (Attachment atc : context.getMsg().getAttachments()) {
                 player.queue(atc.getUrl(), context);
             }
             
@@ -93,17 +93,17 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         if (!context.hasArguments()) {
-            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
             handleNoArguments(context, player);
             return;
         }
 
-        if (TextUtils.isSplitSelect(context.rawArgs)) {
+        if (TextUtils.isSplitSelect(context.getRawArgs())) {
             SelectCommand.select(context, videoSelectionCache);
             return;
         }
 
-        String url = StringUtils.strip(context.args[0], "<>");
+        String url = StringUtils.strip(context.getArgs()[0], "<>");
         //Search youtube for videos and let the user select a video
         if (!url.startsWith("http") && !url.startsWith(FILE_PREFIX)) {
             searchForVideos(context);
@@ -113,7 +113,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             url = url.replaceFirst(FILE_PREFIX, ""); //LocalAudioSourceManager does not manage this itself
         }
 
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.getGuild());
         player.queue(url, context);
         player.setPause(false);
 
@@ -125,12 +125,12 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
             context.reply(context.i18n("playQueueEmpty"));
         } else if (player.isPlaying()) {
             context.reply(context.i18n("playAlreadyPlaying"));
-        } else if (player.getHumanUsersInCurrentVC().isEmpty() && context.guild.getSelfMember().getVoiceState().getChannel() != null) {
+        } else if (player.getHumanUsersInCurrentVC().isEmpty() && context.getGuild().getSelfMember().getVoiceState().getChannel() != null) {
             context.reply(context.i18n("playVCEmpty"));
-        } else if (context.guild.getSelfMember().getVoiceState().getChannel() == null) {
+        } else if (context.getGuild().getSelfMember().getVoiceState().getChannel() == null) {
             // When we just want to continue playing, but the user is not in a VC
             JOIN_COMMAND.onInvoke(context);
-            if (context.guild.getSelfMember().getVoiceState().getChannel() != null) {
+            if (context.getGuild().getSelfMember().getVoiceState().getChannel() != null) {
                 player.play();
                 context.reply(context.i18n("playWillNowPlay"));
             }
@@ -142,7 +142,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
 
     private void searchForVideos(CommandContext context) {
         //Now remove all punctuation
-        String query = context.rawArgs.replaceAll(TrackSearcher.PUNCTUATION_REGEX, "");
+        String query = context.getRawArgs().replaceAll(TrackSearcher.PUNCTUATION_REGEX, "");
 
         context.reply(context.i18n("playSearching").replace("{q}", query), outMsg -> {
             AudioPlaylist list;
@@ -163,7 +163,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 //Get at most 5 tracks
                 List<AudioTrack> selectable = list.getTracks().subList(0, Math.min(TrackSearcher.MAX_RESULTS, list.getTracks().size()));
 
-                VideoSelection oldSelection = videoSelectionCache.remove(context.invoker);
+                VideoSelection oldSelection = videoSelectionCache.remove(context.getMember());
                 if(oldSelection != null) {
                     oldSelection.deleteMessage();
                 }
@@ -185,7 +185,7 @@ public class PlayCommand extends Command implements IMusicCommand, ICommandRestr
                 }
 
                 CentralMessaging.editMessage(outMsg, builder.build());
-                videoSelectionCache.put(context.invoker, selectable, outMsg);
+                videoSelectionCache.put(context.getMember(), selectable, outMsg);
             }
         });
     }

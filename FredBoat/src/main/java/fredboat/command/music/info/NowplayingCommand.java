@@ -64,7 +64,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
 
         if (player != null && player.isPlaying()) {
 
@@ -90,7 +90,7 @@ public class NowplayingCommand extends Command implements IMusicCommand {
             } else {
                 builder = getDefaultEmbed(atc, player, at);
             }
-            Member requester = atc.getMember() != null ? atc.getMember() : context.guild.getSelfMember();
+            Member requester = atc.getMember() != null ? atc.getMember() : context.getGuild().getSelfMember();
             builder = CentralMessaging.addNpFooter(builder, requester);
 
             context.reply(builder.build());

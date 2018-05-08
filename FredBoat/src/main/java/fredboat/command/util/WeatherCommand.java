@@ -34,7 +34,7 @@ public class WeatherCommand extends Command implements IUtilCommand {
             return;
         }
 
-        String query = context.rawArgs;
+        String query = context.getRawArgs();
         String alphabeticalQuery = query.replaceAll("[^A-Za-z]", "");
 
         if (alphabeticalQuery == null || alphabeticalQuery.length() == 0) {

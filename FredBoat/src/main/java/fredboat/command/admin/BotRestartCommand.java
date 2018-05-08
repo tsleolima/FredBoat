@@ -50,7 +50,7 @@ public class BotRestartCommand extends Command implements ICommandRestricted {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         if (context.hasArguments()) {
-            if (context.rawArgs.equals(code)) {
+            if (context.getRawArgs().equals(code)) {
                 try {
                     context.replyWithName("Restarting...").getWithDefaultTimeout();
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
@@ -59,7 +59,7 @@ public class BotRestartCommand extends Command implements ICommandRestricted {
                 return;
             } else {
                 context.reply(String.format("Your input `%s` did not fit the required code `%s`. A new code will be issued.",
-                        TextUtils.escapeMarkdown(context.rawArgs), code));
+                        TextUtils.escapeMarkdown(context.getRawArgs()), code));
             }
         }
 

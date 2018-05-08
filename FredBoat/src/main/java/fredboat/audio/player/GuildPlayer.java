@@ -158,7 +158,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     public void leaveVoiceChannelRequest(CommandContext commandContext, boolean silent) {
         if (!silent) {
-            VoiceChannel currentVc = commandContext.guild.getSelfMember().getVoiceState().getChannel();
+            VoiceChannel currentVc = commandContext.getGuild().getSelfMember().getVoiceState().getChannel();
             if (currentVc == null) {
                 commandContext.reply(commandContext.i18n("playerNotInChannel"));
             } else {
@@ -177,9 +177,9 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void queue(String identifier, CommandContext context) {
-        IdentifierContext ic = new IdentifierContext(jdaEntityProvider, identifier, context.channel, context.invoker);
+        IdentifierContext ic = new IdentifierContext(jdaEntityProvider, identifier, context.getTextChannel(), context.getMember());
 
-        joinChannel(context.invoker);
+        joinChannel(context.getMember());
 
         audioLoader.loadAsync(ic);
     }
@@ -385,7 +385,7 @@ public class GuildPlayer extends AbstractPlayer {
     }
 
     public void skipTracksForMemberPerms(CommandContext context, Collection<Long> trackIds, String successMessage) {
-        Pair<Boolean, String> pair = canMemberSkipTracks(context.invoker, trackIds);
+        Pair<Boolean, String> pair = canMemberSkipTracks(context.getMember(), trackIds);
 
         if (pair.getLeft()) {
             context.reply(successMessage);

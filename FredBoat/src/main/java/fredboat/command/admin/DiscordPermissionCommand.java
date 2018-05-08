@@ -70,13 +70,13 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        TextChannel tc = context.channel;
+        TextChannel tc = context.getTextChannel();
 
-        if (!context.msg.getMentionedChannels().isEmpty()) {
-            tc = context.msg.getMentionedChannels().get(0);
+        if (!context.getMsg().getMentionedChannels().isEmpty()) {
+            tc = context.getMsg().getMentionedChannels().get(0);
         } else if (context.hasArguments()) {
             try {
-                long channelId = Long.parseUnsignedLong(context.args[0]);
+                long channelId = Long.parseUnsignedLong(context.getArgs()[0]);
                 TextChannel textChannel = Launcher.getBotController().getJdaEntityProvider().getTextChannelById(channelId);
                 if (textChannel == null) {
                     context.reply(String.format("No text channel with id `%s` found.", channelId));
@@ -95,9 +95,9 @@ public class DiscordPermissionCommand extends Command implements ICommandRestric
             if (m != null) {
                 member = m;
             }
-        } else if (context.args.length > 1) {
+        } else if (context.getArgs().length > 1) {
             try {
-                long userId = Long.parseUnsignedLong(context.args[1]);
+                long userId = Long.parseUnsignedLong(context.getArgs()[1]);
                 Member m = guild.getMemberById(userId);
                 if (m == null) {
                     context.reply("No member with id `%s` found in the specified guild.");

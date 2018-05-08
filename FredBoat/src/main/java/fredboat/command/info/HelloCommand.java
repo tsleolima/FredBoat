@@ -48,7 +48,7 @@ public class HelloCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        context.reply(getHello(context.guild));
+        context.reply(getHello(context.getGuild()));
     }
 
     @Nonnull

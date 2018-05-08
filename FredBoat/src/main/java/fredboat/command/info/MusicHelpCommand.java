@@ -66,13 +66,13 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
 
-        if (context.args.length > 2 && context.args[0].toLowerCase().contains(UPDATE)) {
+        if (context.getArgs().length > 2 && context.getArgs()[0].toLowerCase().contains(UPDATE)) {
             updateMessage(context);
             return;
         }
 
         boolean postInDm = true;
-        if (context.rawArgs.toLowerCase().contains(HERE)) {
+        if (context.getRawArgs().toLowerCase().contains(HERE)) {
             postInDm = false;
         }
 
@@ -110,8 +110,8 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
         long channelId;
         long messageId;
         try {
-            channelId = Long.parseUnsignedLong(context.args[1]);
-            messageId = Long.parseUnsignedLong(context.args[2]);
+            channelId = Long.parseUnsignedLong(context.getArgs()[1]);
+            messageId = Long.parseUnsignedLong(context.getArgs()[2]);
         } catch (NumberFormatException e) {
             context.reply("Could not parse the provided channel and/or message ids.");
             return;

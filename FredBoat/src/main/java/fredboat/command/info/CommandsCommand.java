@@ -67,7 +67,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
         if (!context.hasArguments()) {
 
             Collection<Module> enabledModules = context.getEnabledModules();
-            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker)) {
+            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
                 enabledModules.remove(Module.ADMIN);//dont show admin commands/modules for non admins
             }
 
@@ -83,16 +83,16 @@ public class CommandsCommand extends Command implements IInfoCommand {
         }
 
         List<Module> showHelpFor;
-        if (context.rawArgs.toLowerCase().contains(ALL.toLowerCase())) {
+        if (context.getRawArgs().toLowerCase().contains(ALL.toLowerCase())) {
             showHelpFor = new ArrayList<>(Arrays.asList(Module.values()));
-            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker)) {
+            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
                 showHelpFor.remove(Module.ADMIN);//dont show admin commands/modules for non admins
             }
         } else {
-            Module module = CommandRegistry.whichModule(context.rawArgs, context);
+            Module module = CommandRegistry.whichModule(context.getRawArgs(), context);
             if (module == null) {
                 context.reply(context.i18nFormat("moduleCantParse",
-                        "`" + context.getPrefix() + context.command.getName()) + "`");
+                        "`" + context.getPrefix() + context.getCommand().getName()) + "`");
                 return;
             } else {
                 showHelpFor = Collections.singletonList(module);
@@ -117,7 +117,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
                 .filter(command -> {
                     if (command instanceof ICommandRestricted) {
                         if (((ICommandRestricted) command).getMinimumPerms().getLevel() >= PermissionLevel.BOT_ADMIN.getLevel()) {
-                            return PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.invoker);
+                            return PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember());
                         }
                     }
                     return true;

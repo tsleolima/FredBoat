@@ -62,27 +62,27 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
-        switch (context.args[0]) {
+        switch (context.getArgs()[0]) {
             case "del":
             case "delete":
             case "remove":
             case "rem":
             case "rm":
-                if (context.args.length < 2) {
+                if (context.getArgs().length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
                 } else {
                     remove(context);
                 }
                 break;
             case "add":
-                if (context.args.length < 4) {
+                if (context.getArgs().length < 4) {
                     HelpCommand.sendFormattedCommandHelp(context);
                 } else {
                     add(context);
                 }
                 break;
             case "show":
-                if (context.args.length < 2) {
+                if (context.getArgs().length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
                 } else {
                     show(context);
@@ -96,7 +96,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
     }
 
     private void remove(@Nonnull CommandContext context) {
-        String name = context.args[1];
+        String name = context.getArgs()[1];
         List<LavalinkSocket> nodes = Launcher.getBotController().getAudioConnectionFacade().getLavalink().getNodes();
         int key = -1;
         for (int i = 0; i < nodes.size(); i++) {
@@ -115,22 +115,22 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
     }
 
     private void add(@Nonnull CommandContext context) {
-        String name = context.args[1];
+        String name = context.getArgs()[1];
         URI uri;
         try {
-            uri = new URI(context.args[2]);
+            uri = new URI(context.getArgs()[2]);
         } catch (URISyntaxException e) {
-            context.reply(context.args[2] + " is not a valid URI");
+            context.reply(context.getArgs()[2] + " is not a valid URI");
             return;
         }
 
-        String password = context.args[3];
+        String password = context.getArgs()[3];
         Launcher.getBotController().getAudioConnectionFacade().getLavalink().addNode(name, uri, password);
         context.reply("Added node: " + name + " @ " + uri.toString());
     }
 
     private void show(@Nonnull CommandContext context) {
-        String name = context.args[1];
+        String name = context.getArgs()[1];
         List<LavalinkSocket> nodes = Launcher.getBotController().getAudioConnectionFacade().getLavalink().getNodes().stream()
                 .filter(ll -> ll.getName().equals(name))
                 .collect(Collectors.toList());
@@ -155,7 +155,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
 
 
         boolean showHosts = false;
-        if (context.hasArguments() && context.rawArgs.contains("host")) {
+        if (context.hasArguments() && context.getRawArgs().contains("host")) {
             if (PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                 showHosts = true;
             } else {

@@ -40,7 +40,7 @@ public class GetIdCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        context.reply(context.i18nFormat("getidSuccess", context.guild.getId(), context.channel.getId()));
+        context.reply(context.i18nFormat("getidSuccess", context.getGuild().getId(), context.getTextChannel().getId()));
     }
 
     @Nonnull

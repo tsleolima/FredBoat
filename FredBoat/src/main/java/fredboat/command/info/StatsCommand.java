@@ -57,7 +57,7 @@ public class StatsCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        context.reply(getStats(context, context.guild.getJDA()));
+        context.reply(getStats(context, context.getGuild().getJDA()));
     }
 
     public static Message getStats(@Nullable Context context, @Nonnull JDA jda) {
