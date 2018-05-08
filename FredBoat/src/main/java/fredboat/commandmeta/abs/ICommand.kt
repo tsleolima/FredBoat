@@ -23,20 +23,17 @@
  *
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
-import fredboat.messaging.internal.Context;
+import fredboat.messaging.internal.Context
 
-import javax.annotation.Nonnull;
+interface ICommand {
 
-public interface ICommand {
-
-    void onInvoke(@Nonnull CommandContext context);
+    fun onInvoke(context: CommandContext)
 
     /**
      * @param context Context for where the help is going to be posted, mostly used for i18ning the help string
      * @return an unformatted help string: convention {0} = prefix, {1} = command, fill these in by the running bot, more parameters can be present
      */
-    @Nonnull
-    String help(@Nonnull Context context);
+    fun help(context: Context): String
 }
