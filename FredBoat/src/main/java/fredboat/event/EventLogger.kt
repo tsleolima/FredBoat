@@ -62,9 +62,6 @@ import java.util.concurrent.atomic.AtomicInteger
  * used to try to not drop occasionally failed messages, since the reporting of status events is especially important
  * during ongoing connection issues. If the amount of status events is too damn high, summaries are posted.
  */
-@FieldsAreNonNullByDefault
-@ParametersAreNonnullByDefault
-@ReturnTypesAreNonNullByDefault
 @Component
 class EventLogger(
         eventLoggerConfig: EventLoggerConfig,

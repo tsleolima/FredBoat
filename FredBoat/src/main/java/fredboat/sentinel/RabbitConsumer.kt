@@ -2,6 +2,7 @@ package fredboat.sentinel
 
 import com.fredboat.sentinel.QueueNames
 import com.fredboat.sentinel.entities.*
+import fredboat.event.EventLogger
 import fredboat.event.SentinelEventHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -12,13 +13,16 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Service
 @RabbitListener(queues = [QueueNames.JDA_EVENTS_QUEUE])
-class RabbitConsumer(private val sentinel: Sentinel) {
+class RabbitConsumer(
+        private val sentinel: Sentinel,
+        eventLogger: EventLogger
+) {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(RabbitConsumer::class.java)
     }
     private val shardStatuses = ConcurrentHashMap<Int, ShardStatus>()
-    private val eventHandlers: List<SentinelEventHandler> = listOf() //TODO
+    private val eventHandlers: List<SentinelEventHandler> = listOf(eventLogger) //TODO
 
     /* Shard lifecycle */
 
