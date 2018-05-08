@@ -31,6 +31,11 @@ class RabbitConsumer(private val sentinel: Sentinel) {
         eventHandlers.forEach { it.onShardStatusChange(event) }
     }
 
+    @RabbitHandler
+    fun receive(event: ShardLifecycleEvent) {
+        eventHandlers.forEach { it.onShardLifecycle(event) }
+    }
+
     /* Guild events */
 
     @RabbitHandler

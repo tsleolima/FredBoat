@@ -1,11 +1,13 @@
 package fredboat.event
 
+import com.fredboat.sentinel.entities.ShardLifecycleEvent
 import com.fredboat.sentinel.entities.ShardStatusChange
 import fredboat.sentinel.*
 
 abstract class SentinelEventHandler {
 
     open fun onShardStatusChange(event: ShardStatusChange) {}
+    open fun onShardLifecycle(event: ShardLifecycleEvent) {}
 
     open fun onGuildJoin(guild: Guild) {}
     open fun onGuildLeave(guild: Guild) {}
