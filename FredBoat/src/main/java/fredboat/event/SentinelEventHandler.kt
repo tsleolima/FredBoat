@@ -1,6 +1,7 @@
 package fredboat.event
 
-import com.fredboat.sentinel.entities.*
+import com.fredboat.sentinel.entities.ShardStatusChange
+import fredboat.sentinel.*
 
 abstract class SentinelEventHandler {
 
@@ -11,9 +12,9 @@ abstract class SentinelEventHandler {
 
     open fun onVoiceJoin(channel: VoiceChannel, member: Member) {}
     open fun onVoiceLeave(channel: VoiceChannel, member: Member) {}
-    open fun onVoiceMove(old: VoiceChannel, new: VoiceChannel, member: Member) {}
+    open fun onVoiceMove(oldChannel: VoiceChannel, newChannel: VoiceChannel, member: Member) {}
 
-    open fun onGuildMessage(channel: TextChannel, member: Member, content: String) {}
-    open fun onPrivateMEssage(user: User, content: String) {}
+    open fun onGuildMessage(channel: TextChannel, author: Member, content: String) {}
+    open fun onPrivateMessage(author: User, content: String) {}
 
 }

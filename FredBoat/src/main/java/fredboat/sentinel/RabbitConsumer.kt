@@ -2,6 +2,7 @@ package fredboat.sentinel
 
 import com.fredboat.sentinel.QueueNames
 import com.fredboat.sentinel.entities.*
+import fredboat.event.SentinelEventHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.annotation.RabbitHandler
@@ -17,6 +18,7 @@ class RabbitConsumer(private val sentinel: Sentinel) {
         private val log: Logger = LoggerFactory.getLogger(RabbitConsumer::class.java)
     }
     private val shardStatuses = ConcurrentHashMap<Int, ShardStatus>()
+    private val eventHandlers: List<SentinelEventHandler> = listOf() //TODO
 
     /* Shard lifecycle */
 
@@ -26,43 +28,60 @@ class RabbitConsumer(private val sentinel: Sentinel) {
             log.info("Shard [$id / $total] status ${shardStatuses.getOrDefault(id, "<new>")} => $status")
             shardStatuses[id] = status
         }
+        eventHandlers.forEach { it.onShardStatusChange(event) }
     }
 
     /* Guild events */
 
     @RabbitHandler
-    fun receive(event: GuildJoinEvent) = log.info("Joined guild ${event.guildId}")
+    fun receive(event: GuildJoinEvent) {
+        log.info("Joined guild ${event.guildId}")
+        eventHandlers.forEach { it.onGuildJoin(Guild(event.guildId)) }
+    }
 
     @RabbitHandler
-    fun receive(event: GuildLeaveEvent) = log.info("Left guild ${event.guildId}")
+    fun receive(event: GuildLeaveEvent) {
+        log.info("Left guild ${event.guildId}")
+        eventHandlers.forEach { it.onGuildLeave(Guild(event.guildId)) }
+    }
 
     /* Voice events */
 
     @RabbitHandler
     fun receive(event: VoiceJoinEvent) {
-        // TODO
+        val channel = VoiceChannel(event.channel)
+        val member = Member(event.member)
+        eventHandlers.forEach { it.onVoiceJoin(channel, member) }
     }
 
     @RabbitHandler
     fun receive(event: VoiceLeaveEvent) {
-        // TODO
+        val channel = VoiceChannel(event.channel)
+        val member = Member(event.member)
+        eventHandlers.forEach { it.onVoiceLeave(channel, member) }
     }
 
     @RabbitHandler
     fun receive(event: VoiceMoveEvent) {
-        // TODO
+        val old = VoiceChannel(event.oldChannel)
+        val new = VoiceChannel(event.newChannel)
+        val member = Member(event.member)
+        eventHandlers.forEach { it.onVoiceMove(old, new, member) }
     }
 
     /* Message events */
 
     @RabbitHandler
     fun receive(event: MessageReceivedEvent) {
-        // TODO
+        val channel = TextChannel(event.channel)
+        val author = Member(event.author)
+        eventHandlers.forEach { it.onGuildMessage(channel, author, event.content) }
     }
 
     @RabbitHandler
     fun receive(event: PrivateMessageReceivedEvent) {
-        // TODO
+        val author = User(event.author)
+        eventHandlers.forEach { it.onPrivateMessage(author, event.content) }
     }
 
     @RabbitListener
