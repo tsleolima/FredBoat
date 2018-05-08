@@ -51,7 +51,7 @@ public class HistoryCommand extends Command implements IMusicCommand {
 
   @Override
   public void onInvoke(@Nonnull CommandContext context) {
-      GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+      GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
 
       if (player == null || player.isHistoryQueueEmpty()) {
           context.reply(context.i18n("npNotInHistory"));
@@ -61,7 +61,7 @@ public class HistoryCommand extends Command implements IMusicCommand {
       int page = 1;
       if (context.hasArguments()) {
           try {
-              page = Integer.valueOf(context.args[0]);
+              page = Integer.valueOf(context.getArgs()[0]);
           } catch (NumberFormatException e) {
               page = 1;
           }
@@ -92,7 +92,7 @@ public class HistoryCommand extends Command implements IMusicCommand {
           String status = " ";
 
           Member member = atc.getMember();
-          String username = member != null ? member.getEffectiveName() : context.guild.getSelfMember().getEffectiveName();
+          String username = member != null ? member.getEffectiveName() : context.getGuild().getSelfMember().getEffectiveName();
           mb.append("[" +
               TextUtils.forceNDigits(i + 1, numberLength)
               + "]", MessageBuilder.Formatting.BLOCK)

@@ -45,7 +45,7 @@ public class MusicTextChannelProvider {
 
     private static final Logger log = LoggerFactory.getLogger(MusicTextChannelProvider.class);
 
-    //guild id <-> channel id
+    //guild id <-> textChannel id
     private final Cache<Long, Long> musicTextChannels;
 
     public MusicTextChannelProvider(Credentials credentials, CacheMetricsCollector cacheMetrics) {
@@ -74,7 +74,7 @@ public class MusicTextChannelProvider {
     }
 
     /**
-     * @return may return null if we never saved  left the guild, the channel was deleted, or there is no channel where we can talk
+     * @return may return null if we never saved  left the guild, the textChannel was deleted, or there is no textChannel where we can talk
      * in that guild
      */
     @Nullable
@@ -84,7 +84,7 @@ public class MusicTextChannelProvider {
         if (textChannel != null) {
             return textChannel;
         } else {
-            log.warn("No currentTC in guild {}! Trying to look up a channel where we can talk...", guild);
+            log.warn("No currentTC in guild {}! Trying to look up a textChannel where we can talk...", guild);
             for (TextChannel tc : guild.getTextChannels()) {
                 if (tc.canTalk()) {
                     return tc;

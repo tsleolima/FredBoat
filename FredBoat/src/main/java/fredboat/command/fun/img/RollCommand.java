@@ -40,7 +40,7 @@ public class RollCommand extends RandomImageCommand implements IFunCommand {
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         String rollMessage = "_"
-                + context.i18nFormat("rollSuccess", context.invoker.getAsMention())
+                + context.i18nFormat("rollSuccess", context.getMember().getAsMention())
                 + "_";
         context.replyImage(super.getRandomImageUrl(), rollMessage);
     }

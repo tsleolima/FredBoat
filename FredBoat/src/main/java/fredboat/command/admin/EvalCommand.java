@@ -70,9 +70,9 @@ public class EvalCommand extends Command implements ICommandRestricted {
     public void onInvoke(@Nonnull CommandContext context) {
         final long started = System.currentTimeMillis();
 
-        String source = context.rawArgs;
+        String source = context.getRawArgs();
 
-        if (context.hasArguments() && (context.args[0].equals("-k") || context.args[0].equals("kill"))) {
+        if (context.hasArguments() && (context.getArgs()[0].equals("-k") || context.getArgs()[0].equals("kill"))) {
             if (this.lastTask != null) {
                 if (this.lastTask.isDone() || this.lastTask.isCancelled()) {
                     context.reply("Task isn't running.");
@@ -89,27 +89,27 @@ public class EvalCommand extends Command implements ICommandRestricted {
         context.sendTyping();
 
         final int timeOut;
-        if (context.args.length > 1 && (context.args[0].equals("-t") || context.args[0].equals("timeout"))) {
-            timeOut = Integer.parseInt(context.args[1]);
-            source = source.replaceFirst(context.args[0], "");
-            source = source.replaceFirst(context.args[1], "");
+        if (context.getArgs().length > 1 && (context.getArgs()[0].equals("-t") || context.getArgs()[0].equals("timeout"))) {
+            timeOut = Integer.parseInt(context.getArgs()[1]);
+            source = source.replaceFirst(context.getArgs()[0], "");
+            source = source.replaceFirst(context.getArgs()[1], "");
         } else timeOut = -1;
 
         final String finalSource = source.trim();
 
-        Guild guild = context.guild;
+        Guild guild = context.getGuild();
         JDA jda = guild.getJDA();
 
         engine.put("jda", jda);
         engine.put("api", jda);
-        engine.put("channel", context.channel);
+        engine.put("textChannel", context.getTextChannel());
         GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(guild);
         engine.put("vc", player != null ? player.getCurrentVoiceChannel() : null);
-        engine.put("author", context.msg.getAuthor());
-        engine.put("invoker", context.invoker);
+        engine.put("author", context.getMsg().getAuthor());
+        engine.put("member", context.getMember());
         engine.put("bot", jda.getSelfUser());
         engine.put("member", guild.getSelfMember());
-        engine.put("message", context.msg);
+        engine.put("message", context.getMsg());
         engine.put("guild", guild);
         engine.put("player", player);
         engine.put("pm", Launcher.getBotController().getAudioPlayerManager());

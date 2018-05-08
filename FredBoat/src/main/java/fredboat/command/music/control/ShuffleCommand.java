@@ -44,7 +44,7 @@ public class ShuffleCommand extends Command implements IMusicCommand, ICommandRe
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getOrCreate(context.getGuild());
         player.setShuffle(!player.isShuffle());
 
         if (player.isShuffle()) {

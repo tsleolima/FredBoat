@@ -69,11 +69,11 @@ public class PermsUtil {
     }
 
     /**
-     * Check whether the invoker has at least the provided minimum permissions level
+     * Check whether the member has at least the provided minimum permissions level
      */
     @CheckReturnValue
     public static boolean checkPermsWithFeedback(PermissionLevel minLevel, CommandContext context) {
-        PermissionLevel actual = getPerms(context.invoker);
+        PermissionLevel actual = getPerms(context.getMember());
 
         if (actual.getLevel() >= minLevel.getLevel()) {
             return true;

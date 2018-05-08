@@ -67,9 +67,9 @@ public class RoleInfoCommand extends Command {
             return;
         }
 
-        List<IMentionable> roles = new ArrayList<>(ArgumentUtil.fuzzyRoleSearch(context.guild, context.rawArgs));
+        List<IMentionable> roles = new ArrayList<>(ArgumentUtil.fuzzyRoleSearch(context.getGuild(), context.getRawArgs()));
 
-        Role role = (Role) ArgumentUtil.checkSingleFuzzySearchResult(roles, context, context.rawArgs);
+        Role role = (Role) ArgumentUtil.checkSingleFuzzySearchResult(roles, context, context.getRawArgs());
         if (role == null) return;
 
         EmbedBuilder eb = CentralMessaging.getClearThreadLocalEmbedBuilder();

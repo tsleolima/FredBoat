@@ -51,7 +51,7 @@ public class RepeatCommand extends Command implements IMusicCommand, ICommandRes
         }
 
         RepeatMode desiredRepeatMode;
-        String userInput = context.args[0];
+        String userInput = context.getArgs()[0];
         switch (userInput) {
             case "off":
             case "out":
@@ -73,7 +73,7 @@ public class RepeatCommand extends Command implements IMusicCommand, ICommandRes
                 return;
         }
 
-        Launcher.getBotController().getPlayerRegistry().getOrCreate(context.guild).setRepeatMode(desiredRepeatMode);
+        Launcher.getBotController().getPlayerRegistry().getOrCreate(context.getGuild()).setRepeatMode(desiredRepeatMode);
 
         switch (desiredRepeatMode) {
             case OFF:

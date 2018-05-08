@@ -47,7 +47,7 @@ public class UnpauseCommand extends Command implements IMusicCommand, ICommandRe
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Guild guild = context.guild;
+        Guild guild = context.getGuild();
         GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(guild);
         if (player == null || player.isQueueEmpty()) {
             context.reply(context.i18n("unpauseQueueEmpty"));

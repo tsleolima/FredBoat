@@ -196,8 +196,8 @@ public class DiscordUtil {
     // ########## Moderation related helper functions
     public static String getReasonForModAction(CommandContext context) {
         String r = null;
-        if (context.args.length > 1) { //ignore the first arg which contains the name/mention of the user
-            r = String.join(" ", Arrays.copyOfRange(context.args, 1, context.args.length));
+        if (context.getArgs().length > 1) { //ignore the first arg which contains the name/mention of the user
+            r = String.join(" ", Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length));
         }
 
         return context.i18n("modReason") + ": " + (r != null ? r : "No reason provided.");

@@ -46,7 +46,7 @@ public class MagicCommand extends Command implements IFunCommand {
     public void onInvoke(@Nonnull CommandContext context) {
         String message = "ABRA KADABRA...";
         if (context.hasArguments()) {
-            message = TextUtils.defuse(context.rawArgs);
+            message = TextUtils.defuse(context.getRawArgs());
         }
 
         context.reply(AsciiArtConstant.MAGICAL_LENNY + message);

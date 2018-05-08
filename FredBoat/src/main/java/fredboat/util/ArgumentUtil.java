@@ -82,7 +82,7 @@ public class ArgumentUtil {
     }
 
     public static Member checkSingleFuzzyMemberSearchResult(CommandContext context, String term, boolean includeBots) {
-        List<Member> list = fuzzyMemberSearch(context.guild, term, includeBots);
+        List<Member> list = fuzzyMemberSearch(context.getGuild(), term, includeBots);
 
         switch (list.size()) {
             case 0:

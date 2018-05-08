@@ -63,7 +63,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             return;
         }
 
-        switch (context.args[0]) {
+        switch (context.getArgs()[0]) {
             case "del":
             case "delete":
             case "remove":
@@ -71,7 +71,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             case "rm":
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
 
-                if (context.args.length < 2) {
+                if (context.getArgs().length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
                     return;
                 }
@@ -81,7 +81,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             case "add":
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
 
-                if (context.args.length < 2) {
+                if (context.getArgs().length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
                     return;
                 }
@@ -99,10 +99,10 @@ public class PermissionsCommand extends Command implements IConfigCommand {
     }
 
     public void remove(CommandContext context) {
-        Guild guild = context.guild;
-        Member invoker = context.invoker;
+        Guild guild = context.getGuild();
+        Member invoker = context.getMember();
         //remove the first argument aka add / remove etc to get a nice search term
-        String term = context.rawArgs.replaceFirst(context.args[0], "").trim();
+        String term = context.getRawArgs().replaceFirst(context.getArgs()[0], "").trim();
 
         List<IMentionable> search = new ArrayList<>();
         search.addAll(ArgumentUtil.fuzzyRoleSearch(guild, term));
@@ -131,13 +131,13 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             context.replyWithName(context.i18nFormat("permsRemoved", mentionableToName(selected), permissionLevel));
             return gp.setFromEnum(permissionLevel, newList);
         };
-        Launcher.getBotController().getGuildPermsService().transformGuildPerms(context.guild, transformation);
+        Launcher.getBotController().getGuildPermsService().transformGuildPerms(context.getGuild(), transformation);
     }
 
     public void add(CommandContext context) {
-        Guild guild = context.guild;
+        Guild guild = context.getGuild();
         //remove the first argument aka add / remove etc to get a nice search term
-        String term = context.rawArgs.replaceFirst(context.args[0], "").trim();
+        String term = context.getRawArgs().replaceFirst(context.getArgs()[0], "").trim();
 
         List<IMentionable> list = new ArrayList<>();
         list.addAll(ArgumentUtil.fuzzyRoleSearch(guild, term));
@@ -161,12 +161,12 @@ public class PermissionsCommand extends Command implements IConfigCommand {
                     TextUtils.escapeMarkdown(mentionableToName(selected)), permissionLevel));
             return gp.setFromEnum(permissionLevel, newList);
         };
-        Launcher.getBotController().getGuildPermsService().transformGuildPerms(context.guild, transformation);
+        Launcher.getBotController().getGuildPermsService().transformGuildPerms(context.getGuild(), transformation);
     }
 
     public void list(CommandContext context) {
-        Guild guild = context.guild;
-        Member invoker = context.invoker;
+        Guild guild = context.getGuild();
+        Member invoker = context.getMember();
         GuildPermissions gp = Launcher.getBotController().getGuildPermsService().fetchGuildPermissions(guild);
 
         List<IMentionable> mentionables = idsToMentionables(guild, gp.getFromEnum(permissionLevel));

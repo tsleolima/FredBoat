@@ -52,21 +52,21 @@ public class GetNodeCommand extends Command implements ICommandRestricted {
         Guild guild = null;
         if (context.hasArguments()) {
             try {
-                long guildId = Long.parseUnsignedLong(context.args[0]);
+                long guildId = Long.parseUnsignedLong(context.getArgs()[0]);
                 guild = Launcher.getBotController().getJdaEntityProvider().getGuildById(guildId);
             } catch (NumberFormatException ignored) {
             }
             if (guild == null) {
-                context.reply("Guild not found for id " + context.args[0]);
+                context.reply("Guild not found for id " + context.getArgs()[0]);
                 return;
             }
         } else {
-            guild = context.guild;
+            guild = context.getGuild();
         }
         LavalinkSocket node = Launcher.getBotController().getAudioConnectionFacade().getLavalink().getLink(guild).getNode();
 
         String reply = String.format("Guild %s id `%s` lavalink socket: `%s`",
-                context.guild.getName(), context.guild.getIdLong(), String.valueOf(node));
+                context.getGuild().getName(), context.getGuild().getIdLong(), String.valueOf(node));
 
         //sensitive info, send it by DM
         context.replyPrivate(reply,

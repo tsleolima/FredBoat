@@ -61,7 +61,7 @@ public class KickCommand extends Command implements IModerationCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        Guild guild = context.guild;
+        Guild guild = context.getGuild();
         //Ensure we have a search term
         if (!context.hasArguments()) {
             HelpCommand.sendFormattedCommandHelp(context);
@@ -69,7 +69,7 @@ public class KickCommand extends Command implements IModerationCommand {
         }
 
         //was there a target provided?
-        Member target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.args[0]);
+        Member target = ArgumentUtil.checkSingleFuzzyMemberSearchResult(context, context.getArgs()[0]);
         if (target == null) return;
 
         //are we allowed to do that?
@@ -77,7 +77,7 @@ public class KickCommand extends Command implements IModerationCommand {
 
         //putting together a reason
         String plainReason = DiscordUtil.getReasonForModAction(context);
-        String auditLogReason = DiscordUtil.formatReasonForAuditLog(plainReason, context.invoker);
+        String auditLogReason = DiscordUtil.formatReasonForAuditLog(plainReason, context.getMember());
 
         //putting together the action
         RestAction<Void> modAction = guild.getController().kick(target, auditLogReason);
@@ -104,7 +104,7 @@ public class KickCommand extends Command implements IModerationCommand {
     }
 
     private boolean checkKickAuthorization(CommandContext context, Member target) {
-        Member mod = context.invoker;
+        Member mod = context.getMember();
         if (mod == target) {
             context.replyWithName(context.i18n("kickFailSelf"));
             return false;

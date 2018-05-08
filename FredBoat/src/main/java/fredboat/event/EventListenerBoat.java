@@ -159,21 +159,21 @@ public class EventListenerBoat extends AbstractEventListener {
         log.info(event.getMessage().getContentRaw());
 
         //ignore all commands in channels where we can't write, except for the help command
-        if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
-            log.info("Ignoring command {} because this bot cannot write in that channel", context.command.name);
+        if (!channel.canTalk() && !(context.getCommand() instanceof HelpCommand)) {
+            log.info("Ignoring command {} because this bot cannot write in that textChannel", context.getCommand().getName());
             return;
         }
 
-        Metrics.commandsReceived.labels(context.command.getClass().getSimpleName()).inc();
+        Metrics.commandsReceived.labels(context.getCommand().getClass().getSimpleName()).inc();
 
         //BOT_ADMINs can always use all commands everywhere
         if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, event.getMember())) {
 
             //ignore commands of disabled modules for plebs
-            Module module = context.command.getModule();
+            Module module = context.getCommand().getModule();
             if (module != null && !context.getEnabledModules().contains(module)) {
                 log.debug("Ignoring command {} because its module {} is disabled in guild {}",
-                        context.command.name, module.name(), event.getGuild().getIdLong());
+                        context.getCommand().getName(), module.name(), event.getGuild().getIdLong());
                 return;
             }
         }
@@ -186,13 +186,13 @@ public class EventListenerBoat extends AbstractEventListener {
      * @param context Command context of the command to be invoked.
      */
     private void limitOrExecuteCommand(CommandContext context) {
-        if (ratelimiter.isRatelimited(context, context.command)) {
+        if (ratelimiter.isRatelimited(context, context.getCommand())) {
             return;
         }
 
         try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
              // their performance should be judged by the totalResponseTime metric instead
-             Summary.Timer ignored = Metrics.executionTime.labels(context.command.getClass().getSimpleName()).startTimer()
+             Summary.Timer ignored = Metrics.executionTime.labels(context.getCommand().getClass().getSimpleName()).startTimer()
         ) {
             commandManager.prefixCalled(context);
         }
@@ -300,15 +300,15 @@ public class EventListenerBoat extends AbstractEventListener {
             return;
         }
 
-        //we got kicked from the server while in a voice channel, do nothing and return, because onGuildLeave()
+        //we got kicked from the server while in a voice textChannel, do nothing and return, because onGuildLeave()
         // should take care of destroying stuff
         if (!guild.isMember(guild.getJDA().getSelfUser())) {
             log.warn("onGuildVoiceLeave called for a guild where we aren't a member. This line should only ever be " +
-                    "reached if we are getting kicked from that guild while in a voice channel. Investigate if not.");
+                    "reached if we are getting kicked from that guild while in a voice textChannel. Investigate if not.");
             return;
         }
 
-        //are we in the channel that someone left from?
+        //are we in the textChannel that someone left from?
         VoiceChannel currentVc = player.getCurrentVoiceChannel();
         if (currentVc != null && currentVc.getIdLong() != channelLeft.getIdLong()) {
             return;
@@ -367,9 +367,9 @@ public class EventListenerBoat extends AbstractEventListener {
             return;
         }
 
-        TextChannel channel = guild.getTextChannelById(guild.getIdLong()); //old public channel
+        TextChannel channel = guild.getTextChannelById(guild.getIdLong()); //old public textChannel
         if (channel == null || !channel.canTalk()) {
-            //find first channel that we can talk in
+            //find first textChannel that we can talk in
             for (TextChannel tc : guild.getTextChannels()) {
                 if (tc.canTalk()) {
                     channel = tc;
@@ -378,7 +378,7 @@ public class EventListenerBoat extends AbstractEventListener {
             }
         }
         if (channel == null) {
-            //no channel found to talk in
+            //no textChannel found to talk in
             return;
         }
 

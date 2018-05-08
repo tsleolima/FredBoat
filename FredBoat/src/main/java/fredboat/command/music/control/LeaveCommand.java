@@ -49,14 +49,14 @@ public class LeaveCommand extends Command implements IMusicCommand, ICommandRest
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
         try {
-            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+            GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
             if (player != null) {
                 player.pause();
                 player.leaveVoiceChannelRequest(context, false);
             }
         } catch (Exception e) {
-            log.error("Something caused us to not properly leave a voice channel!", e);
-            Launcher.getBotController().getAudioConnectionFacade().closeConnection(context.guild);
+            log.error("Something caused us to not properly leave a voice textChannel!", e);
+            Launcher.getBotController().getAudioConnectionFacade().closeConnection(context.getGuild());
         }
     }
 

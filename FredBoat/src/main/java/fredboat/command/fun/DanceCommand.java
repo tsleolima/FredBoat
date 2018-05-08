@@ -83,7 +83,7 @@ public class DanceCommand extends Command implements IFunCommand {
                 context.reply(TextUtils.ZERO_WIDTH_CHAR + "\\o\\", msg -> {
                     try {
                         lock.lock();
-                        EventListenerBoat.messagesToDeleteIfIdDeleted.put(context.msg.getIdLong(), msg.getIdLong());
+                        EventListenerBoat.messagesToDeleteIfIdDeleted.put(context.getMsg().getIdLong(), msg.getIdLong());
                         long start = System.currentTimeMillis();
                         while (start + 60000 > System.currentTimeMillis()) {
                             Thread.sleep(1000);

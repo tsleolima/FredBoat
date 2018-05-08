@@ -47,7 +47,7 @@ public class SeekCommand extends Command implements IMusicCommand, ICommandRestr
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.guild);
+        GuildPlayer player = Launcher.getBotController().getPlayerRegistry().getExisting(context.getGuild());
 
         if(player == null || player.isQueueEmpty()) {
             context.replyWithName(context.i18n("queueEmpty"));
@@ -61,7 +61,7 @@ public class SeekCommand extends Command implements IMusicCommand, ICommandRestr
 
         long t;
         try {
-            t = TextUtils.parseTimeString(context.args[0]);
+            t = TextUtils.parseTimeString(context.getArgs()[0]);
         } catch (IllegalStateException e){
             HelpCommand.sendFormattedCommandHelp(context);
             return;

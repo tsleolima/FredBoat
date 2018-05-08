@@ -48,7 +48,7 @@ public class HelloCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        context.reply(getHello(context.guild));
+        context.reply(getHello(context.getGuild()));
     }
 
     @Nonnull
@@ -59,14 +59,14 @@ public class HelloCommand extends Command implements IInfoCommand {
 
     @Nonnull
     private static final String HELLO
-            = "Thanks for using Fredboat Music! To get started, join a voice channel and type `%s <song name>`."
+            = "Thanks for using Fredboat Music! To get started, join a voice textChannel and type `%s <song name>`."
             + " I'll give you a list of 5 songs where you can choose one by typing `%s <number>`."
             + "\n\n"
             + "Type `%s` for a list of commands you can use! Or go to <%s> for a full review of what I can do."
             + " Type `%s` for documentation, bot invite links, and an invite to the Fredboat Hangout Discord Server."
             + "\n\n"
             + "You can set up FredBoat to announce music as it plays and automatically"
-            + " resume when a user enters the channel with the `%s` command."
+            + " resume when a user enters the textChannel with the `%s` command."
             + "\n\n"
             + "I can speak your language, too! Type `%s` to see a list of languages I can speak."
             + " It should look like this: `%s en_US` but with your language code."

@@ -49,7 +49,7 @@ public class AudioTrackContext extends LeakSafeContext implements Comparable<Aud
     }
 
     protected AudioTrackContext(JdaEntityProvider jdaEntityProvider, AudioTrack at, long guildId, long userId) {
-        //It's ok to set a non-existing channelId, since inside the AudioTrackContext, the channel needs to be looked up
+        //It's ok to set a non-existing channelId, since inside the AudioTrackContext, the textChannel needs to be looked up
         // every time. See the getTextChannel() below for doing that.
         super(jdaEntityProvider, -1, guildId, userId);
         this.track = at;
@@ -140,7 +140,7 @@ public class AudioTrackContext extends LeakSafeContext implements Comparable<Aud
         return result;
     }
 
-    //return the currently active text channel of the associated guildplayer
+    //return the currently active text textChannel of the associated guildplayer
     @Override
     @Nullable
     public TextChannel getTextChannel() {

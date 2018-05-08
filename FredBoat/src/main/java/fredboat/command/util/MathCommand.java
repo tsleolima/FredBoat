@@ -56,24 +56,24 @@ public class MathCommand extends Command implements IUtilCommand {
         String output;
 
         try {
-            if (context.args.length == 2) {
+            if (context.getArgs().length == 2) {
 
-                BigDecimal num1 = new BigDecimal(context.args[1]);
+                BigDecimal num1 = new BigDecimal(context.getArgs()[1]);
 
-                if (context.args[0].equals("sqrt")) {
+                if (context.getArgs()[0].equals("sqrt")) {
                     output = context.i18n("mathOperationResult") + " " + Double.toString(sqrt(num1.doubleValue()));
                 } else {
                     HelpCommand.sendFormattedCommandHelp(context);
                     return;
                 }
 
-            } else if (context.args.length == 3) {
+            } else if (context.getArgs().length == 3) {
 
-                BigDecimal num1 = new BigDecimal(context.args[1]);
-                BigDecimal num2 = new BigDecimal(context.args[2]);
+                BigDecimal num1 = new BigDecimal(context.getArgs()[1]);
+                BigDecimal num2 = new BigDecimal(context.getArgs()[2]);
                 String resultStr = context.i18n("mathOperationResult") + " ";
 
-                switch (context.args[0]) {
+                switch (context.getArgs()[0]) {
                     case "sum":
                     case "add":
                         output = resultStr + num1.add(num2, MathContext.DECIMAL64).toPlainString();

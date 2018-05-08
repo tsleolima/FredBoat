@@ -129,7 +129,7 @@ public class YoutubeVideo {
     }
 
     public String getChannelUrl() {
-        return "https://www.youtube.com/channel/" + channelId;
+        return "https://www.youtube.com/textChannel/" + channelId;
     }
 
     public String getChannelThumbUrl() {
@@ -148,7 +148,7 @@ public class YoutubeVideo {
                     .getJSONObject("default")
                     .getString("url");
         } catch (JSONException | IOException e) {
-            log.error("Failed to get channel thumbnail", e);
+            log.error("Failed to get textChannel thumbnail", e);
             return null;
         }
     }

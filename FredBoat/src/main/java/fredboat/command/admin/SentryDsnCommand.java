@@ -55,7 +55,7 @@ public class SentryDsnCommand extends Command implements ICommandRestricted {
             HelpCommand.sendFormattedCommandHelp(context);
             return;
         }
-        String dsn = context.rawArgs;
+        String dsn = context.getRawArgs();
 
         if (dsn.equalsIgnoreCase("stop") || dsn.equalsIgnoreCase("clear")) {
             sentryConfiguration.turnOff();

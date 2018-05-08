@@ -56,13 +56,13 @@ public class DebugCommand extends Command implements IInfoCommand, ICommandRestr
 
         Guild guild;
         if (!context.hasArguments()) {
-            guild = context.guild;
+            guild = context.getGuild();
         } else {
             try {
                 if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                     return;
                 }
-                guild = Launcher.getBotController().getJdaEntityProvider().getGuildById(Long.parseLong(context.args[0]));
+                guild = Launcher.getBotController().getJdaEntityProvider().getGuildById(Long.parseLong(context.getArgs()[0]));
             } catch (NumberFormatException ignored) {
                 guild = null;
             }
@@ -71,7 +71,7 @@ public class DebugCommand extends Command implements IInfoCommand, ICommandRestr
         if (guild != null) {
             context.reply(getDebugEmbed(Launcher.getBotController().getPlayerRegistry().getOrCreate(guild)).build());
         } else {
-            context.replyWithName(String.format("There is no guild with id `%s`.", context.args[0]));
+            context.replyWithName(String.format("There is no guild with id `%s`.", context.getArgs()[0]));
         }
     }
 

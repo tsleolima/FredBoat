@@ -128,12 +128,12 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
             return;
         }
 
-        code = context.rawArgs.toCharArray();
+        code = context.getRawArgs().toCharArray();
         bytes = ByteBuffer.allocateDirect(1024 * 1024 * 8);
         String inputArg = "";
 
         try {
-            inputArg = context.args[1];
+            inputArg = context.getArgs()[1];
         } catch (Exception ignored) {
         }
 
