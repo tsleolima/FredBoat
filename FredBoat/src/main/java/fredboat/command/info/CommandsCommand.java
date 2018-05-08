@@ -92,7 +92,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
             Module module = CommandRegistry.whichModule(context.rawArgs, context);
             if (module == null) {
                 context.reply(context.i18nFormat("moduleCantParse",
-                        "`" + context.getPrefix() + context.command.name) + "`");
+                        "`" + context.getPrefix() + context.command.getName()) + "`");
                 return;
             } else {
                 showHelpFor = Collections.singletonList(module);
@@ -137,7 +137,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
                 if (c instanceof DestroyCommand) {
                     continue;//dont want to publicly show this one
                 }
-                sbs[i++ % 3].append(prefix).append(c.name).append("\n");
+                sbs[i++ % 3].append(prefix).append(c.getName()).append("\n");
             }
 
             return embedBuilder
@@ -148,7 +148,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
         } else {
             StringBuilder sb = new StringBuilder();
             for (Command c : commands) {
-                sb.append(prefix).append(c.name).append("\n");
+                sb.append(prefix).append(c.getName()).append("\n");
             }
             return embedBuilder
                     .addField(context.i18n(module.module.getTranslationKey()), sb.toString(), true)

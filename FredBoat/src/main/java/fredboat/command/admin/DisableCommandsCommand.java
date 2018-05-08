@@ -52,8 +52,8 @@ public class DisableCommandsCommand extends Command implements ICommandRestricte
                 return;
             }
 
-            if (command.name.equals("enable")
-                    || command.name.equals("disable")) {
+            if (command.getName().equals("enable")
+                    || command.getName().equals("disable")) {
                 context.reply("Let's not disable this :wink:");
                 return;
             }
@@ -64,7 +64,7 @@ public class DisableCommandsCommand extends Command implements ICommandRestricte
             }
 
             CommandManager.disabledCommands.add(command);
-            context.reply(":ok_hand: Command `" + command.name + "` disabled!");
+            context.reply(":ok_hand: Command `" + command.getName() + "` disabled!");
         } else {
             HelpCommand.sendFormattedCommandHelp(context);
         }

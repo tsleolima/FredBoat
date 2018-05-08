@@ -104,7 +104,7 @@ public class CommandManager {
         }
 
         if (disabledCommands.contains(invoked)) {
-            context.replyWithName("Sorry the `" + context.command.name + "` command is currently disabled. Please try again later");
+            context.replyWithName("Sorry the `" + context.command.getName() + "` command is currently disabled. Please try again later");
             return;
         }
 

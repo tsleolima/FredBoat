@@ -160,7 +160,7 @@ public class EventListenerBoat extends AbstractEventListener {
 
         //ignore all commands in channels where we can't write, except for the help command
         if (!channel.canTalk() && !(context.command instanceof HelpCommand)) {
-            log.info("Ignoring command {} because this bot cannot write in that channel", context.command.name);
+            log.info("Ignoring command {} because this bot cannot write in that channel", context.command.getName());
             return;
         }
 
@@ -173,7 +173,7 @@ public class EventListenerBoat extends AbstractEventListener {
             Module module = context.command.getModule();
             if (module != null && !context.getEnabledModules().contains(module)) {
                 log.debug("Ignoring command {} because its module {} is disabled in guild {}",
-                        context.command.name, module.name(), event.getGuild().getIdLong());
+                        context.command.getName(), module.name(), event.getGuild().getIdLong());
                 return;
             }
         }

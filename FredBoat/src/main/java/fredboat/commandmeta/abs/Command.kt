@@ -23,39 +23,25 @@
  *
  */
 
-package fredboat.commandmeta.abs;
+package fredboat.commandmeta.abs
 
-import fredboat.definitions.Module;
+import fredboat.definitions.Module
+import java.util.Arrays
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
+abstract class Command protected constructor(val name: String, vararg aliases: String) : ICommand {
+    val aliases: List<String>
 
-public abstract class Command implements ICommand {
+    var module: Module? = null
 
-    public final String name;
-    public final List<String> aliases;
-
-    @Nullable
-    private Module module;
-
-    protected Command(@Nonnull String name, String... aliases) {
-        this.name = name;
-        this.aliases = Arrays.asList(aliases);
+    init {
+        this.aliases = Arrays.asList(*aliases)
     }
 
-    public void setModule(@Nullable Module module) {
-        this.module = module;
+    override fun equals(other: Any?): Boolean {
+        return other is Command && other.name == this.name
     }
 
-    @Nullable
-    public Module getModule() {
-        return module;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof Command) && ((Command) obj).name.equals(this.name);
+    override fun hashCode(): Int {
+        return name.hashCode()
     }
 }

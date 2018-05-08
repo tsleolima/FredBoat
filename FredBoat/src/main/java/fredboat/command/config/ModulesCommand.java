@@ -87,7 +87,7 @@ public class ModulesCommand extends Command implements IConfigCommand {
         Module module = CommandRegistry.whichModule(args, context);
         if (module == null) {
             context.reply(context.i18nFormat("moduleCantParse",
-                    context.getPrefix() + context.command.name));
+                    context.getPrefix() + context.command.getName()));
             return;
         } else if (module.isLockedModule()) {
             context.reply(context.i18nFormat("moduleLocked", context.i18n(module.getTranslationKey()))

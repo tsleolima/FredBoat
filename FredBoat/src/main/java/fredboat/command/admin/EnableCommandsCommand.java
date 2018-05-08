@@ -54,7 +54,7 @@ public class EnableCommandsCommand extends Command implements ICommandRestricted
 
             if (CommandManager.disabledCommands.contains(command)) {
                 CommandManager.disabledCommands.remove(command);
-                context.reply(":ok_hand: Command `" + command.name + "` enabled!");
+                context.reply(":ok_hand: Command `" + command.getName() + "` enabled!");
                 return;
             }
             context.reply("This command is not disabled!");

@@ -163,8 +163,8 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
         // of the play command, which is "good enough" for this list
         musicCommands = musicCommands.stream()
                 .filter(command -> !(command instanceof PlayCommand
-                        && (command.name.equals(CommandInitializer.YOUTUBE_COMM_NAME)
-                        || command.name.equals(CommandInitializer.SOUNDCLOUD_COMM_NAME))))
+                        && (command.getName().equals(CommandInitializer.YOUTUBE_COMM_NAME)
+                        || command.getName().equals(CommandInitializer.SOUNDCLOUD_COMM_NAME))))
                 .filter(command -> !(command instanceof DestroyCommand))
                 .collect(Collectors.toList());
 
@@ -172,7 +172,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
 
         List<String> musicComms = new ArrayList<>();
         for (Command command : musicCommands) {
-            String formattedHelp = HelpCommand.getFormattedCommandHelp(context, command, command.name);
+            String formattedHelp = HelpCommand.getFormattedCommandHelp(context, command, command.getName());
             musicComms.add(formattedHelp);
         }
 
