@@ -29,13 +29,9 @@ import fredboat.definitions.Module
 import java.util.Arrays
 
 abstract class Command protected constructor(val name: String, vararg aliases: String) : ICommand {
-    val aliases: List<String>
+    val aliases: List<String> = Arrays.asList(*aliases)
 
     var module: Module? = null
-
-    init {
-        this.aliases = Arrays.asList(*aliases)
-    }
 
     override fun equals(other: Any?): Boolean {
         return other is Command && other.name == this.name
