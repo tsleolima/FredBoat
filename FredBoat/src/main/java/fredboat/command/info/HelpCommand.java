@@ -41,12 +41,6 @@ import fredboat.messaging.internal.Context;
 import fredboat.shared.constant.BotConstants;
 import fredboat.util.Emojis;
 import fredboat.util.TextUtils;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -111,12 +105,10 @@ public class HelpCommand extends Command implements IInfoCommand {
     }
 
     //for answering private messages with the help
-    public static void sendGeneralHelp(@Nonnull PrivateMessageReceivedEvent event) {
-        if (HELP_RECEIVED_RECENTLY.getIfPresent(event.getAuthor().getIdLong()) != null) {
-            return;
-        }
+    public static void sendGeneralHelp(User author, String content) {
+        if (HELP_RECEIVED_RECENTLY.getIfPresent(author.getId()) != null) return;
 
-        HELP_RECEIVED_RECENTLY.put(event.getAuthor().getIdLong(), true);
+        HELP_RECEIVED_RECENTLY.put(author.getId(), true);
         CentralMessaging.message(event.getChannel(), getHelpDmMsg(new Context() { //yeah this is ugly ¯\_(ツ)_/¯
             @Override
             public TextChannel getTextChannel() {

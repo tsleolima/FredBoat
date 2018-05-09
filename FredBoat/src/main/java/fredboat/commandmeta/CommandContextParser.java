@@ -69,7 +69,7 @@ public class CommandContextParser {
      * @return The full context for the triggered command, or null if it's not a command that we know.
      */
     @Nullable
-    public CommandContext parse(MessageReceivedEvent event) {
+    public CommandContext parse(TextChannel channel, Member author, String content) {
         String raw = event.getContent();
         String input;
         boolean isMention = false;

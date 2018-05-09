@@ -72,8 +72,9 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
-    fun sendPrivateMessage(member: Member, content: String): Mono<Unit> = Mono.create {
-        val req = SendPrivateMessageRequest(member.id, content)
+    // TODO: Figure out how to route this. We don't know what Sentinel to contact!
+    fun sendPrivateMessage(user: User, content: String): Mono<Unit> = Mono.create {
+        val req = SendPrivateMessageRequest(user.id, content)
         template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
                 { _ -> it.success() },
                 { exc -> it.error(exc) }
@@ -96,7 +97,13 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
-    fun getApplicationInfo() = blockingTemplate.convertSendAndReceive(ApplicationInfoRequest()) as ApplicationInfo
+    private var cachedApplicationInfo: ApplicationInfo? = null
+    fun getApplicationInfo(): ApplicationInfo {
+        if (cachedApplicationInfo != null) return cachedApplicationInfo as ApplicationInfo
+
+        cachedApplicationInfo = blockingTemplate.convertSendAndReceive(ApplicationInfoRequest()) as ApplicationInfo
+        return cachedApplicationInfo!!
+    }
 
     /* Permissions */
 

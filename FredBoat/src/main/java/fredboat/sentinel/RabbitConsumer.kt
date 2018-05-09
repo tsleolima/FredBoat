@@ -2,10 +2,12 @@ package fredboat.sentinel
 
 import com.fredboat.sentinel.QueueNames
 import com.fredboat.sentinel.entities.*
+import fredboat.config.SentryConfiguration
 import fredboat.event.EventLogger
 import fredboat.event.SentinelEventHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.amqp.rabbit.annotation.RabbitHandler
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
@@ -58,22 +60,22 @@ class RabbitConsumer(
 
     @RabbitHandler
     fun receive(event: VoiceJoinEvent) {
-        val channel = VoiceChannel(event.channel)
+        val channel = VoiceChannel(event.channel, event.guildId)
         val member = Member(event.member)
         eventHandlers.forEach { it.onVoiceJoin(channel, member) }
     }
 
     @RabbitHandler
     fun receive(event: VoiceLeaveEvent) {
-        val channel = VoiceChannel(event.channel)
+        val channel = VoiceChannel(event.channel, event.guildId)
         val member = Member(event.member)
         eventHandlers.forEach { it.onVoiceLeave(channel, member) }
     }
 
     @RabbitHandler
     fun receive(event: VoiceMoveEvent) {
-        val old = VoiceChannel(event.oldChannel)
-        val new = VoiceChannel(event.newChannel)
+        val old = VoiceChannel(event.oldChannel, event.guildId)
+        val new = VoiceChannel(event.newChannel, event.guildId)
         val member = Member(event.member)
         eventHandlers.forEach { it.onVoiceMove(old, new, member) }
     }
@@ -82,14 +84,29 @@ class RabbitConsumer(
 
     @RabbitHandler
     fun receive(event: MessageReceivedEvent) {
-        val channel = TextChannel(event.channel)
+        val channel = TextChannel(event.channel, event.guildId)
         val author = Member(event.author)
-        eventHandlers.forEach { it.onGuildMessage(channel, author, event.content) }
+
+        // Before execution set some variables that can help with finding traces that belong to each other
+        MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_GUILD, channel.guild.id.toString()).use {
+            MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_CHANNEL, channel.id.toString()).use {
+                MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_INVOKER, author.id.toString()).use {
+                    eventHandlers.forEach { it.onGuildMessage(channel, author, event.content) }
+                }
+            }
+        }
     }
 
     @RabbitHandler
     fun receive(event: PrivateMessageReceivedEvent) {
         val author = User(event.author)
+
+        // Before execution set some variables that can help with finding traces that belong to each other
+        MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_GUILD, "PRIVATE").use {
+            MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_INVOKER, author.id.toString()).use {
+                eventHandlers.forEach { it.onPrivateMessage(author, event.content) }
+            }
+        }
         eventHandlers.forEach { it.onPrivateMessage(author, event.content) }
     }
 

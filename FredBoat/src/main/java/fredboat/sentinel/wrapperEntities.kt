@@ -30,13 +30,13 @@ class Guild(
     val textChannels: List<TextChannel>
         get() {
             val list = mutableListOf<TextChannel>()
-            raw.textChannels.forEach {list.add(TextChannel(it))}
+            raw.textChannels.forEach {list.add(TextChannel(it, id))}
             return list
         }
     val voiceChannels: List<VoiceChannel>
         get() {
             val list = mutableListOf<VoiceChannel>()
-            raw.voiceChannels.forEach {list.add(VoiceChannel(it))}
+            raw.voiceChannels.forEach {list.add(VoiceChannel(it, id))}
             return list
         }
     val selfMember: Member
@@ -72,7 +72,7 @@ class Member(val raw: RawMember) {
         get() = raw.bot
     val voiceChannel: VoiceChannel?
         get() {
-            if (raw.voiceChannel != null) return VoiceChannel(raw.voiceChannel!!)
+            if (raw.voiceChannel != null) return VoiceChannel(raw.voiceChannel!!, raw.guildId)
             return null
         }
 
@@ -101,16 +101,22 @@ class User(val raw: RawUser) {
 interface Channel {
     val id: Long
     val name: String
+    val guild: Guild
     val ourEffectivePermissions: Long
 }
 
-class TextChannel(val raw: RawTextChannel) : Channel {
+class TextChannel(val raw: RawTextChannel, val guildId: Long) : Channel {
     override val id: Long
         get() = raw.id
     override val name: String
         get() = raw.name
+    override val guild: Guild
+        get() = Guild(guildId)
     override val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
+
+    fun checkOurPermissions(permissions: IPermissionSet): Boolean =
+            raw.ourEffectivePermissions and permissions.raw == permissions.raw
 
     fun send(str: String): Mono<SendMessageResponse> {
         return Sentinel.INSTANCE.sendMessage(raw, str)
@@ -121,13 +127,15 @@ class TextChannel(val raw: RawTextChannel) : Channel {
     }
 }
 
-class VoiceChannel(val raw: RawVoiceChannel) : Channel {
+class VoiceChannel(val raw: RawVoiceChannel, val guildId: Long) : Channel {
     // TODO: List of members
 
     override val id: Long
         get() = raw.id
     override val name: String
         get() = raw.name
+    override val guild: Guild
+        get() = Guild(guildId)
     override val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
 }
@@ -142,7 +150,7 @@ class Message(val raw: MessageReceivedEvent) {
     val guild: Guild
         get() = Guild(raw.guildId)
     val channel: TextChannel
-        get() = TextChannel(raw.channel)
+        get() = TextChannel(raw.channel, raw.guildId)
     val mentionedMembers: List<Member>
         get() {
             // Technically one could mention someone who isn't a member of the guild,

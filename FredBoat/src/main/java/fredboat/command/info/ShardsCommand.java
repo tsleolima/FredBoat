@@ -51,12 +51,12 @@ public class ShardsCommand extends Command implements IInfoCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        for (Message message : getShardStatus(context.getMsg())) {
-            context.reply(message);
+        for (Message message : getShardStatus(context.getMsg().getContent().toLowerCase())) {
+            context.reply(message.getContentRaw());
         }
     }
 
-    public static List<Message> getShardStatus(@Nonnull Message input) {
+    public static List<Message> getShardStatus(@Nonnull String input) {
         List<String> lines = new ArrayList<>();
 
         //do a full report? or just a summary

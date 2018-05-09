@@ -109,141 +109,6 @@ public class EventListenerBoat extends ListenerAdapter {
         cacheMetrics.addCache("messagesToDeleteIfIdDeleted", messagesToDeleteIfIdDeleted);
     }
 
-    @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        try (// before execution set some variables that can help with finding traces that belong to each other
-             MDC.MDCCloseable _guild = MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_GUILD,
-                     event.getGuild() != null ? event.getGuild().getId() : "PRIVATE");
-             MDC.MDCCloseable _channel = MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_CHANNEL,
-                     event.getChannel().getId());
-             MDC.MDCCloseable _invoker = MDC.putCloseable(SentryConfiguration.SENTRY_MDC_TAG_INVOKER,
-                     event.getAuthor().getId());
-                ) {
-
-            doOnMessageReceived(event);
-        }
-    }
-
-    private void doOnMessageReceived(MessageReceivedEvent event) {
-        if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
-            Metrics.blacklistedMessagesReceived.inc();
-            return;
-        }
-
-        if (event.getPrivateChannel() != null) {
-            log.info("PRIVATE" + " \t " + event.getAuthor().getName() + " \t " + event.getMessage().getContentRaw());
-            return;
-        }
-
-        if (event.getAuthor().equals(event.getJDA().getSelfUser())) {
-            log.info(event.getMessage().getContentRaw());
-            return;
-        }
-
-        if (event.getAuthor().isBot()) {
-            return;
-        }
-
-        TextChannel channel = event.getTextChannel(); //never null since we are filtering private messages out above
-
-        //preliminary permission filter to avoid a ton of parsing
-        //let messages pass on to parsing that contain "help" since we want to answer help requests even from channels
-        // where we can't talk in
-        if (!channel.canTalk() && !event.getMessage().getContentRaw().toLowerCase().contains(CommandInitializer.HELP_COMM_NAME)) {
-            return;
-        }
-
-        CommandContext context = commandContextParser.parse(event);
-        if (context == null) {
-            return;
-        }
-        log.info(event.getMessage().getContentRaw());
-
-        //ignore all commands in channels where we can't write, except for the help command
-        if (!channel.canTalk() && !(context.getCommand() instanceof HelpCommand)) {
-            log.info("Ignoring command {} because this bot cannot write in that channel", context.getCommand().getName());
-            return;
-        }
-
-        Metrics.commandsReceived.labels(context.getCommand().getClass().getSimpleName()).inc();
-
-        //BOT_ADMINs can always use all commands everywhere
-        if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, event.getMember())) {
-
-            //ignore commands of disabled modules for plebs
-            Module module = context.getCommand().getModule();
-            if (module != null && !context.getEnabledModules().contains(module)) {
-                log.debug("Ignoring command {} because its module {} is disabled in guild {}",
-                        context.getCommand().getName(), module.name(), event.getGuild().getIdLong());
-                return;
-            }
-        }
-
-        limitOrExecuteCommand(context);
-    }
-
-    /**
-     * Check the rate limit of the user and execute the command if everything is fine.
-     * @param context Command context of the command to be invoked.
-     */
-    private void limitOrExecuteCommand(CommandContext context) {
-        if (ratelimiter.isRatelimited(context, context.getCommand())) {
-            return;
-        }
-
-        try (//NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
-             // their performance should be judged by the totalResponseTime metric instead
-             Summary.Timer ignored = Metrics.executionTime.labels(context.getCommand().getClass().getSimpleName()).startTimer()
-        ) {
-            commandManager.prefixCalled(context);
-        }
-    }
-
-    @Override
-    public void onMessageDelete(MessageDeleteEvent event) {
-        Long toDelete = messagesToDeleteIfIdDeleted.getIfPresent(event.getMessageIdLong());
-        if (toDelete != null) {
-            messagesToDeleteIfIdDeleted.invalidate(toDelete);
-            CentralMessaging.deleteMessageById(event.getChannel(), toDelete);
-        }
-    }
-
-    @Override
-    public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-
-        if (ratelimiter.isBlacklisted(event.getAuthor().getIdLong())) {
-            //dont need to inc() the metrics counter here, because private message events are a subset of
-            // MessageReceivedEvents where we inc() the blacklisted messages counter already
-            return;
-        }
-
-        //technically not possible anymore to receive private messages from bots but better safe than sorry
-        //also ignores our own messages since we're a bot
-        if (event.getAuthor().isBot()) {
-            return;
-        }
-
-        //quick n dirty bot admin / owner check
-        if (appConfig.getAdminIds().contains(event.getAuthor().getIdLong())
-                || DiscordUtil.getOwnerId(event.getJDA()) == event.getAuthor().getIdLong()) {
-
-            //hack in / hardcode some commands; this is not meant to look clean
-            String raw = event.getMessage().getContentRaw().toLowerCase();
-            if (raw.contains("shard")) {
-                for (Message message : ShardsCommand.getShardStatus(event.getMessage())) {
-                    CentralMessaging.message(event.getChannel(), message).send(null);
-                }
-                return;
-            } else if (raw.contains("stats")) {
-                CentralMessaging.message(event.getChannel(), StatsCommand.getStats(null, event.getJDA()))
-                        .send(null);
-                return;
-            }
-        }
-
-        HelpCommand.sendGeneralHelp(event);
-    }
-
     /* music related */
     @Override
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
@@ -345,6 +210,7 @@ public class EventListenerBoat extends ListenerAdapter {
         Metrics.guildLifespan.observe(lifespan);
     }
 
+    // TODO: Move to Sentinel
     @Override
     public void onHttpRequest(HttpRequestEvent event) {
         if (event.getResponse().code >= 300) {
@@ -352,12 +218,6 @@ public class EventListenerBoat extends ListenerAdapter {
                     event.getRequestRaw(), event.getResponseRaw());
         }
     }
-
-    /* Shard lifecycle */
-    @Override
-    public void onReady(ReadyEvent event) {
-        log.info("Received ready event for {}", event.getJDA().getShardInfo().toString());
-        }
 
     private void sendHelloOnJoin(@Nonnull Guild guild) {
         //filter guilds that already received a hello message
