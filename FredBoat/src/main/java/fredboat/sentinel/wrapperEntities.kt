@@ -27,6 +27,8 @@ class Guild(
             if (raw.owner != null) return Member(raw.owner!!)
             return null
         }
+
+    // TODO: Make these lazy so we don't have to recompute them
     val textChannels: List<TextChannel>
         get() {
             val list = mutableListOf<TextChannel>()
@@ -40,7 +42,7 @@ class Guild(
             return list
         }
     val selfMember: Member
-        get() { TODO("We don't know our own ID")}
+        get() = membersMap[Sentinel.INSTANCE.getApplicationInfo().botId.toString()]!!
     val members: List<Member>
         get() {
             val list = mutableListOf<Member>()
