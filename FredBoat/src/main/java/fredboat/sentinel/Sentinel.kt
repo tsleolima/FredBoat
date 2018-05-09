@@ -72,6 +72,22 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
+    fun sendPrivateMessage(member: Member, content: String): Mono<Unit> = Mono.create {
+        val req = SendPrivateMessageRequest(member.id, content)
+        template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
+                { _ -> it.success() },
+                { exc -> it.error(exc) }
+        )
+    }
+
+    fun editMessage(channel: TextChannel, messageId: Long, content: String): Mono<Unit> = Mono.create {
+        val req = EditMessageRequest(channel.id, messageId, content)
+        template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
+                { _ -> it.success() },
+                { exc -> it.error(exc) }
+        )
+    }
+
     fun sendTyping(channel: RawTextChannel) {
         val req = SendTypingRequest(channel.id)
         template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
