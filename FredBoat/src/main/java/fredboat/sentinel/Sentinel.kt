@@ -64,7 +64,7 @@ class Sentinel(private val template: AsyncRabbitTemplate,
 
     fun getGuild(id: Long) = guildCache.get(id)!!
 
-    fun sendMessage(channel: RawTextChannel, message: String): Mono<SendMessageResponse> = Mono.create {
+    fun sendMessage(channel: RawTextChannel, message: IMessage): Mono<SendMessageResponse> = Mono.create {
         val req = SendMessageRequest(channel.id, message)
         template.convertSendAndReceive<SendMessageResponse?>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
                 { res -> it.success(res) },
@@ -73,16 +73,16 @@ class Sentinel(private val template: AsyncRabbitTemplate,
     }
 
     // TODO: Figure out how to route this. We don't know what Sentinel to contact!
-    fun sendPrivateMessage(user: User, content: String): Mono<Unit> = Mono.create {
-        val req = SendPrivateMessageRequest(user.id, content)
+    fun sendPrivateMessage(user: User, message: IMessage): Mono<Unit> = Mono.create {
+        val req = SendPrivateMessageRequest(user.id, message)
         template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
                 { _ -> it.success() },
                 { exc -> it.error(exc) }
         )
     }
 
-    fun editMessage(channel: TextChannel, messageId: Long, content: String): Mono<Unit> = Mono.create {
-        val req = EditMessageRequest(channel.id, messageId, content)
+    fun editMessage(channel: TextChannel, messageId: Long, message: IMessage): Mono<Unit> = Mono.create {
+        val req = EditMessageRequest(channel.id, messageId, message)
         template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
                 { _ -> it.success() },
                 { exc -> it.error(exc) }
