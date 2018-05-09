@@ -190,26 +190,6 @@ public class EventListenerBoat extends ListenerAdapter {
         }
     }
 
-    @Override
-    public void onGuildJoin(GuildJoinEvent event) {
-        //wait a few seconds to allow permissions to be set and applied and propagated
-        CentralMessaging.restService.schedule(() -> {
-            //retrieve the guild again - many things may have happened in 10 seconds!
-            Guild g = jdaEntityProvider.getGuildById(event.getGuild().getIdLong());
-            if (g != null) {
-                sendHelloOnJoin(g);
-            }
-        }, 10, TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void onGuildLeave(GuildLeaveEvent event) {
-        playerRegistry.destroyPlayer(event.getGuild());
-
-        long lifespan = OffsetDateTime.now().toEpochSecond() - event.getGuild().getSelfMember().getJoinDate().toEpochSecond();
-        Metrics.guildLifespan.observe(lifespan);
-    }
-
     // TODO: Move to Sentinel
     @Override
     public void onHttpRequest(HttpRequestEvent event) {
