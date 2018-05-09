@@ -89,6 +89,14 @@ class Sentinel(private val template: AsyncRabbitTemplate,
         )
     }
 
+    fun deleteMessages(channel: TextChannel, messages: List<Long>) = Mono.create<Unit> {
+        val req = MessageDeleteRequest(channel.id, messages)
+        template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
+                { _ -> it.success() },
+                { exc -> it.error(exc) }
+        )
+    }
+
     fun sendTyping(channel: RawTextChannel) {
         val req = SendTypingRequest(channel.id)
         template.convertSendAndReceive<Unit>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
@@ -118,10 +126,9 @@ class Sentinel(private val template: AsyncRabbitTemplate,
     }
 
     // Role and member are mutually exclusive
-    fun checkPermissions(guild: Guild, member: Member, permissions: IPermissionSet)
-            = checkPermissions(guild, member, null, permissions)
-    fun checkPermissions(guild: Guild, role: Role, permissions: IPermissionSet)
-            = checkPermissions(guild, null, role, permissions)
+    fun checkPermissions(guild: Guild, member: Member, permissions: IPermissionSet) = checkPermissions(guild, member, null, permissions)
+
+    fun checkPermissions(guild: Guild, role: Role, permissions: IPermissionSet) = checkPermissions(guild, null, role, permissions)
 
     private fun checkPermissions(channel: Channel, member: Member?, role: Role?, permissions: IPermissionSet):
             Mono<PermissionCheckResponse> = Mono.create {
@@ -134,9 +141,8 @@ class Sentinel(private val template: AsyncRabbitTemplate,
     }
 
     // Role and member are mutually exclusive
-    fun checkPermissions(channel: Channel, member: Member, permissions: IPermissionSet)
-            = checkPermissions(channel, member, null, permissions)
-    fun checkPermissions(channel: Channel, role: Role, permissions: IPermissionSet)
-            = checkPermissions(channel, null, role, permissions)
+    fun checkPermissions(channel: Channel, member: Member, permissions: IPermissionSet) = checkPermissions(channel, member, null, permissions)
+
+    fun checkPermissions(channel: Channel, role: Role, permissions: IPermissionSet) = checkPermissions(channel, null, role, permissions)
 
 }
