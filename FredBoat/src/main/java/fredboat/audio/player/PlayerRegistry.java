@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Component
@@ -47,6 +48,7 @@ public class PlayerRegistry {
     public static final float DEFAULT_VOLUME = 1f;
 
     private final Map<Long, GuildPlayer> registry = new ConcurrentHashMap<>();
+    private final Object iteratorLock = new Object(); //iterators, which are also used by stream(), need to be synced, despite it being a concurrent map
     private final JdaEntityProvider jdaEntityProvider;
     private final AudioConnectionFacade audioConnectionFacade;
     private final GuildConfigService guildConfigService;
@@ -89,15 +91,21 @@ public class PlayerRegistry {
         return registry.get(guildId);
     }
 
-    public Map<Long, GuildPlayer> getRegistry() {
-        return registry;
-
+    public void forEach(BiConsumer<Long, GuildPlayer> consumer) {
+        registry.forEach(consumer);
     }
 
+    /**
+     * @return a copied list of the the playing players of the registry. This may be an expensive operation depending on
+     * the size, don't use this in code that is called often. Instead, have a look at other methods like
+     * {@link PlayerRegistry#playingCount()} which might fulfill your needs without creating intermediary giant list objects.
+     */
     public List<GuildPlayer> getPlayingPlayers() {
-        return registry.values().stream()
-                .filter(GuildPlayer::isPlaying)
-                .collect(Collectors.toList());
+        synchronized (iteratorLock) {
+            return registry.values().stream()
+                    .filter(GuildPlayer::isPlaying)
+                    .collect(Collectors.toList());
+        }
     }
 
     public void destroyPlayer(Guild g) {
@@ -112,9 +120,15 @@ public class PlayerRegistry {
         }
     }
 
+    public long totalCount() {
+        return registry.size();
+    }
+
     public long playingCount() {
-        return registry.values().stream()
-                .filter(GuildPlayer::isPlaying)
-                .count();
+        synchronized (iteratorLock) {
+            return registry.values().stream()
+                    .filter(GuildPlayer::isPlaying)
+                    .count();
+        }
     }
 }

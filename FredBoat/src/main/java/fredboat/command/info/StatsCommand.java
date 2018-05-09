@@ -33,6 +33,8 @@ import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IInfoCommand;
 import fredboat.feature.I18n;
 import fredboat.feature.metrics.BotMetrics;
+import fredboat.feature.metrics.DockerStats;
+import fredboat.feature.metrics.JdaEntityStats;
 import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
@@ -93,9 +95,21 @@ public class StatsCommand extends Command implements IInfoCommand {
         content += "\n----------\n\n";
 
         content += "Sharding:                       " + jda.getShardInfo().getShardString() + "\n";
-        content += "Players playing:                " + Launcher.getBotController().getPlayerRegistry().getPlayingPlayers().size() + "\n";
-        content += "Known servers:                  " + botMetrics.getTotalGuildsCount() + "\n";
-        content += "Known users in servers:         " + botMetrics.getTotalUniqueUsersCount() + "\n";
+        content += "Music players playing:          " + Launcher.getBotController().getPlayerRegistry().playingCount() + "\n";
+
+        JdaEntityStats entityStats = botMetrics.getJdaEntityStatsTotal();
+        boolean notCounted = !entityStats.isCounted();
+        String not = "not counted yet";//todo i18n
+        content += "Known servers:                  " + (notCounted ? not : entityStats.getGuildsCount()) + "\n";
+        content += "Users in servers:               " + (notCounted ? not : entityStats.getUniqueUsersCount()) + "\n";
+        content += "Text channels:                  " + (notCounted ? not : entityStats.getTextChannelsCount()) + "\n";
+        content += "Voice channels:                 " + (notCounted ? not : entityStats.getVoiceChannelsCount()) + "\n";
+        content += "Categories:                     " + (notCounted ? not : entityStats.getCategoriesCount()) + "\n";
+        content += "Roles:                          " + (notCounted ? not : entityStats.getRolesCount()) + "\n";
+        content += "Emotes:                         " + (notCounted ? not : entityStats.getEmotesCount()) + "\n";
+
+        content += "\n----------\n\n";
+
         content += "Distribution:                   " + Launcher.getBotController().getAppConfig().getDistribution() + "\n";
         content += "JDA responses total:            " + jda.getResponseTotal() + "\n";
         content += "JDA version:                    " + JDAInfo.VERSION + "\n";
@@ -104,9 +118,10 @@ public class StatsCommand extends Command implements IInfoCommand {
 
         content += "\n----------\n\n";
         if (DiscordUtil.isOfficialBot(Launcher.getBotController().getCredentials())) {
+            DockerStats dockerStats = botMetrics.getDockerStats();
             content += "Docker pulls:\n";
-            content += "    FredBoat image:             " + botMetrics.getDockerPullsBot() + "\n";
-            content += "    Database image:             " + botMetrics.getDockerPullsDb() + "\n";
+            content += "    FredBoat image:             " + dockerStats.getDockerPullsBot() + "\n";
+            content += "    Database image:             " + dockerStats.getDockerPullsDb() + "\n";
             content += "\n----------\n\n";
         }
 

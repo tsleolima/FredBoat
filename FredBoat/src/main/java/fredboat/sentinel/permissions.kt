@@ -53,4 +53,12 @@ class PermissionSet(override val raw: Long) : IPermissionSet {
 interface IPermissionSet {
     val raw: Long
     operator fun plus(other: IPermissionSet): PermissionSet
+
+    fun asList(): List<Permission> {
+        val list = mutableListOf<Permission>()
+        Permission.values().forEach {
+            if (it.raw and raw != 0L) list.add(it)
+        }
+        return list.toList()
+    }
 }

@@ -22,31 +22,27 @@
  * SOFTWARE.
  */
 
-package fredboat.jda;
+package fredboat.util;
 
-import fredboat.commandmeta.MessagingException;
-import net.dv8tion.jda.core.JDA;
-
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- * Created by napster on 25.02.18.
+ * Created by napster on 10.04.18.
  */
-public interface ShardProvider {
+public class IgnoreCaseStringList extends ArrayList<String> {
+    private static final long serialVersionUID = -7506969278886990540L;
 
-    JDA getShardById(int shardId);
+    public IgnoreCaseStringList(Collection<? extends String> c) {
+        super(c);
+    }
 
-    /**
-     * @return all shards
-     */
-    Stream<JDA> streamShards();
-
-    /**
-     * @return any shard. useful when you just need one JDA instance
-     */
-    default JDA anyShard() {
-        return streamShards().findFirst().orElseThrow(
-                () -> new MessagingException("No shards available. Please try again later.") //yeah...dont ask how this message is sent when no shards are available.
-        );
+    @Override
+    public boolean contains(Object o) {
+        String paramStr = (String) o;
+        for (String s : this) {
+            if (paramStr.equalsIgnoreCase(s)) return true;
+        }
+        return false;
     }
 }

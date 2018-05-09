@@ -28,6 +28,7 @@ package fredboat.command.music.info;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IMusicCommand;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -42,6 +43,11 @@ public class GensokyoRadioCommand extends Command implements IMusicCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+        //slow execution due to http requests
+        Launcher.getBotController().getExecutor().execute(() -> invoke(context));
+    }
+
+    public void invoke(@Nonnull CommandContext context) {
         EmbedBuilder eb = CentralMessaging.addFooter(
                 NowplayingCommand.getGensokyoRadioEmbed(context), context.getGuild().getSelfMember());
         context.reply(eb.build());

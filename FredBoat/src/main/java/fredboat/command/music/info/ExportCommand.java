@@ -63,7 +63,13 @@ public class ExportCommand extends Command implements IMusicCommand {
                     } else {
                         return context.i18n("exportPlaylistFail") + "\n" + context.i18n("tryLater");
                     }
-                }).thenAccept(context::reply);
+                })
+                .thenAccept(context::reply)
+                .whenComplete((ignored, t) -> {
+                    if (t != null) {
+                        TextUtils.handleException("Failed to export to any paste service", t, context);
+                    }
+                });
     }
 
     @Nonnull

@@ -325,7 +325,6 @@ public class AudioLoader implements AudioLoadResultHandler {
         context.reply(mb.build());
     }
 
-    @SuppressWarnings("ThrowableResultIgnored")
     private void handleThrowable(IdentifierContext ic, Throwable th) {
         try {
             if (th instanceof FriendlyException) {
@@ -339,13 +338,13 @@ public class AudioLoader implements AudioLoadResultHandler {
                 } else if (ic.getTextChannel() != null) {
                     context.reply(ic.i18nFormat("loadErrorSusp", context.identifier));
                     Throwable exposed = fe.getCause() == null ? fe : fe.getCause();
-                    TextUtils.handleException(exposed, context);
+                    TextUtils.handleException("Failed to load a track", exposed, context);
                 } else {
                     log.error("Error while loading track ", th);
                 }
             } else if (ic.getTextChannel() != null) {
                 context.reply(ic.i18n("loadErrorSusp"));
-                TextUtils.handleException(th, context);
+                TextUtils.handleException("Failed to load a track", th, context);
             } else {
                 log.error("Error while loading track ", th);
             }

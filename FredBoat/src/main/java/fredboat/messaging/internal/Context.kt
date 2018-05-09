@@ -29,18 +29,17 @@ import com.fredboat.sentinel.entities.SendMessageResponse
 import fredboat.command.config.PrefixCommand
 import fredboat.commandmeta.MessagingException
 import fredboat.feature.I18n
-import fredboat.sentinel.Guild
-import fredboat.sentinel.Member
-import fredboat.sentinel.TextChannel
-import fredboat.sentinel.User
+import fredboat.sentinel.*
 import fredboat.util.TextUtils
+import kotlinx.coroutines.experimental.reactive.awaitSingle
+import net.dv8tion.jda.core.Permission
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
-
-import javax.annotation.CheckReturnValue
 import java.text.MessageFormat
-import java.util.ResourceBundle
+import java.util.*
+import java.util.stream.Collectors
+import javax.annotation.CheckReturnValue
 
 /**
  * Provides a context to whats going on. Where is it happening, who caused it?
@@ -122,8 +121,32 @@ abstract class Context {
 
     //TODO: Add support for in sentinel
     /*
+    /**
+     * Privately DM the invoker
+     */
     public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        getMember().getUser().openPrivateChannel().queue(
+        sendPrivate(getUser(), message, onSuccess, onFail);
+    }
+
+    /**
+     * Privately DM any user
+     */
+    public void sendPrivate(@Nonnull User user, @Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
+        if (user.isBot()) {
+            if (onFail != null) {
+                onFail.accept(new IllegalArgumentException("Cannot DM a bot user."));
+            }
+            return;
+        }
+
+        if (user.isFake()) {
+            if (onFail != null) {
+                onFail.accept(new IllegalArgumentException("Cannot DM a fake user."));
+            }
+            return;
+        }
+
+        user.openPrivateChannel().queue(
                 privateChannel -> {
                     Metrics.successfulRestActions.labels("openPrivateChannel").inc();
                     CentralMessaging.message(privateChannel, message)
@@ -150,6 +173,42 @@ abstract class Context {
     }*/
 
     /**
+     * @return true if we the bot have all the provided permissions, false if not. Also informs the invoker about the
+     * missing permissions for the bot, given there is a channel to reply in.
+     */
+    suspend fun checkSelfPermissionsWithFeedback(permissions: IPermissionSet): Boolean {
+        val result = Sentinel.INSTANCE.checkPermissions(guild, guild.selfMember, permissions).awaitSingle()
+
+        if (result.passed) return true
+        if (result.missingEntityFault) return false // Error
+
+        val builder = StringBuilder()
+        PermissionSet(result.missingPermissions).asList().forEach{
+            builder.append(it.uiName).append("\"**, **")
+        }
+        reply("${i18n("permissionMissingBot")} **$builder**")
+        return false
+    }
+
+    /**
+     * @return true if the invoker has all the provided permissions, false if not. Also informs the invoker about the
+     * missing permissions, given there is a channel to reply in.
+     */
+    suspend fun checkInvokerPermissionsWithFeedback(permissions: IPermissionSet): Boolean {
+        val result = Sentinel.INSTANCE.checkPermissions(guild, member, permissions).awaitSingle()
+
+        if (result.passed) return true
+        if (result.missingEntityFault) return false // Error
+
+        val builder = StringBuilder()
+        PermissionSet(result.missingPermissions).asList().forEach{
+            builder.append(it.uiName).append("\"**, **")
+        }
+        reply("${i18n("permissionMissingInvoker")} **$builder**")
+        return false
+    }
+
+    /**
      * Return a single translated string.
      *
      * @param key Key of the i18n string.
@@ -174,7 +233,7 @@ abstract class Context {
      */
     @CheckReturnValue
     fun i18nFormat(key: String, vararg params: Any): String {
-        if (params == null || params.size == 0) {
+        if (params.isEmpty()) {
             log.warn("Context#i18nFormat() called with empty or null params, this is likely a bug.",
                     MessagingException("a stack trace to help find the source"))
         }

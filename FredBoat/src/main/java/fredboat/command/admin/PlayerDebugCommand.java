@@ -25,7 +25,6 @@
 
 package fredboat.command.admin;
 
-import fredboat.audio.player.GuildPlayer;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.ICommandRestricted;
@@ -33,11 +32,18 @@ import fredboat.definitions.PermissionLevel;
 import fredboat.main.Launcher;
 import fredboat.messaging.internal.Context;
 import fredboat.util.TextUtils;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.VoiceChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 
+/**
+ * @deprecated This command can probably not show information sanely with FredBoats scale. Instead, the information it
+ * provides should be covered by metrics and / or rest endpoints and / or executing eval commands.
+ */
+@Deprecated
 public class PlayerDebugCommand extends Command implements ICommandRestricted {
 
     public PlayerDebugCommand(String name, String... aliases) {
@@ -48,20 +54,28 @@ public class PlayerDebugCommand extends Command implements ICommandRestricted {
     public void onInvoke(@Nonnull CommandContext context) {
         JSONArray a = new JSONArray();
 
-        for (GuildPlayer gp : Launcher.getBotController().getPlayerRegistry().getRegistry().values()) {
+        Launcher.getBotController().getPlayerRegistry().forEach((guildId, player) -> {
             JSONObject data = new JSONObject();
-            data.put("name", gp.getGuild().getName());
-            data.put("id", gp.getGuild().getId());
-            data.put("users", gp.getCurrentVoiceChannel().getMembers().toString());
-            data.put("isPlaying", gp.isPlaying());
-            data.put("isPaused", gp.isPaused());
-            data.put("songCount", gp.getTrackCount());
-            
+            Guild guild = player.getGuild();
+            data.put("name", guild == null ? "null" : guild.getName());
+            data.put("id", guildId);
+            VoiceChannel voiceChannel = player.getCurrentVoiceChannel();
+            data.put("users", voiceChannel == null ? "not in a voiceChannel" : voiceChannel.getMembers().toString());
+            data.put("isPlaying", player.isPlaying());
+            data.put("isPaused", player.isPaused());
+            data.put("songCount", player.getTrackCount());
+
             a.put(data);
-        }
+        });
+
         TextUtils.postToPasteService(a.toString())
                 .thenApply(pasteUrl -> pasteUrl.orElse("Failed to upload to any pasteservice."))
-                .thenAccept(context::reply);
+                .thenAccept(context::reply)
+                .whenComplete((ignored, t) -> {
+                    if (t != null) {
+                        TextUtils.handleException("Failed to upload to any pasteservice.", t, context);
+                    }
+                });
     }
 
     @Nonnull

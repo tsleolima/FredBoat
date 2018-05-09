@@ -167,7 +167,13 @@ public class BrainfuckCommand extends Command implements IUtilCommand {
         TextUtils.postToPasteService(output)
                 .thenApply(pasteUrl -> {
                     return pasteUrl.map(url -> message + " and has been uploaded to " + url).orElse(message);//todo i18n
-                }).thenAccept(context::reply);
+                })
+                .thenAccept(context::reply)
+                .whenComplete((ignored, t) -> {
+                    if (t != null) {
+                        TextUtils.handleException("Failed to upload brainfuck output to any paste service", t, context);
+                    }
+                });
     }
 
     @Nonnull

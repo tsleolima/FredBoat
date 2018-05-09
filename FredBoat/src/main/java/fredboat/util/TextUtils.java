@@ -33,6 +33,7 @@ import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
 import fredboat.messaging.internal.Context;
 import fredboat.sentinel.Member;
+import fredboat.sentinel.User;
 import fredboat.shared.constant.BotConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -103,7 +104,17 @@ public class TextUtils {
     private static final String SORRY = "An error occurred " + Emojis.ANGER + "\nPlease try again later. If the issue"
             + " persists please join our support chat and explain what steps you took to receive this response."; //todo i18n?
 
-    public static void handleException(Throwable e, Context context) {
+    /**
+     * This method takes care of all exceptions when a {@link Context} is present. If it is an expected exception, like
+     * {@link MessagingException} or any subclass of it, the message of the exception with be shown to the user.
+     * If it is an unexpected exception, a generic message is shown to the user, and the exception is logged with the
+     * passed log message.
+     *
+     * @param logMessage a log message with possible futher clues as to what could have gone wrong
+     * @param e          the exception that happened
+     * @param context    current context, used to send a message to the user
+     */
+    public static void handleException(String logMessage, Throwable e, Context context) {
         String label;
         if (e instanceof MessagingException) {
             Metrics.messagingExceptions.labels(e.getClass().getSimpleName()).inc();
@@ -119,7 +130,7 @@ public class TextUtils {
             return;
         }
 
-        log.error("Caught exception while executing a command", e);
+        log.error(logMessage, e);
 
         // TODO handle InsufficientPermissionException
         /*
@@ -431,5 +442,25 @@ public class TextUtils {
             throw new IllegalArgumentException();
         }
         return randomStringGenerator.generate(length);
+    }
+
+    /**
+     * @return a string representation of a member like this: {0}#{1} [{2}] EffectiveName#Discrim [id]
+     */
+    public static String asString(@Nonnull fredboat.sentinel.Member member) {
+        return String.format("%s#%s [%d]",
+                member.getEffectiveName(),
+                member.getDiscrim(),
+                member.getId());
+    }
+
+    /**
+     * @return a string representation of a user like this: {0}#{1} [{2}] Name#Discrim [id]
+     */
+    public static String asString(@Nonnull User user) {
+        return String.format("%s#%s [%d]",
+                user.getName(),
+                user.getDiscrim(),
+                user.getId());
     }
 }

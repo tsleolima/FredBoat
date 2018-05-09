@@ -39,6 +39,8 @@ class Guild(
             raw.voiceChannels.forEach {list.add(VoiceChannel(it))}
             return list
         }
+    val selfMember: Member
+        get() { TODO("We don't know our own ID")}
     val members: List<Member>
         get() {
             val list = mutableListOf<Member>()

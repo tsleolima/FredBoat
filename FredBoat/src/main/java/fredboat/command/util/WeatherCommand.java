@@ -4,6 +4,7 @@ import fredboat.command.info.HelpCommand;
 import fredboat.commandmeta.abs.Command;
 import fredboat.commandmeta.abs.CommandContext;
 import fredboat.commandmeta.abs.IUtilCommand;
+import fredboat.main.Launcher;
 import fredboat.messaging.CentralMessaging;
 import fredboat.messaging.internal.Context;
 import fredboat.util.rest.APILimitException;
@@ -27,6 +28,11 @@ public class WeatherCommand extends Command implements IUtilCommand {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
+        //slow execution due to http requests
+        Launcher.getBotController().getExecutor().execute(() -> invoke(context));
+    }
+
+    public void invoke(@Nonnull CommandContext context) {
 
         context.sendTyping();
         if (!context.hasArguments()) {

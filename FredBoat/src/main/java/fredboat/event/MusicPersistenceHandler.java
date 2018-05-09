@@ -64,8 +64,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -96,10 +96,19 @@ public class MusicPersistenceHandler extends ListenerAdapter {
         this.allPlayerManagers = allPlayerManagers;
     }
 
-    //TODO this needs to happen before the shard manager is shut down, inside of a shutdown hook (for docker etc)
+
+    //this needs to happen before the shard manager is shut down, inside of a shutdown hook (so shutdown signals are properly processed)
     public void handlePreShutdown(int code) {
         if (!appConfig.isMusicDistribution()) {
-            persist(code);
+            List<CompletableFuture> announcements = announceAndPersist(code);
+
+            // this makes sure that the announcements actually reach the users. if we go into full shut down before
+            // that, JDA's requester may not deliver all announcements
+            for (Future announcement : announcements) {
+                try {
+                    announcement.get(30, TimeUnit.SECONDS); //30 seconds is enough on patron boat, we don't announce on public boat (music distribution)
+                } catch (Exception ignored) {}
+            }
         }
 
         //will also shutdown all AudioSourceManagers registered with the AudioPlayerManagers
@@ -108,23 +117,25 @@ public class MusicPersistenceHandler extends ListenerAdapter {
         }
     }
 
-    private void persist(int code) {
+    /**
+     * @return a list of futures that will completed as soon as we sent out all announcements to users about the shutdown
+     */
+    private List<CompletableFuture> announceAndPersist(int code) {
         File dir = new File("music_persistence");
         if (!dir.exists()) {
             boolean created = dir.mkdir();
             if (!created) {
                 log.error("Failed to create music persistence directory");
-                return;
+                return Collections.emptyList();
             }
         }
-        Map<Long, GuildPlayer> reg = playerRegistry.getRegistry();
 
         boolean isUpdate = code == ExitCodes.EXIT_CODE_UPDATE;
         boolean isRestart = code == ExitCodes.EXIT_CODE_RESTART;
 
-        for (long gId : reg.keySet()) {
+        List<CompletableFuture> announcements = new ArrayList<>();
+        playerRegistry.forEach((guildId, player) -> {
             try {
-                GuildPlayer player = reg.get(gId);
 
                 String msg;
 
@@ -137,14 +148,8 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                 }
 
                 TextChannel activeTextChannel = player.getActiveTextChannel();
-                List<CompletableFuture> announcements = new ArrayList<>();
                 if (activeTextChannel != null && player.isPlaying()) {
                     announcements.add(CentralMessaging.message(activeTextChannel, msg).send(null));
-                }
-                for (Future announcement : announcements) {
-                    try {
-                        announcement.get(30, TimeUnit.SECONDS); //30 seconds is enough on patron boat
-                    } catch (Exception ignored) {}
                 }
 
                 JSONObject data = new JSONObject();
@@ -186,7 +191,7 @@ public class MusicPersistenceHandler extends ListenerAdapter {
                 data.put("sources", identifiers);
 
                 try {
-                    FileUtils.writeStringToFile(new File(dir, Long.toString(gId)), data.toString(), Charset.forName("UTF-8"));
+                    FileUtils.writeStringToFile(new File(dir, Long.toString(guildId)), data.toString(), Charset.forName("UTF-8"));
                 } catch (IOException ex) {
                     if (activeTextChannel != null) {
                         CentralMessaging.message(activeTextChannel,
@@ -198,7 +203,9 @@ public class MusicPersistenceHandler extends ListenerAdapter {
             } catch (Exception ex) {
                 log.error("Error when saving persistence file", ex);
             }
-        }
+        });
+
+        return announcements;
     }
 
     @Override

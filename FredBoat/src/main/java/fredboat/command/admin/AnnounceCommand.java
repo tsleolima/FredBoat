@@ -121,8 +121,7 @@ public class AnnounceCommand extends Command implements ICommandRestricted {
 
                 //failure handler
                 throwable -> {
-                    log.error("Announcement failed!", throwable);
-                    TextUtils.handleException(throwable, context);
+                    TextUtils.handleException("Announcement failed!", throwable, context);
                     throw new RuntimeException(throwable);
                 }
         );

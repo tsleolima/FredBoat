@@ -74,4 +74,25 @@ public class StatsAgent extends FredBoatAgent {
         void act() throws Exception;
     }
 
+    public static class ActionAdapter implements Action {
+        private final String name;
+        private final Runnable action;
+
+        public ActionAdapter(String name, Runnable action) {
+            super();
+            this.name = name;
+            this.action = action;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public void act() throws Exception {
+            action.run();
+        }
+    }
+
 }

@@ -22,31 +22,38 @@
  * SOFTWARE.
  */
 
-package fredboat.jda;
+package fredboat.feature.metrics;
 
-import fredboat.commandmeta.MessagingException;
-import net.dv8tion.jda.core.JDA;
-
-import java.util.stream.Stream;
+import fredboat.audio.player.PlayerRegistry;
 
 /**
- * Created by napster on 25.02.18.
+ * Created by napster on 18.04.18.
  */
-public interface ShardProvider {
+public class MusicPlayerStats {
+    private boolean counted = false;
+    protected long total;
+    protected long playing;
 
-    JDA getShardById(int shardId);
+    void count(PlayerRegistry playerRegistry) {
+        total = playerRegistry.totalCount();
+        playing = playerRegistry.playingCount();
+        counted = true;
+    }
 
     /**
-     * @return all shards
+     * @return true if the stats have been counted at least once successfully
      */
-    Stream<JDA> streamShards();
+    public boolean isCounted() {
+        return counted;
+    }
 
-    /**
-     * @return any shard. useful when you just need one JDA instance
-     */
-    default JDA anyShard() {
-        return streamShards().findFirst().orElseThrow(
-                () -> new MessagingException("No shards available. Please try again later.") //yeah...dont ask how this message is sent when no shards are available.
-        );
+    //is 0 while uncalculated
+    public long getTotal() {
+        return total;
+    }
+
+    //is 0 while uncalculated
+    public long getPlaying() {
+        return playing;
     }
 }

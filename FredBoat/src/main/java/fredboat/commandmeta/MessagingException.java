@@ -29,7 +29,7 @@ import fredboat.messaging.internal.Context;
 
 /**
  * This exception class and subclasses of it can be used to handle user failures. They will bubble up and their
- * message printed to the user, see {@link fredboat.util.TextUtils#handleException(Throwable, Context)}, as well as
+ * message printed to the user, see {@link fredboat.util.TextUtils#handleException(String, Throwable, Context)}, as well as
  * be instrumented, so that we maybe one day may gain more insight into what users do wrong the most and improve our UX.
  */
 public class MessagingException extends RuntimeException {

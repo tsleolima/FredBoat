@@ -24,7 +24,12 @@
 
 package fredboat.definitions;
 
-import java.util.*;
+import fredboat.util.IgnoreCaseStringList;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Created by napster on 21.03.18.
@@ -121,22 +126,5 @@ public enum Language {
         }
 
         return Optional.empty();
-    }
-
-    private static class IgnoreCaseStringList extends ArrayList<String> {
-        private static final long serialVersionUID = -7506969278886990540L;
-
-        public IgnoreCaseStringList(Collection<? extends String> c) {
-            super(c);
-        }
-
-        @Override
-        public boolean contains(Object o) {
-            String paramStr = (String) o;
-            for (String s : this) {
-                if (paramStr.equalsIgnoreCase(s)) return true;
-            }
-            return false;
-        }
     }
 }

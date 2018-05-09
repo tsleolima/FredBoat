@@ -121,7 +121,7 @@ public class CommandManager {
         try {
             invoked.onInvoke(context);
         } catch (Exception e) {
-            TextUtils.handleException(e, context);
+            TextUtils.handleException("Caught exception while executing a command", e, context);
         }
 
     }
