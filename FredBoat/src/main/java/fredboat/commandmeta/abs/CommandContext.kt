@@ -29,9 +29,6 @@ import fredboat.definitions.Module
 import fredboat.main.Launcher
 import fredboat.messaging.internal.Context
 import fredboat.sentinel.*
-import space.npstr.annotations.FieldsAreNonNullByDefault
-import space.npstr.annotations.ParametersAreNonnullByDefault
-import space.npstr.annotations.ReturnTypesAreNonNullByDefault
 
 /**
  * Convenience container for values associated with an issued command
@@ -78,13 +75,7 @@ class CommandContext(
      * Deletes the users message that triggered this command, if we have the permissions to do so
      */
     fun deleteMessage() {
-        val tc = msg.channel
-
-        // TODO
-        /*
-        if (tc != null && hasPermissions(tc, Permission.MESSAGE_MANAGE)) {
-            CentralMessaging.deleteMessage(msg);
-        }*/
+        msg.delete().subscribe()
     }
 
     fun hasArguments(): Boolean {

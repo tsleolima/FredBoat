@@ -253,4 +253,6 @@ class Message(val raw: MessageReceivedEvent) {
 
             return list
         }
+
+    fun delete(): Mono<Unit> = Sentinel.INSTANCE.deleteMessages(channel, listOf(id))
 }
