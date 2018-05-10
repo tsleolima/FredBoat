@@ -35,25 +35,13 @@ class Guild(
 
     // TODO: Make these lazy so we don't have to recompute them
     val textChannels: List<TextChannel>
-        get() {
-            val list = mutableListOf<TextChannel>()
-            raw.textChannels.forEach {list.add(TextChannel(it, id))}
-            return list
-        }
+        get() = raw.textChannels.map { TextChannel(it, id) }
     val voiceChannels: List<VoiceChannel>
-        get() {
-            val list = mutableListOf<VoiceChannel>()
-            raw.voiceChannels.forEach {list.add(VoiceChannel(it, id))}
-            return list
-        }
+        get() = raw.voiceChannels.map { VoiceChannel(it, id) }
     val selfMember: Member
         get() = membersMap[Sentinel.INSTANCE.getApplicationInfo().botId.toString()]!!
     val members: List<Member>
-        get() {
-            val list = mutableListOf<Member>()
-            raw.members.forEach { (_, v) -> list.add(Member(v))}
-            return list
-        }
+        get() = raw.members.map { Member(it.value) }
     val membersMap: Map<String, Member>
         get() {
             val list = mutableMapOf<String, Member>()
@@ -61,11 +49,7 @@ class Guild(
             return list
         }
     val roles: List<Role>
-        get() {
-            val list = mutableListOf<Role>()
-            raw.roles.forEach { list.add(Role(it)) }
-            return list.toList()
-        }
+        get() = raw.roles.map { Role(it) }
 
     fun getVoiceChannel(id: Long): VoiceChannel? {
         voiceChannels.forEach { if (it.id == id) return it }
@@ -121,6 +105,11 @@ class User(val raw: RawUser) {
         get() = raw.discrim
     val bot: Boolean
         get() = raw.bot
+
+    fun sendPrivate(message: String)
+            = Sentinel.INSTANCE.sendPrivateMessage(this, RawMesssage(message))
+    fun sendPrivate(message: IMessage)
+            = Sentinel.INSTANCE.sendPrivateMessage(this, message)
 }
 
 interface Channel {

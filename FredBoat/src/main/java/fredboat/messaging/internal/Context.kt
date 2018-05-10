@@ -25,21 +25,32 @@
 
 package fredboat.messaging.internal
 
+import com.fredboat.sentinel.entities.Embed
+import com.fredboat.sentinel.entities.IMessage
 import com.fredboat.sentinel.entities.SendMessageResponse
+import com.fredboat.sentinel.entities.embed
 import fredboat.command.config.PrefixCommand
 import fredboat.commandmeta.MessagingException
 import fredboat.feature.I18n
 import fredboat.sentinel.*
+import fredboat.shared.constant.BotConstants
 import fredboat.util.TextUtils
 import kotlinx.coroutines.experimental.reactive.awaitSingle
-import net.dv8tion.jda.core.Permission
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
 import java.text.MessageFormat
 import java.util.*
-import java.util.stream.Collectors
 import javax.annotation.CheckReturnValue
+import fredboat.feature.metrics.Metrics.successfulRestActions
+import javax.annotation.Nonnull
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor.getUser
+
+
+
+
+
+
 
 /**
  * Provides a context to whats going on. Where is it happening, who caused it?
@@ -56,9 +67,8 @@ abstract class Context {
     abstract val member: Member
     abstract val user: User
 
-
     /**
-     * Convenience method to get the prefix of the guild of this context.
+     * Convenience property to get the prefix of the guild of this context.
      */
     val prefix: String
         get() = PrefixCommand.giefPrefix(guild)
@@ -74,89 +84,74 @@ abstract class Context {
     //                         Convenience reply methods
     // ********************************************************************************
 
-    fun reply(message: String): Mono<SendMessageResponse> {
-        return textChannel.send(message)
+    fun replyMono(message: String): Mono<SendMessageResponse> = textChannel.send(message)
+
+    fun reply(message: String) {
+        textChannel.send(message).subscribe()
     }
 
-    fun replyWithName(message: String): Mono<SendMessageResponse> {
-        return reply(TextUtils.prefaceWithName(member, message))
+    fun replyMono(message: IMessage): Mono<SendMessageResponse> = textChannel.send(message)
+
+    fun reply(message: IMessage) {
+        textChannel.send(message).subscribe()
     }
 
-    fun replyWithMention(message: String): Mono<SendMessageResponse> {
-        return reply(TextUtils.prefaceWithMention(member, message))
+    fun replyWithNameMono(message: String): Mono<SendMessageResponse> {
+        return replyMono(TextUtils.prefaceWithName(member, message))
     }
 
-    /* //TODO: Add support for in sentinel
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture reply(MessageEmbed embed) {
-        return CentralMessaging.message(getTextChannel(), embed).send(this);
+    fun replyWithName(message: String) {
+        reply(TextUtils.prefaceWithName(member, message))
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyImage(@Nonnull String url, @Nullable String message, @Nullable Consumer<Message> onSuccess) {
-        return CentralMessaging.message(
-                getTextChannel(),
-                CentralMessaging.getClearThreadLocalMessageBuilder()
-                        .setEmbed(embedImage(url))
-                        .append(message != null ? message : "")
-                        .build())
-                .success(onSuccess)
-                .send(this);
+    fun replyWithMentionMono(message: String): Mono<SendMessageResponse> {
+        return replyMono(TextUtils.prefaceWithMention(member, message))
     }
 
-
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyImage(@Nonnull String url, @Nullable String message) {
-        return replyImage(url, message, null);
+    fun replyWithMention(message: String) {
+        reply(TextUtils.prefaceWithMention(member, message))
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public MessageFuture replyImage(@Nonnull String url) {
-        return replyImage(url, null);
-    }*/
+    fun replyImageMono(url: String, message: String = ""): Mono<SendMessageResponse> {
+        val embed = embedImage(url)
+        embed.content = message
+        return textChannel.send(embed)
+    }
+
+    fun replyImage(url: String, message: String = "") {
+        replyImageMono(url, message).subscribe()
+    }
 
     fun sendTyping() {
         textChannel.sendTyping()
     }
 
-    //TODO: Add support for in sentinel
-    /*
     /**
      * Privately DM the invoker
      */
-    public void replyPrivate(@Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        sendPrivate(getUser(), message, onSuccess, onFail);
+    fun replyPrivate(message: String) {
+        sendPrivate(user, message)
     }
 
     /**
      * Privately DM any user
      */
-    public void sendPrivate(@Nonnull User user, @Nonnull String message, @Nullable Consumer<Message> onSuccess, @Nullable Consumer<Throwable> onFail) {
-        if (user.isBot()) {
-            if (onFail != null) {
-                onFail.accept(new IllegalArgumentException("Cannot DM a bot user."));
-            }
-            return;
-        }
+    fun sendPrivate(user: User, message: String) {
+        if (user.bot) throw IllegalArgumentException("Cannot DM a bot user.")
 
-        if (user.isFake()) {
-            if (onFail != null) {
-                onFail.accept(new IllegalArgumentException("Cannot DM a fake user."));
-            }
-            return;
-        }
+        user.sendPrivate()
 
         user.openPrivateChannel().queue(
-                privateChannel -> {
-                    Metrics.successfulRestActions.labels("openPrivateChannel").inc();
+                { privateChannel ->
+                    Metrics.successfulRestActions.labels("openPrivateChannel").inc()
                     CentralMessaging.message(privateChannel, message)
                             .success(onSuccess)
                             .failure(onFail)
-                            .send(this);
+                            .send(this)
                 },
-                onFail != null ? onFail : CentralMessaging.NOOP_EXCEPTION_HANDLER //dun care logging about ppl that we cant message
-        );
-    }*/
+                onFail ?: CentralMessaging.NOOP_EXCEPTION_HANDLER //dun care logging about ppl that we cant message
+        )
+    }
 
     //TODO: Add support for in sentinel
     /*
@@ -216,11 +211,11 @@ abstract class Context {
      */
     @CheckReturnValue
     fun i18n(key: String): String {
-        if (getI18n().containsKey(key)) {
-            return getI18n().getString(key)
+        return if (getI18n().containsKey(key)) {
+            getI18n().getString(key)
         } else {
             log.warn("Missing language entry for key {} in language {}", key, I18n.getLocale(guild).code)
-            return I18n.DEFAULT.props.getString(key)
+            I18n.DEFAULT.props.getString(key)
         }
     }
 
@@ -237,13 +232,13 @@ abstract class Context {
             log.warn("Context#i18nFormat() called with empty or null params, this is likely a bug.",
                     MessagingException("a stack trace to help find the source"))
         }
-        try {
-            return MessageFormat.format(this.i18n(key), *params)
+        return try {
+            MessageFormat.format(this.i18n(key), *params)
         } catch (e: IllegalArgumentException) {
             log.warn("Failed to format key '{}' for language '{}' with following parameters: {}",
                     key, getI18n().baseBundleName, params, e)
             //fall back to default props
-            return MessageFormat.format(I18n.DEFAULT.props.getString(key), *params)
+            MessageFormat.format(I18n.DEFAULT.props.getString(key), *params)
         }
 
     }
@@ -257,11 +252,8 @@ abstract class Context {
         return result
     }
 
-    //TODO: Add support for in sentinel
-    /*
-    private static MessageEmbed embedImage(String url) {
-        return CentralMessaging.getColoredEmbedBuilder()
-                .setImage(url)
-                .build();
-    }*/
+    private fun embedImage(url: String): Embed = embed {
+        color = BotConstants.FREDBOAT_COLOR.rgb
+        image = url
+    }
 }
