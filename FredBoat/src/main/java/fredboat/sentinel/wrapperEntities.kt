@@ -16,6 +16,8 @@ typealias RawMesssage = com.fredboat.sentinel.entities.Message
 
 private val MENTION_PATTERN = Pattern.compile("<@!?([0-9]+)>", Pattern.DOTALL)
 
+// TODO: These classes are rather inefficient. We should cache more things, and we should avoid duplication of Guild entities
+
 class Guild(
         val id: Long
 ) {
@@ -76,8 +78,10 @@ class Member(val raw: RawMember) {
         get() = raw.id
     val name: String
         get() = raw.name
+    val nickname: String?
+        get() = raw.nickname
     val effectiveName: String
-        get() = raw.name //TODO
+        get() = if (raw.nickname != null) raw.nickname!! else raw.name
     val discrim: Short
         get() = raw.discrim
     val guild: Guild
