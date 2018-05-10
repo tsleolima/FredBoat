@@ -94,7 +94,7 @@ public class CommandManager {
         if (guild.getIdLong() == BotConstants.FREDBOAT_HANGOUT_ID && DiscordUtil.isOfficialBot(credentials)) {
             if (!channel.getId().equals("174821093633294338") // #spam_and_music
                     && !channel.getId().equals("217526705298866177") // #staff
-                    && !PermsUtil.checkPerms(PermissionLevel.ADMIN, invoker)) {
+                    && !PermsUtil.INSTANCE.checkPerms(PermissionLevel.ADMIN, invoker)) {
                 context.deleteMessage();
                 context.replyWithName("Please read <#219483023257763842> for server rules and only use commands in <#174821093633294338>!",
                         msg -> CentralMessaging.restService.schedule(() -> CentralMessaging.deleteMessage(msg),
@@ -109,7 +109,7 @@ public class CommandManager {
         }
 
         if (invoked instanceof ICommandRestricted) {
-            if (!PermsUtil.checkPermsWithFeedback(((ICommandRestricted) invoked).getMinimumPerms(), context)) {
+            if (!PermsUtil.INSTANCE.checkPermsWithFeedback(((ICommandRestricted) invoked).getMinimumPerms(), context)) {
                 return;
             }
         }

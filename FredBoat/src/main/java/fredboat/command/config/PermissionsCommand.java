@@ -69,7 +69,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             case "remove":
             case "rem":
             case "rm":
-                if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
+                if (!PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
 
                 if (context.getArgs().length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
@@ -79,7 +79,7 @@ public class PermissionsCommand extends Command implements IConfigCommand {
                 remove(context);
                 break;
             case "add":
-                if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
+                if (!PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) return;
 
                 if (context.getArgs().length < 2) {
                     HelpCommand.sendFormattedCommandHelp(context);
@@ -121,9 +121,9 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             newList.remove(mentionableToId(selected));
 
             if (permissionLevel == PermissionLevel.ADMIN
-                    && PermissionLevel.BOT_ADMIN.getLevel() > PermsUtil.getPerms(invoker).getLevel()
+                    && PermissionLevel.BOT_ADMIN.getLevel() > PermsUtil.INSTANCE.getPerms(invoker).getLevel()
                     && !invoker.hasPermission(Permission.ADMINISTRATOR)
-                    && !PermsUtil.checkList(newList, invoker)) {
+                    && !PermsUtil.INSTANCE.checkList(newList, invoker)) {
                 context.replyWithName(context.i18n("permsFailSelfDemotion"));
                 return gp;
             }
@@ -186,8 +186,8 @@ public class PermissionsCommand extends Command implements IConfigCommand {
             }
         }
 
-        PermissionLevel invokerPerms = PermsUtil.getPerms(invoker);
-        boolean invokerHas = PermsUtil.checkPerms(permissionLevel, invoker);
+        PermissionLevel invokerPerms = PermsUtil.INSTANCE.getPerms(invoker);
+        boolean invokerHas = PermsUtil.INSTANCE.checkPerms(permissionLevel, invoker);
 
         if (roleMentions.isEmpty()) roleMentions = "<none>";
         if (memberMentions.isEmpty()) memberMentions = "<none>";

@@ -71,7 +71,7 @@ public class ConfigCommand extends Command implements IConfigCommand, ICommandRe
 
     private void setConfig(CommandContext context) {
         Member invoker = context.getMember();
-        if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
+        if (!PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
             return;
         }
 

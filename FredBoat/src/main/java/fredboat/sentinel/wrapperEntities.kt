@@ -49,10 +49,15 @@ class Guild(
             return list
         }
     val roles: List<Role>
-        get() = raw.roles.map { Role(it) }
+        get() = raw.roles.map { Role(it, id) }
 
     fun getVoiceChannel(id: Long): VoiceChannel? {
         voiceChannels.forEach { if (it.id == id) return it }
+        return null
+    }
+
+    fun getRole(id: Long): Role? {
+        roles.forEach { if(it.id == id) return it }
         return null
     }
 }
@@ -94,6 +99,10 @@ class Member(val raw: RawMember) {
                 bot
         ))
     }
+
+    fun hasPermission(permissions: IPermissionSet): Mono<Boolean> =
+            Sentinel.INSTANCE.checkPermissions(this, permissions)
+                    .map { it.passed }
 }
 
 class User(val raw: RawUser) {
@@ -158,13 +167,17 @@ class VoiceChannel(val raw: RawVoiceChannel, val guildId: Long) : Channel {
         get() = raw.ourEffectivePermissions
 }
 
-class Role(val raw: RawRole) {
+class Role(val raw: RawRole, val guildId: Long) {
     val id: Long
         get() = raw.id
     val name: String
         get() = raw.name
     val permissions: PermissionSet
         get() = PermissionSet(raw.permissions)
+    val guild: Guild
+        get() = Guild(guildId)
+    val publicRole: Boolean // The @everyone role shares the ID of the guild
+        get() = id == guildId
 }
 
 class Message(val raw: MessageReceivedEvent) {

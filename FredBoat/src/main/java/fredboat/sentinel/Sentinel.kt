@@ -116,8 +116,10 @@ class Sentinel(private val template: AsyncRabbitTemplate,
 
     /* Permissions */
 
-    private fun checkPermissions(guild: Guild, member: Member?, role: Role?, permissions: IPermissionSet):
+    private fun checkPermissions(member: Member?, role: Role?, permissions: IPermissionSet):
             Mono<PermissionCheckResponse> = Mono.create {
+
+        val guild = member?.guild ?: role!!.guild
 
         val req = GuildPermissionRequest(guild.id, member?.id, role?.id, permissions.raw)
         template.convertSendAndReceive<PermissionCheckResponse>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
@@ -127,9 +129,9 @@ class Sentinel(private val template: AsyncRabbitTemplate,
     }
 
     // Role and member are mutually exclusive
-    fun checkPermissions(guild: Guild, member: Member, permissions: IPermissionSet) = checkPermissions(guild, member, null, permissions)
+    fun checkPermissions(member: Member, permissions: IPermissionSet) = checkPermissions(member, null, permissions)
 
-    fun checkPermissions(guild: Guild, role: Role, permissions: IPermissionSet) = checkPermissions(guild, null, role, permissions)
+    fun checkPermissions(role: Role, permissions: IPermissionSet) = checkPermissions(null, role, permissions)
 
     private fun checkPermissions(channel: Channel, member: Member?, role: Role?, permissions: IPermissionSet):
             Mono<PermissionCheckResponse> = Mono.create {

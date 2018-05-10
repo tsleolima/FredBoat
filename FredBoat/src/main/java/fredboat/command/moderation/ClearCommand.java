@@ -59,7 +59,7 @@ public class ClearCommand extends Command implements IModerationCommand {
         Member invoker = context.getMember();
 
         if (!invoker.hasPermission(channel, Permission.MESSAGE_MANAGE)
-                && !PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, invoker)) {
+                && !PermsUtil.INSTANCE.checkPerms(PermissionLevel.BOT_ADMIN, invoker)) {
             context.replyWithName("You must have Manage Messages to do that!");
             return;
         }

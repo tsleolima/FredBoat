@@ -358,7 +358,7 @@ public class GuildPlayer extends AbstractPlayer {
 
     //Success, fail message
     public Pair<Boolean, String> canMemberSkipTracks(Member member, Collection<Long> trackIds) {
-        if (PermsUtil.checkPerms(PermissionLevel.DJ, member)) {
+        if (PermsUtil.INSTANCE.checkPerms(PermissionLevel.DJ, member)) {
             return new ImmutablePair<>(true, null);
         } else {
             //We are not a mod

@@ -156,7 +156,7 @@ public class NodeAdminCommand extends Command implements ICommandRestricted {
 
         boolean showHosts = false;
         if (context.hasArguments() && context.getRawArgs().contains("host")) {
-            if (PermsUtil.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
+            if (PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.BOT_ADMIN, context)) {
                 showHosts = true;
             } else {
                 return;

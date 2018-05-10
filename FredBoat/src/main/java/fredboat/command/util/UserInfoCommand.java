@@ -99,7 +99,7 @@ public class UserInfoCommand extends Command implements IUtilCommand {
                 .addField(context.i18n("userinfoCreationTime"), target.getUser().getCreationTime().format(dtf), true)
                 .addField(context.i18n("userinfoBlacklisted"),
                         Boolean.toString(Launcher.getBotController().getRatelimiter().isBlacklisted(target.getUser().getIdLong())), true)
-                .addField("Permission Level", PermsUtil.getPerms(target).getName(), true) //todo i18n
+                .addField("Permission Level", PermsUtil.INSTANCE.getPerms(target).getName(), true) //todo i18n
                 .build()
         );
     }

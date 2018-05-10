@@ -94,7 +94,7 @@ public class PrefixCommand extends Command implements IConfigCommand {
             return;
         }
 
-        if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
+        if (!PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
             return;
         }
 

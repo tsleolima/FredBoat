@@ -171,7 +171,7 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
 
     private void skipUser(GuildPlayer player, CommandContext context, List<User> users) {
 
-        if (!PermsUtil.checkPerms(PermissionLevel.DJ, context.getMember())) {
+        if (!PermsUtil.INSTANCE.checkPerms(PermissionLevel.DJ, context.getMember())) {
 
             if (users.size() == 1) {
                 User user = users.get(0);

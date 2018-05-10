@@ -66,7 +66,7 @@ public class ModulesCommand extends Command implements IConfigCommand {
             displayModuleStatus(context);
             return;
         }
-        if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
+        if (!PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
             return;
         }
 
@@ -117,7 +117,7 @@ public class ModulesCommand extends Command implements IConfigCommand {
         Function<Module, String> moduleStatusFormatter = moduleStatusLine(gm, context);
         String moduleStatus = "";
 
-        if (PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
+        if (PermsUtil.INSTANCE.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
             moduleStatus
                     = moduleStatusFormatter.apply(Module.ADMIN) + " " + Emojis.LOCK + "\n"
                     + moduleStatusFormatter.apply(Module.INFO) + " " + Emojis.LOCK + "\n"

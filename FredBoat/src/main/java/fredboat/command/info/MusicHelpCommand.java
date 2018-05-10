@@ -104,7 +104,7 @@ public class MusicHelpCommand extends Command implements IInfoCommand {
 
     private static void updateMessage(CommandContext context) {
         //this method is intentionally undocumented cause Napster cba to i18n it as this is intended for FBH mainly
-        if (!PermsUtil.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
+        if (!PermsUtil.INSTANCE.checkPermsWithFeedback(PermissionLevel.ADMIN, context)) {
             return;
         }
         long channelId;

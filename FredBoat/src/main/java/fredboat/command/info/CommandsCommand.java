@@ -67,7 +67,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
         if (!context.hasArguments()) {
 
             Collection<Module> enabledModules = context.getEnabledModules();
-            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
+            if (!PermsUtil.INSTANCE.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
                 enabledModules.remove(Module.ADMIN);//dont show admin commands/modules for non admins
             }
 
@@ -85,7 +85,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
         List<Module> showHelpFor;
         if (context.getRawArgs().toLowerCase().contains(ALL.toLowerCase())) {
             showHelpFor = new ArrayList<>(Arrays.asList(Module.values()));
-            if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
+            if (!PermsUtil.INSTANCE.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember())) {
                 showHelpFor.remove(Module.ADMIN);//dont show admin commands/modules for non admins
             }
         } else {
@@ -117,7 +117,7 @@ public class CommandsCommand extends Command implements IInfoCommand {
                 .filter(command -> {
                     if (command instanceof ICommandRestricted) {
                         if (((ICommandRestricted) command).getMinimumPerms().getLevel() >= PermissionLevel.BOT_ADMIN.getLevel()) {
-                            return PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember());
+                            return PermsUtil.INSTANCE.checkPerms(PermissionLevel.BOT_ADMIN, context.getMember());
                         }
                     }
                     return true;
