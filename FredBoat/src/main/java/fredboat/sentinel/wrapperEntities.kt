@@ -1,5 +1,6 @@
 package fredboat.sentinel
 
+import com.fredboat.sentinel.entities.IMessage
 import com.fredboat.sentinel.entities.MessageReceivedEvent
 import com.fredboat.sentinel.entities.SendMessageResponse
 import reactor.core.publisher.Mono
@@ -11,6 +12,7 @@ typealias RawUser = com.fredboat.sentinel.entities.User
 typealias RawTextChannel = com.fredboat.sentinel.entities.TextChannel
 typealias RawVoiceChannel = com.fredboat.sentinel.entities.VoiceChannel
 typealias RawRole = com.fredboat.sentinel.entities.Role
+typealias RawMesssage = com.fredboat.sentinel.entities.Message
 
 private val MENTION_PATTERN = Pattern.compile("<@!?([0-9]+)>", Pattern.DOTALL)
 
@@ -70,8 +72,6 @@ class Guild(
 }
 
 class Member(val raw: RawMember) {
-    // TODO: Roles property
-
     val id: Long
         get() = raw.id
     val name: String
@@ -140,7 +140,11 @@ class TextChannel(val raw: RawTextChannel, val guildId: Long) : Channel {
             raw.ourEffectivePermissions and permissions.raw == permissions.raw
 
     fun send(str: String): Mono<SendMessageResponse> {
-        return Sentinel.INSTANCE.sendMessage(raw, str)
+        return Sentinel.INSTANCE.sendMessage(raw, RawMesssage(str))
+    }
+
+    fun send(message: IMessage): Mono<SendMessageResponse> {
+        return Sentinel.INSTANCE.sendMessage(raw, message)
     }
 
     fun sendTyping() {
