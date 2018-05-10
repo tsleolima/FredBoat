@@ -44,6 +44,7 @@ import fredboat.sentinel.TextChannel
 import fredboat.sentinel.User
 import fredboat.util.DiscordUtil
 import fredboat.util.ratelimit.Ratelimiter
+import kotlinx.coroutines.experimental.async
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -67,7 +68,7 @@ class MessageEventHandler(
             return
         }
 
-        if(channel.guild.selfMember.id == author.id) log.info(content)
+        if (channel.guild.selfMember.id == author.id) log.info(content)
         if (author.bot) return
 
         //Preliminary permission filter to avoid a ton of parsing
@@ -87,19 +88,20 @@ class MessageEventHandler(
 
         Metrics.commandsReceived.labels(context.command.javaClass.simpleName).inc()
 
-        //BOT_ADMINs can always use all commands everywhere
-        if (!PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, author)) {
-
+        async {
             //ignore commands of disabled modules for plebs
+            //BOT_ADMINs can always use all commands everywhere
             val module = context.command.module
-            if (module != null && !context.enabledModules.contains(module)) {
+            if (module != null
+                    && !context.enabledModules.contains(module)
+                    && !PermsUtil.checkPerms(PermissionLevel.BOT_ADMIN, author)) {
                 log.debug("Ignoring command {} because its module {} is disabled",
                         context.command.name, module.name)
-                return
+                return@async
             }
-        }
 
-        limitOrExecuteCommand(context)
+            limitOrExecuteCommand(context)
+        }
     }
 
     /**
@@ -111,12 +113,14 @@ class MessageEventHandler(
             return
         }
 
-        Metrics.executionTime.labels(context.command.javaClass.simpleName).startTimer().use { commandManager.prefixCalled(context) }
+        Metrics.executionTime.labels(context.command.javaClass.simpleName).startTimer().use {
+            commandManager.prefixCalled(context)
+        }
         //NOTE: Some commands, like ;;mal, run async and will not reflect the real performance of FredBoat
         // their performance should be judged by the totalResponseTime metric instead
     }
 
-    /*
+    /* TODO
     @Override
     public void onMessageDelete(MessageDeleteEvent event) {
         Long toDelete = messagesToDeleteIfIdDeleted.getIfPresent(event.getMessageIdLong());

@@ -65,7 +65,6 @@ public class CommandContextParser {
     }
 
     /**
-     * @param event the event to be parsed
      * @return The full context for the triggered command, or null if it's not a command that we know.
      */
     @Nullable
