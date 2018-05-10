@@ -43,12 +43,6 @@ import java.text.MessageFormat
 import java.util.*
 import javax.annotation.CheckReturnValue
 
-
-
-
-
-
-
 /**
  * Provides a context to whats going on. Where is it happening, who caused it?
  * Also home to a bunch of convenience methods
@@ -145,19 +139,19 @@ abstract class Context {
         user.sendPrivate(message).subscribe()
     }
 
-    //TODO: Add support for in sentinel
-    /*
-    //checks whether we have the provided permissions for the channel of this context
+    /**
+     * Checks whether we have the provided permissions for the channel of this context
+     */
     @CheckReturnValue
-    public boolean hasPermissions(Permission... permissions) {
-        return hasPermissions(getTextChannel(), permissions);
-    }
+    fun hasPermissions(permissions: IPermissionSet): Boolean = textChannel.checkOurPermissions(permissions)
 
-    //checks whether we have the provided permissions for the provided channel
+    /**
+     * Checks whether we have the provided permissions for the provided channel
+     */
     @CheckReturnValue
-    public boolean hasPermissions(@Nonnull TextChannel tc, Permission... permissions) {
-        return getGuild().getSelfMember().hasPermission(tc, permissions);
-    }*/
+    fun hasPermissions(tc: TextChannel, permissions: IPermissionSet): Boolean {
+        return tc.checkOurPermissions(permissions)
+    }
 
     /**
      * @return true if we the bot have all the provided permissions, false if not. Also informs the invoker about the
