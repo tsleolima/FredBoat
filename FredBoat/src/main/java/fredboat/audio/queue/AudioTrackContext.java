@@ -29,7 +29,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.jda.JdaEntityProvider;
 import fredboat.main.Launcher;
-import fredboat.messaging.internal.LeakSafeContext;
+import fredboat.messaging.internal.Context;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 
@@ -37,7 +37,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AudioTrackContext extends LeakSafeContext implements Comparable<AudioTrackContext> {
+public class AudioTrackContext extends Context implements Comparable<AudioTrackContext> {
 
     protected final AudioTrack track;
     private final long added;
