@@ -42,9 +42,6 @@ import reactor.core.publisher.Mono
 import java.text.MessageFormat
 import java.util.*
 import javax.annotation.CheckReturnValue
-import fredboat.feature.metrics.Metrics.successfulRestActions
-import javax.annotation.Nonnull
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor.getUser
 
 
 
@@ -126,31 +123,26 @@ abstract class Context {
         textChannel.sendTyping()
     }
 
+    /* Private messages */
+    /**
+     * Privately DM the invoker
+     */
+    fun replyPrivateMono(message: String) = user.sendPrivate(message)
+    /**
+     * Privately DM the invoker
+     */
+    fun replyPrivateMono(message: IMessage) = user.sendPrivate(message)
     /**
      * Privately DM the invoker
      */
     fun replyPrivate(message: String) {
-        sendPrivate(user, message)
+        user.sendPrivate(message).subscribe()
     }
-
     /**
-     * Privately DM any user
+     * Privately DM the invoker
      */
-    fun sendPrivate(user: User, message: String) {
-        if (user.bot) throw IllegalArgumentException("Cannot DM a bot user.")
-
-        user.sendPrivate()
-
-        user.openPrivateChannel().queue(
-                { privateChannel ->
-                    Metrics.successfulRestActions.labels("openPrivateChannel").inc()
-                    CentralMessaging.message(privateChannel, message)
-                            .success(onSuccess)
-                            .failure(onFail)
-                            .send(this)
-                },
-                onFail ?: CentralMessaging.NOOP_EXCEPTION_HANDLER //dun care logging about ppl that we cant message
-        )
+    fun replyPrivate(message: IMessage) {
+        user.sendPrivate(message).subscribe()
     }
 
     //TODO: Add support for in sentinel
