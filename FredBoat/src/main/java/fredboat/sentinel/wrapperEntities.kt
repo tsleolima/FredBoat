@@ -10,6 +10,7 @@ typealias RawMember = com.fredboat.sentinel.entities.Member
 typealias RawUser = com.fredboat.sentinel.entities.User
 typealias RawTextChannel = com.fredboat.sentinel.entities.TextChannel
 typealias RawVoiceChannel = com.fredboat.sentinel.entities.VoiceChannel
+typealias RawRole = com.fredboat.sentinel.entities.Role
 
 private val MENTION_PATTERN = Pattern.compile("<@!?([0-9]+)>", Pattern.DOTALL)
 
@@ -55,6 +56,17 @@ class Guild(
             raw.members.forEach { (k, v) -> list[k] = Member(v) }
             return list
         }
+    val roles: List<Role>
+        get() {
+            val list = mutableListOf<Role>()
+            raw.roles.forEach { list.add(Role(it)) }
+            return list.toList()
+        }
+
+    fun getVoiceChannel(id: Long): VoiceChannel? {
+        voiceChannels.forEach { if (it.id == id) return it }
+        return null
+    }
 }
 
 class Member(val raw: RawMember) {
@@ -68,14 +80,21 @@ class Member(val raw: RawMember) {
         get() = raw.name //TODO
     val discrim: Short
         get() = raw.discrim
-    val guild: RawGuild
-        get() = Sentinel.INSTANCE.getGuild(raw.guildId)
+    val guild: Guild
+        get() = Guild(raw.guildId)
     val bot: Boolean
         get() = raw.bot
     val voiceChannel: VoiceChannel?
         get() {
-            if (raw.voiceChannel != null) return VoiceChannel(raw.voiceChannel!!, raw.guildId)
+            if (raw.voiceChannel != null) return guild.getVoiceChannel(raw.voiceChannel!!)
             return null
+        }
+    val roles: List<Role>
+        get() {
+            val list = mutableListOf<Role>()
+            val guildRoles = guild.roles
+            guildRoles.forEach { if (raw.roles.contains(it.id)) list.add(it) }
+            return list.toList()
         }
 
     fun asMention() = "<@$id>"
@@ -140,6 +159,15 @@ class VoiceChannel(val raw: RawVoiceChannel, val guildId: Long) : Channel {
         get() = Guild(guildId)
     override val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
+}
+
+class Role(val raw: RawRole) {
+    val id: Long
+        get() = raw.id
+    val name: String
+        get() = raw.name
+    val permissions: PermissionSet
+        get() = PermissionSet(raw.permissions)
 }
 
 class Message(val raw: MessageReceivedEvent) {

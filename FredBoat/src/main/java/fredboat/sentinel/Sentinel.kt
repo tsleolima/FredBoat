@@ -37,6 +37,7 @@ class Sentinel(private val template: AsyncRabbitTemplate,
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build<Long, RawGuild>(
                     CacheLoader.from(Function {
+                        // TODO We need to do something about this blocking
                         val result = blockingTemplate.convertSendAndReceive(QueueNames.SENTINEL_REQUESTS_QUEUE, GuildRequest(it!!))
 
                         if (result == null) {
