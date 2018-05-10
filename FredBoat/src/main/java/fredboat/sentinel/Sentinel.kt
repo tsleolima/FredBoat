@@ -148,4 +148,26 @@ class Sentinel(private val template: AsyncRabbitTemplate,
 
     fun checkPermissions(channel: Channel, role: Role, permissions: IPermissionSet) = checkPermissions(channel, null, role, permissions)
 
+    /**
+     * Takes [members] and maps them to their effective permissions.
+     *
+     * @throws [IllegalArgumentException] if any member is not of the [guild]
+     */
+    fun getPermissions(guild: Guild, members: List<Member>): Flux<Long> {
+        val req = BulkGuildPermissionRequest(guild.id, members.map {
+            if (it.guildId != guild.id) throw IllegalArgumentException("All members must be of the same guild")
+            it.id
+        })
+
+        return Flux.create { sink ->
+            template.convertSendAndReceive<BulkGuildPermissionResponse>(QueueNames.SENTINEL_REQUESTS_QUEUE, req).addCallback(
+                    { r ->
+                        r!!.effectivePermissions.forEach { sink.next(it ?: 0) }
+                        sink.complete()
+                    },
+                    { exc -> sink.error(exc) }
+            )
+        }
+    }
+
 }

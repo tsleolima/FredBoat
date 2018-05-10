@@ -23,7 +23,7 @@ class GuildEventHandler(
             sendHelloOnJoin(guild)
         }
         mono.delaySubscription(Duration.ofSeconds(10))
-        mono.subscribe()
+                .subscribe()
     }
 
     override fun onGuildLeave(guild: Guild) {

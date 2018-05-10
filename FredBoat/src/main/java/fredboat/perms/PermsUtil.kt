@@ -75,7 +75,7 @@ object PermsUtil {
         } else {
             if (minLevel.level >= PermissionLevel.BOT_ADMIN.level) {
                 if (actual.level >= PermissionLevel.BOT_ADMIN.level) {
-                    //fredboat admin tried running administrative command which requires higher administrative level
+                    //FredBoat admin tried running administrative command which requires higher administrative level
                     context.replyImage("https://i.imgur.com/zZQRlCk.png",
                             "Ahoy fellow bot admin this command is reserved for the bot owner alone.")
                 } else {//regular user tried running administrative command
@@ -103,9 +103,10 @@ object PermsUtil {
         return botAdmin
     }
 
-    suspend fun checkList(list: List<String>, member: Member): Boolean {
-        if (member.hasPermission(Permission.ADMINISTRATOR).awaitSingle()) return true // TODO This is bad, use flux!
-
+    /**
+     * Checks if [member] matches any of the IDs of [list], or if it has any of the roles of [list]
+     */
+    fun checkList(list: List<String>, member: Member): Boolean {
         for (id in list) {
             if (id.isEmpty()) continue
 

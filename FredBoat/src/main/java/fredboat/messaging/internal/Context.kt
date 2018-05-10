@@ -158,7 +158,7 @@ abstract class Context {
      * missing permissions for the bot, given there is a channel to reply in.
      */
     suspend fun checkSelfPermissionsWithFeedback(permissions: IPermissionSet): Boolean {
-        val result = Sentinel.INSTANCE.checkPermissions(guild, guild.selfMember, permissions).awaitSingle()
+        val result = Sentinel.INSTANCE.checkPermissions(guild.selfMember, permissions).awaitSingle()
 
         if (result.passed) return true
         if (result.missingEntityFault) return false // Error
@@ -176,7 +176,7 @@ abstract class Context {
      * missing permissions, given there is a channel to reply in.
      */
     suspend fun checkInvokerPermissionsWithFeedback(permissions: IPermissionSet): Boolean {
-        val result = Sentinel.INSTANCE.checkPermissions(guild, member, permissions).awaitSingle()
+        val result = Sentinel.INSTANCE.checkPermissions(member, permissions).awaitSingle()
 
         if (result.passed) return true
         if (result.missingEntityFault) return false // Error

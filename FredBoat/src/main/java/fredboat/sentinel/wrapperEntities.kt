@@ -21,8 +21,6 @@ private val MENTION_PATTERN = Pattern.compile("<@!?([0-9]+)>", Pattern.DOTALL)
 class Guild(
         val id: Long
 ) {
-    // TODO: Roles
-
     val raw: RawGuild
         get() = Sentinel.INSTANCE.getGuild(id)
     val name: String
@@ -60,6 +58,14 @@ class Guild(
         roles.forEach { if(it.id == id) return it }
         return null
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Guild && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 class Member(val raw: RawMember) {
@@ -75,6 +81,8 @@ class Member(val raw: RawMember) {
         get() = raw.discrim
     val guild: Guild
         get() = Guild(raw.guildId)
+    val guildId: Long
+        get() = raw.guildId
     val bot: Boolean
         get() = raw.bot
     val voiceChannel: VoiceChannel?
@@ -103,6 +111,14 @@ class Member(val raw: RawMember) {
     fun hasPermission(permissions: IPermissionSet): Mono<Boolean> =
             Sentinel.INSTANCE.checkPermissions(this, permissions)
                     .map { it.passed }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Member && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 class User(val raw: RawUser) {
@@ -119,6 +135,14 @@ class User(val raw: RawUser) {
             = Sentinel.INSTANCE.sendPrivateMessage(this, RawMesssage(message))
     fun sendPrivate(message: IMessage)
             = Sentinel.INSTANCE.sendPrivateMessage(this, message)
+
+    override fun equals(other: Any?): Boolean {
+        return other is User && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 interface Channel {
@@ -152,6 +176,14 @@ class TextChannel(val raw: RawTextChannel, val guildId: Long) : Channel {
     fun sendTyping() {
         Sentinel.INSTANCE.sendTyping(raw)
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other is TextChannel && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 class VoiceChannel(val raw: RawVoiceChannel, val guildId: Long) : Channel {
@@ -165,6 +197,14 @@ class VoiceChannel(val raw: RawVoiceChannel, val guildId: Long) : Channel {
         get() = Guild(guildId)
     override val ourEffectivePermissions: Long
         get() = raw.ourEffectivePermissions
+
+    override fun equals(other: Any?): Boolean {
+        return other is VoiceChannel && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 class Role(val raw: RawRole, val guildId: Long) {
@@ -178,6 +218,14 @@ class Role(val raw: RawRole, val guildId: Long) {
         get() = Guild(guildId)
     val publicRole: Boolean // The @everyone role shares the ID of the guild
         get() = id == guildId
+
+    override fun equals(other: Any?): Boolean {
+        return other is Role && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 class Message(val raw: MessageReceivedEvent) {
