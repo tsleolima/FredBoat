@@ -1,17 +1,17 @@
 package fredboat.audio.lavalink
 
+import fredboat.config.property.AppConfig
 import fredboat.sentinel.Sentinel
 import lavalink.client.io.Lavalink
-import net.dv8tion.jda.bot.sharding.ShardManager
 import org.springframework.stereotype.Service
 
 @Service
 class SentinelLavalink(
-        public val sentinel: Sentinel,
-        shardManager: ShardManager
+        val sentinel: Sentinel,
+        val appConfig: AppConfig
 ) : Lavalink<SentinelLink>(
         sentinel.getApplicationInfo().botId.toString(),
-        shardManager.shardsTotal
+        appConfig.shardCount
 ) {
 
     companion object {
