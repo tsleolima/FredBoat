@@ -57,6 +57,7 @@ config:
   autoBlacklist:     true         # Set to true to automatically blacklist users who frequently hit the rate limits
   game:              ""           # Set the displayed game/status. Leave empty quote marks for the default status
   continuePlayback:  false        # Set to true to force the player to continue playback even if left alone
+  shardCount: 1                   # The number of shards this bot supports. Leave at 1 unless you know what you are doing.
 
 server:
   port: 1356                      # Change the port of the API FredBoat exposes
