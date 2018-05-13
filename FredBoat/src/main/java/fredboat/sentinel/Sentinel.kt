@@ -48,6 +48,10 @@ class Sentinel(private val template: AsyncRabbitTemplate,
                     })
             )
 
+    fun sendAndForget(obj: Any) {
+        template.convertSendAndReceive<Any>(QueueNames.SENTINEL_REQUESTS_QUEUE, obj)
+    }
+
     fun getGuilds(shard: Shard): Flux<RawGuild> = Flux.create {
         val req = GuildsRequest(shard.id)
         template.convertSendAndReceive<GuildsResponse?>(req).addCallback(

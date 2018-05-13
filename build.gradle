@@ -57,7 +57,7 @@ subprojects {
     ext {
         //@formatter:off
 
-        sentinelVersion             = '54f5e78eeb'
+        sentinelVersion             = '515b915936'
         springBootVersion           = "${springBootVersion}"
         kotlinVersion               = "${kotlinVersion}"
         //discord deps
@@ -66,7 +66,7 @@ subprojects {
         //audio deps
         lavaplayerVersion           = '1.2.62'
         jdaNasVersion               = '1.0.6'
-        lavalinkVersion             = 'd643aea721'
+        lavalinkVersion             = '40c3431c1e'
 
         //utility deps
         jsonOrgVersion              = '20180130'
