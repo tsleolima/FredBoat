@@ -3,6 +3,7 @@ package fredboat.sentinel
 import com.fredboat.sentinel.QueueNames
 import com.fredboat.sentinel.entities.*
 import fredboat.config.SentryConfiguration
+import fredboat.event.AudioEventHandler
 import fredboat.event.EventLogger
 import fredboat.event.GuildEventHandler
 import fredboat.event.SentinelEventHandler
@@ -19,14 +20,19 @@ import java.util.concurrent.ConcurrentHashMap
 class RabbitConsumer(
         private val sentinel: Sentinel,
         eventLogger: EventLogger,
-        guildHandler: GuildEventHandler
+        guildHandler: GuildEventHandler,
+        audioHandler: AudioEventHandler
 ) {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(RabbitConsumer::class.java)
     }
     private val shardStatuses = ConcurrentHashMap<Int, ShardStatus>()
-    private val eventHandlers: List<SentinelEventHandler> = listOf(eventLogger, guildHandler)
+    private val eventHandlers: List<SentinelEventHandler> = listOf(
+            eventLogger,
+            guildHandler,
+            audioHandler
+    )
 
     /* Shard lifecycle */
 
@@ -80,6 +86,11 @@ class RabbitConsumer(
         val new = VoiceChannel(event.newChannel, event.guildId)
         val member = Member(event.member)
         eventHandlers.forEach { it.onVoiceMove(old, new, member) }
+    }
+
+    @RabbitHandler
+    fun receive(event: VoiceServerUpdate) {
+        eventHandlers.forEach { it.onVoiceServerUpdate(event) }
     }
 
     /* Message events */
