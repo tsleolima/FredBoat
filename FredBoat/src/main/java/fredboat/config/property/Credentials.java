@@ -103,6 +103,4 @@ public interface Credentials {
     // ********************************************************************************
 
     String getCarbonKey();
-
-    String getDikeUrl();
 }

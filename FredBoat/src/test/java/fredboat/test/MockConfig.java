@@ -231,9 +231,4 @@ public class MockConfig implements AppConfig, AudioSourcesConfig, Credentials, E
     public String getCarbonKey() {
         return "";
     }
-
-    @Override
-    public String getDikeUrl() {
-        return "";
-    }
 }

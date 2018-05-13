@@ -104,11 +104,6 @@ public class CredentialsProperties implements Credentials {
         return carbonKey;
     }
 
-    @Override
-    public String getDikeUrl() {
-        return dikeUrl;
-    }
-
     public void setDiscordBotToken(String discordBotToken) {
         this.discordBotToken = discordBotToken;
         //noinspection ConstantConditions
