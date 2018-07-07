@@ -194,11 +194,13 @@ public class Http {
         @Nonnull
         @CheckReturnValue
         public static Params of(@Nonnull String... pairs) {
-            if (pairs.length % 2 == 1) {
-                log.warn("Passed an uneven number of args to the Params wrapper, this is a likely bug.");
-            }
             Params result = new Params();
-            MapUtils.putAll(result.params, pairs);
+            if (pairs != null) {
+                if (pairs.length % 2 == 1) {
+                    log.warn("Passed an uneven number of args to the Params wrapper, this is a likely bug.");
+                }
+                MapUtils.putAll(result.params, pairs);
+            }
             return result;
         }
     }
